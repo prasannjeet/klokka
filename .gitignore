@@ -4,6 +4,10 @@
 !.env.example
 .agents/local.json
 .agents/local-credentials.json
+.agents/local-credentials/
+apps/mobile/google-services.json
+*.keystore
+*.jks
 # Node
 node_modules/
 .next/

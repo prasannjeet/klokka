@@ -17,6 +17,12 @@ Deliver correct, maintainable changes with minimal risk.
   per-workspace toggle. Free and open source (MIT), public repo `prasannjeet/klokka`.
 - Roles per workspace: EMPLOYER (owner of the workspace), EMPLOYEE. Plus the global `platform-admin` (operator console).
   A workspace is a Logto organization; a user can belong to several.
+- Business model: commercial open source with a hosted service (the cal.com / Odoo shape). The code is MIT and
+  self-hostable; the hosted instance is free to use today and may charge later. Public copy says "free to use" and
+  "open source" with a direct sign-up; it never mentions pricing, tiers or seats.
+- Languages: Swedish and English everywhere. Public site: switcher, `sv` at `/`, `en` at `/en`. Signed-in web app and
+  phone app: a user setting stored server-side, defaulting to the device language on first sign-in.
+- Theme: Nightshift (owner's choice), light and dark. Signal and Clay remain in `docs/design/tokens.css` as history.
 - **Status: design phase.** Nothing is implemented. Implementation starts only after the owner approves the preliminary
   report. Until then, changes to this repo are documents, mockups and brand assets.
 - Documentation map: `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
@@ -71,11 +77,27 @@ guarded by a regenerate-and-diff check.
   Logto issues an opaque token). Web: `@logto/next`, token stays server-side, browser calls `/api/k/*` which adds the bearer.
 
 ## API contract (OpenAPI-first, absolute)
-- Every byte crossing a client/API boundary is defined in `apps/api/src/main/openapi/openapi.yaml` first. The Maven build
-  generates the server interfaces (`jaxrs-spec`, `library=quarkus`, `interfaceOnly`) and the ONE `typescript-fetch` client
-  in `packages/api-client`. Never hand-roll a DTO, client or response type on either side.
+- Every byte crossing a client/API boundary is defined in `apps/api/src/main/openapi/openapi.yaml` first. From it the
+  build generates the server interfaces (`jaxrs-spec`, `library=quarkus`, `interfaceOnly`) and the ONE `typescript-fetch`
+  client. Never hand-roll a DTO, client or response type on either side.
+- The contract is published to Nexus by CI (`docs/DECISIONS.md` D13): Maven `se.klokka:klokka-api-contract` (server
+  interfaces + models) to `maven-releases`/`maven-snapshots`, npm `@klokka/api-client` to `npm-hosted`. The API depends on
+  the Maven artifact; web and mobile depend on the npm package at the version of the API they target. Locally both are
+  also generated from the spec so nothing waits on Nexus.
 - New feature = spec change first, regenerate, then implement against the generated types.
 - The web BFF auth plumbing (sign-in, callback, sign-out, `/api/k/*` proxy) is transport and stays outside the spec.
+
+## CI/CD (GitHub Actions on our own runners)
+- Runners: two per-repo self-hosted runners on this host (`/srv/actions-runner/klokka-01`, `klokka-02`, label `build`,
+  systemd services like `tax-agent`'s). Workflows ask for `runs-on: [self-hosted, build]`, never bare `self-hosted`.
+- A push to `main` builds and tests everything that changed (path-filtered jobs: api, web, landing, mobile, contract),
+  publishes the contract to Nexus, pushes images to `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}` with an
+  immutable tag, deploys staging through the Coolify API, and builds + signs the Android release APK (JDK 21) which is
+  published to Nexus (raw) for the landing page's download link.
+- Secrets live in the GitHub repository (`NEXUS_USERNAME`, `NEXUS_PASSWORD`, `COOLIFY_TOKEN`, `EXPO_TOKEN`,
+  `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `GOOGLE_SERVICES_JSON`) and in `.agents/local-credentials/`
+  locally. Never in the repo.
+- Production is a later `v*`-tag path per `~/.agents/production-deploys.md`; the staging pipeline is never touched for it.
 
 ## Authorization (`docs/DECISIONS.md` D1)
 - One Logto access token per user (audience = the Klokka API resource, no `organization_id`). The API decides what a user
@@ -127,10 +149,14 @@ guarded by a regenerate-and-diff check.
 - Release APKs are signed with the project keystore (outside git); the Android package id never changes once set.
 
 ## Environments (staging only; never production without the owner's explicit ask)
-- Staging Coolify `https://coolify.coolify.ooguy.com/` (`ssh testenv`, MCP `coolify-testenv`). Apps deploy as
-  `dockerimage` from `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}` (512m, `--init`, healthchecks).
-- Logto staging: `https://logto-vgyjk5a0t98xjk8l0vphgyeh.coolify.ooguy.com` (admin console at `logto-admin-...`),
-  shared `default` tenant with Kulram (OSS has one tenant): Klokka has its own apps, API resource and organization roles.
+- Staging Coolify `https://coolify.coolify.ooguy.com/` (`ssh testenv`, MCP `coolify-testenv`), project **Klokka**. Apps
+  deploy as `dockerimage` from `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}` (512m, `--init`, healthchecks).
+  Addresses: `klokka.coolify.ooguy.com` (landing), `klokka-app.coolify.ooguy.com` (web app),
+  `klokka-api.coolify.ooguy.com` (API), `klokka-logto.coolify.ooguy.com` (Logto). No real domain yet.
+- Logto: Klokka's OWN Logto service in the Klokka project (own Postgres, admin console, email connector); nothing is shared
+  with Kulram's Logto (`logto-vgyjk5a0t98xjk8l0vphgyeh...`), which stays Kulram's.
+- Push: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase project `klokka-64f3a`, Android package
+  `com.prasannjeet.klokka` (fixed forever). `google-services.json` is copied from `.agents/local-credentials/` at build time.
 - Postgres: `klokka` database on the Common Resources PostgreSQL 18 (Coolify uuid `k10e48k41urcbb1erev0vhmu`), two roles
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
 - SMTP: Migadu `smtp.migadu.com:587` STARTTLS; ~100 emails/month on staging, so email is for invitations (2 per invitee)

@@ -35,18 +35,18 @@ in v1, no magic links), shows the workspace they joined, and then offers "Get th
 default of 10 minutes is too short for an inbox). Budget: 2 emails per invitee (invitation + email
 verification).
 
-## D4. Android distribution in v1: sideloaded APK from the landing site
+## D4. Android distribution in v1: sideloaded APK from the landing site (owner confirmed)
 
 Employees download a signed release APK from the landing site (and from the invite page). A Play Store
-listing is a post-v1 ticket. Consequence: release builds are signed with our own keystore from day one
-(kept out of git), and the package id is fixed now. **Owner:** package id. Proposal `app.klokka.android`
-until a real domain exists; it cannot change once Firebase or a store knows it.
+listing is a post-v1 ticket. Release builds are signed with our own keystore from day one (kept out of
+git, held as a repository secret for the runners). Package id: D12.
 
-## D5. Push prerequisites the owner must create
+## D5. Push prerequisites (owner delivered 2026-09-27)
 
-Expo push needs an Expo account with an EAS project id, and a Firebase project with
-`google-services.json` and the FCM V1 service-account key uploaded to Expo. **Owner:** create both (or
-hand over access). Until then push is stubbed and in-app notifications carry everything.
+Expo project id `f617e8bb-38d1-4247-9dde-d92bda37fe18` and the Firebase project `klokka-64f3a` with
+`google-services.json` exist (`.agents/local-credentials/`). Still needed before push works end to
+end: an Expo access token for the runners and this host (`EXPO_TOKEN`), and the Firebase service
+account key (FCM V1) uploaded to the EAS project's Android credentials.
 
 ## D6. Staging infrastructure
 
@@ -80,6 +80,55 @@ both see one write. Single-entry `PUT` stays for the phone's quick add.
 Totals, trends, projections and "nothing logged" days are API read models (one endpoint per dashboard),
 so web and mobile render identical numbers and neither client re-implements month arithmetic.
 `packages/core` keeps only presentation helpers (rounding display, month labels).
+
+## D11. Theme: Nightshift (owner, 2026-09-27)
+
+Nightshift (violet, magenta, cyan over deep night; Unbounded + Inter), light and dark, for the landing,
+the web app, the operator console and the phone. The mark takes the theme primary (magenta). Signal and
+Clay stay in `tokens.css` as history, not as options.
+
+## D12. Android package id: `com.prasannjeet.klokka` (owner)
+
+Fixed; matches the Firebase Android app. EAS project id and the Firebase config live in
+`.agents/local-credentials/` (gitignored), never in the repo.
+
+## D13. CI/CD from day one, on our own runners, publishing the contract to Nexus (owner)
+
+- GitHub Actions in `prasannjeet/klokka`, running on self-hosted runners on this host (two `build`
+  runners registered to the repo, like `tax-agent`), so a push builds immediately and in parallel.
+- `apps/api/src/main/openapi/openapi.yaml` is the contract. The pipeline publishes from it: a Maven
+  artifact with the generated Quarkus server interfaces (`se.klokka:klokka-api-contract`) to Nexus
+  `maven-releases`/`maven-snapshots`, and an npm package with the generated `typescript-fetch` client
+  (`@klokka/api-client`) to Nexus `npm-hosted`. The API depends on the Maven artifact; web and mobile
+  depend on the npm package (same version as the API they target). Locally, the monorepo still builds
+  both from the spec so a developer never waits for Nexus.
+- Images (`klokka-api`, `klokka-web`, `klokka-landing`) go to `docker.nexus.coolify.ooguy.com`; the
+  workflow then deploys staging through the Coolify API. Production later by `v*` tag.
+- Runners also build the Android release APK (JDK 21, `ANDROID_HOME`), sign it with the project
+  keystore (a repository secret), and publish it to Nexus (raw) so the landing site can link it.
+
+## D14. Staging addresses (no domain yet)
+
+`klokka.coolify.ooguy.com` (landing), `klokka-app.coolify.ooguy.com` (web app),
+`klokka-api.coolify.ooguy.com` (API), `klokka-logto.coolify.ooguy.com` (Klokka's own Logto). All in a
+new Coolify project "Klokka" on staging. `example.com` placeholders are replaced by these.
+
+## D15. Klokka gets its own Logto on staging (owner)
+
+A new Logto service in the Coolify project "Klokka", with its own Postgres, admin console and email
+connector; nothing shared with Kulram. Superseded parts of D6: the "shared tenant" bullet.
+
+## D16. Languages
+
+Swedish and English everywhere. Public site: language switcher, `sv` at `/`, `en` at `/en`.
+Signed-in web app and phone app: the language is a user setting (stored server-side, D2), defaulting
+to the device language on first sign-in.
+
+## D17. Postgres, email, Nexus (owner confirmations)
+
+Common Resources Postgres 18 on staging, `klokka` database. Migadu `smtp.migadu.com:587` STARTTLS.
+Nexus is reachable as `docker.nexus.coolify.ooguy.com` / `nexus.coolify.ooguy.com` (it runs on
+`ssh ubuntu-old`; only the hostnames matter to the pipeline).
 
 ## D10. Ports on this host
 

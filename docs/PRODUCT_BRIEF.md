@@ -13,6 +13,11 @@ it is worth).
 Name: "Klokka" is Norwegian for "the clock". Repo: `prasannjeet/klokka` (personal GitHub, public,
 MIT). Jira: project `CHQ`, every ticket summary prefixed `KLOKKA: `.
 
+Business model (owner, 2026-09-27): commercial open source with a hosted service, the cal.com / Odoo
+shape. The code is MIT and anyone can self-host it; we run a hosted instance that is free to use today
+and may charge for hosted plans later. Public copy says "free to use" and "open source" and offers a
+direct sign-up; it never mentions pricing, tiers or seats.
+
 ## Who uses it
 
 | Role | Who | What they do |

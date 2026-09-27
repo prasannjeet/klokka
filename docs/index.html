@@ -151,12 +151,12 @@
   <div class="status">
     <span class="chip ok"><span class="dot"></span>Research done, verified</span>
     <span class="chip ok"><span class="dot"></span>Mockups built, three themes</span>
-    <span class="chip"><span class="dot"></span>Logo picked, finals made</span>
+    <span class="chip ok"><span class="dot"></span>Logo picked, finals made</span><span class="chip ok"><span class="dot"></span>Decisions locked 27 Sep: Nightshift, own Logto, CI on our runners</span>
     <span class="chip warn"><span class="dot"></span>Nothing implemented yet</span>
   </div>
   <div class="hero-grid">
     <div class="stack rise">
-      <span class="eyebrow">Preliminary report, 27 September 2026</span>
+      <span class="eyebrow">Preliminary report, 27 September 2026, revised after your decisions</span>
       <h1>Klokka, before we build it.</h1>
       <p class="lead">One clock, both sides: the employer logs the hours each employee worked, the employee sees the same month on their phone, and pay is a switch rather than a requirement. This page shows what we plan to build, how it will look on the web and on the phone, how the backend and sign-in work, where it will run, and the few decisions that are yours to make before implementation starts.</p>
     </div>
@@ -176,24 +176,37 @@
 <section class="chapter" id="decisions">
   <div class="wrap stack-lg">
     <div class="chapter-head">
-      <span class="eyebrow">Your decisions</span>
-      <h2>Thirteen things only you can settle</h2>
-      <p class="lead">Everything else in this report is a call already made, with its reason. These wait on you. Each row has a recommendation, so a reply of "all recommended" is a valid answer.</p>
+      <span class="eyebrow">Decisions</span>
+      <h2>Locked on 27 September, and the four things still in your hands</h2>
+      <p class="lead">You answered the open questions; they are now written into the repository's decision log. Below, what was decided, and the short list of steps that only you can do before the build runs fully unattended.</p>
     </div>
-    <div>
-      <div class="decision"><div class="q">1. Theme direction</div><div>Signal (Swiss: white, black, International Orange), Nightshift (the visible Kulram descendant, violet and magenta) or Clay (warm sand and terracotta). All three are complete in the tokens; every mockup switches between them live.</div><div class="rec"><b>Recommended:</b> Signal. Time is numerals, and Signal makes the numbers the design.</div></div>
-      <div class="decision"><div class="q">2. Logo weight and colour</div><div>The mark is #4's bubble with the hands at 4:10. Two weights exist (regular and heavy). The mark is drawn in a single colour, so it can follow the theme's primary (orange in Signal) or stay the concept pink.</div><div class="rec"><b>Recommended:</b> heavy weight, coloured by the theme (orange in Signal). Pink stays the answer if you pick Nightshift.</div></div>
-      <div class="decision"><div class="q">3. Sign-in on staging shares Kulram's Logto tenant</div><div>Our self-hosted Logto has one tenant. Klokka gets its own apps, API resource and roles there, but the sign-in page look, the organization template and the email connector are shared with Kulram on staging. Production gets its own Logto later.</div><div class="rec"><b>Recommended:</b> accept for staging. Also upgrade the staging Logto from 1.41.0 to 1.43.0 first (security fixes; your action).</div></div>
-      <div class="decision"><div class="q">4. Database on staging</div><div>A PostgreSQL 18 already runs on staging Coolify ("Common Resources"). Klokka can be a database with two roles on it, or get its own container.</div><div class="rec"><b>Recommended:</b> reuse the shared Postgres 18 with a dedicated <span class="mono">klokka</span> database.</div></div>
-      <div class="decision"><div class="q">5. Email port</div><div>Migadu documents port 465 with TLS; Kulram runs 587 with STARTTLS and it works.</div><div class="rec"><b>Recommended:</b> 587 STARTTLS, the proven one.</div></div>
-      <div class="decision"><div class="q">6. Android package id</div><div>Fixed forever once Firebase or a store knows it. The domain is still a placeholder, so this cannot be derived from it.</div><div class="rec"><b>Proposal:</b> <span class="mono">app.klokka.android</span> unless you already know the real domain.</div></div>
-      <div class="decision"><div class="q">7. Two accounts to create for push notifications</div><div>Even a locally built APK needs an Expo account (project id) and a Firebase project (Android push). Neither exists yet. Until they do, push is stubbed and the in-app notification center carries everything.</div><div class="rec"><b>Your action:</b> create both or hand over access when we reach the notifications epic.</div></div>
-      <div class="decision"><div class="q">8. How employees get the Android app in v1</div><div>A signed APK downloaded from the landing page and the invite page, or a Play Store listing (review time, developer account, store policies).</div><div class="rec"><b>Recommended:</b> sideloaded APK for v1, Play Store as a follow-up ticket.</div></div>
-      <div class="decision"><div class="q">9. Swedish at launch</div><div>English copy is written. Swedish for the landing page and the app catalogue is planned from day one (as Kulram does). The tagline "One clock. Both sides." needs a Swedish line that carries the idea, not the words.</div><div class="rec"><b>Recommended:</b> yes, sv default on the landing, en at /en, exactly like Kulram.</div></div>
-      <div class="decision"><div class="q">10. Who the landing speaks to</div><div>The rotating line says "Made for the cafe / salon / bakery / cleaning crew / corner shop / small agency".</div><div class="rec"><b>Question:</b> are these the customers you mean?</div></div>
-      <div class="decision"><div class="q">11. Real domain</div><div>Placeholders: example.com (landing), app.example.com (web app), api.example.com. Staging uses coolify.ooguy.com names until then.</div><div class="rec"><b>When you have it:</b> the domain feeds the package id, the Logto redirect URIs and the invite links.</div></div>
-      <div class="decision"><div class="q">12. Invitations cost two emails</div><div>Logto sends the invitation, then a verification code when the invitee signs up. With about 100 emails a month on staging that is 50 invitees. Fine for testing, and production gets its own quota.</div><div class="rec"><b>Recommended:</b> accept; keep every other notification on push and in-app.</div></div>
-      <div class="decision"><div class="q">13. Where Nexus runs</div><div>Image pushes and pulls work from this host, but the Coolify record for Nexus is stale, so the runbook cannot say which machine hosts it.</div><div class="rec"><b>Info only:</b> tell us, no blocker.</div></div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Decided</h3>
+        <ul class="plain">
+          <li><b>Theme: Nightshift</b>, light and dark, for the site, the web app, the operator console and the phone. The mark takes the theme's magenta.</li>
+          <li><b>Business model:</b> commercial open source with a hosted service (the cal.com and Odoo shape). MIT code anyone can self-host; our hosted instance is free to use today. Public copy says "free to use" and "open source" with a direct sign-up, and never mentions pricing.</li>
+          <li><b>Klokka gets its own Logto</b> on staging, in a new Coolify project "Klokka" that also holds the API, the web app, the landing site and the Android APK downloads. Nothing shared with Kulram.</li>
+          <li><b>Database:</b> the shared Common Resources Postgres 18 on staging, a <span class="mono">klokka</span> database. <b>Email:</b> Migadu on port 587.</li>
+          <li><b>Android package id:</b> <span class="mono">com.prasannjeet.klokka</span>. Firebase project and Expo project exist and are stored outside git.</li>
+          <li><b>Employees get the app</b> as a signed APK downloaded from our site.</li>
+          <li><b>Swedish and English everywhere:</b> a switcher on the public site, a user setting inside the apps.</li>
+          <li><b>Addresses:</b> klokka.coolify.ooguy.com (site), klokka-app (web app), klokka-api, klokka-logto; a real domain comes later.</li>
+          <li><b>CI/CD from day one</b> on our own runners: a push builds and tests what changed, publishes the API contract to Nexus (Maven server interfaces, npm client), pushes images, deploys staging, and builds the signed APK. Production later by version tag.</li>
+          <li><b>Quarkus 4</b> is an upgrade ticket the week it is released; 3.40 LTS for v1.</li>
+          <li>Two emails per invitation: accepted. Nexus: reached by hostname, its host is irrelevant to the pipeline.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <h3>Still yours (five minutes, then everything is autonomous)</h3>
+        <ol class="steps">
+          <li><b>Coolify token permissions.</b> The token you gave was created without the read permission (the API answers "Missing required permissions: read"). Edit it, or create a new one, with read, write and deploy (or root), and paste it once more.</li>
+          <li><b>Runners as services.</b> Two runners (klokka-01, klokka-02, label build) are registered to the repository and running now, but as plain processes. Making them survive a reboot needs sudo, which this session does not have: run the four commands I give you in the chat.</li>
+          <li><b>Expo access token.</b> Create one at expo.dev (Account settings, Access tokens) so the runners and this host can talk to your Expo project without a browser login.</li>
+          <li><b>Firebase service account for push.</b> In the Firebase console (Project settings, Service accounts) generate a private key and either upload it yourself under the Expo project's Android credentials (FCM V1) or hand me the file and I upload it.</li>
+          <li><b>Which mailbox sends Klokka's email.</b> Kulram's staging uses a Migadu test mailbox; Klokka needs its own sender address (or the same one for staging) and its password, for Logto's email connector and the API.</li>
+        </ol>
+      </div>
     </div>
   </div>
 </section>
@@ -289,7 +302,7 @@
           <div style="place-items:center; padding: 28px 12px;"><svg width="72" height="72" style="color: var(--ink)"><use href="#klokka-mark"/></svg><span class="mute" style="font-size:12px">ink</span></div>
           <div style="place-items:center; padding: 28px 12px; background: #FD286B;"><svg width="72" height="72" style="color: #fff"><use href="#klokka-mark"/></svg><span style="font-size:12px; color:#fff">on pink</span></div>
         </div>
-        <p>The mark is one colour, so it takes the theme's primary wherever it appears (orange in Signal, magenta in Nightshift, terracotta in Clay) and works in plain black or white. At favicon sizes the hollow hands fill in, so the icon set will get a solid-hands cut of the same shape.</p>
+        <p>The mark is one colour, so it takes the theme's primary wherever it appears (magenta in Nightshift, the chosen theme) and works in plain black or white. At favicon sizes the hollow hands fill in, so the icon set will get a solid-hands cut of the same shape.</p>
         <p class="mute">Twenty-four concepts were explored on the way (four contact sheets in docs/brand/concepts/); the K-as-clock-hands idea from #5 and the bubble from #4 are what survived.</p>
       </div>
     </div>
@@ -300,12 +313,12 @@
   <div class="wrap stack-lg">
     <div class="chapter-head">
       <span class="eyebrow">Design direction</span>
-      <h2>Three directions, one recommendation</h2>
+      <h2>Three directions were built; you chose Nightshift</h2>
       <p class="lead">Klokka means "the clock". The recommended direction borrows from the most famous clock design there is, the Swiss railway clock: one grotesk, black on white, and a red paddle for a second hand that sweeps and waits at twelve. Time is numerals, so a Swiss system makes the product's own content the design. The other two directions are complete too, and every mockup switches between them live.</p>
     </div>
     <div class="hgrid">
-      <div><span class="eyebrow">Signal, recommended</span><span class="big" style="color:#FF4F00">Aa 22.5</span><p>White and near-black, one family (Archivo, expanded for display), International Orange as the only loud colour, hairline rules, huge numerals, no shadows. Trivially readable in both modes, cheap to render on any phone, and it keeps Kulram's motion without looking like Kulram.</p></div>
-      <div><span class="eyebrow">Nightshift</span><span class="big" style="color:#FF006E">Aa 22.5</span><p>Violet, magenta and cyan over deep night, Unbounded plus Inter, a glow on the primary, springy entrances. The visible descendant of the Kulram site. The fallback if you want the family resemblance at first glance.</p></div>
+      <div><span class="eyebrow">Signal</span><span class="big" style="color:#FF4F00">Aa 22.5</span><p>White and near-black, one family (Archivo, expanded for display), International Orange as the only loud colour, hairline rules, huge numerals, no shadows. Trivially readable in both modes, cheap to render on any phone, and it keeps Kulram's motion without looking like Kulram.</p></div>
+      <div style="box-shadow: inset 0 0 0 2px var(--accent);"><span class="eyebrow">Nightshift, chosen</span><span class="big" style="color:#FF006E">Aa 22.5</span><p>Violet, magenta and cyan over deep night, Unbounded plus Inter, a glow on the primary, springy entrances. The visible descendant of the Kulram site. The fallback if you want the family resemblance at first glance.</p></div>
       <div><span class="eyebrow">Clay</span><span class="big" style="color:#C8623A">Aa 22.5</span><p>Sand, terracotta and moss, Fraunces with Epilogue, big 28 px radii, a faint grain, gentle motion. Warm and friendly; the outlier if the other two feel too sharp.</p></div>
     </div>
     <div class="cols-2">
@@ -333,15 +346,17 @@
       <h2>The landing page</h2>
       <p class="lead">Nav, a poster-size headline with the live railway clock, "how it works" in three steps, what employers get, what employees get, the pay switch story, an insights teaser, the open-source section, FAQ, and a footer. Everything drawn in code, no stock imagery. Scroll inside the frame; the week grid in the hero fills itself.</p>
     </div>
-    <div class="viewer" data-src="design/mockups/landing.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+    <div class="viewer" data-src="design/mockups/landing.html" data-width="1440" data-height="900" data-theme="nightshift" data-mode="dark" data-device="desktop">
       <div class="bar">
-        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
         <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
         <a class="open" target="_blank" rel="noopener" href="design/mockups/landing.html">Open full size</a>
       </div>
       <div class="stage"><iframe title="Landing page mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
-      <div class="note">Illustrative workspace and numbers. The Swedish version is planned as the default language at launch, with English at /en, like the Kulram site.</div>
+      <div class="note">Illustrative workspace and numbers. Swedish is the default at launch with English at /en and a switcher in the nav. Copy to change before build: the "no tiers, no per-seat pricing" line becomes "Free to use, no card needed", per the business model.</div>
+    <div class="stack"><h4>Screenshots (Nightshift)</h4><div class="shots"><figure><img src="shots/landing-hero-dark.webp" alt="Hero, dark" loading="lazy"><figcaption>Hero, dark</figcaption></figure><figure><img src="shots/landing-hero-light.webp" alt="Hero, light" loading="lazy"><figcaption>Hero, light</figcaption></figure><figure><img src="shots/landing-phone-dark.webp" alt="Hero at phone width" loading="lazy"><figcaption>Hero at phone width</figcaption></figure></div></div>
+  
     </div>
   </div>
 </section>
@@ -353,16 +368,18 @@
       <h2>One account for everyone</h2>
       <p class="lead">Employers and employees sign in at the same place; whether you run the workspace or work there comes from the workspace, not from where you sign in. The card in the dashed frame is Logto's hosted page, which we brand; everything around it is ours. Four states: sign in, "you were invited", sign up, and create your workspace.</p>
     </div>
-    <div class="viewer" data-src="design/mockups/login.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop" data-view="state=signin">
+    <div class="viewer" data-src="design/mockups/login.html" data-width="1440" data-height="900" data-theme="nightshift" data-mode="dark" data-device="desktop" data-view="state=signin">
       <div class="bar">
         <div class="group"><span class="label">State</span><button data-set="view:state=signin" aria-pressed="true">Sign in</button><button data-set="view:state=invite" aria-pressed="false">Invited</button><button data-set="view:state=signup" aria-pressed="false">Sign up</button><button data-set="view:state=workspace" aria-pressed="false">Workspace</button></div>
-        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
         <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
         <a class="open" target="_blank" rel="noopener" href="design/mockups/login.html">Open full size</a>
       </div>
       <div class="stage"><iframe title="Sign-in mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
       <div class="note">Email and password only in v1; social sign-in later. Passwords never touch Klokka's own database.</div>
+    <div class="stack"><h4>Screenshots (Nightshift)</h4><div class="shots"><figure><img src="shots/login-signin-dark.webp" alt="Sign in" loading="lazy"><figcaption>Sign in</figcaption></figure><figure><img src="shots/login-invite-dark.webp" alt="You were invited, dark" loading="lazy"><figcaption>You were invited, dark</figcaption></figure><figure><img src="shots/login-invite-light.webp" alt="You were invited, light" loading="lazy"><figcaption>You were invited, light</figcaption></figure><figure><img src="shots/login-signup-dark.webp" alt="Sign up" loading="lazy"><figcaption>Sign up</figcaption></figure><figure><img src="shots/login-workspace-dark.webp" alt="Create your workspace" loading="lazy"><figcaption>Create your workspace</figcaption></figure></div></div>
+  
     </div>
   </div>
 </section>
@@ -376,11 +393,11 @@
     <div class="stack">
       <h3>Employer</h3>
       <p>Use the rail inside the frame: Overview, Week grid, Employees, Employee month, Settings, Notifications. Flip the "Show pay to employees" switch in Settings and watch rates, earnings and labour cost appear everywhere; try the keyboard in the grid (arrows, Enter, Escape) and the open flag on the Overview.</p>
-      <div class="viewer" data-src="design/mockups/web-employer.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+      <div class="viewer" data-src="design/mockups/web-employer.html" data-width="1440" data-height="900" data-theme="nightshift" data-mode="dark" data-device="desktop">
         <div class="bar">
           <div class="group"><span class="label">Pay</span><button data-set="view:pay=off" aria-pressed="true">Hours only</button><button data-set="view:pay=on" aria-pressed="false">Pay on</button></div>
-          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
           <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
           <a class="open" target="_blank" rel="noopener" href="design/mockups/web-employer.html">Open full size</a>
         </div>
@@ -391,10 +408,10 @@
     <div class="stack">
       <h3>Employee</h3>
       <p>Maria belongs to two workspaces: Cafe Nord (pay on, so earnings show) and Salon Vega (hours only). The switcher in the frame swaps between them. My month, a day's detail with history and the flag dialog, notifications, the shareable card, and the profile with language and notification preferences.</p>
-      <div class="viewer" data-src="design/mockups/web-employee.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+      <div class="viewer" data-src="design/mockups/web-employee.html" data-width="1440" data-height="900" data-theme="nightshift" data-mode="dark" data-device="desktop">
         <div class="bar">
-          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
           <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
           <a class="open" target="_blank" rel="noopener" href="design/mockups/web-employee.html">Open full size</a>
         </div>
@@ -404,15 +421,16 @@
     <div class="stack">
       <h3>Operator console</h3>
       <p>Only for the global platform-admin role. Workspaces, users, invitations (pending, accepted, expired, with resend), volume (the email meter against the monthly quota, push and in-app counts, coalescing savings) and health (p95 per app, dependencies, recent deploys). Denser type scale, hairline tables with sort, search, filters and paging; the same design system as the product, not an admin template.</p>
-      <div class="viewer" data-src="design/mockups/web-operator.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+      <div class="viewer" data-src="design/mockups/web-operator.html" data-width="1440" data-height="900" data-theme="nightshift" data-mode="dark" data-device="desktop">
         <div class="bar">
-          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
           <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
           <a class="open" target="_blank" rel="noopener" href="design/mockups/web-operator.html">Open full size</a>
         </div>
         <div class="stage"><iframe title="Operator console mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
       </div>
+    <div class="wrap" style="margin-top:32px"><div class="stack"><h4>Screenshots (Nightshift)</h4><div class="shots"><figure><img src="shots/web-employer-overview-dark.webp" alt="Employer overview, dark" loading="lazy"><figcaption>Employer overview, dark</figcaption></figure><figure><img src="shots/web-employer-overview-light.webp" alt="Employer overview, light" loading="lazy"><figcaption>Employer overview, light</figcaption></figure><figure><img src="shots/web-employer-overview-pay-dark.webp" alt="Overview with pay on" loading="lazy"><figcaption>Overview with pay on</figcaption></figure><figure><img src="shots/web-employer-week-dark.webp" alt="Week grid, dark" loading="lazy"><figcaption>Week grid, dark</figcaption></figure><figure><img src="shots/web-employer-week-light.webp" alt="Week grid, light" loading="lazy"><figcaption>Week grid, light</figcaption></figure><figure><img src="shots/web-employer-week-phone-dark.webp" alt="Week grid at phone width" loading="lazy"><figcaption>Week grid at phone width</figcaption></figure><figure><img src="shots/web-employer-employees-dark.webp" alt="Employees" loading="lazy"><figcaption>Employees</figcaption></figure><figure><img src="shots/web-employer-month-dark.webp" alt="Employee month" loading="lazy"><figcaption>Employee month</figcaption></figure><figure><img src="shots/web-employer-settings-dark.webp" alt="Settings with the pay switch" loading="lazy"><figcaption>Settings with the pay switch</figcaption></figure><figure><img src="shots/web-employer-notifications-dark.webp" alt="Notifications" loading="lazy"><figcaption>Notifications</figcaption></figure><figure><img src="shots/web-employee-month-dark.webp" alt="Employee: my month, dark" loading="lazy"><figcaption>Employee: my month, dark</figcaption></figure><figure><img src="shots/web-employee-month-light.webp" alt="Employee: my month, light" loading="lazy"><figcaption>Employee: my month, light</figcaption></figure><figure><img src="shots/web-employee-notifications-dark.webp" alt="Employee: notifications" loading="lazy"><figcaption>Employee: notifications</figcaption></figure><figure><img src="shots/web-employee-profile-dark.webp" alt="Employee: profile and workspaces" loading="lazy"><figcaption>Employee: profile and workspaces</figcaption></figure><figure><img src="shots/web-operator-workspaces-dark.webp" alt="Operator: workspaces, dark" loading="lazy"><figcaption>Operator: workspaces, dark</figcaption></figure><figure><img src="shots/web-operator-workspaces-light.webp" alt="Operator: workspaces, light" loading="lazy"><figcaption>Operator: workspaces, light</figcaption></figure><figure><img src="shots/web-operator-invitations-dark.webp" alt="Operator: invitations" loading="lazy"><figcaption>Operator: invitations</figcaption></figure><figure><img src="shots/web-operator-volume-dark.webp" alt="Operator: volume and email quota" loading="lazy"><figcaption>Operator: volume and email quota</figcaption></figure><figure><img src="shots/web-operator-health-dark.webp" alt="Operator: health" loading="lazy"><figcaption>Operator: health</figcaption></figure></div></div></div>
     </div>
   </div>
 </section>
@@ -424,10 +442,10 @@
       <h2>The app on a phone</h2>
       <p class="lead">Twenty-three screens as phone frames: sign-in and invitation, the employer's day (every person as a card with a big quick-add, the add-hours sheet, the week, employees, a person's month, insights, settings, notifications, resolving a flag) and the employee's side (my month, a day with its history, flagging an entry, notifications, profile and workspace switcher, the shareable monthly card). The last row shows the hero screens in the other mode. Scroll inside the frame.</p>
     </div>
-    <div class="viewer" data-src="design/mockups/mobile.html" data-width="1440" data-height="1000" data-theme="signal" data-mode="light" data-device="desktop">
+    <div class="viewer" data-src="design/mockups/mobile.html" data-width="1440" data-height="1000" data-theme="nightshift" data-mode="dark" data-device="desktop">
       <div class="bar">
-        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
         <a class="open" target="_blank" rel="noopener" href="design/mockups/mobile.html">Open full size</a>
       </div>
       <div class="stage"><iframe title="Mobile screens gallery" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
@@ -437,10 +455,10 @@
       <div class="stack">
         <h3>Try the navigation</h3>
         <p>One live frame: the employer's tabs (Home, Week, Insights, Settings) and a quick-add that opens the add-hours sheet with the pop motion. Tap around.</p>
-        <div class="viewer" data-src="design/mockups/mobile-flow.html" data-theme="signal" data-mode="light" data-device="phone">
+        <div class="viewer" data-src="design/mockups/mobile-flow.html" data-theme="nightshift" data-mode="dark" data-device="phone">
           <div class="bar">
-            <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
-            <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+            <div class="group"><span class="label">Theme</span><button data-set="theme:nightshift" aria-pressed="true">Nightshift</button><button data-set="theme:signal" aria-pressed="false">Signal</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+            <div class="group"><span class="label">Mode</span><button data-set="mode:dark" aria-pressed="true">Dark</button><button data-set="mode:light" aria-pressed="false">Light</button></div>
           </div>
           <div class="stage"><iframe title="Interactive phone frame" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
         </div>
@@ -453,9 +471,10 @@
           <li><b>The week grid becomes one person per page</b>, swiped left and right, with the next person peeking in; the spreadsheet stays on the web.</li>
           <li><b>The share card never shows pay</b>, only hours, whatever the workspace setting.</li>
           <li><b>Android first, iOS-ready.</b> No module without an iOS counterpart; the iOS build waits for an Apple account and runs in the cloud from this Linux host.</li>
-          <li><b>Distribution in v1</b> is a signed APK from the landing page (decision 8); a Play Store listing is a later ticket.</li>
+          <li><b>Distribution in v1</b> is a signed APK from the landing page; a Play Store listing is a later ticket. Package id com.prasannjeet.klokka, Firebase and Expo projects in place.</li>
         </ul>
       </div>
+    <div class="wrap" style="margin-top:32px"><div class="stack"><h4>Screenshots (Nightshift)</h4><div class="shots"><figure><img src="shots/mobile-signin-dark.webp" alt="Sign in and invite" loading="lazy"><figcaption>Sign in and invite</figcaption></figure><figure><img src="shots/mobile-employer-dark.webp" alt="Employer screens" loading="lazy"><figcaption>Employer screens</figcaption></figure><figure><img src="shots/mobile-employee-dark.webp" alt="Employee screens" loading="lazy"><figcaption>Employee screens</figcaption></figure><figure><img src="shots/mobile-alt-dark.webp" alt="Hero screens in the other mode" loading="lazy"><figcaption>Hero screens in the other mode</figcaption></figure><figure><img src="shots/mobile-signin-light.webp" alt="Sign in and invite, light" loading="lazy"><figcaption>Sign in and invite, light</figcaption></figure><figure><img src="shots/mobile-flow-dark.webp" alt="Interactive frame, dark" loading="lazy"><figcaption>Interactive frame, dark</figcaption></figure><figure><img src="shots/mobile-flow-light.webp" alt="Interactive frame, light" loading="lazy"><figcaption>Interactive frame, light</figcaption></figure></div></div></div>
     </div>
   </div>
 </section>
@@ -480,7 +499,7 @@
         <h3>What was proven, not assumed</h3>
         <ul class="plain">
           <li>A throwaway Quarkus 3.39.5 project with every extension we need was created, packaged and tested on JDK 25 on this host: create 18 s, package 21 s, full test run green in 1 min 16 s (Postgres started automatically by the test tooling). Spring Boot is not needed.</li>
-          <li>The OpenAPI generator produced Quarkus server interfaces and a resource implementing them compiled on JDK 25.</li>
+          <li>The OpenAPI generator produced Quarkus server interfaces and a resource implementing them compiled on JDK 25. The same generation step publishes the contract to Nexus from CI (Maven and npm), so every client and the server build against one versioned artifact.</li>
           <li>Quarkus 3.40 LTS ships this week; we start on it. Quarkus 4 (November) is a planned upgrade ticket, not a v1 concern.</li>
           <li>Versions are pinned below "latest" where latest breaks things: ESLint 10 crashes Next's config today, TypeScript 7 is not supported by the lint tooling, and Expo pins React 19.2.3 for the whole repo.</li>
         </ul>
@@ -531,7 +550,7 @@
       <div class="stack"><h4>Roles</h4><p><b>EMPLOYER</b> and <b>EMPLOYEE</b> are per workspace (a person can be both, in different workspaces). <b>platform-admin</b> is a global role for the operator console and is checked on every operator route.</p></div>
       <div class="stack"><h4>On the phone</h4><p>Sign-in opens Logto in the system browser and returns to the app (the same flow Kulram's app uses today). The token lives in the secure store; the app never sees the password.</p></div>
       <div class="stack"><h4>On the web</h4><p>The session is an encrypted cookie. The browser never holds an API token; a server route adds it to each API call, which also means no cross-origin setup on the API.</p></div>
-      <div class="stack"><h4>Staging reality</h4><p>Our self-hosted Logto has a single tenant, so on staging Klokka shares the sign-in experience with Kulram (decision 3). Production gets its own instance.</p></div>
+      <div class="stack"><h4>Own Logto</h4><p>Klokka runs its own Logto service on staging (klokka-logto.coolify.ooguy.com) in the Klokka Coolify project, with its own database and email connector. Nothing is shared with Kulram.</p></div>
     </div>
   </div>
 </section>
@@ -540,24 +559,25 @@
   <div class="wrap stack-lg">
     <div class="chapter-head">
       <span class="eyebrow">Hosting and releases</span>
-      <h2>Staging on Coolify now, production by tag later</h2>
-      <p class="lead">Exactly the shape the Kulram site uses today: each app is a Docker image in our Nexus registry, deployed as an image app on the staging Coolify. No CI for now; one script builds, pushes and deploys. Production is added later on a version tag, following the standing runbook, with its own Logto and database.</p>
+      <h2>Staging on Coolify, built and deployed by our own runners</h2>
+      <p class="lead">Each app is a Docker image in our Nexus registry, deployed as an image app in the "Klokka" project on the staging Coolify. GitHub Actions runs on two self-hosted runners on our own machine, so a push starts building within seconds and two jobs run side by side. Production is added later on a version tag, following the standing runbook, with its own Logto and database.</p>
     </div>
     <div class="hgrid">
       <div><span class="eyebrow">klokka-api</span><span class="big">8080</span><span class="mute">Quarkus fast-jar on a Java 25 runtime image, health at /q/health/ready, 512 MB</span></div>
       <div><span class="eyebrow">klokka-web</span><span class="big">3000</span><span class="mute">Next.js standalone, settings read at runtime so one image serves every environment, health at /healthz</span></div>
       <div><span class="eyebrow">klokka-landing</span><span class="big">3000</span><span class="mute">Next.js static site, like kulram-web, sv and en</span></div>
-      <div><span class="eyebrow">Postgres 18</span><span class="big">klokka</span><span class="mute">A database with two roles on the shared staging Postgres (decision 4)</span></div>
+      <div><span class="eyebrow">Postgres 18</span><span class="big">klokka</span><span class="mute">A database with two roles on the shared staging Postgres</span></div><div><span class="eyebrow">klokka-logto</span><span class="big">OIDC</span><span class="mute">Klokka's own Logto service with its own database, admin console and email connector</span></div>
     </div>
     <div class="cols-2">
       <div class="stack">
-        <h3>Release path (no CI yet)</h3>
+        <h3>What a push to main does</h3>
         <ol class="steps">
-          <li><b>Build</b> the three images locally with an immutable tag (git short sha).</li>
-          <li><b>Push</b> to docker.nexus.coolify.ooguy.com (credentials already on this host).</li>
-          <li><b>Deploy</b> by setting the image tag on the Coolify app with instant deploy, so Coolify's own record always names what is running. Rollback is the same call with an older tag.</li>
+          <li><b>Build and test</b> only what changed: API (Maven, JDK 25), web app, landing, mobile, and the contract. Jobs run in parallel on the two runners.</li>
+          <li><b>Publish the contract</b> to Nexus: the generated server interfaces as a Maven artifact, the generated TypeScript client as an npm package, both at the API's version.</li>
+          <li><b>Push images</b> with an immutable tag and <b>deploy staging</b> by setting that tag on each Coolify app, so Coolify's own record names what is running; rollback is the same call with an older tag.</li>
+          <li><b>Build and sign the Android APK</b> (JDK 21, our keystore from a repository secret) and publish it to Nexus so the site's download link always points at the latest build.</li>
         </ol>
-        <p class="mute">Secrets (database roles, Logto client ids and keys, SMTP, Expo access token) live only in Coolify environment variables and in gitignored local files.</p>
+        <p class="mute">Secrets (Nexus, Coolify, Expo, keystore, Firebase config) live in the GitHub repository's secrets and in gitignored local files, never in the code. Nexus and Firebase secrets are already set on the repository.</p>
       </div>
       <div class="stack">
         <h3>Developing on this host</h3>

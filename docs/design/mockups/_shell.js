@@ -5,7 +5,7 @@
   Initial state, in order of precedence:
     1. URL query: ?theme=signal|nightshift|clay  ?mode=auto|light|dark  ?bar=0 (hide the bar)
     2. attributes already present on <html> (a mockup may hardcode data-theme="clay")
-    3. defaults: theme "signal", mode "auto" (follows prefers-color-scheme)
+    3. defaults: theme "nightshift", mode "auto" (follows prefers-color-scheme)
 
   Script API for mockup scripts:
     KlokkaShell.setTheme("clay"); KlokkaShell.setMode("dark"); KlokkaShell.get() -> { theme, mode }
@@ -28,7 +28,7 @@
 
   var root = document.documentElement;
   var params = new URLSearchParams(location.search);
-  var state = { theme: "signal", mode: "auto" };
+  var state = { theme: "nightshift", mode: "auto" };
 
   function validTheme(t) { return THEMES.some(function (x) { return x.id === t; }) ? t : null; }
   function validMode(m) { return MODES.indexOf(m) >= 0 ? m : null; }
