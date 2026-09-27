@@ -1,0 +1,25 @@
+{
+  "name": "@klokka/api-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The ONE TypeScript client for the Klokka API, generated (typescript-fetch) from apps/api/contract/src/main/openapi/openapi.yaml and committed. Web calls it through the BFF, mobile with a bearer token.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./generated": "./src/generated/index.ts"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "generate": "node scripts/generate.mjs",
+    "check": "node scripts/generate.mjs --check",
+    "build": "node scripts/generate.mjs --check && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.41.0"
+  }
+}

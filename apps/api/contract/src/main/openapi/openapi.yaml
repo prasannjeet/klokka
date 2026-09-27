@@ -1,0 +1,4345 @@
+openapi: 3.1.0
+info:
+  title: Klokka API
+  version: 0.1.0
+  summary: Hours per employee per day, both sides see the month add up.
+  description: |
+    The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the
+    boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated
+    from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.
+
+    Conventions
+    - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC.
+    - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace
+      currency's major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has
+      `showPay` off or the caller may not see the rate.
+    - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string.
+    - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a
+      user belongs to, and with which role, is decided by the API's own `membership` table, never by token
+      claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim).
+    - Language: every localized string in a response (notification titles, problem messages) uses the language
+      stored in the user's preferences. The public invitation lookup takes a `lang` query instead.
+    - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every
+      operation may also answer `401`, `403` and `500` in that shape.
+    - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is.
+  license:
+    name: MIT
+    url: https://github.com/prasannjeet/klokka/blob/main/LICENSE
+  contact:
+    name: Klokka
+    url: https://github.com/prasannjeet/klokka
+
+servers:
+  - url: /v1
+    description: Relative to the API host (locally http://localhost:8080/v1; the web app calls it through its BFF at /api/k).
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: me
+    description: The signed-in user, their preferences and push tokens. Available to every authenticated user.
+  - name: workspaces
+    description: A workspace is one business (a Logto organization). Settings are changed by its employer.
+  - name: members
+    description: Employer and employees of a workspace, invitations included.
+  - name: invitations
+    description: The invite link flow. The lookup is public (token in the URL); accepting needs a signed-in user.
+  - name: entries
+    description: Hours per member per day. Written by the employer, read by the employer and by the member themselves.
+  - name: months
+    description: Month lock, summary and CSV export.
+  - name: insights
+    description: Read models for the dashboards. Every number both clients show comes from here (D9).
+  - name: flags
+    description: An employee flags an entry they think is wrong; the employer fixes or dismisses it.
+  - name: notifications
+    description: The in-app notification centre; push carries the same items.
+  - name: operator
+    description: The hosted-instance console. Aggregates only, requires the platform-admin role.
+  - name: webhooks
+    description: Inbound webhooks (Logto). Signed, no bearer token.
+
+paths:
+  # ---------------------------------------------------------------- me
+  /me:
+    get:
+      tags: [me]
+      operationId: getMe
+      summary: Who am I, what do I prefer, which workspaces am I in
+      description: |
+        Creates the `app_user` row on first call (default language from the `Accept-Language` header, or Swedish),
+        refreshes `last_seen_at`, and returns the user's memberships with the figures the workspace switcher shows.
+      responses:
+        '200':
+          description: The signed-in user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+    patch:
+      tags: [me]
+      operationId: updateMe
+      summary: Change my display name or avatar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: The updated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Me'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /me/preferences:
+    patch:
+      tags: [me]
+      operationId: updateMyPreferences
+      summary: Change language, push, digest or theme preference
+      description: Fields left out are unchanged. Language changes apply to every later notification (D2).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferencesUpdate'
+      responses:
+        '200':
+          description: The stored preferences.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Preferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /me/push-tokens:
+    post:
+      tags: [me]
+      operationId: registerPushToken
+      summary: Register this device's Expo push token
+      description: Idempotent per token. A token that moves to another user is re-assigned (tokens are per device install).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushTokenRegistration'
+      responses:
+        '204':
+          description: Registered.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /me/push-tokens/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        description: The Expo push token, URL-encoded.
+        schema:
+          type: string
+          maxLength: 200
+          example: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+    delete:
+      tags: [me]
+      operationId: deletePushToken
+      summary: Forget a push token (sign-out on that device)
+      responses:
+        '204':
+          description: Forgotten (also when it was unknown).
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- workspaces
+  /workspaces:
+    post:
+      tags: [workspaces]
+      operationId: createWorkspace
+      summary: Create a workspace (the caller becomes its employer)
+      description: Creates the Logto organization, the employer membership and the workspace row in one transaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+      responses:
+        '201':
+          description: The new workspace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [workspaces]
+      operationId: getWorkspace
+      summary: Workspace settings (any member)
+      responses:
+        '200':
+          description: The workspace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+    patch:
+      tags: [workspaces]
+      operationId: updateWorkspace
+      summary: Change settings (employer only)
+      description: Settings save one field at a time; fields left out are unchanged.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceUpdate'
+      responses:
+        '200':
+          description: The updated workspace.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- members
+  /workspaces/{workspaceId}/members:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [members]
+      operationId: listMembers
+      summary: Members of the workspace with their month figures
+      description: |
+        Employers see everyone with rates (when pay is on). Employees see names, avatars and statuses only:
+        `hourlyRate`, `month.earnings` and `invitation` are `null` for members other than themselves.
+      parameters:
+        - name: status
+          in: query
+          description: Filter by membership status.
+          schema:
+            $ref: '#/components/schemas/MemberStatus'
+        - $ref: '#/components/parameters/MonthQuery'
+      responses:
+        '200':
+          description: Members, employer first, then by display name.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Member'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+    post:
+      tags: [members]
+      operationId: inviteMember
+      summary: Invite an employee (employer only)
+      description: |
+        Creates the membership as INVITED and sends the Logto organization invitation email (7 day lifetime, D3).
+        Hours can be logged for an invited member right away. `409 CONFLICT` when the email already belongs to
+        a member of this workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberInvite'
+      responses:
+        '201':
+          description: The invited member.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/members/{membershipId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+    get:
+      tags: [members]
+      operationId: getMember
+      summary: One member (employer, or the member themselves)
+      parameters:
+        - $ref: '#/components/parameters/MonthQuery'
+      responses:
+        '200':
+          description: The member.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+    patch:
+      tags: [members]
+      operationId: updateMember
+      summary: Change name, rate or status (employer only)
+      description: |
+        `status` may move ACTIVE to DEACTIVATED and back. An INVITED member cannot be activated here (that
+        happens when they accept). The employer's own membership cannot be deactivated.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUpdate'
+      responses:
+        '200':
+          description: The updated member.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+    delete:
+      tags: [members]
+      operationId: removeMember
+      summary: Revoke a pending invitation or remove a member (employer only)
+      description: |
+        An INVITED member is removed outright and the Logto invitation revoked. An ACTIVE or DEACTIVATED member
+        with entries is not deleted but deactivated (their hours stay visible to both sides); one without entries
+        is removed. `409` when the target is the employer.
+      responses:
+        '204':
+          description: Removed or deactivated.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/members/{membershipId}/invitation/resend:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+    post:
+      tags: [members]
+      operationId: resendInvitation
+      summary: Send the invitation email again (employer only)
+      description: Costs one email. Only for INVITED members; the expiry moves 7 days forward.
+      responses:
+        '200':
+          description: The member with the refreshed invitation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- invitations
+  /invitations/{token}:
+    parameters:
+      - $ref: '#/components/parameters/InvitationToken'
+    get:
+      tags: [invitations]
+      operationId: getInvitation
+      summary: What the join page shows before sign-in (public)
+      description: |
+        No bearer token: the invitation token in the URL is the secret. Returns the workspace name, colour and
+        emoji, who invited, the invited email, the role and the expiry. `404` for an unknown token; an expired or
+        accepted one is returned with its `status`, so the page can say so. `lang` picks the language of
+        `localized` texts.
+      security: []
+      parameters:
+        - name: lang
+          in: query
+          description: Language for the localized texts in the response. Defaults to Swedish.
+          schema:
+            $ref: '#/components/schemas/Language'
+      responses:
+        '200':
+          description: The invitation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /invitations/{token}/accept:
+    parameters:
+      - $ref: '#/components/parameters/InvitationToken'
+    post:
+      tags: [invitations]
+      operationId: acceptInvitation
+      summary: Accept an invitation as the signed-in user
+      description: |
+        Repeat-safe: accepting an invitation this user already accepted returns `200` again. The signed-in
+        user's email must equal the invited email (`403 INVITATION_EMAIL_MISMATCH`). `410 INVITATION_EXPIRED`
+        after 7 days. On success the membership becomes ACTIVE, the Logto invitation is accepted through the
+        Management API and the employer is notified.
+      responses:
+        '200':
+          description: The membership that was activated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: The invitation has expired.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- entries
+  /workspaces/{workspaceId}/entries:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [entries]
+      operationId: listEntries
+      summary: Entries in a date range (week grid, day lists)
+      description: |
+        Employers get every member; employees get their own entries only, whatever `membershipId` says.
+        Soft-deleted entries are not returned. At most 62 days per call.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: First date, inclusive.
+          schema:
+            type: string
+            format: date
+            example: '2026-09-21'
+        - name: to
+          in: query
+          required: true
+          description: Last date, inclusive.
+          schema:
+            type: string
+            format: date
+            example: '2026-09-27'
+        - name: membershipId
+          in: query
+          description: Only this member's entries.
+          schema:
+            type: string
+            format: uuid
+            example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+      responses:
+        '200':
+          description: Entries ordered by member, then date.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/members/{membershipId}/entries/{date}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+      - $ref: '#/components/parameters/WorkDate'
+    put:
+      tags: [entries]
+      operationId: upsertEntry
+      summary: Set the hours for one member and day (employer only; the phone's quick add)
+      description: |
+        Creates or replaces the entry for `(membershipId, date)`; the previous value goes to the history and the
+        member is notified (coalesced per sitting). Hours are rounded by the workspace rule. `409 MONTH_LOCKED`
+        when the month is closed, `409 MEMBER_NOT_ACTIVE` for a deactivated member.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryUpsert'
+      responses:
+        '200':
+          description: The stored entry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+    delete:
+      tags: [entries]
+      operationId: deleteEntry
+      summary: Remove the hours for one member and day (employer only)
+      description: Soft delete; the history keeps the value and the member is told. `204` also when there was nothing.
+      responses:
+        '204':
+          description: Removed.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/entries/batch:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      tags: [entries]
+      operationId: batchUpsertEntries
+      summary: Save a week grid in one write (employer only, D8)
+      description: |
+        Applies every item atomically: `hours` set means upsert, `hours` null means remove. One sitting, so each
+        affected member gets one coalesced notification. The whole batch is refused with `409 MONTH_LOCKED` if
+        any item falls in a closed month, and with `400` if any item is invalid (the problem lists them).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryBatchRequest'
+      responses:
+        '200':
+          description: What was saved and removed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntryBatchResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/entries/{entryId}/history:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/EntryId'
+    get:
+      tags: [entries]
+      operationId: getEntryHistory
+      summary: Who changed what, when (employer, or the entry's member)
+      responses:
+        '200':
+          description: Changes, newest first, flags included.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntryChange'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- months
+  /workspaces/{workspaceId}/months/{month}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MonthPath'
+    get:
+      tags: [months]
+      operationId: getMonth
+      summary: Lock status of a month (any member)
+      responses:
+        '200':
+          description: The month.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/months/{month}/lock:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MonthPath'
+    put:
+      tags: [months]
+      operationId: lockMonth
+      summary: Close the month (employer only)
+      description: Repeat-safe. Every member is notified once. Entries in the month refuse edits until unlocked.
+      responses:
+        '200':
+          description: The month, now locked.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+    delete:
+      tags: [months]
+      operationId: unlockMonth
+      summary: Reopen the month (employer only)
+      description: Repeat-safe. The lock history keeps who locked and unlocked when; members are notified.
+      responses:
+        '200':
+          description: The month, now open.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/months/{month}/summary:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MonthPath'
+    get:
+      tags: [months]
+      operationId: getMonthSummary
+      summary: Totals per member, per week and for the workspace (employer only)
+      responses:
+        '200':
+          description: The summary.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/months/{month}/export.csv:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MonthPath'
+    get:
+      tags: [months]
+      operationId: exportMonthCsv
+      summary: CSV of a month, whole workspace or one member
+      description: |
+        Employers export the workspace or any member; employees export themselves only. UTF-8 with BOM, `;`
+        separated (opens cleanly in Swedish Excel), one row per entry: date, weekday, member, hours, note, and
+        rate and amount when pay is on. `Content-Disposition` names the file `klokka-<slug>-<month>.csv`.
+      parameters:
+        - name: membershipId
+          in: query
+          description: Only this member.
+          schema:
+            type: string
+            format: uuid
+            example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+      responses:
+        '200':
+          description: The CSV.
+          content:
+            text/csv:
+              schema:
+                type: string
+                example: "date;weekday;member;hours;note\n2026-09-21;Monday;Maria Lind;4;Counter\n"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- read models
+  /workspaces/{workspaceId}/members/{membershipId}/months/{month}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+      - $ref: '#/components/parameters/MonthPath'
+    get:
+      tags: [insights]
+      operationId: getMemberMonth
+      summary: 'One member''s month: every day, the total, the average, vs last month (employer or the member)'
+      description: The calendar heat-map and the day list on both clients render this as is.
+      responses:
+        '200':
+          description: The month read model.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberMonth'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/insights:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [insights]
+      operationId: getWorkspaceInsights
+      summary: The employer dashboard in one call (employer only)
+      description: |
+        Total hours, vs the same point last month, projection, per member, week by week, weekday distribution,
+        busiest day, nothing-logged days, labour cost when pay is on, and the current week strip for the phone's
+        home screen. `month` defaults to the current month in the workspace time zone.
+      parameters:
+        - $ref: '#/components/parameters/MonthQuery'
+      responses:
+        '200':
+          description: The insights.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceInsights'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/members/{membershipId}/insights:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+    get:
+      tags: [insights]
+      operationId: getMemberInsights
+      summary: The employee dashboard and share card figures (employer or the member)
+      parameters:
+        - $ref: '#/components/parameters/MonthQuery'
+      responses:
+        '200':
+          description: The insights.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberInsights'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- flags
+  /workspaces/{workspaceId}/entries/{entryId}/flags:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/EntryId'
+    post:
+      tags: [flags]
+      operationId: raiseFlag
+      summary: Flag an entry as wrong (the entry's member only)
+      description: One open flag per entry (`409 FLAG_ALREADY_OPEN`). The employer is notified.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagCreate'
+      responses:
+        '201':
+          description: The open flag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/flags:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [flags]
+      operationId: listFlags
+      summary: 'Flags in the workspace (employer: all; employee: their own)'
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status. Defaults to all.
+          schema:
+            $ref: '#/components/schemas/FlagStatus'
+      responses:
+        '200':
+          description: Flags, open first, newest first.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Flag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/flags/{flagId}/resolve:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/FlagId'
+    post:
+      tags: [flags]
+      operationId: resolveFlag
+      summary: Fix the entry or dismiss the flag (employer only)
+      description: |
+        `FIX` sets the entry to `hours` (history kept, month lock respected) and marks the flag FIXED; `DISMISS`
+        keeps the entry and marks the flag DISMISSED. Either way the member is notified. `409` when the flag is
+        already resolved or the month is locked.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagResolve'
+      responses:
+        '200':
+          description: The resolved flag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- notifications
+  /notifications:
+    get:
+      tags: [notifications]
+      operationId: listNotifications
+      summary: My notification centre, newest first
+      description: Titles and bodies are localized in my stored language. Cursor paging; `unreadCount` is over the whole filter.
+      parameters:
+        - name: workspaceId
+          in: query
+          description: Only this workspace.
+          schema:
+            type: string
+            format: uuid
+            example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: A page of notifications.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /notifications/{notificationId}/read:
+    parameters:
+      - $ref: '#/components/parameters/NotificationId'
+    post:
+      tags: [notifications]
+      operationId: markNotificationRead
+      summary: Mark one notification as read
+      responses:
+        '204':
+          description: Marked (also when it already was).
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /notifications/read-all:
+    post:
+      tags: [notifications]
+      operationId: markAllNotificationsRead
+      summary: Mark every notification as read, optionally in one workspace
+      parameters:
+        - name: workspaceId
+          in: query
+          schema:
+            type: string
+            format: uuid
+            example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+      responses:
+        '204':
+          description: Marked.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- operator (platform-admin)
+  /operator/workspaces:
+    get:
+      tags: [operator]
+      operationId: operatorListWorkspaces
+      summary: Workspaces on the hosted instance, counts and dates only
+      x-klokka-role: platform-admin
+      parameters:
+        - name: q
+          in: query
+          description: Search by name or slug.
+          schema:
+            type: string
+            maxLength: 100
+        - name: pay
+          in: query
+          description: Only workspaces with pay on or off.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/MonthQuery'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: sort
+          in: query
+          description: Sort key, prefix `-` for descending.
+          schema:
+            type: string
+            enum: [name, -name, members, -members, hours, -hours, created, -created, activity, -activity]
+            default: -activity
+      responses:
+        '200':
+          description: A page plus the headline figures.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorWorkspacePage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /operator/users:
+    get:
+      tags: [operator]
+      operationId: operatorListUsers
+      summary: People signed in through Logto, with membership counts
+      x-klokka-role: platform-admin
+      parameters:
+        - name: q
+          in: query
+          description: Search by name or email.
+          schema:
+            type: string
+            maxLength: 100
+        - name: role
+          in: query
+          description: Only users who are an employer or an employee somewhere.
+          schema:
+            $ref: '#/components/schemas/Role'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of users.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorUserPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /operator/invitations:
+    get:
+      tags: [operator]
+      operationId: operatorListInvitations
+      summary: Invitations and what they cost in email
+      x-klokka-role: platform-admin
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvitationStatus'
+        - $ref: '#/components/parameters/MonthQuery'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: A page of invitations plus the headline figures.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorInvitationPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /operator/invitations/{invitationId}/resend:
+    parameters:
+      - name: invitationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+    post:
+      tags: [operator]
+      operationId: operatorResendInvitation
+      summary: Resend a pending invitation (the console's only mutating action)
+      x-klokka-role: platform-admin
+      responses:
+        '204':
+          description: Sent.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /operator/volume:
+    get:
+      tags: [operator]
+      operationId: operatorVolume
+      summary: Email against the quota, push, in-app and coalescing figures for a month
+      x-klokka-role: platform-admin
+      parameters:
+        - $ref: '#/components/parameters/MonthQuery'
+      responses:
+        '200':
+          description: The volume figures.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorVolume'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /operator/health:
+    get:
+      tags: [operator]
+      operationId: operatorHealth
+      summary: What the API depends on and how it is doing
+      x-klokka-role: platform-admin
+      responses:
+        '200':
+          description: Health, dependencies, recent deploys.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorHealth'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- webhooks
+  /webhooks/logto:
+    post:
+      tags: [webhooks]
+      operationId: logtoWebhook
+      summary: Logto membership and user events (signed, no bearer)
+      description: |
+        Logto signs the raw body with HMAC-SHA256 using the hook's signing key and sends it in
+        `logto-signature-sha-256`. An invalid signature is `401 INVALID_SIGNATURE`. Events are applied
+        idempotently (`hookId` + `createdAt` as the key): organization membership changes mirror into
+        `membership`, user deletions deactivate memberships.
+      security: []
+      parameters:
+        - name: logto-signature-sha-256
+          in: header
+          required: true
+          description: Hex HMAC-SHA256 of the raw request body.
+          schema:
+            type: string
+            example: 3f9c1a2b4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f8
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogtoWebhookEvent'
+      responses:
+        '204':
+          description: Accepted (also for events Klokka does not act on).
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A Logto access token for the Klokka API resource (`aud` = KLOKKA_AUTH_AUDIENCE, issued by
+        KLOKKA_AUTH_ISSUER). Web clients never hold it: the BFF adds it. Mobile requests it with
+        `resource=` on every authorize, exchange and refresh (without it Logto issues an opaque token, which
+        the API rejects with 401).
+
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+    MembershipId:
+      name: membershipId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+    EntryId:
+      name: entryId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+    FlagId:
+      name: flagId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 1e0f9a8b-7c6d-4e5f-9a3b-2c1d0e9f8a7b
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 0f9a8b7c-6d5e-4f4a-8b3c-2d1e0f9a8b7c
+    InvitationToken:
+      name: token
+      in: path
+      required: true
+      description: The opaque invitation token from the email link.
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 128
+        example: inv_9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c
+    WorkDate:
+      name: date
+      in: path
+      required: true
+      description: The work date in the workspace time zone.
+      schema:
+        type: string
+        format: date
+        example: '2026-09-23'
+    MonthPath:
+      name: month
+      in: path
+      required: true
+      description: The month as `yyyy-MM`.
+      schema:
+        type: string
+        pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+        example: '2026-09'
+    MonthQuery:
+      name: month
+      in: query
+      required: false
+      description: The month as `yyyy-MM`. Defaults to the current month in the workspace time zone.
+      schema:
+        type: string
+        pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'
+        example: '2026-09'
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor from the previous page's `nextCursor`.
+      schema:
+        type: string
+        maxLength: 200
+        example: eyJjIjoiMjAyNi0wOS0yNVQwNzoxNTowMFoiLCJpIjoiMGY5YThiN2MifQ
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 30
+    Page:
+      name: page
+      in: query
+      description: 1-based page number.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 12
+
+  responses:
+    Problem:
+      description: An error in RFC 9457 shape with a stable `code`.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    BadRequest:
+      description: The request is malformed or fails validation; `errors` names the fields.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Bad Request
+            status: 400
+            code: VALIDATION
+            detail: hours must be between 0 and 24
+            errors:
+              - field: hours
+                message: must be less than or equal to 24
+    Unauthorized:
+      description: No valid bearer token (missing, expired, wrong audience, opaque).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Unauthorized
+            status: 401
+            code: UNAUTHENTICATED
+            detail: A valid bearer token for the Klokka API is required.
+    Forbidden:
+      description: The caller is not a member with the needed role, or lacks platform-admin.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Forbidden
+            status: 403
+            code: FORBIDDEN
+            detail: Only the employer of this workspace can do that.
+    NotFound:
+      description: No such resource in a workspace the caller can see.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Not Found
+            status: 404
+            code: NOT_FOUND
+            detail: No member 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21 in this workspace.
+    Conflict:
+      description: The request is well formed but the resource's state forbids it (locked month, duplicate, already resolved).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+          example:
+            type: about:blank
+            title: Conflict
+            status: 409
+            code: MONTH_LOCKED
+            detail: September 2026 is closed. Unlock it to change entries.
+
+  schemas:
+    # ------------------------------------------------------------ errors
+    ProblemCode:
+      type: string
+      description: |
+        The stable machine code every error carries. Clients branch on this, never on `detail`, and localize it
+        with the `errors.*` keys of the catalogue.
+      enum:
+        - VALIDATION
+        - UNAUTHENTICATED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - MONTH_LOCKED
+        - MEMBER_NOT_ACTIVE
+        - INVITATION_EXPIRED
+        - INVITATION_EMAIL_MISMATCH
+        - FLAG_ALREADY_OPEN
+        - INVALID_SIGNATURE
+        - NOT_IMPLEMENTED
+        - INTERNAL
+      example: MONTH_LOCKED
+    Problem:
+      type: object
+      description: RFC 9457 problem details plus Klokka's `code` and field `errors`.
+      required: [title, status, code]
+      properties:
+        type:
+          type: string
+          format: uri
+          default: about:blank
+          example: about:blank
+        title:
+          type: string
+          example: Conflict
+        status:
+          type: integer
+          example: 409
+        detail:
+          type: string
+          description: A developer-facing sentence in English. Not for display; use `code`.
+          example: September 2026 is closed. Unlock it to change entries.
+        instance:
+          type: string
+          example: /v1/workspaces/2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b/entries/batch
+        code:
+          $ref: '#/components/schemas/ProblemCode'
+        errors:
+          type: array
+          description: Field-level problems for `VALIDATION`.
+          items:
+            $ref: '#/components/schemas/FieldError'
+      example:
+        type: about:blank
+        title: Conflict
+        status: 409
+        code: MONTH_LOCKED
+        detail: September 2026 is closed. Unlock it to change entries.
+        instance: /v1/workspaces/2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b/entries/batch
+    FieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+          description: JSON pointer-ish path of the offending field (`items[3].hours`).
+          example: hours
+        message:
+          type: string
+          example: must be less than or equal to 24
+      example:
+        field: hours
+        message: must be less than or equal to 24
+
+    # ------------------------------------------------------------ enums
+    Language:
+      type: string
+      description: Swedish or English (D16).
+      enum: [sv, en]
+      example: sv
+    ThemePreference:
+      type: string
+      description: Follow the device, or force light or dark.
+      enum: [SYSTEM, LIGHT, DARK]
+      example: SYSTEM
+    Role:
+      type: string
+      enum: [EMPLOYER, EMPLOYEE]
+      example: EMPLOYEE
+    MemberStatus:
+      type: string
+      enum: [INVITED, ACTIVE, DEACTIVATED]
+      example: ACTIVE
+    InvitationStatus:
+      type: string
+      enum: [PENDING, ACCEPTED, EXPIRED, REVOKED]
+      example: PENDING
+    WeekStart:
+      type: string
+      enum: [MONDAY, SUNDAY]
+      example: MONDAY
+    Weekday:
+      type: string
+      enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+      example: FRIDAY
+    Rounding:
+      type: string
+      description: Applied when an entry is saved. NONE keeps two decimals, QUARTER rounds to 0.25 h, HALF to 0.5 h.
+      enum: [NONE, QUARTER, HALF]
+      example: HALF
+    WorkspaceColour:
+      type: string
+      description: One of the workspace colour swatches; the clients map it to design tokens.
+      enum: [PRIMARY, BLUE, GREEN, PURPLE, YELLOW, INK]
+      example: PRIMARY
+    PushPlatform:
+      type: string
+      enum: [ANDROID, IOS]
+      example: ANDROID
+    FlagReason:
+      type: string
+      description: I worked more, I worked less, I was not in.
+      enum: [MORE, LESS, NOT_IN]
+      example: MORE
+    FlagStatus:
+      type: string
+      enum: [OPEN, FIXED, DISMISSED]
+      example: OPEN
+    FlagResolutionAction:
+      type: string
+      enum: [FIX, DISMISS]
+      example: FIX
+    EntryChangeKind:
+      type: string
+      enum: [CREATED, UPDATED, DELETED, FLAGGED, FLAG_FIXED, FLAG_DISMISSED]
+      example: UPDATED
+    NotificationKind:
+      type: string
+      description: |
+        HOURS_CHANGED covers added, changed and removed hours, coalesced per sitting. Employees receive
+        HOURS_CHANGED, FLAG_RESOLVED, MONTH_CLOSED and MONTH_REOPENED; employers receive INVITE_ACCEPTED and
+        ENTRY_FLAGGED.
+      enum: [HOURS_CHANGED, INVITE_ACCEPTED, ENTRY_FLAGGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED]
+      example: HOURS_CHANGED
+    HealthStatus:
+      type: string
+      enum: [UP, DEGRADED, DOWN]
+      example: UP
+
+    # ------------------------------------------------------------ shared pieces
+    Actor:
+      type: object
+      description: 'Who did something: a user id and the display name to show.'
+      required: [userId, name]
+      properties:
+        userId:
+          type: string
+          example: usr_nora
+        name:
+          type: string
+          example: Nora Lind
+      example:
+        userId: usr_nora
+        name: Nora Lind
+    WeekTotal:
+      type: object
+      description: Hours in one ISO week (`from` and `to` are clipped to the month).
+      required: [isoWeek, from, to, hours]
+      properties:
+        isoWeek:
+          type: integer
+          example: 39
+        from:
+          type: string
+          format: date
+          example: '2026-09-21'
+        to:
+          type: string
+          format: date
+          example: '2026-09-27'
+        hours:
+          type: number
+          example: 113.5
+      example:
+        isoWeek: 39
+        from: '2026-09-21'
+        to: '2026-09-27'
+        hours: 113.5
+    EntryFlagSummary:
+      type: object
+      description: The open or latest flag on an entry, as shown on a calendar day.
+      required: [id, status, reason]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 1e0f9a8b-7c6d-4e5f-9a3b-2c1d0e9f8a7b
+        status:
+          $ref: '#/components/schemas/FlagStatus'
+        reason:
+          $ref: '#/components/schemas/FlagReason'
+        suggestedHours:
+          type: [number, 'null']
+          example: 4
+      example:
+        id: 1e0f9a8b-7c6d-4e5f-9a3b-2c1d0e9f8a7b
+        status: OPEN
+        reason: MORE
+        suggestedHours: 4
+
+    # ------------------------------------------------------------ me
+    UserProfile:
+      type: object
+      required: [id, name, createdAt]
+      properties:
+        id:
+          type: string
+          description: The Logto user id (`sub`).
+          example: usr_maria
+        email:
+          type: [string, 'null']
+          format: email
+          description: Null until the profile has been synced from Logto (the access token carries no email claim by default).
+          example: maria.lind@example.com
+        name:
+          type: string
+          example: Maria Lind
+        avatarEmoji:
+          type: [string, 'null']
+          description: An emoji avatar, or null for the initial.
+          example: "🐝"
+        avatarUrl:
+          type: [string, 'null']
+          format: uri
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-12T09:30:00Z'
+      example:
+        id: usr_maria
+        email: maria.lind@example.com
+        name: Maria Lind
+        avatarEmoji: "🐝"
+        avatarUrl: null
+        createdAt: '2026-05-12T09:30:00Z'
+    UserProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Maria Lind
+        avatarEmoji:
+          type: [string, 'null']
+          maxLength: 16
+          description: An empty string clears the emoji (back to the initial); absent or null leaves it unchanged.
+          example: "🐝"
+      example:
+        name: Maria Lind
+        avatarEmoji: "🐝"
+    Preferences:
+      type: object
+      required: [language, pushEnabled, digestEnabled, theme]
+      properties:
+        language:
+          $ref: '#/components/schemas/Language'
+        pushEnabled:
+          type: boolean
+          example: true
+        digestEnabled:
+          type: boolean
+          description: The opt-in weekly email digest, off by default.
+          example: false
+        theme:
+          $ref: '#/components/schemas/ThemePreference'
+      example:
+        language: sv
+        pushEnabled: true
+        digestEnabled: false
+        theme: SYSTEM
+    PreferencesUpdate:
+      type: object
+      properties:
+        language:
+          $ref: '#/components/schemas/Language'
+        pushEnabled:
+          type: boolean
+          example: true
+        digestEnabled:
+          type: boolean
+          example: false
+        theme:
+          $ref: '#/components/schemas/ThemePreference'
+      example:
+        language: en
+        digestEnabled: true
+    PushTokenRegistration:
+      type: object
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+          description: From `getExpoPushTokenAsync({ projectId })`.
+          maxLength: 200
+          example: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+        platform:
+          $ref: '#/components/schemas/PushPlatform'
+        deviceName:
+          type: string
+          maxLength: 80
+          example: Pixel 8
+      example:
+        token: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+        platform: ANDROID
+        deviceName: Pixel 8
+    MyWorkspace:
+      type: object
+      description: A membership as the workspace switcher shows it.
+      required: [workspaceId, membershipId, name, slug, colour, emoji, role, memberStatus, showPay, currency, timezone, weekStart, hoursThisMonth, unreadNotifications]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name:
+          type: string
+          example: Café Nord
+        slug:
+          type: string
+          example: cafe-nord
+        colour:
+          $ref: '#/components/schemas/WorkspaceColour'
+        emoji:
+          type: string
+          example: "☕"
+        role:
+          $ref: '#/components/schemas/Role'
+        memberStatus:
+          $ref: '#/components/schemas/MemberStatus'
+        showPay:
+          type: boolean
+          example: true
+        currency:
+          type: string
+          example: SEK
+        timezone:
+          type: string
+          example: Europe/Stockholm
+        weekStart:
+          $ref: '#/components/schemas/WeekStart'
+        memberCount:
+          type: [integer, 'null']
+          description: Active plus invited members; for employers ("Employer, 4 people").
+          example: 4
+        employerName:
+          type: [string, 'null']
+          description: For employees ("Nora Lind logs your hours").
+          example: Nora Lind
+        hoursThisMonth:
+          type: number
+          description: The member's own hours this month (employee), or the workspace total (employer).
+          example: 92.5
+        unreadNotifications:
+          type: integer
+          example: 2
+      example:
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name: Café Nord
+        slug: cafe-nord
+        colour: PRIMARY
+        emoji: "☕"
+        role: EMPLOYEE
+        memberStatus: ACTIVE
+        showPay: true
+        currency: SEK
+        timezone: Europe/Stockholm
+        weekStart: MONDAY
+        memberCount: null
+        employerName: Nora Lind
+        hoursThisMonth: 92.5
+        unreadNotifications: 2
+    Me:
+      type: object
+      required: [user, preferences, workspaces, platformAdmin, pushTokenRegistered]
+      properties:
+        user:
+          $ref: '#/components/schemas/UserProfile'
+        preferences:
+          $ref: '#/components/schemas/Preferences'
+        workspaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyWorkspace'
+        platformAdmin:
+          type: boolean
+          description: True when the token carries the global `platform-admin` role.
+          example: false
+        pushTokenRegistered:
+          type: boolean
+          description: Whether at least one enabled push token exists for this user.
+          example: true
+      example:
+        user:
+          id: usr_maria
+          email: maria.lind@example.com
+          name: Maria Lind
+          avatarEmoji: "🐝"
+          avatarUrl: null
+          createdAt: '2026-05-12T09:30:00Z'
+        preferences:
+          language: sv
+          pushEnabled: true
+          digestEnabled: false
+          theme: SYSTEM
+        workspaces:
+          - workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            name: Café Nord
+            slug: cafe-nord
+            colour: PRIMARY
+            emoji: "☕"
+            role: EMPLOYEE
+            memberStatus: ACTIVE
+            showPay: true
+            currency: SEK
+            timezone: Europe/Stockholm
+            weekStart: MONDAY
+            memberCount: null
+            employerName: Nora Lind
+            hoursThisMonth: 92.5
+            unreadNotifications: 2
+          - workspaceId: 6d5e4f3a-2b1c-4d0e-9f8a-7b6c5d4e3f2a
+            membershipId: 8b7c6d5e-4f3a-4b2c-9d1e-0f9a8b7c6d5e
+            name: Nordlys Cafe
+            slug: nordlys-cafe
+            colour: YELLOW
+            emoji: "🥐"
+            role: EMPLOYEE
+            memberStatus: ACTIVE
+            showPay: false
+            currency: NOK
+            timezone: Europe/Oslo
+            weekStart: MONDAY
+            memberCount: null
+            employerName: Elin Berg
+            hoursThisMonth: 24
+            unreadNotifications: 0
+        platformAdmin: false
+        pushTokenRegistered: true
+
+    # ------------------------------------------------------------ workspaces
+    Workspace:
+      type: object
+      required: [id, name, slug, timezone, currency, weekStart, colour, emoji, showPay, rounding, defaultDayHours, createdAt, memberCount, activeMemberCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name:
+          type: string
+          example: Café Nord
+        slug:
+          type: string
+          description: URL-safe, unique, derived from the name at creation.
+          example: cafe-nord
+        timezone:
+          type: string
+          description: IANA time zone; days and weeks are cut by it.
+          example: Europe/Stockholm
+        country:
+          type: [string, 'null']
+          description: ISO 3166-1 alpha-2, used for defaults only.
+          example: SE
+        currency:
+          type: string
+          description: ISO 4217.
+          example: SEK
+        weekStart:
+          $ref: '#/components/schemas/WeekStart'
+        colour:
+          $ref: '#/components/schemas/WorkspaceColour'
+        emoji:
+          type: string
+          example: "☕"
+        showPay:
+          type: boolean
+          description: When on, every hours figure gets a money figure and employees see their own rate.
+          example: true
+        rounding:
+          $ref: '#/components/schemas/Rounding'
+        defaultDayHours:
+          type: number
+          description: What the Full day chip fills in.
+          example: 7.5
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-02T08:00:00Z'
+        memberCount:
+          type: integer
+          description: Active plus invited members, the employer included.
+          example: 5
+        activeMemberCount:
+          type: integer
+          example: 4
+        myRole:
+          $ref: '#/components/schemas/Role'
+        myMembershipId:
+          type: string
+          format: uuid
+          example: 3c2d1e0f-9a8b-4c7d-8e6f-5a4b3c2d1e0f
+      example:
+        id: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name: Café Nord
+        slug: cafe-nord
+        timezone: Europe/Stockholm
+        country: SE
+        currency: SEK
+        weekStart: MONDAY
+        colour: PRIMARY
+        emoji: "☕"
+        showPay: true
+        rounding: HALF
+        defaultDayHours: 7.5
+        createdAt: '2026-05-02T08:00:00Z'
+        memberCount: 5
+        activeMemberCount: 4
+        myRole: EMPLOYER
+        myMembershipId: 3c2d1e0f-9a8b-4c7d-8e6f-5a4b3c2d1e0f
+    WorkspaceCreate:
+      type: object
+      required: [name, timezone, currency]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Café Nord
+        timezone:
+          type: string
+          example: Europe/Stockholm
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: SE
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: SEK
+        weekStart:
+          $ref: '#/components/schemas/WeekStart'
+        colour:
+          $ref: '#/components/schemas/WorkspaceColour'
+        emoji:
+          type: string
+          maxLength: 16
+          example: "☕"
+        showPay:
+          type: boolean
+          default: false
+        rounding:
+          $ref: '#/components/schemas/Rounding'
+        defaultDayHours:
+          type: number
+          minimum: 0.5
+          maximum: 24
+          default: 8
+          example: 7.5
+      example:
+        name: Café Nord
+        timezone: Europe/Stockholm
+        country: SE
+        currency: SEK
+        weekStart: MONDAY
+        colour: PRIMARY
+        emoji: "☕"
+    WorkspaceUpdate:
+      type: object
+      description: Every field optional; a field left out is unchanged.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Café Nord
+        timezone:
+          type: string
+          example: Europe/Stockholm
+        country:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: SE
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          example: SEK
+        weekStart:
+          $ref: '#/components/schemas/WeekStart'
+        colour:
+          $ref: '#/components/schemas/WorkspaceColour'
+        emoji:
+          type: string
+          maxLength: 16
+          example: "☕"
+        showPay:
+          type: boolean
+          example: true
+        rounding:
+          $ref: '#/components/schemas/Rounding'
+        defaultDayHours:
+          type: number
+          minimum: 0.5
+          maximum: 24
+          example: 7.5
+      example:
+        showPay: true
+        rounding: HALF
+
+    # ------------------------------------------------------------ members
+    MemberInvitationState:
+      type: object
+      description: The pending invitation of an INVITED member.
+      required: [status, sentAt, expiresAt, resendCount]
+      properties:
+        status:
+          $ref: '#/components/schemas/InvitationStatus'
+        sentAt:
+          type: string
+          format: date-time
+          example: '2026-09-25T10:00:00Z'
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2026-10-02T10:00:00Z'
+        resendCount:
+          type: integer
+          example: 0
+      example:
+        status: PENDING
+        sentAt: '2026-09-25T10:00:00Z'
+        expiresAt: '2026-10-02T10:00:00Z'
+        resendCount: 0
+    MemberMonthFigures:
+      type: object
+      description: The member's figures for the requested month (the Employees table columns).
+      required: [month, hours, daysWorked]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        hours:
+          type: number
+          example: 118
+        daysWorked:
+          type: integer
+          example: 20
+        earnings:
+          type: [number, 'null']
+          description: Null when pay is off or the caller may not see the rate.
+          example: 20060
+      example:
+        month: '2026-09'
+        hours: 118
+        daysWorked: 20
+        earnings: 20060
+    Member:
+      type: object
+      required: [id, workspaceId, displayName, email, role, status, invitedAt, month]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The membership id.
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        userId:
+          type: [string, 'null']
+          description: The Logto user id once the invitation is accepted.
+          example: usr_maria
+        displayName:
+          type: string
+          example: Maria Lind
+        email:
+          type: string
+          format: email
+          example: maria.lind@example.com
+        avatarEmoji:
+          type: [string, 'null']
+          example: "🐝"
+        role:
+          $ref: '#/components/schemas/Role'
+        status:
+          $ref: '#/components/schemas/MemberStatus'
+        hourlyRate:
+          type: [number, 'null']
+          description: In the workspace currency. Null when unset, when pay is off, or when the caller may not see it.
+          example: 170
+        invitedAt:
+          type: string
+          format: date-time
+          example: '2026-05-10T12:00:00Z'
+        joinedAt:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-05-12T09:30:00Z'
+        invitation:
+          $ref: '#/components/schemas/MemberInvitationState'
+        month:
+          $ref: '#/components/schemas/MemberMonthFigures'
+        lastEntryDate:
+          type: [string, 'null']
+          format: date
+          example: '2026-09-25'
+      example:
+        id: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        userId: usr_maria
+        displayName: Maria Lind
+        email: maria.lind@example.com
+        avatarEmoji: "🐝"
+        role: EMPLOYEE
+        status: ACTIVE
+        hourlyRate: 170
+        invitedAt: '2026-05-10T12:00:00Z'
+        joinedAt: '2026-05-12T09:30:00Z'
+        month:
+          month: '2026-09'
+          hours: 118
+          daysWorked: 20
+          earnings: 20060
+        lastEntryDate: '2026-09-25'
+    MemberInvite:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Lina Ahmed
+        email:
+          type: string
+          format: email
+          maxLength: 254
+          example: lina.ahmed@example.com
+        hourlyRate:
+          type: number
+          minimum: 0
+          maximum: 100000
+          description: Optional; ignored for display while pay is off but stored.
+          example: 160
+      example:
+        name: Lina Ahmed
+        email: lina.ahmed@example.com
+        hourlyRate: 160
+    MemberUpdate:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 80
+          example: Maria Lind
+        hourlyRate:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 100000
+          description: Null clears the rate.
+          example: 175
+        status:
+          $ref: '#/components/schemas/MemberStatus'
+      example:
+        hourlyRate: 175
+
+    # ------------------------------------------------------------ invitations
+    Invitation:
+      type: object
+      description: What the public join page shows.
+      required: [workspaceName, workspaceEmoji, workspaceColour, inviterName, email, role, status, expiresAt, language]
+      properties:
+        workspaceName:
+          type: string
+          example: Café Nord
+        workspaceEmoji:
+          type: string
+          example: "☕"
+        workspaceColour:
+          $ref: '#/components/schemas/WorkspaceColour'
+        inviterName:
+          type: string
+          example: Nora Lind
+        email:
+          type: string
+          format: email
+          description: The invited address, prefilled on the sign-up page.
+          example: maria.lind@example.com
+        role:
+          $ref: '#/components/schemas/Role'
+        status:
+          $ref: '#/components/schemas/InvitationStatus'
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2026-10-02T10:00:00Z'
+        language:
+          $ref: '#/components/schemas/Language'
+        localized:
+          type: object
+          description: The join page's headline and body in `language`, so the page needs no catalogue before sign-in.
+          required: [headline, body]
+          properties:
+            headline:
+              type: string
+              example: Nora invited you to Café Nord.
+            body:
+              type: string
+              example: Café Nord logs your hours in Klokka. Set a password and every one of them is yours to see, day by day, month by month.
+      example:
+        workspaceName: Café Nord
+        workspaceEmoji: "☕"
+        workspaceColour: PRIMARY
+        inviterName: Nora Lind
+        email: maria.lind@example.com
+        role: EMPLOYEE
+        status: PENDING
+        expiresAt: '2026-10-02T10:00:00Z'
+        language: en
+        localized:
+          headline: Nora invited you to Café Nord.
+          body: Café Nord logs your hours in Klokka. Set a password and every one of them is yours to see, day by day, month by month.
+    InvitationAccepted:
+      type: object
+      required: [workspaceId, membershipId, workspaceName, role]
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceName:
+          type: string
+          example: Café Nord
+        role:
+          $ref: '#/components/schemas/Role'
+      example:
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceName: Café Nord
+        role: EMPLOYEE
+
+    # ------------------------------------------------------------ entries
+    Entry:
+      type: object
+      description: One member's hours on one day. `earnings` is null unless pay is on and the caller may see the rate.
+      required: [id, workspaceId, membershipId, memberName, workDate, hours, locked, createdAt, createdBy, updatedAt, updatedBy, changeCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        memberName:
+          type: string
+          example: Maria Lind
+        workDate:
+          type: string
+          format: date
+          example: '2026-09-23'
+        hours:
+          type: number
+          minimum: 0
+          maximum: 24
+          example: 6.5
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          example: Delivery day, stayed to unload.
+        earnings:
+          type: [number, 'null']
+          example: 1073
+        locked:
+          type: boolean
+          description: True when the entry's month is closed.
+          example: false
+        flag:
+          $ref: '#/components/schemas/EntryFlagSummary'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-09-23T16:40:00Z'
+        createdBy:
+          $ref: '#/components/schemas/Actor'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-09-24T06:12:00Z'
+        updatedBy:
+          $ref: '#/components/schemas/Actor'
+        changeCount:
+          type: integer
+          description: Number of history rows (1 for a fresh entry).
+          example: 2
+      example:
+        id: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        memberName: Maria Lind
+        workDate: '2026-09-23'
+        hours: 6.5
+        note: Delivery day, stayed to unload.
+        earnings: 1073
+        locked: false
+        createdAt: '2026-09-23T16:40:00Z'
+        createdBy:
+          userId: usr_nora
+          name: Nora Lind
+        updatedAt: '2026-09-24T06:12:00Z'
+        updatedBy:
+          userId: usr_nora
+          name: Nora Lind
+        changeCount: 2
+    EntryUpsert:
+      type: object
+      required: [hours]
+      properties:
+        hours:
+          type: number
+          minimum: 0
+          maximum: 24
+          description: Two decimals at most; rounded by the workspace rule on save.
+          example: 6.5
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          description: Null or absent clears the note.
+          example: Delivery day, stayed to unload.
+      example:
+        hours: 6.5
+        note: Delivery day, stayed to unload.
+    EntryBatchItem:
+      type: object
+      required: [membershipId, workDate, hours]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workDate:
+          type: string
+          format: date
+          example: '2026-09-22'
+        hours:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 24
+          description: Null removes the entry for that day.
+          example: 4
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          example: null
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workDate: '2026-09-22'
+        hours: 4
+        note: null
+    EntryBatchRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/EntryBatchItem'
+      example:
+        items:
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            workDate: '2026-09-21'
+            hours: 4
+            note: Counter
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            workDate: '2026-09-22'
+            hours: 4
+            note: null
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            workDate: '2026-09-26'
+            hours: null
+            note: null
+    EntryKey:
+      type: object
+      required: [membershipId, workDate]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workDate:
+          type: string
+          format: date
+          example: '2026-09-26'
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workDate: '2026-09-26'
+    EntryBatchResult:
+      type: object
+      required: [saved, removed, membersNotified]
+      properties:
+        saved:
+          type: array
+          items:
+            $ref: '#/components/schemas/Entry'
+        removed:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntryKey'
+        membersNotified:
+          type: integer
+          description: How many members got (or will get, after coalescing) a notification for this sitting.
+          example: 1
+      example:
+        saved:
+          - id: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+            workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            memberName: Maria Lind
+            workDate: '2026-09-21'
+            hours: 4
+            note: Counter
+            earnings: 680
+            locked: false
+            createdAt: '2026-09-21T16:40:00Z'
+            createdBy:
+              userId: usr_nora
+              name: Nora Lind
+            updatedAt: '2026-09-21T16:40:00Z'
+            updatedBy:
+              userId: usr_nora
+              name: Nora Lind
+            changeCount: 1
+        removed:
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            workDate: '2026-09-26'
+        membersNotified: 1
+    EntryChange:
+      type: object
+      description: One history row. Flag events carry `flagId`; hours fields are null when the row is a flag event.
+      required: [id, entryId, kind, changedBy, changedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 4d3c2b1a-0f9e-4d8c-b7a6-5f4e3d2c1b0a
+        entryId:
+          type: string
+          format: uuid
+          example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        kind:
+          $ref: '#/components/schemas/EntryChangeKind'
+        hoursBefore:
+          type: [number, 'null']
+          example: 6
+        hoursAfter:
+          type: [number, 'null']
+          example: 6.5
+        noteBefore:
+          type: [string, 'null']
+          example: null
+        noteAfter:
+          type: [string, 'null']
+          example: Delivery day, stayed to unload.
+        flagId:
+          type: [string, 'null']
+          format: uuid
+          example: null
+        changedBy:
+          $ref: '#/components/schemas/Actor'
+        changedAt:
+          type: string
+          format: date-time
+          example: '2026-09-24T06:12:00Z'
+      example:
+        id: 4d3c2b1a-0f9e-4d8c-b7a6-5f4e3d2c1b0a
+        entryId: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        kind: UPDATED
+        hoursBefore: 6
+        hoursAfter: 6.5
+        noteBefore: null
+        noteAfter: Delivery day, stayed to unload.
+        flagId: null
+        changedBy:
+          userId: usr_nora
+          name: Nora Lind
+        changedAt: '2026-09-24T06:12:00Z'
+
+    # ------------------------------------------------------------ months
+    MonthStatus:
+      type: object
+      required: [month, locked, workingDays, daysInMonth, entryCount]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        locked:
+          type: boolean
+          example: false
+        lockedAt:
+          type: [string, 'null']
+          format: date-time
+          example: null
+        lockedBy:
+          $ref: '#/components/schemas/Actor'
+        workingDays:
+          type: integer
+          description: Monday to Friday days in the month.
+          example: 22
+        daysInMonth:
+          type: integer
+          example: 30
+        entryCount:
+          type: integer
+          example: 84
+      example:
+        month: '2026-09'
+        locked: false
+        lockedAt: null
+        workingDays: 22
+        daysInMonth: 30
+        entryCount: 84
+    MemberMonthTotal:
+      type: object
+      required: [membershipId, name, status, hours, daysWorked]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name:
+          type: string
+          example: Maria Lind
+        status:
+          $ref: '#/components/schemas/MemberStatus'
+        hours:
+          type: number
+          example: 118
+        daysWorked:
+          type: integer
+          example: 20
+        earnings:
+          type: [number, 'null']
+          example: 20060
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name: Maria Lind
+        status: ACTIVE
+        hours: 118
+        daysWorked: 20
+        earnings: 20060
+    MonthSummary:
+      type: object
+      required: [month, locked, currency, showPay, totalHours, workingDays, members, weeks]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        locked:
+          type: boolean
+          example: false
+        currency:
+          type: string
+          example: SEK
+        showPay:
+          type: boolean
+          example: true
+        totalHours:
+          type: number
+          example: 486
+        workingDays:
+          type: integer
+          example: 22
+        labourCost:
+          type: [number, 'null']
+          description: Sum of hours times each member's rate; null when pay is off.
+          example: 85660
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberMonthTotal'
+        weeks:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekTotal'
+      example:
+        month: '2026-09'
+        locked: false
+        currency: SEK
+        showPay: true
+        totalHours: 486
+        workingDays: 22
+        labourCost: 85660
+        members:
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            name: Maria Lind
+            status: ACTIVE
+            hours: 118
+            daysWorked: 20
+            earnings: 20060
+          - membershipId: 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+            name: Jonas Berg
+            status: ACTIVE
+            hours: 150
+            daysWorked: 19
+            earnings: 25500
+        weeks:
+          - isoWeek: 36
+            from: '2026-09-01'
+            to: '2026-09-06'
+            hours: 89.5
+          - isoWeek: 37
+            from: '2026-09-07'
+            to: '2026-09-13'
+            hours: 155.5
+          - isoWeek: 38
+            from: '2026-09-14'
+            to: '2026-09-20'
+            hours: 127.5
+          - isoWeek: 39
+            from: '2026-09-21'
+            to: '2026-09-27'
+            hours: 113.5
+
+    # ------------------------------------------------------------ read models
+    MemberMonthDay:
+      type: object
+      description: One calendar day. `hours` is null on days with nothing logged.
+      required: [date, weekday, workingDay, changeCount]
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-23'
+        weekday:
+          $ref: '#/components/schemas/Weekday'
+        workingDay:
+          type: boolean
+          example: true
+        entryId:
+          type: [string, 'null']
+          format: uuid
+          example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        hours:
+          type: [number, 'null']
+          example: 6.5
+        note:
+          type: [string, 'null']
+          example: Delivery day, stayed to unload.
+        earnings:
+          type: [number, 'null']
+          example: 1073
+        flag:
+          $ref: '#/components/schemas/EntryFlagSummary'
+        changeCount:
+          type: integer
+          example: 2
+        updatedAt:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-24T06:12:00Z'
+        updatedBy:
+          $ref: '#/components/schemas/Actor'
+      example:
+        date: '2026-09-23'
+        weekday: WEDNESDAY
+        workingDay: true
+        entryId: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        hours: 6.5
+        note: Delivery day, stayed to unload.
+        earnings: 1073
+        changeCount: 2
+        updatedAt: '2026-09-24T06:12:00Z'
+        updatedBy:
+          userId: usr_nora
+          name: Nora Lind
+    MemberMonth:
+      type: object
+      description: The employee month view and the employer's per-employee month, one shape for both clients.
+      required: [membershipId, workspaceId, name, month, locked, currency, showPay, days, totalHours, daysWorked, workingDays, avgPerWorkingDay, lastMonthHours, vsLastMonthHours, weeks, daysWithNote, openFlags]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name:
+          type: string
+          example: Maria Lind
+        month:
+          type: string
+          example: '2026-09'
+        locked:
+          type: boolean
+          example: false
+        currency:
+          type: string
+          example: SEK
+        showPay:
+          type: boolean
+          example: true
+        hourlyRate:
+          type: [number, 'null']
+          example: 170
+        days:
+          type: array
+          description: Every day of the month in order, logged or not.
+          items:
+            $ref: '#/components/schemas/MemberMonthDay'
+        totalHours:
+          type: number
+          example: 118
+        daysWorked:
+          type: integer
+          example: 20
+        workingDays:
+          type: integer
+          example: 22
+        avgPerWorkingDay:
+          type: number
+          description: totalHours divided by the working days elapsed so far (or all of them for a past month).
+          example: 5.9
+        lastMonthHours:
+          type: number
+          example: 109
+        vsLastMonthHours:
+          type: number
+          description: totalHours minus the same member's total for the previous month (whole month).
+          example: 9
+        bestWeek:
+          $ref: '#/components/schemas/WeekTotal'
+        weeks:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekTotal'
+        daysWithNote:
+          type: integer
+          example: 2
+        earnings:
+          type: [number, 'null']
+          example: 20060
+        openFlags:
+          type: integer
+          example: 1
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name: Maria Lind
+        month: '2026-09'
+        locked: false
+        currency: SEK
+        showPay: true
+        hourlyRate: 170
+        days:
+          - date: '2026-09-21'
+            weekday: MONDAY
+            workingDay: true
+            entryId: 1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d
+            hours: 4
+            note: Counter
+            earnings: 680
+            changeCount: 1
+            updatedAt: '2026-09-21T16:40:00Z'
+            updatedBy:
+              userId: usr_nora
+              name: Nora Lind
+          - date: '2026-09-22'
+            weekday: TUESDAY
+            workingDay: true
+            entryId: 2b3c4d5e-6f7a-4b8c-9d0e-1f2a3b4c5d6e
+            hours: 4
+            note: null
+            earnings: 680
+            changeCount: 1
+            updatedAt: '2026-09-22T16:02:00Z'
+            updatedBy:
+              userId: usr_nora
+              name: Nora Lind
+          - date: '2026-09-23'
+            weekday: WEDNESDAY
+            workingDay: true
+            entryId: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+            hours: 6.5
+            note: Delivery day, stayed to unload.
+            earnings: 1073
+            changeCount: 2
+            updatedAt: '2026-09-24T06:12:00Z'
+            updatedBy:
+              userId: usr_nora
+              name: Nora Lind
+          - date: '2026-09-26'
+            weekday: SATURDAY
+            workingDay: false
+            entryId: null
+            hours: null
+            note: null
+            earnings: null
+            changeCount: 0
+            updatedAt: null
+        totalHours: 118
+        daysWorked: 20
+        workingDays: 22
+        avgPerWorkingDay: 5.9
+        lastMonthHours: 109
+        vsLastMonthHours: 9
+        bestWeek:
+          isoWeek: 38
+          from: '2026-09-14'
+          to: '2026-09-20'
+          hours: 36.5
+        weeks:
+          - isoWeek: 36
+            from: '2026-09-01'
+            to: '2026-09-06'
+            hours: 20.5
+          - isoWeek: 37
+            from: '2026-09-07'
+            to: '2026-09-13'
+            hours: 33.5
+          - isoWeek: 38
+            from: '2026-09-14'
+            to: '2026-09-20'
+            hours: 36.5
+          - isoWeek: 39
+            from: '2026-09-21'
+            to: '2026-09-27'
+            hours: 22.5
+        daysWithNote: 2
+        earnings: 20060
+        openFlags: 1
+    MemberShare:
+      type: object
+      required: [membershipId, name, hours, sharePercent]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name:
+          type: string
+          example: Maria Lind
+        hours:
+          type: number
+          example: 118
+        sharePercent:
+          type: number
+          description: This member's share of the workspace total, 0 to 100.
+          example: 24.3
+        earnings:
+          type: [number, 'null']
+          example: 20060
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        name: Maria Lind
+        hours: 118
+        sharePercent: 24.3
+        earnings: 20060
+    WeekdayShare:
+      type: object
+      required: [weekday, totalHours, avgHours]
+      properties:
+        weekday:
+          $ref: '#/components/schemas/Weekday'
+        totalHours:
+          type: number
+          example: 104
+        avgHours:
+          type: number
+          description: Average team hours on that weekday, over the weekdays of that kind elapsed so far.
+          example: 26
+      example:
+        weekday: FRIDAY
+        totalHours: 104
+        avgHours: 26
+    BusiestDay:
+      type: object
+      required: [weekday, avgHours]
+      properties:
+        weekday:
+          $ref: '#/components/schemas/Weekday'
+        avgHours:
+          type: number
+          example: 26
+      example:
+        weekday: FRIDAY
+        avgHours: 26
+    CurrentWeekDay:
+      type: object
+      required: [date, hours]
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-21'
+        hours:
+          type: number
+          example: 21
+      example:
+        date: '2026-09-21'
+        hours: 21
+    CurrentWeek:
+      type: object
+      description: 'The phone''s home strip: the running week for the whole team.'
+      required: [isoWeek, from, to, hours, days, membersLoggedToday, membersActive]
+      properties:
+        isoWeek:
+          type: integer
+          example: 39
+        from:
+          type: string
+          format: date
+          example: '2026-09-21'
+        to:
+          type: string
+          format: date
+          example: '2026-09-27'
+        hours:
+          type: number
+          example: 101
+        days:
+          type: array
+          items:
+            $ref: '#/components/schemas/CurrentWeekDay'
+        membersLoggedToday:
+          type: integer
+          example: 3
+        membersActive:
+          type: integer
+          example: 4
+      example:
+        isoWeek: 39
+        from: '2026-09-21'
+        to: '2026-09-27'
+        hours: 101
+        days:
+          - date: '2026-09-21'
+            hours: 21
+          - date: '2026-09-22'
+            hours: 18.5
+          - date: '2026-09-23'
+            hours: 24
+          - date: '2026-09-24'
+            hours: 20.5
+          - date: '2026-09-25'
+            hours: 17
+          - date: '2026-09-26'
+            hours: 0
+          - date: '2026-09-27'
+            hours: 0
+        membersLoggedToday: 3
+        membersActive: 4
+    WorkspaceInsights:
+      type: object
+      description: Every figure on the employer overview and the phone's Insights and Home tabs.
+      required: [month, asOf, timezone, currency, showPay, activeMembers, totalHours, lastMonthHoursAtSamePoint, vsLastMonthAtSamePointHours, vsLastMonthAtSamePointPercent, lastMonthTotalHours, projectedMonthEndHours, projectedVsLastMonthPercent, avgHoursPerPersonPerWorkingDay, workingDays, elapsedWorkingDays, perMember, weekByWeek, weekdayDistribution, nothingLoggedDays, currentWeek, openFlags]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        asOf:
+          type: string
+          format: date
+          description: Today in the workspace time zone (or the last day of a past month).
+          example: '2026-09-27'
+        timezone:
+          type: string
+          example: Europe/Stockholm
+        currency:
+          type: string
+          example: SEK
+        showPay:
+          type: boolean
+          example: true
+        activeMembers:
+          type: integer
+          example: 4
+        totalHours:
+          type: number
+          example: 486
+        lastMonthHoursAtSamePoint:
+          type: number
+          description: Last month's total up to the same day number.
+          example: 455
+        vsLastMonthAtSamePointHours:
+          type: number
+          example: 31
+        vsLastMonthAtSamePointPercent:
+          type: number
+          example: 6.8
+        lastMonthTotalHours:
+          type: number
+          example: 581
+        projectedMonthEndHours:
+          type: number
+          description: totalHours scaled by working days in the month over working days elapsed.
+          example: 582
+        projectedVsLastMonthPercent:
+          type: number
+          example: 0.2
+        avgHoursPerPersonPerWorkingDay:
+          type: number
+          example: 6.1
+        workingDays:
+          type: integer
+          example: 22
+        elapsedWorkingDays:
+          type: integer
+          example: 20
+        labourCost:
+          type: [number, 'null']
+          example: 85660
+        perMember:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberShare'
+        weekByWeek:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekTotal'
+        weekdayDistribution:
+          type: array
+          description: Seven items, Monday first regardless of the week start.
+          items:
+            $ref: '#/components/schemas/WeekdayShare'
+        busiestDay:
+          $ref: '#/components/schemas/BusiestDay'
+        nothingLoggedDays:
+          type: array
+          description: Elapsed days with no entry for any active member, skipping weekdays on which the workspace has never logged anything.
+          items:
+            type: string
+            format: date
+          example: ['2026-09-05', '2026-09-19']
+        currentWeek:
+          $ref: '#/components/schemas/CurrentWeek'
+        openFlags:
+          type: integer
+          example: 1
+      example:
+        month: '2026-09'
+        asOf: '2026-09-27'
+        timezone: Europe/Stockholm
+        currency: SEK
+        showPay: true
+        activeMembers: 4
+        totalHours: 486
+        lastMonthHoursAtSamePoint: 455
+        vsLastMonthAtSamePointHours: 31
+        vsLastMonthAtSamePointPercent: 6.8
+        lastMonthTotalHours: 581
+        projectedMonthEndHours: 582
+        projectedVsLastMonthPercent: 0.2
+        avgHoursPerPersonPerWorkingDay: 6.1
+        workingDays: 22
+        elapsedWorkingDays: 20
+        labourCost: 85660
+        perMember:
+          - membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+            name: Maria Lind
+            hours: 118
+            sharePercent: 24.3
+            earnings: 20060
+          - membershipId: 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+            name: Jonas Berg
+            hours: 150
+            sharePercent: 30.9
+            earnings: 25500
+          - membershipId: 8b7c6d5e-4f3a-4b2c-9d1e-0f9a8b7c6d5e
+            name: Ayla Demir
+            hours: 129
+            sharePercent: 26.5
+            earnings: 20640
+          - membershipId: 9c8d7e6f-5a4b-4c3d-8e2f-1a0b9c8d7e6f
+            name: Sam Ali
+            hours: 89
+            sharePercent: 18.3
+            earnings: 19460
+        weekByWeek:
+          - isoWeek: 36
+            from: '2026-09-01'
+            to: '2026-09-06'
+            hours: 89.5
+          - isoWeek: 37
+            from: '2026-09-07'
+            to: '2026-09-13'
+            hours: 155.5
+          - isoWeek: 38
+            from: '2026-09-14'
+            to: '2026-09-20'
+            hours: 127.5
+          - isoWeek: 39
+            from: '2026-09-21'
+            to: '2026-09-27'
+            hours: 113.5
+        weekdayDistribution:
+          - weekday: MONDAY
+            totalHours: 92
+            avgHours: 23
+          - weekday: TUESDAY
+            totalHours: 86
+            avgHours: 21.5
+          - weekday: WEDNESDAY
+            totalHours: 100
+            avgHours: 25
+          - weekday: THURSDAY
+            totalHours: 88
+            avgHours: 22
+          - weekday: FRIDAY
+            totalHours: 104
+            avgHours: 26
+          - weekday: SATURDAY
+            totalHours: 16
+            avgHours: 4
+          - weekday: SUNDAY
+            totalHours: 0
+            avgHours: 0
+        busiestDay:
+          weekday: FRIDAY
+          avgHours: 26
+        nothingLoggedDays: ['2026-09-05', '2026-09-19']
+        currentWeek:
+          isoWeek: 39
+          from: '2026-09-21'
+          to: '2026-09-27'
+          hours: 113.5
+          days:
+            - date: '2026-09-21'
+              hours: 21
+            - date: '2026-09-22'
+              hours: 18.5
+            - date: '2026-09-23'
+              hours: 24
+            - date: '2026-09-24'
+              hours: 20.5
+            - date: '2026-09-25'
+              hours: 17
+            - date: '2026-09-26'
+              hours: 12.5
+            - date: '2026-09-27'
+              hours: 0
+          membersLoggedToday: 3
+          membersActive: 4
+        openFlags: 1
+    MemberInsights:
+      type: object
+      description: The employee dashboard and the shareable card, for one member and month.
+      required: [membershipId, month, asOf, currency, showPay, totalHours, lastMonthHours, vsLastMonthHours, vsLastMonthPercent, avgPerWorkingDay, workingDays, daysWorked, weekByWeek, streakDays]
+      properties:
+        membershipId:
+          type: string
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        month:
+          type: string
+          example: '2026-09'
+        asOf:
+          type: string
+          format: date
+          example: '2026-09-27'
+        currency:
+          type: string
+          example: SEK
+        showPay:
+          type: boolean
+          example: true
+        hourlyRate:
+          type: [number, 'null']
+          example: 165
+        totalHours:
+          type: number
+          example: 92.5
+        lastMonthHours:
+          type: number
+          example: 86.5
+        vsLastMonthHours:
+          type: number
+          example: 6
+        vsLastMonthPercent:
+          type: number
+          example: 6.9
+        avgPerWorkingDay:
+          type: number
+          example: 4.6
+        workingDays:
+          type: integer
+          example: 22
+        daysWorked:
+          type: integer
+          example: 20
+        bestWeek:
+          $ref: '#/components/schemas/WeekTotal'
+        weekByWeek:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeekTotal'
+        streakDays:
+          type: integer
+          description: Consecutive working days with hours, ending today or yesterday.
+          example: 5
+        earnings:
+          type: [number, 'null']
+          example: 15263
+      example:
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        month: '2026-09'
+        asOf: '2026-09-27'
+        currency: SEK
+        showPay: true
+        hourlyRate: 165
+        totalHours: 92.5
+        lastMonthHours: 86.5
+        vsLastMonthHours: 6
+        vsLastMonthPercent: 6.9
+        avgPerWorkingDay: 4.6
+        workingDays: 22
+        daysWorked: 20
+        bestWeek:
+          isoWeek: 38
+          from: '2026-09-14'
+          to: '2026-09-20'
+          hours: 25.5
+        weekByWeek:
+          - isoWeek: 36
+            from: '2026-09-01'
+            to: '2026-09-06'
+            hours: 20.5
+          - isoWeek: 37
+            from: '2026-09-07'
+            to: '2026-09-13'
+            hours: 24
+          - isoWeek: 38
+            from: '2026-09-14'
+            to: '2026-09-20'
+            hours: 25.5
+          - isoWeek: 39
+            from: '2026-09-21'
+            to: '2026-09-27'
+            hours: 22.5
+        streakDays: 5
+        earnings: 15263
+
+    # ------------------------------------------------------------ flags
+    FlagResolution:
+      type: object
+      required: [action]
+      properties:
+        action:
+          $ref: '#/components/schemas/FlagResolutionAction'
+        hours:
+          type: [number, 'null']
+          description: The hours the entry was set to (FIX).
+          example: 6
+        note:
+          type: [string, 'null']
+          example: null
+      example:
+        action: FIX
+        hours: 6
+        note: null
+    Flag:
+      type: object
+      required: [id, workspaceId, entryId, membershipId, memberName, workDate, loggedHours, reason, message, status, raisedAt, raisedBy]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 1e0f9a8b-7c6d-4e5f-9a3b-2c1d0e9f8a7b
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        entryId:
+          type: string
+          format: uuid
+          example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        membershipId:
+          type: string
+          format: uuid
+          example: 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+        memberName:
+          type: string
+          example: Jonas Berg
+        workDate:
+          type: string
+          format: date
+          example: '2026-09-22'
+        loggedHours:
+          type: number
+          description: The entry's hours when the flag was raised.
+          example: 4
+        suggestedHours:
+          type: [number, 'null']
+          example: 6
+        reason:
+          $ref: '#/components/schemas/FlagReason'
+        message:
+          type: string
+          example: I worked 6 h, not 4. I closed with Sam that evening.
+        status:
+          $ref: '#/components/schemas/FlagStatus'
+        raisedAt:
+          type: string
+          format: date-time
+          example: '2026-09-26T19:10:00Z'
+        raisedBy:
+          $ref: '#/components/schemas/Actor'
+        resolvedAt:
+          type: [string, 'null']
+          format: date-time
+          example: null
+        resolvedBy:
+          $ref: '#/components/schemas/Actor'
+        resolution:
+          $ref: '#/components/schemas/FlagResolution'
+      example:
+        id: 1e0f9a8b-7c6d-4e5f-9a3b-2c1d0e9f8a7b
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        entryId: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+        membershipId: 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+        memberName: Jonas Berg
+        workDate: '2026-09-22'
+        loggedHours: 4
+        suggestedHours: 6
+        reason: MORE
+        message: I worked 6 h, not 4. I closed with Sam that evening.
+        status: OPEN
+        raisedAt: '2026-09-26T19:10:00Z'
+        raisedBy:
+          userId: usr_jonas
+          name: Jonas Berg
+        resolvedAt: null
+    FlagCreate:
+      type: object
+      required: [reason, message]
+      properties:
+        reason:
+          $ref: '#/components/schemas/FlagReason'
+        message:
+          type: string
+          minLength: 1
+          maxLength: 500
+          example: I worked 6 h, not 4. I closed with Sam that evening.
+        suggestedHours:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 24
+          example: 6
+      example:
+        reason: MORE
+        message: I worked 6 h, not 4. I closed with Sam that evening.
+        suggestedHours: 6
+    FlagResolve:
+      type: object
+      required: [action]
+      properties:
+        action:
+          $ref: '#/components/schemas/FlagResolutionAction'
+        hours:
+          type: [number, 'null']
+          minimum: 0
+          maximum: 24
+          description: Required for FIX, ignored for DISMISS.
+          example: 6
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          example: null
+      example:
+        action: FIX
+        hours: 6
+
+    # ------------------------------------------------------------ notifications
+    NotificationLink:
+      type: object
+      description: Where the notification leads. Only the relevant ids are present.
+      properties:
+        workspaceId:
+          type: [string, 'null']
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId:
+          type: [string, 'null']
+          format: uuid
+          example: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        entryId:
+          type: [string, 'null']
+          format: uuid
+          example: null
+        flagId:
+          type: [string, 'null']
+          format: uuid
+          example: null
+        month:
+          type: [string, 'null']
+          example: '2026-09'
+        date:
+          type: [string, 'null']
+          format: date
+          example: null
+      example:
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+        entryId: null
+        flagId: null
+        month: '2026-09'
+        date: null
+    Notification:
+      type: object
+      description: |
+        One in-app item. `title`, `body` and `detail` are localized in the recipient's language; `payload` is the
+        raw data the texts were built from, for deep links and tests.
+      required: [id, workspaceId, workspaceName, workspaceEmoji, kind, title, body, payload, link, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 0f9a8b7c-6d5e-4f4a-8b3c-2d1e0f9a8b7c
+        workspaceId:
+          type: [string, 'null']
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        workspaceName:
+          type: string
+          example: Café Nord
+        workspaceEmoji:
+          type: string
+          example: "☕"
+        kind:
+          $ref: '#/components/schemas/NotificationKind'
+        title:
+          type: string
+          example: Nora added 5 days for you.
+        body:
+          type: string
+          example: 22.5 h in week 39.
+        detail:
+          type: [string, 'null']
+          example: Mon 21 to Fri 25 Sep
+        payload:
+          type: object
+          additionalProperties: true
+          description: Kind-specific fields (`actorName`, `days`, `hours`, `from`, `to`, `before`, `after`, `month`, `money`).
+          example:
+            actorName: Nora Lind
+            days: 5
+            hours: 22.5
+            from: '2026-09-21'
+            to: '2026-09-25'
+            isoWeek: 39
+        link:
+          $ref: '#/components/schemas/NotificationLink'
+        readAt:
+          type: [string, 'null']
+          format: date-time
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-09-25T11:50:00Z'
+      example:
+        id: 0f9a8b7c-6d5e-4f4a-8b3c-2d1e0f9a8b7c
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        workspaceName: Café Nord
+        workspaceEmoji: "☕"
+        kind: HOURS_CHANGED
+        title: Nora added 5 days for you.
+        body: 22.5 h in week 39.
+        detail: Mon 21 to Fri 25 Sep
+        payload:
+          actorName: Nora Lind
+          days: 5
+          hours: 22.5
+          from: '2026-09-21'
+          to: '2026-09-25'
+          isoWeek: 39
+        link:
+          workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+          membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+          entryId: null
+          flagId: null
+          month: '2026-09'
+          date: null
+        readAt: null
+        createdAt: '2026-09-25T11:50:00Z'
+    NotificationPage:
+      type: object
+      required: [items, unreadCount]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        nextCursor:
+          type: [string, 'null']
+          description: Pass as `cursor` for the next page; null on the last page.
+          example: null
+        unreadCount:
+          type: integer
+          example: 2
+      example:
+        items:
+          - id: 0f9a8b7c-6d5e-4f4a-8b3c-2d1e0f9a8b7c
+            workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            workspaceName: Café Nord
+            workspaceEmoji: "☕"
+            kind: HOURS_CHANGED
+            title: Nora added 5 days for you.
+            body: 22.5 h in week 39.
+            detail: Mon 21 to Fri 25 Sep
+            payload:
+              actorName: Nora Lind
+              days: 5
+              hours: 22.5
+              from: '2026-09-21'
+              to: '2026-09-25'
+              isoWeek: 39
+            link:
+              workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+              membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+              entryId: null
+              flagId: null
+              month: '2026-09'
+              date: null
+            readAt: null
+            createdAt: '2026-09-25T11:50:00Z'
+          - id: 1a0b9c8d-7e6f-4a5b-9c4d-3e2f1a0b9c8d
+            workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            workspaceName: Café Nord
+            workspaceEmoji: "☕"
+            kind: MONTH_CLOSED
+            title: August is closed.
+            body: 96 h, 15 840 kr.
+            detail: Nora locked the month. Share your card from Profile.
+            payload:
+              actorName: Nora Lind
+              month: '2026-08'
+              hours: 96
+              money: 15840
+            link:
+              workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+              membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
+              entryId: null
+              flagId: null
+              month: '2026-08'
+              date: null
+            readAt: '2026-09-01T07:00:00Z'
+            createdAt: '2026-09-01T06:30:00Z'
+        nextCursor: null
+        unreadCount: 1
+
+    # ------------------------------------------------------------ operator
+    OperatorWorkspaceSummary:
+      type: object
+      required: [month, workspaces, newThisMonth, members, membersActive, membersInvited, membersDeactivated, hoursThisMonth, activeLast7Days]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        workspaces:
+          type: integer
+          example: 38
+        newThisMonth:
+          type: integer
+          example: 3
+        members:
+          type: integer
+          example: 214
+        membersActive:
+          type: integer
+          example: 187
+        membersInvited:
+          type: integer
+          example: 19
+        membersDeactivated:
+          type: integer
+          example: 8
+        hoursThisMonth:
+          type: number
+          example: 9412
+        activeLast7Days:
+          type: integer
+          description: Workspaces with at least one saved entry in the last 7 days.
+          example: 31
+      example:
+        month: '2026-09'
+        workspaces: 38
+        newThisMonth: 3
+        members: 214
+        membersActive: 187
+        membersInvited: 19
+        membersDeactivated: 8
+        hoursThisMonth: 9412
+        activeLast7Days: 31
+    OperatorWorkspace:
+      type: object
+      required: [id, name, slug, emoji, memberCount, activeCount, invitedCount, deactivatedCount, monthHours, showPay, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name:
+          type: string
+          example: Café Nord
+        slug:
+          type: string
+          example: cafe-nord
+        emoji:
+          type: string
+          example: "☕"
+        memberCount:
+          type: integer
+          example: 5
+        activeCount:
+          type: integer
+          example: 4
+        invitedCount:
+          type: integer
+          example: 1
+        deactivatedCount:
+          type: integer
+          example: 0
+        monthHours:
+          type: number
+          example: 486
+        showPay:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-02T08:00:00Z'
+        lastActivityAt:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-27T14:07:00Z'
+      example:
+        id: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        name: Café Nord
+        slug: cafe-nord
+        emoji: "☕"
+        memberCount: 5
+        activeCount: 4
+        invitedCount: 1
+        deactivatedCount: 0
+        monthHours: 486
+        showPay: true
+        createdAt: '2026-05-02T08:00:00Z'
+        lastActivityAt: '2026-09-27T14:07:00Z'
+    OperatorWorkspacePage:
+      type: object
+      required: [items, page, pageSize, total, summary]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorWorkspace'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 12
+        total:
+          type: integer
+          example: 38
+        summary:
+          $ref: '#/components/schemas/OperatorWorkspaceSummary'
+      example:
+        items:
+          - id: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            name: Café Nord
+            slug: cafe-nord
+            emoji: "☕"
+            memberCount: 5
+            activeCount: 4
+            invitedCount: 1
+            deactivatedCount: 0
+            monthHours: 486
+            showPay: true
+            createdAt: '2026-05-02T08:00:00Z'
+            lastActivityAt: '2026-09-27T14:07:00Z'
+        page: 1
+        pageSize: 12
+        total: 38
+        summary:
+          month: '2026-09'
+          workspaces: 38
+          newThisMonth: 3
+          members: 214
+          membersActive: 187
+          membersInvited: 19
+          membersDeactivated: 8
+          hoursThisMonth: 9412
+          activeLast7Days: 31
+    OperatorUser:
+      type: object
+      required: [id, name, email, workspaceCount, employerOf, employeeOf, language, pushRegistered, platformAdmin, createdAt]
+      properties:
+        id:
+          type: string
+          example: usr_maria
+        name:
+          type: string
+          example: Maria Lind
+        email:
+          type: string
+          format: email
+          example: maria.lind@example.com
+        workspaceCount:
+          type: integer
+          example: 2
+        employerOf:
+          type: integer
+          example: 0
+        employeeOf:
+          type: integer
+          example: 2
+        language:
+          $ref: '#/components/schemas/Language'
+        pushRegistered:
+          type: boolean
+          description: Whether a device token exists, never the token.
+          example: true
+        platformAdmin:
+          type: boolean
+          example: false
+        lastSeenAt:
+          type: [string, 'null']
+          format: date-time
+          example: '2026-09-27T12:01:00Z'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-12T09:30:00Z'
+      example:
+        id: usr_maria
+        name: Maria Lind
+        email: maria.lind@example.com
+        workspaceCount: 2
+        employerOf: 0
+        employeeOf: 2
+        language: sv
+        pushRegistered: true
+        platformAdmin: false
+        lastSeenAt: '2026-09-27T12:01:00Z'
+        createdAt: '2026-05-12T09:30:00Z'
+    OperatorUserPage:
+      type: object
+      required: [items, page, pageSize, total, users, employers, employees]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorUser'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 12
+        total:
+          type: integer
+          example: 214
+        users:
+          type: integer
+          example: 214
+        employers:
+          type: integer
+          example: 38
+        employees:
+          type: integer
+          example: 180
+      example:
+        items:
+          - id: usr_maria
+            name: Maria Lind
+            email: maria.lind@example.com
+            workspaceCount: 2
+            employerOf: 0
+            employeeOf: 2
+            language: sv
+            pushRegistered: true
+            platformAdmin: false
+            lastSeenAt: '2026-09-27T12:01:00Z'
+            createdAt: '2026-05-12T09:30:00Z'
+        page: 1
+        pageSize: 12
+        total: 214
+        users: 214
+        employers: 38
+        employees: 180
+    OperatorInvitationSummary:
+      type: object
+      required: [month, pending, expiringTomorrow, acceptedThisMonth, acceptedPercent, expiredThisMonth, resentThisMonth]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        pending:
+          type: integer
+          example: 19
+        expiringTomorrow:
+          type: integer
+          example: 4
+        acceptedThisMonth:
+          type: integer
+          example: 22
+        acceptedPercent:
+          type: number
+          description: Accepted over sent, this month.
+          example: 79
+        expiredThisMonth:
+          type: integer
+          example: 6
+        resentThisMonth:
+          type: integer
+          example: 3
+        medianHoursToAccept:
+          type: [number, 'null']
+          example: 9
+      example:
+        month: '2026-09'
+        pending: 19
+        expiringTomorrow: 4
+        acceptedThisMonth: 22
+        acceptedPercent: 79
+        expiredThisMonth: 6
+        resentThisMonth: 3
+        medianHoursToAccept: 9
+    OperatorInvitation:
+      type: object
+      required: [id, workspaceId, workspaceName, inviteeEmail, invitedBy, sentAt, expiresAt, status, resendCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        workspaceId:
+          type: string
+          format: uuid
+          example: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        workspaceName:
+          type: string
+          example: Café Nord
+        inviteeEmail:
+          type: string
+          format: email
+          example: sam.ali@example.com
+        invitedBy:
+          type: string
+          example: Nora Lind
+        sentAt:
+          type: string
+          format: date-time
+          example: '2026-09-25T10:00:00Z'
+        expiresAt:
+          type: string
+          format: date-time
+          example: '2026-10-02T10:00:00Z'
+        status:
+          $ref: '#/components/schemas/InvitationStatus'
+        resendCount:
+          type: integer
+          example: 0
+        acceptedAt:
+          type: [string, 'null']
+          format: date-time
+          example: null
+      example:
+        id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+        workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+        workspaceName: Café Nord
+        inviteeEmail: sam.ali@example.com
+        invitedBy: Nora Lind
+        sentAt: '2026-09-25T10:00:00Z'
+        expiresAt: '2026-10-02T10:00:00Z'
+        status: PENDING
+        resendCount: 0
+        acceptedAt: null
+    OperatorInvitationPage:
+      type: object
+      required: [items, page, pageSize, total, summary]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorInvitation'
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 47
+        summary:
+          $ref: '#/components/schemas/OperatorInvitationSummary'
+      example:
+        items:
+          - id: 7c9e6679-7425-40de-944b-e07fc1f90ae7
+            workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
+            workspaceName: Café Nord
+            inviteeEmail: sam.ali@example.com
+            invitedBy: Nora Lind
+            sentAt: '2026-09-25T10:00:00Z'
+            expiresAt: '2026-10-02T10:00:00Z'
+            status: PENDING
+            resendCount: 0
+            acceptedAt: null
+        page: 1
+        pageSize: 10
+        total: 47
+        summary:
+          month: '2026-09'
+          pending: 19
+          expiringTomorrow: 4
+          acceptedThisMonth: 22
+          acceptedPercent: 79
+          expiredThisMonth: 6
+          resentThisMonth: 3
+          medianHoursToAccept: 9
+    OperatorEmailVolume:
+      type: object
+      required: [sent, quota, invitations, verifications, digests, bounced, resetsOn, sameMonthLastMonth, digestOptIns, digestMondays]
+      properties:
+        sent:
+          type: integer
+          example: 43
+        quota:
+          type: integer
+          description: The configured monthly allowance (KLOKKA_MAIL_MONTHLY_QUOTA).
+          example: 100
+        invitations:
+          type: integer
+          example: 24
+        verifications:
+          type: integer
+          example: 11
+        digests:
+          type: integer
+          example: 8
+        bounced:
+          type: integer
+          example: 0
+        resetsOn:
+          type: string
+          format: date
+          example: '2026-10-01'
+        sameMonthLastMonth:
+          type: integer
+          description: Emails sent by the same day number last month.
+          example: 51
+        digestOptIns:
+          type: integer
+          example: 2
+        digestMondays:
+          type: integer
+          example: 4
+      example:
+        sent: 43
+        quota: 100
+        invitations: 24
+        verifications: 11
+        digests: 8
+        bounced: 0
+        resetsOn: '2026-10-01'
+        sameMonthLastMonth: 51
+        digestOptIns: 2
+        digestMondays: 4
+    OperatorPushVolume:
+      type: object
+      required: [sent, delivered, failed, failedPercent]
+      properties:
+        sent:
+          type: integer
+          example: 1284
+        delivered:
+          type: integer
+          example: 1267
+        failed:
+          type: integer
+          example: 17
+        failedPercent:
+          type: number
+          example: 1.3
+      example:
+        sent: 1284
+        delivered: 1267
+        failed: 17
+        failedPercent: 1.3
+    OperatorInAppVolume:
+      type: object
+      required: [created, readWithinDayPercent]
+      properties:
+        created:
+          type: integer
+          example: 1301
+        readWithinDayPercent:
+          type: number
+          example: 84
+      example:
+        created: 1301
+        readWithinDayPercent: 84
+    OperatorCoalescing:
+      type: object
+      required: [sittings, entryChanges]
+      properties:
+        sittings:
+          type: integer
+          description: Notifications produced by coalescing.
+          example: 412
+        entryChanges:
+          type: integer
+          description: Entry changes that went into them.
+          example: 1906
+      example:
+        sittings: 412
+        entryChanges: 1906
+    OperatorVolumeDay:
+      type: object
+      required: [date, push, inApp]
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-25'
+        push:
+          type: integer
+          example: 61
+        inApp:
+          type: integer
+          example: 63
+      example:
+        date: '2026-09-25'
+        push: 61
+        inApp: 63
+    OperatorVolumeKind:
+      type: object
+      required: [kind, count]
+      properties:
+        kind:
+          $ref: '#/components/schemas/NotificationKind'
+        count:
+          type: integer
+          example: 1104
+      example:
+        kind: HOURS_CHANGED
+        count: 1104
+    OperatorVolume:
+      type: object
+      required: [month, email, push, inApp, coalescing, perDay, byKind]
+      properties:
+        month:
+          type: string
+          example: '2026-09'
+        email:
+          $ref: '#/components/schemas/OperatorEmailVolume'
+        push:
+          $ref: '#/components/schemas/OperatorPushVolume'
+        inApp:
+          $ref: '#/components/schemas/OperatorInAppVolume'
+        coalescing:
+          $ref: '#/components/schemas/OperatorCoalescing'
+        perDay:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorVolumeDay'
+        byKind:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorVolumeKind'
+      example:
+        month: '2026-09'
+        email:
+          sent: 43
+          quota: 100
+          invitations: 24
+          verifications: 11
+          digests: 8
+          bounced: 0
+          resetsOn: '2026-10-01'
+          sameMonthLastMonth: 51
+          digestOptIns: 2
+          digestMondays: 4
+        push:
+          sent: 1284
+          delivered: 1267
+          failed: 17
+          failedPercent: 1.3
+        inApp:
+          created: 1301
+          readWithinDayPercent: 84
+        coalescing:
+          sittings: 412
+          entryChanges: 1906
+        perDay:
+          - date: '2026-09-24'
+            push: 58
+            inApp: 60
+          - date: '2026-09-25'
+            push: 61
+            inApp: 63
+        byKind:
+          - kind: HOURS_CHANGED
+            count: 1104
+          - kind: ENTRY_FLAGGED
+            count: 41
+          - kind: FLAG_RESOLVED
+            count: 39
+          - kind: INVITE_ACCEPTED
+            count: 22
+          - kind: MONTH_CLOSED
+            count: 95
+    OperatorDependency:
+      type: object
+      required: [name, status, checkedAt]
+      properties:
+        name:
+          type: string
+          example: postgres
+        status:
+          $ref: '#/components/schemas/HealthStatus'
+        latencyMs:
+          type: [integer, 'null']
+          example: 3
+        detail:
+          type: [string, 'null']
+          example: PostgreSQL 18.6, 12 connections
+        checkedAt:
+          type: string
+          format: date-time
+          example: '2026-09-27T14:07:00Z'
+      example:
+        name: postgres
+        status: UP
+        latencyMs: 3
+        detail: PostgreSQL 18.6, 12 connections
+        checkedAt: '2026-09-27T14:07:00Z'
+    OperatorDeploy:
+      type: object
+      required: [app, version, deployedAt]
+      properties:
+        app:
+          type: string
+          example: klokka-api
+        version:
+          type: string
+          example: 0.1.0-3f9c1a2
+        deployedAt:
+          type: string
+          format: date-time
+          example: '2026-09-27T09:12:00Z'
+      example:
+        app: klokka-api
+        version: 0.1.0-3f9c1a2
+        deployedAt: '2026-09-27T09:12:00Z'
+    OperatorHealth:
+      type: object
+      required: [status, version, checkedAt, uptimeSeconds, dependencies, recentDeploys]
+      properties:
+        status:
+          $ref: '#/components/schemas/HealthStatus'
+        version:
+          type: string
+          description: The API's version and short commit.
+          example: 0.1.0-3f9c1a2
+        checkedAt:
+          type: string
+          format: date-time
+          example: '2026-09-27T14:07:00Z'
+        uptimeSeconds:
+          type: integer
+          example: 17520
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorDependency'
+        recentDeploys:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorDeploy'
+      example:
+        status: UP
+        version: 0.1.0-3f9c1a2
+        checkedAt: '2026-09-27T14:07:00Z'
+        uptimeSeconds: 17520
+        dependencies:
+          - name: postgres
+            status: UP
+            latencyMs: 3
+            detail: PostgreSQL 18.6, 12 connections
+            checkedAt: '2026-09-27T14:07:00Z'
+          - name: logto
+            status: UP
+            latencyMs: 41
+            detail: JWKS fetched 4 minutes ago
+            checkedAt: '2026-09-27T14:07:00Z'
+          - name: expo-push
+            status: UP
+            latencyMs: 120
+            detail: last receipt check 9 minutes ago
+            checkedAt: '2026-09-27T14:07:00Z'
+          - name: smtp
+            status: UP
+            latencyMs: 210
+            detail: smtp.migadu.com:587 STARTTLS
+            checkedAt: '2026-09-27T14:07:00Z'
+        recentDeploys:
+          - app: klokka-api
+            version: 0.1.0-3f9c1a2
+            deployedAt: '2026-09-27T09:12:00Z'
+          - app: klokka-web
+            version: 0.1.0-3f9c1a2
+            deployedAt: '2026-09-27T09:14:00Z'
+
+    # ------------------------------------------------------------ webhooks
+    LogtoWebhookEvent:
+      type: object
+      description: A Logto hook payload. Only `hookId`, `event`, `createdAt` and `data` are read; the rest is kept as is.
+      required: [hookId, event, createdAt]
+      additionalProperties: true
+      properties:
+        hookId:
+          type: string
+          example: hook_klokka
+        event:
+          type: string
+          description: Logto event name, for example `User.Deleted` or `Organization.Membership.Updated`.
+          example: Organization.Membership.Updated
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-09-27T14:07:00Z'
+        data:
+          type: object
+          additionalProperties: true
+          example:
+            organizationId: org_cafe_nord
+            userId: usr_maria
+      example:
+        hookId: hook_klokka
+        event: Organization.Membership.Updated
+        createdAt: '2026-09-27T14:07:00Z'
+        data:
+          organizationId: org_cafe_nord
+          userId: usr_maria

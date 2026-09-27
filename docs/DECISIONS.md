@@ -75,6 +75,9 @@ for the Android Gradle build (JDK 25 breaks the native CMake step).
 applies it atomically, so the grid's optimistic UI and the "one notification per sitting" coalescing
 both see one write. Single-entry `PUT` stays for the phone's quick add.
 
+Implemented (CHQ-107) as `POST /workspaces/{workspaceId}/entries/batch`: a colon in a path segment is not
+matched by Quarkus REST, and the batch is not idempotent on its URL (items may remove entries), so POST.
+
 ## D9. Insights are computed by the API
 
 Totals, trends, projections and "nothing logged" days are API read models (one endpoint per dashboard),
@@ -96,10 +99,14 @@ Fixed; matches the Firebase Android app. EAS project id and the Firebase config 
 
 - GitHub Actions in `prasannjeet/klokka`, running on self-hosted runners on this host (two `build`
   runners registered to the repo, like `tax-agent`), so a push builds immediately and in parallel.
-- `apps/api/src/main/openapi/openapi.yaml` is the contract. The pipeline publishes from it: a Maven
-  artifact with the generated Quarkus server interfaces (`se.klokka:klokka-api-contract`) to Nexus
-  `maven-releases`/`maven-snapshots`, and an npm package with the generated `typescript-fetch` client
-  (`@klokka/api-client`) to Nexus `npm-hosted`. The API depends on the Maven artifact; web and mobile
+- `apps/api/contract/src/main/openapi/openapi.yaml` is the contract. The pipeline publishes from it: a
+  Maven artifact with the generated Quarkus server interfaces and models
+  (`com.prasannjeet.klokka:klokka-api-contract`) to Nexus `maven-releases`/`maven-snapshots`, and an npm
+  package with the generated `typescript-fetch` client (`@klokka/api-client`) to Nexus `npm-hosted`.
+  Java group id everywhere: `com.prasannjeet.klokka` (same root as the Android package id). Contract,
+  API and client share one version (0.x until v1.0.0).
+- Until the real API is deployed, the frontends run against a Prism mock server started from the same
+  `openapi.yaml` (`npx @stoplight/prism-cli mock`), which is why every schema carries examples. The API depends on the Maven artifact; web and mobile
   depend on the npm package (same version as the API they target). Locally, the monorepo still builds
   both from the spec so a developer never waits for Nexus.
 - Images (`klokka-api`, `klokka-web`, `klokka-landing`) go to `docker.nexus.coolify.ooguy.com`; the
