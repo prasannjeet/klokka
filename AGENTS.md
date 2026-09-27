@@ -23,8 +23,9 @@ Deliver correct, maintainable changes with minimal risk.
 - Languages: Swedish and English everywhere. Public site: switcher, `sv` at `/`, `en` at `/en`. Signed-in web app and
   phone app: a user setting stored server-side, defaulting to the device language on first sign-in.
 - Theme: Nightshift (owner's choice), light and dark. Signal and Clay remain in `docs/design/tokens.css` as history.
-- **Status: design phase.** Nothing is implemented. Implementation starts only after the owner approves the preliminary
-  report. Until then, changes to this repo are documents, mockups and brand assets.
+- **Status: implementation, E0 Foundations landed (CHQ-105/106/107).** Root tooling, `packages/tokens`,
+  `packages/core`, the contract, `packages/api-client` and the API skeleton (`GET /me` real, everything else 501)
+  exist and build green; `apps/web`, `apps/landing` and `apps/mobile` arrive with their tickets.
 - Documentation map: `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
   docs when they differ), `docs/research/*.md` (evidence per area), `docs/design/DIRECTION.md` + `docs/design/mockups/`
   (visual direction, tokens, mockups), `docs/brand/` (logo), `docs/JIRA_PLAN.md` (epics and stories).
@@ -47,7 +48,7 @@ Deliver correct, maintainable changes with minimal risk.
 
 ## Repository layout (npm workspaces; `apps/api` is Maven, not a workspace)
 ```
-apps/api            Quarkus API, Java 25, Maven; owns src/main/openapi/openapi.yaml
+apps/api            Maven parent: contract/ (openapi.yaml + generated Quarkus interfaces) and service/ (the API)
 apps/web            Next.js product app (app.example.com) incl. the operator console route group
 apps/landing        Next.js marketing site (example.com), sv default + en
 apps/mobile         Expo app (Android now, iOS-ready), android/ and ios/ generated and gitignored
@@ -77,13 +78,19 @@ guarded by a regenerate-and-diff check.
   Logto issues an opaque token). Web: `@logto/next`, token stays server-side, browser calls `/api/k/*` which adds the bearer.
 
 ## API contract (OpenAPI-first, absolute)
-- Every byte crossing a client/API boundary is defined in `apps/api/src/main/openapi/openapi.yaml` first. From it the
-  build generates the server interfaces (`jaxrs-spec`, `library=quarkus`, `interfaceOnly`) and the ONE `typescript-fetch`
-  client. Never hand-roll a DTO, client or response type on either side.
-- The contract is published to Nexus by CI (`docs/DECISIONS.md` D13): Maven `se.klokka:klokka-api-contract` (server
-  interfaces + models) to `maven-releases`/`maven-snapshots`, npm `@klokka/api-client` to `npm-hosted`. The API depends on
+- Every byte crossing a client/API boundary is defined in `apps/api/contract/src/main/openapi/openapi.yaml` first. From
+  it the build generates the server interfaces (`jaxrs-spec`, `library=quarkus`, `interfaceOnly`) and the ONE
+  `typescript-fetch` client. Never hand-roll a DTO, client or response type on either side. `docs/CONTRACT.md` is the
+  index (one line per operation, who may call it, which screen) and holds the versioning rule.
+- The contract is published to Nexus by CI (`docs/DECISIONS.md` D13): Maven
+  `com.prasannjeet.klokka:klokka-api-contract` (server interfaces + models, with a Jandex index so Quarkus sees the
+  `@Path` interfaces) to `maven-releases`/`maven-snapshots`, npm `@klokka/api-client` to `npm-hosted`. The API depends on
   the Maven artifact; web and mobile depend on the npm package at the version of the API they target. Locally both are
-  also generated from the spec so nothing waits on Nexus.
+  also generated from the spec so nothing waits on Nexus; `packages/api-client/src/generated` is committed and
+  `npm run check` fails when it drifts. Never pass `withoutRuntimeChecks=false` to the typescript-fetch CLI: the
+  option's presence disables every FromJSON/ToJSON transformer (dates would stay strings).
+- Every operation not yet implemented answers `501 NOT_IMPLEMENTED` (a stub resource per generated interface), so the
+  whole contract compiles against the server; a ticket replaces the stub method by method.
 - New feature = spec change first, regenerate, then implement against the generated types.
 - The web BFF auth plumbing (sign-in, callback, sign-out, `/api/k/*` proxy) is transport and stays outside the spec.
 
@@ -163,8 +170,10 @@ guarded by a regenerate-and-diff check.
   and opt-in digests only. Credentials live only in Coolify env vars and `.env` files that are gitignored.
 - No CI yet: `release.sh` builds each image, pushes an immutable tag, and PATCHes the Coolify app
   (`docker_registry_image_tag` + `instant_deploy`). Production comes later by `v*` tag per `~/.agents/production-deploys.md`.
-- Local dev: Quarkus Dev Services for the API alone; `docker compose` (Postgres 18 + Mailpit) for the whole stack; auth
-  against the staging Logto with `http://localhost:3000/callback` registered. Ports: API 8080, web 3000, landing 3001.
+- Local dev: Quarkus Dev Services for the API alone; `docker compose` (Postgres 18 on 5434, Mailpit 8025/1025; 5433 is
+  another project's Postgres on this host) for the whole stack; auth against the staging Logto with
+  `http://localhost:3000/callback` registered. Ports: API 8080, web 3000, landing 3001, Prism mock 4010.
+- The API's environment is `KLOKKA_*` only (`.env.example` lists every name); `%prod` has no defaults for secrets.
 
 ## MCP & Skills
 - MCP server definitions: `.agents/agents.json`
