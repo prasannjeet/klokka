@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 3,
+  "instructions": {
+    "path": "AGENTS.md"
+  },
+  "integrations": {
+    "enabled": [
+      "claude",
+      "codex"
+    ],
+    "options": {
+      "cursorAutoApprove": true,
+      "antigravityGlobalSync": true
+    }
+  },
+  "syncMode": "source-only",
+  "mcp": {
+    "servers": {
+      "filesystem": {
+        "label": "Filesystem",
+        "description": "Read and write files in the current project",
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-filesystem",
+          "${PROJECT_ROOT}"
+        ],
+        "targets": [
+          "codex",
+          "claude",
+          "claude_desktop",
+          "gemini",
+          "copilot_vscode",
+          "copilot_cli",
+          "cursor",
+          "antigravity",
+          "windsurf",
+          "opencode",
+          "junie"
+        ],
+        "enabled": true
+      },
+      "fetch": {
+        "label": "Fetch",
+        "description": "HTTP fetching and scraping helpers",
+        "transport": "stdio",
+        "command": "uvx",
+        "args": [
+          "mcp-server-fetch"
+        ],
+        "env": {
+          "FASTMCP_LOG_LEVEL": "ERROR"
+        },
+        "targets": [
+          "codex",
+          "claude",
+          "claude_desktop",
+          "gemini",
+          "copilot_vscode",
+          "copilot_cli",
+          "cursor",
+          "antigravity",
+          "windsurf",
+          "opencode",
+          "junie"
+        ],
+        "enabled": true
+      },
+      "git": {
+        "label": "Git",
+        "description": "Repository-aware git operations",
+        "transport": "stdio",
+        "command": "uvx",
+        "args": [
+          "mcp-server-git",
+          "--repository",
+          "${PROJECT_ROOT}"
+        ],
+        "env": {
+          "FASTMCP_LOG_LEVEL": "ERROR"
+        },
+        "targets": [
+          "codex",
+          "claude",
+          "claude_desktop",
+          "gemini",
+          "copilot_vscode",
+          "copilot_cli",
+          "cursor",
+          "antigravity",
+          "windsurf",
+          "opencode",
+          "junie"
+        ],
+        "enabled": true
+      }
+    }
+  },
+  "workspace": {
+    "vscode": {
+      "hideGenerated": true,
+      "hiddenPaths": [
+        "**/.codex",
+        "**/.claude",
+        "**/.gemini",
+        "**/.cursor",
+        "**/.antigravity",
+        "**/.agents/mcp_config.json",
+        "**/.windsurf",
+        "**/.opencode",
+        "**/.junie",
+        "**/.mcp.json",
+        "**/opencode.json",
+        "**/.agents/generated"
+      ]
+    }
+  },
+  "lastSync": "2026-09-27T20:07:30.544Z",
+  "lastSyncSourceHash": "c3350df8653f072885d4f6e9f6b571270e05d460cc3e2f1711c11884ae164fca"
+}

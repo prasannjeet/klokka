@@ -1,0 +1,42 @@
+# Secrets and local overrides
+.env
+.env.*
+!.env.example
+.agents/local.json
+.agents/local-credentials.json
+# Node
+node_modules/
+.next/
+dist/
+.expo/
+*.tsbuildinfo
+# Java / Maven
+target/
+*.log
+# Generated native projects (expo prebuild)
+apps/mobile/android/
+apps/mobile/ios/
+# Generated clients (regenerated on build)
+packages/api-client/src/generated/
+# Tooling
+.idea/
+.vscode/
+.DS_Store
+.codegraph/
+.superpowers/
+.claude/worktrees/
+.agents/generated/
+CLAUDE.md
+.agents/mcp_config.json
+.codex/
+.gemini/
+.mcp.json
+.vscode/mcp.json
+.claude/skills
+.cursor/
+.antigravity/
+.windsurf/
+.opencode/
+opencode.json
+.junie/mcp/
+.junie/skills

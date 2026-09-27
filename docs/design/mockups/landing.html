@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="en" data-theme="signal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Klokka: one clock, both sides</title>
+<meta name="description" content="Klokka is a free, open-source app where an employer logs the hours each employee worked and both of them see the same month, hour by hour. Pay is optional.">
+<link rel="stylesheet" href="_shell.css">
+<script src="_shell.js" defer></script>
+<style>
+/* =========================================================
+   Klokka landing mockup. Everything below reads tokens only.
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: none; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; color: inherit; }
+img, svg { display: block; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip { position: absolute; left: 12px; top: -60px; z-index: 1000; padding: 10px 14px; background: var(--secondary); color: var(--on-secondary); border-radius: var(--radius-control); }
+.skip:focus { top: 12px; }
+
+/* ---- layout ---- */
+.container { width: min(100% - 2 * var(--gutter), var(--container)); margin-inline: auto; }
+.section { padding-block: var(--section-y); }
+.section-head { display: grid; gap: var(--space-6); align-items: end; margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
+@media (min-width: 900px) { .section-head { grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-9); } }
+.eyebrow { font-size: var(--text-eyebrow); font-weight: 700; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--accent); margin-bottom: var(--space-5); display: flex; align-items: center; gap: 10px; }
+.eyebrow::before { content: ""; width: 22px; height: 2px; background: currentColor; }
+.on-color .eyebrow { color: inherit; opacity: 0.8; }
+.h-xl { font-size: calc(var(--text-display-xl) * var(--font-display-scale)); }
+.h-l { font-size: calc(var(--text-display-l) * var(--font-display-scale)); }
+.h1 { font-size: calc(var(--text-h1) * var(--font-display-scale)); line-height: var(--leading-h1); }
+.h2 { font-size: calc(var(--text-h2) * var(--font-display-scale)); line-height: var(--leading-h2); }
+.h3 { font-size: calc(var(--text-h3) * var(--font-display-scale)); line-height: var(--leading-h3); }
+.lead { font-size: var(--text-lead); line-height: var(--leading-lead); color: var(--text-muted); max-width: 46ch; text-wrap: pretty; }
+.on-color .lead { color: inherit; opacity: 0.86; }
+.small { font-size: var(--text-small); line-height: var(--leading-small); }
+.muted { color: var(--text-muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---- buttons ---- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 24px; border: 0; border-radius: var(--radius-control); font-weight: 600; font-size: 15px; cursor: pointer; white-space: nowrap; transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), filter var(--dur-fast) var(--ease-out); }
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(0.985); }
+.btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: var(--shadow-glow); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-secondary { background: var(--secondary); color: var(--on-secondary); }
+.btn-ghost { background: transparent; color: inherit; box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 30%, transparent); }
+.btn-ghost:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
+.btn-sm { min-height: 40px; padding: 0 16px; font-size: 14px; }
+.btn svg { width: 18px; height: 18px; }
+
+/* ---- cards and hairline grids ---- */
+.card { background: var(--surface); border: var(--card-border); border-radius: var(--radius-card); box-shadow: var(--shadow-md); }
+.hgrid { display: grid; gap: var(--grid-gap); background: var(--grid-line); border: var(--grid-gap) solid var(--grid-line); border-radius: var(--radius-card); overflow: hidden; }
+.hgrid > * { background: var(--bg); border-radius: var(--cell-radius); box-shadow: var(--shadow-sm); }
+.icon { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---- reveals (scroll timeline, with an observer fallback) ---- */
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@supports (animation-timeline: view()) {
+  .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 38%; }
+}
+@supports not (animation-timeline: view()) {
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity var(--dur-rise) var(--ease-enter), transform var(--dur-rise) var(--ease-enter); }
+  .reveal.is-in { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; transition: none; } }
+
+/* ---- nav ---- */
+.nav { position: relative; z-index: var(--z-nav); display: flex; align-items: center; gap: var(--space-5); height: var(--nav-h); }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 24px; letter-spacing: -0.02em; }
+.wordmark .mark { width: 30px; height: 30px; color: var(--primary); flex: none; }
+.nav-links { display: none; gap: 2px; margin-left: var(--space-2); font-size: 14.5px; font-weight: 500; }
+.nav-links a { padding: 8px 10px; border-radius: var(--radius-control); color: var(--text-muted); transition: color var(--dur-fast), background var(--dur-fast); }
+.nav-links a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.nav-login { display: none; font-size: 14.5px; font-weight: 500; color: var(--text-muted); padding: 8px 10px; }
+.nav-login:hover { color: var(--text); }
+.nav-cta { display: none; }
+.nav-burger { width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 1px solid color-mix(in srgb, var(--text) 22%, transparent); border-radius: var(--radius-control); cursor: pointer; }
+.nav-burger span { display: block; width: 18px; height: 2px; background: currentColor; margin: 2.5px 0; border-radius: 2px; }
+@media (min-width: 640px) { .nav-cta { display: inline-flex; } }
+@media (min-width: 1024px) { .nav-links { display: flex; } .nav-login { display: inline-block; } .nav-burger { display: none; } }
+.menu { position: fixed; inset: 0; z-index: var(--z-overlay); background: var(--bg); color: var(--text); display: none; flex-direction: column; padding: 0 var(--gutter) var(--space-9); overflow-y: auto; }
+.menu.is-open { display: flex; animation: menuIn var(--dur-base) var(--ease-out) both; }
+@keyframes menuIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.menu-head { height: var(--nav-h); display: flex; align-items: center; justify-content: space-between; }
+.menu-close { width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 1px solid color-mix(in srgb, var(--text) 22%, transparent); border-radius: var(--radius-control); cursor: pointer; }
+.menu a.item { display: block; padding: 18px 0; border-bottom: 1px solid var(--border); font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 26px; letter-spacing: -0.02em; }
+.menu .menu-actions { display: grid; gap: 12px; margin-top: var(--space-7); }
+
+/* ---- hero ---- */
+.hero { position: relative; overflow: clip; display: flex; flex-direction: column; min-height: 100svh; }
+.hero-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-block: clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 5vw, 4rem); }
+.hero-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: var(--space-5); }
+.hero h1 { font-size: calc(clamp(2.25rem, 9.6vw, 8.25rem) * var(--font-display-scale)); line-height: var(--font-display-leading); letter-spacing: var(--font-display-tracking); text-wrap: nowrap; min-width: 0; }
+@media (max-width: 719px) { .hero-top { grid-template-columns: minmax(0, 1fr); } .clock-wrap { order: -1; width: 92px; margin-bottom: var(--space-4); } }
+.hero h1 .line { display: block; animation: rise var(--dur-rise) var(--ease-enter) both; }
+.hero h1 .line + .line { animation-delay: calc(var(--stagger) * 1.5); }
+.hero h1 .accent { color: var(--primary); text-shadow: var(--glow-text); }
+.clock-wrap { width: clamp(92px, 16vw, 236px); aspect-ratio: 1; animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 3); }
+.hero-row { display: grid; gap: var(--space-8); margin-top: clamp(1.5rem, 3vw, 2.5rem); align-items: center; }
+@media (min-width: 960px) { .hero-row { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: var(--space-9); } }
+.hero-for { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: calc(var(--text-h3) * var(--font-display-scale)); letter-spacing: -0.01em; line-height: 1.2; color: var(--text-muted); animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 3); }
+.hero-for .rot { color: var(--text); }
+.hero-copy > * + * { margin-top: var(--space-5); }
+.hero-copy .lead { animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 4); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 5); }
+.hero-note { font-size: var(--text-caption); color: var(--text-muted); }
+.trust { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: var(--space-6); animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 6); }
+.trust li { display: flex; align-items: center; gap: 8px; font-size: var(--text-small); color: var(--text-muted); }
+.trust svg { width: 16px; height: 16px; color: var(--accent); }
+.badge { display: inline-flex; align-self: flex-start; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--radius-pill); border: 1px solid color-mix(in srgb, var(--text) 18%, transparent); font-size: 12.5px; font-weight: 600; letter-spacing: 0.01em; animation: rise var(--dur-rise) var(--ease-enter) both; }
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); animation: blink 1.8s ease-in-out infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* the rotating word */
+.rot { display: inline-block; vertical-align: bottom; perspective: 600px; white-space: nowrap; }
+.rot .word { display: inline-block; transform-origin: bottom; }
+.rot .word.is-in { animation: swapIn 0.55s var(--ease-out) both; }
+.rot .word.is-out { animation: swapOut 0.36s var(--ease-out) both; }
+@keyframes swapIn { 0% { opacity: 0; transform: translateY(60%) rotateX(-40deg); filter: blur(6px); } 100% { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes swapOut { 0% { opacity: 1; transform: none; filter: blur(0); } 100% { opacity: 0; transform: translateY(-60%) rotateX(40deg); filter: blur(6px); } }
+
+/* the railway clock */
+.clock { width: 100%; height: 100%; }
+.clock .face { fill: var(--surface); stroke: var(--rule); stroke-width: 3; }
+.clock .tick { fill: var(--text); }
+.clock .hand { transform-box: view-box; transform-origin: 100px 100px; fill: var(--text); }
+.clock .hand.second { fill: var(--primary); }
+.clock .hand.hour { animation: sweep 43200s linear infinite; }
+.clock .hand.minute { animation: sweep 3600s steps(60, end) infinite; }
+.clock .hand.second { animation: paddle var(--paddle-cycle) linear infinite; }
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes paddle { 0% { transform: rotate(0deg); } 97.5% { transform: rotate(360deg); } 100% { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .clock .hand { animation: none !important; } }
+
+/* hero stage: the week grid fills, the toast lands, the employee sees */
+.stage { position: relative; container-type: inline-size; animation: rise var(--dur-rise) var(--ease-enter) both; animation-delay: calc(var(--stagger) * 2); }
+.stage-card { position: relative; padding: clamp(14px, 3.2cqw, 22px); font-size: clamp(11px, 2.6cqw, 14px); }
+.stage-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 1em; }
+.stage-title { font-weight: 700; font-size: 1.1em; }
+.stage-title small { display: block; font-weight: 500; color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: var(--radius-pill); background: var(--surface-2); font-size: 0.8em; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: blink 1.8s ease-in-out infinite; }
+.wk { display: grid; grid-template-columns: minmax(6.5em, 1.3fr) repeat(7, minmax(0, 1fr)); gap: 4px; }
+.wk .hd { font-size: 0.78em; font-weight: 600; color: var(--text-muted); text-align: center; padding-bottom: 4px; letter-spacing: 0.04em; }
+.wk .who { display: flex; align-items: center; gap: 7px; font-weight: 600; padding-right: 6px; min-width: 0; }
+.wk .who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.av { width: 1.7em; height: 1.7em; border-radius: 50%; display: grid; place-items: center; font-size: 0.7em; font-weight: 700; color: var(--on-secondary); background: var(--secondary); flex: none; }
+.av.c2 { background: var(--chart-2); color: #fff; }
+.av.c3 { background: var(--chart-3); color: #fff; }
+.wk .cell { height: 2.4em; border-radius: var(--radius-sm); background: var(--surface-2); display: grid; place-items: center; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+.wk .cell.off { background: transparent; box-shadow: inset 0 0 0 1px var(--border); color: var(--text-muted); font-weight: 500; }
+.wk .cell.fill { background: var(--primary); color: var(--on-primary); opacity: 0; transform: scale(0.85); }
+.stage.play .wk .cell.fill { animation: pop var(--dur-base) var(--ease-enter) both; animation-delay: calc(0.5s + var(--i) * 110ms); }
+@keyframes pop { from { opacity: 0; transform: scale(0.85) translateY(4px); } to { opacity: 1; transform: none; } }
+.stage-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 1em; padding-top: 0.9em; border-top: 1px solid var(--border); font-size: 0.9em; color: var(--text-muted); }
+.stage-foot b { color: var(--text); font-variant-numeric: tabular-nums; }
+.toast { position: absolute; z-index: 3; right: clamp(-6px, -1cqw, 0px); bottom: clamp(-18px, -3cqw, -8px); width: min(74%, 330px); display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px 14px; background: var(--secondary); color: var(--on-secondary); border-radius: var(--radius-card); box-shadow: var(--shadow-float); opacity: 0; transform: translateY(12px) scale(0.98); font-size: clamp(11px, 2.5cqw, 13.5px); }
+.toast .t-app { width: 26px; height: 26px; border-radius: 7px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
+.toast .t-app svg { width: 16px; height: 16px; }
+.toast .t-title { font-weight: 700; display: flex; justify-content: space-between; gap: 8px; }
+.toast .t-title span { font-weight: 500; opacity: 0.7; font-size: 0.85em; }
+.toast .t-body { opacity: 0.85; margin-top: 2px; line-height: 1.35; }
+.stage.play .toast { animation: toastIn var(--dur-slow) var(--ease-enter) 3.2s both, toastOut 0.5s var(--ease-exit) 8.3s both; }
+@keyframes toastIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(6px); } }
+.phone-mini { position: absolute; z-index: 2; right: clamp(-10px, -2cqw, 0px); top: -22px; width: min(38%, 168px); padding: 10px 12px 12px; border-radius: var(--radius-lg); background: var(--bg); border: var(--card-border); box-shadow: var(--shadow-float); opacity: 0; font-size: clamp(10px, 2.2cqw, 12.5px); }
+.phone-mini .pm-label { font-size: 0.85em; color: var(--text-muted); font-weight: 600; }
+.phone-mini .pm-val { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 2.2em; letter-spacing: -0.02em; line-height: 1; margin-top: 4px; }
+.phone-mini .pm-sub { font-size: 0.85em; color: var(--success); font-weight: 600; margin-top: 4px; }
+.stage.play .phone-mini { animation: pmIn var(--dur-slow) var(--ease-enter) 4.6s both, toastOut 0.5s var(--ease-exit) 8.3s both; }
+@keyframes pmIn { from { opacity: 0; transform: translateY(-10px) scale(0.96); } to { opacity: 1; transform: none; } }
+.stage.play .stage-card { animation: cardHold 9s linear both; }
+@keyframes cardHold { 0%, 93% { opacity: 1; } 100% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .wk .cell.fill, .toast, .phone-mini { opacity: 1; transform: none; animation: none !important; } }
+
+/* ticker */
+.ticker { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 18px 0; overflow: hidden; }
+.ticker-track { display: flex; gap: 12px; width: max-content; animation: tick 52s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+@keyframes tick { to { transform: translateX(-50%); } }
+.ticker .item { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: var(--radius-pill); border: 1px solid var(--border); background: var(--surface); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.ticker .item svg { width: 15px; height: 15px; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; flex-wrap: wrap; width: auto; } .ticker .copy { display: none; } }
+
+/* ---- how it works (colour block) ---- */
+.how { background: var(--primary); color: var(--on-primary); }
+.how .steps { display: grid; gap: var(--space-6); }
+@media (min-width: 800px) { .how .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); } }
+.step { display: flex; flex-direction: column; gap: var(--space-5); padding-top: var(--space-5); border-top: 2px solid currentColor; }
+.step .n { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: calc(var(--text-display-l) * var(--font-display-scale)); line-height: 0.9; letter-spacing: -0.03em; }
+.step h3 { font-size: calc(var(--text-h3) * var(--font-display-scale)); line-height: var(--leading-h3); }
+.step p { max-width: 34ch; text-wrap: pretty; opacity: 0.86; }
+.step .vig { margin-top: auto; background: var(--bg); color: var(--text); border-radius: var(--radius-card); padding: 16px; box-shadow: var(--shadow-float); font-size: 13px; }
+.vig .row { display: flex; align-items: center; gap: 10px; }
+.vig .row + .row { margin-top: 10px; }
+.vig .lbl { font-size: 11.5px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.vig .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.vig .chip { padding: 6px 10px; border-radius: var(--radius-pill); background: var(--surface-2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.vig .chip.on { background: var(--primary); color: var(--on-primary); }
+.vig .btnm { margin-left: auto; padding: 7px 12px; border-radius: var(--radius-control); background: var(--secondary); color: var(--on-secondary); font-weight: 600; font-size: 12.5px; }
+.vig .line { height: 8px; border-radius: 4px; background: var(--surface-2); }
+.vig .notif { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 10px; border-radius: var(--radius-lg); background: var(--surface); border: var(--card-border); }
+.vig .notif .t-app { width: 24px; height: 24px; border-radius: 6px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
+.vig .notif .t-app svg { width: 14px; height: 14px; }
+.vig .notif b { display: block; }
+.vig .notif span { color: var(--text-muted); }
+
+/* ---- feature sections ---- */
+.feature { display: grid; gap: var(--space-8); align-items: center; }
+@media (min-width: 960px) { .feature { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-10); } .feature.flip > .feature-visual { order: -1; } }
+.feature-copy > * + * { margin-top: var(--space-6); }
+.flist { display: grid; gap: 4px; }
+.flist li { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; padding: 14px 12px; border-radius: var(--radius-lg); transition: background var(--dur-fast) var(--ease-out); }
+.flist li:hover { background: color-mix(in srgb, var(--text) 5%, transparent); }
+.flist .ic { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--radius-md); background: var(--surface-2); color: var(--accent); }
+.flist b { display: block; font-size: 16px; }
+.flist p { color: var(--text-muted); font-size: 14.5px; margin-top: 3px; text-wrap: pretty; }
+
+/* week grid, big */
+.wg { container-type: inline-size; }
+.wg-card { padding: clamp(14px, 3cqw, 24px); font-size: clamp(11px, 2.4cqw, 14px); }
+.wg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 1em; }
+.wg-tabs { display: inline-flex; padding: 3px; border-radius: var(--radius-pill); background: var(--surface-2); }
+.wg-tabs span { padding: 5px 12px; border-radius: var(--radius-pill); font-weight: 600; font-size: 0.85em; color: var(--text-muted); }
+.wg-tabs span.on { background: var(--bg); color: var(--text); box-shadow: var(--shadow-sm); }
+.wg .wk { gap: 5px; }
+.wg .wk .cell { height: 2.6em; position: relative; }
+.wg .wk .cell.edit { box-shadow: 0 0 0 2px var(--primary); background: var(--bg); }
+.wg-pop { position: absolute; z-index: 2; left: 50%; top: calc(100% + 8px); transform: translateX(-50%); width: max-content; padding: 8px; background: var(--bg); border: var(--card-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-float); display: flex; gap: 5px; }
+.wg-pop::before { content: ""; position: absolute; top: -5px; left: 50%; width: 10px; height: 10px; background: inherit; border-left: var(--card-border); border-top: var(--card-border); transform: translateX(-50%) rotate(45deg); }
+.wg-pop span { padding: 6px 9px; border-radius: var(--radius-pill); background: var(--surface-2); font-weight: 600; font-size: 0.85em; }
+.wg-pop span.on { background: var(--primary); color: var(--on-primary); }
+.wg-pop span.same { background: transparent; box-shadow: inset 0 0 0 1px var(--border); font-weight: 500; }
+.wg-tot { text-align: right; font-weight: 700; padding-left: 4px; }
+.wg-foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 1.2em; padding-top: 1em; border-top: 1px solid var(--border); }
+.wg-foot .btnm { padding: 8px 12px; border-radius: var(--radius-control); background: var(--secondary); color: var(--on-secondary); font-weight: 600; font-size: 0.85em; display: inline-flex; gap: 6px; align-items: center; }
+.wg-foot .btnm.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px var(--border); }
+.wg-foot .btnm svg { width: 14px; height: 14px; }
+.wg-foot .flag { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 0.85em; color: var(--warning); font-weight: 600; }
+.wg-foot .flag svg { width: 14px; height: 14px; }
+
+/* phone frame */
+.phone-wrap { display: grid; place-items: center; }
+.phone { width: clamp(240px, 70cqw, 300px); aspect-ratio: 9 / 18.6; border-radius: 44px; background: var(--secondary); padding: 10px; box-shadow: var(--shadow-float); position: relative; animation: floaty 7s ease-in-out infinite; }
+@keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.phone .notch { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); width: 80px; height: 22px; border-radius: 999px; background: var(--secondary); z-index: 2; }
+.phone .screen { height: 100%; border-radius: 36px; background: var(--bg); overflow: hidden; display: flex; flex-direction: column; font-size: 12px; container-type: inline-size; }
+.ph-top { padding: 52px 18px 12px; }
+.ph-top .lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.ph-top .big { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 42px; line-height: 1; letter-spacing: -0.03em; margin-top: 4px; }
+.ph-top .big small { font-size: 0.5em; letter-spacing: 0; color: var(--text-muted); font-weight: 600; }
+.ph-top .delta { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 11px; font-weight: 600; color: var(--success); background: var(--success-soft); padding: 3px 8px; border-radius: 999px; }
+.ph-top .delta svg { width: 12px; height: 12px; }
+.cal { padding: 4px 14px 10px; }
+.cal .dow { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; font-size: 9.5px; color: var(--text-muted); font-weight: 600; text-align: center; margin-bottom: 3px; }
+.cal .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal .d { aspect-ratio: 1; border-radius: 7px; background: var(--surface-2); display: grid; place-items: center; font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cal .d.pad { background: transparent; }
+.cal .d.h { background: var(--primary); color: var(--on-primary); }
+.cal .d.h.lo { background: color-mix(in srgb, var(--primary) 55%, var(--surface-2)); }
+.cal .d.flag { box-shadow: inset 0 0 0 2px var(--warning); }
+.ph-list { margin-top: auto; padding: 10px 12px 14px; border-top: 1px solid var(--border); display: grid; gap: 6px; }
+.ph-list .n { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; padding: 8px; border-radius: 12px; background: var(--surface); border: var(--card-border); font-size: 11px; }
+.ph-list .n .t-app { width: 20px; height: 20px; border-radius: 5px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
+.ph-list .n .t-app svg { width: 12px; height: 12px; }
+/* Klokka app avatars carry the brand mark itself, in primary, with no box behind it */
+.toast .t-app.brand, .vig .notif .t-app.brand, .ph-list .n .t-app.brand { background: transparent; color: var(--primary); }
+.toast .t-app.brand svg, .vig .notif .t-app.brand svg, .ph-list .n .t-app.brand svg { width: 100%; height: 100%; }
+.ph-list .n b { display: block; }
+.ph-list .n span { color: var(--text-muted); }
+
+/* ---- pay toggle story (colour block) ---- */
+.pay { background: var(--secondary); color: var(--on-secondary); }
+.pay .card, .pay .card * { color: var(--text); }
+.switch { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; user-select: none; font-weight: 600; background: transparent; border: 0; padding: 4px 0; color: inherit; font-size: 16px; }
+.switch .track { width: 56px; height: 32px; border-radius: 999px; background: color-mix(in srgb, currentColor 22%, transparent); position: relative; transition: background var(--dur-base) var(--ease-out); flex: none; }
+.switch .track::after { content: ""; position: absolute; top: 4px; left: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--on-secondary); transition: transform var(--dur-base) var(--ease-enter); }
+.switch[aria-checked="true"] .track { background: var(--primary); }
+.switch[aria-checked="true"] .track::after { transform: translateX(24px); background: var(--on-primary); }
+.pay-list { display: grid; gap: 2px; }
+.pay-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; border-radius: var(--radius-md); }
+.pay-row + .pay-row { border-top: 1px solid var(--border); }
+.pay-row .h { font-weight: 700; font-variant-numeric: tabular-nums; display: flex; gap: 10px; align-items: baseline; justify-content: flex-end; }
+.money { display: inline-block; overflow: hidden; max-width: 0; opacity: 0; white-space: nowrap; color: var(--accent); font-weight: 600; transition: max-width var(--dur-slow) var(--ease-enter), opacity var(--dur-base) var(--ease-out), margin var(--dur-slow) var(--ease-enter); }
+[data-pay="on"] .money { max-width: 12ch; opacity: 1; }
+.pay-total { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 14px 4px; margin-top: 8px; border-top: 2px solid var(--rule); font-weight: 700; }
+.pay-total .big { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 28px; letter-spacing: -0.02em; }
+.pay-state { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: var(--space-6); }
+.pay-state div { padding: 16px; border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, currentColor 22%, transparent); transition: background var(--dur-base), border-color var(--dur-base); }
+.pay-state b { display: block; margin-bottom: 4px; }
+.pay-state p { opacity: 0.8; font-size: 14px; }
+[data-pay="off"] .pay-state .off, [data-pay="on"] .pay-state .on { background: color-mix(in srgb, currentColor 10%, transparent); border-color: currentColor; }
+.rate-note { font-size: var(--text-caption); color: var(--text-muted); margin-top: 10px; }
+
+/* ---- insights ---- */
+.tiles { display: grid; gap: var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 720px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tile { padding: 20px; min-height: 150px; display: flex; flex-direction: column; gap: 8px; }
+.tile .lbl { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+.tile .val { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: clamp(30px, 4vw, 44px); line-height: 1; letter-spacing: -0.03em; margin-top: auto; }
+.tile .val small { font-size: 0.5em; font-weight: 600; letter-spacing: 0; color: var(--text-muted); }
+.tile .delta { font-size: 13px; font-weight: 600; color: var(--success); display: inline-flex; align-items: center; gap: 4px; }
+.tile .delta.warn { color: var(--warning); }
+.tile .delta svg { width: 14px; height: 14px; }
+.tile.span2 { grid-column: span 2; }
+.tile.cost { display: none; }
+.insights[data-pay="on"] .tile.cost { display: flex; animation: pop var(--dur-base) var(--ease-enter) both; }
+.spark { width: 100%; height: 44px; margin-top: 4px; }
+.spark path { fill: none; stroke: var(--chart-1); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.spark .area { fill: var(--chart-1); opacity: 0.1; stroke: none; }
+.spark circle { fill: var(--chart-1); stroke: var(--surface); stroke-width: 2; }
+.bars { display: grid; gap: 8px; margin-top: 6px; }
+.bar { display: grid; grid-template-columns: 5.5em 1fr 3em; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { height: 12px; border-radius: 0 4px 4px 0; background: var(--surface-2); position: relative; overflow: hidden; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 0 4px 4px 0; background: var(--c); transform-origin: left; transform: scaleX(0); transition: transform var(--dur-rise) var(--ease-enter); }
+.is-in .bar .fill, .tiles:not(.reveal) .bar .fill { transform: none; }
+.bar .v { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.cols { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; align-items: end; height: 70px; margin-top: 6px; }
+.cols .c { display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+.cols .c i { display: block; width: 100%; max-width: 22px; height: var(--h); border-radius: 4px 4px 0 0; background: var(--chart-1); }
+.cols .c.top i { background: var(--primary); }
+.cols .c span { font-size: 10.5px; color: var(--text-muted); font-weight: 600; }
+.illustrative { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-caption); color: var(--text-muted); margin-top: var(--space-5); }
+.illustrative svg { width: 14px; height: 14px; }
+
+/* ---- open source ---- */
+.oss { display: grid; gap: var(--space-4); }
+@media (min-width: 900px) { .oss { grid-template-columns: 1.3fr 1fr; } }
+.oss > *, .feature > *, .tiles > *, .cta-band > *, .steps > *, .foot-grid > * { min-width: 0; }
+.gh { flex-wrap: wrap; }
+.oss-big { padding: clamp(24px, 4vw, 44px); display: flex; flex-direction: column; gap: var(--space-5); background: var(--surface); }
+.oss-big .mit { font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: calc(clamp(4rem, 14vw, 11rem) * var(--font-display-scale)); line-height: 0.85; letter-spacing: -0.04em; color: var(--primary); text-shadow: var(--glow-text); }
+.oss-side { display: grid; gap: var(--space-4); }
+.oss-item { padding: 22px; display: grid; gap: 8px; }
+.oss-item b { font-size: 17px; }
+.oss-item p { color: var(--text-muted); font-size: 14.5px; text-wrap: pretty; }
+.code { font-family: var(--font-mono); font-size: 13px; padding: 12px 14px; border-radius: var(--radius-md); background: var(--secondary); color: var(--on-secondary); overflow-x: auto; white-space: nowrap; }
+.gh { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--accent); }
+.gh svg { width: 18px; height: 18px; }
+
+/* ---- faq ---- */
+.faq { max-width: var(--container-narrow); }
+.faq details { border-top: 1px solid var(--border); }
+.faq details:last-child { border-bottom: 1px solid var(--border); }
+.faq summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 4px; font-weight: 600; font-size: 17px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary svg { width: 20px; height: 20px; flex: none; transition: transform var(--dur-base) var(--ease-out); color: var(--accent); }
+.faq details[open] summary svg { transform: rotate(45deg); }
+.faq .a { padding: 0 4px 22px; color: var(--text-muted); max-width: 62ch; text-wrap: pretty; animation: rise var(--dur-base) var(--ease-out) both; }
+
+/* ---- final cta ---- */
+.cta-band { display: grid; gap: var(--space-4); }
+@media (min-width: 900px) { .cta-band { grid-template-columns: 1fr 1fr; } }
+.cta-dark { background: var(--secondary); color: var(--on-secondary); border-radius: var(--radius-card); padding: clamp(28px, 4vw, 44px); display: flex; flex-direction: column; gap: var(--space-5); min-height: 360px; }
+.cta-dark .lead { color: inherit; opacity: 0.8; }
+.cta-light { background: var(--primary); color: var(--on-primary); border-radius: var(--radius-card); padding: clamp(28px, 4vw, 44px); display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-5); }
+.cta-light .h2 { max-width: 12ch; }
+.cta-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: auto; }
+.on-primary-btn { background: var(--on-primary); color: var(--primary); }
+
+/* ---- footer ---- */
+.footer { border-top: 1px solid var(--border); padding-top: var(--space-10); }
+.foot-grid { display: grid; gap: var(--space-8); }
+@media (min-width: 800px) { .foot-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr); gap: var(--space-10); } }
+.foot-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+@media (min-width: 560px) { .foot-cols { grid-template-columns: repeat(3, 1fr); } }
+.foot-cols h5 { margin: 0 0 12px; font-size: var(--text-eyebrow); letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--text-muted); }
+.foot-cols a { display: inline-block; padding: 5px 0; font-size: 14.5px; color: var(--text); opacity: 0.85; }
+.foot-cols a:hover { color: var(--accent); opacity: 1; }
+.foot-bar { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; margin-top: var(--space-9); padding-top: var(--space-6); border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-muted); }
+.lang { display: inline-flex; padding: 3px; border-radius: 999px; border: 1px solid var(--border); }
+.lang span { padding: 4px 10px; border-radius: 999px; font-weight: 600; }
+.lang span.on { background: var(--secondary); color: var(--on-secondary); }
+.foot-big { margin-top: var(--space-8); height: clamp(1.5rem, 6.4vw, 7.4rem); overflow: hidden; }
+.foot-big span { display: block; font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: calc(clamp(2.4rem, 19vw, 21rem) * var(--font-display-scale)); line-height: 0.72; letter-spacing: -0.04em; white-space: nowrap; color: var(--primary); text-align: left; text-shadow: var(--glow-text); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mark" viewBox="0 0 2048 2048"><g fill="currentColor" fill-rule="evenodd">
+    <path d="M 993.935 281.428 C 1184.37 270.286 1371.71 333.334 1516.66 457.342 C 1666.68 586.798 1765.19 767.01 1779.65 965.903 C 1792.09 1130.26 1747.41 1293.86 1653.15 1429.08 C 1636.97 1452.31 1616.1 1477.37 1597.51 1498.81 C 1463.67 1650.11 1275.76 1742.81 1074.25 1756.93 C 1015.52 1759.82 955.727 1758.85 896.826 1758.9 L 638.411 1759.38 L 493.105 1759.95 C 469.938 1759.97 441.856 1761.51 419.445 1758.33 C 348.239 1748.22 287.957 1677.24 286.387 1605.91 C 285.495 1565.38 285.811 1524.61 285.812 1484.17 L 285.576 1271.42 L 285.888 1105.95 C 285.99 1067.88 285.355 1027.72 288.025 989.81 C 300.547 811.965 365.713 658.265 484.608 525.448 C 615.611 380.192 798.644 292.5 993.935 281.428 z M 1008.06 478.424 C 1009.44 478.286 1010.6 478.169 1011.99 478.114 C 1156.13 472.703 1296.5 524.818 1402.19 622.978 C 1509.79 722.065 1573.03 860.263 1577.67 1006.47 C 1582.67 1147.58 1527.43 1282.53 1431.13 1384.54 C 1334.67 1486.71 1194.17 1552.53 1053.63 1557.17 C 1021.47 1558.98 986.688 1556.6 954.327 1555.53 C 913.288 1554.43 872.238 1553.74 831.185 1553.45 C 766.785 1553.06 702.384 1553.63 638.001 1555.16 C 589.746 1556.35 541.013 1558.76 492.831 1559.16 C 492.815 1524.48 494.441 1488.21 494.89 1453.27 L 496.779 1218.21 C 496.661 1172.99 496.08 1127.77 495.036 1082.56 C 494.406 1052.19 492.77 1021.86 494.932 991.526 C 514.733 713.647 730.662 496.668 1008.06 478.424 z"/>
+    <path stroke="currentColor" stroke-width="26" stroke-linejoin="round" transform="translate(1037,1015) scale(1.3) translate(-1022,-1019)" d="M 1185.46 663.353 C 1252.28 657.053 1295.42 740.043 1255.68 791.762 C 1238.53 814.089 1208.74 838.808 1187.52 858.823 L 1029.91 1006.64 C 1095.65 1068.7 1164.85 1128.05 1230.32 1190.52 C 1247.86 1207.26 1259.85 1217.02 1267.3 1240.99 C 1273.83 1262.65 1271.49 1286.01 1260.8 1305.95 C 1250.83 1324.53 1233.82 1338.33 1213.58 1344.24 C 1190.2 1351.24 1167.84 1347.37 1146.74 1335.97 C 1133.57 1327.72 1101.56 1296.92 1087.65 1284.47 L 969.732 1177.59 C 948.723 1158.26 927.761 1138.41 906.502 1119.34 C 898.822 1112.44 886.06 1110.02 875.955 1105.98 C 866.962 1102.3 858.51 1097.42 850.832 1091.46 C 829.209 1074.56 813.407 1047.42 810.342 1019.98 C 807.029 990.899 815.49 961.703 833.837 938.9 C 851.32 917.089 869.074 907.788 894.258 899.599 C 897.515 898.54 910.842 886.703 914.098 883.741 C 959.86 842.109 1007.29 802.199 1053.15 760.701 C 1074.25 741.679 1095.48 722.805 1116.84 704.082 C 1141.44 682.318 1151.18 667.332 1185.46 663.353 z M 1186.35 709.125 C 1187.56 709.018 1188.77 708.941 1189.99 708.894 C 1199.92 708.487 1209.57 712.242 1216.62 719.254 C 1223.35 725.965 1227.01 735.166 1226.72 744.669 C 1226.51 749.977 1223.66 759.893 1220.34 763.563 C 1201.89 783.945 1178.01 804.872 1157.94 823.657 L 1013.78 958.242 L 1009.07 950.569 C 993.598 927.668 981.843 918.455 958.918 904.743 C 964.639 898.829 974.787 890.494 981.258 884.794 C 995.654 872.206 1009.93 859.485 1024.09 846.633 C 1072.72 802.456 1122.8 759.492 1172.53 716.562 C 1176.47 713.166 1181.56 711.028 1186.35 709.125 z M 1011.13 1056.9 C 1024.6 1068.34 1039.15 1082.42 1052.3 1094.46 C 1078.27 1118.13 1104.11 1141.94 1129.82 1165.89 C 1155.04 1189.38 1180.72 1212.32 1206.11 1235.61 C 1218.85 1247.3 1226.09 1258.45 1219.63 1276.42 C 1216.26 1285.62 1209.37 1293.11 1200.48 1297.24 C 1191.02 1301.66 1183.99 1300.56 1174.78 1297.46 C 1164.65 1292.17 1127.06 1256.66 1116.57 1247.36 C 1063.62 1200.39 1012.57 1152.09 958.88 1105.79 C 983.41 1093.18 996.29 1079.7 1011.13 1056.9 z M 911.078 946.489 C 943.694 943.234 972.752 967.086 975.917 999.71 C 979.082 1032.33 955.15 1061.33 922.517 1064.4 C 890.011 1067.46 861.156 1043.65 858.003 1011.15 C 854.851 978.651 878.59 949.731 911.078 946.489 z"/>
+  </g></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M15 3v5h5M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M6 11l6 6 6-6"/><path d="M4 21h16"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4h11l-1.5 4L16 12H5"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 8v4l3 2"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v13"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-5-6.7"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M15 22v-4a3.4 3.4 0 0 0-1-2.6c3.1-.3 6.4-1.5 6.4-7a5.4 5.4 0 0 0-1.5-3.8 5 5 0 0 0-.1-3.7s-1.2-.4-3.9 1.4a13.4 13.4 0 0 0-7 0C5.2.5 4 .9 4 .9a5 5 0 0 0-.1 3.7A5.4 5.4 0 0 0 2.4 8.4c0 5.5 3.3 6.7 6.4 7A3.4 3.4 0 0 0 8 18v4"/><path d="M8 20c-4 1.5-4-2-6-2"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hero" id="top">
+  <div class="container">
+    <nav class="nav" aria-label="Main">
+      <a class="wordmark" href="#top" aria-label="Klokka, home">
+        <svg class="mark" viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg>
+        klokka
+      </a>
+      <div class="nav-links">
+        <a href="#how">How it works</a>
+        <a href="#employers">Employers</a>
+        <a href="#employees">Employees</a>
+        <a href="#insights">Insights</a>
+        <a href="#open-source">Open source</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-right">
+        <a class="nav-login" href="login.html">Log in</a>
+        <a class="btn btn-secondary btn-sm nav-cta" href="login.html?state=signup">Create workspace</a>
+        <button class="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+      </div>
+    </nav>
+  </div>
+
+  <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="menu-head">
+      <span class="wordmark"><svg class="mark" viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg>klokka</span>
+      <button class="menu-close" type="button" aria-label="Close menu"><svg class="icon" aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <a class="item" href="#how">How it works</a>
+    <a class="item" href="#employers">Employers</a>
+    <a class="item" href="#employees">Employees</a>
+    <a class="item" href="#insights">Insights</a>
+    <a class="item" href="#open-source">Open source</a>
+    <a class="item" href="#faq">FAQ</a>
+    <div class="menu-actions">
+      <a class="btn btn-primary" href="login.html?state=signup">Create workspace</a>
+      <a class="btn btn-ghost" href="login.html">Log in</a>
+    </div>
+  </div>
+
+  <div class="container hero-body">
+    <p class="badge"><span class="dot" aria-hidden="true"></span>Free and open source. MIT licence.</p>
+    <div class="hero-top" style="margin-top: var(--space-6)">
+      <h1><span class="line">One clock.</span><span class="line accent">Both sides.</span></h1>
+      <div class="clock-wrap" role="img" aria-label="A railway clock showing the current time">
+        <svg class="clock" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="face" cx="100" cy="100" r="97"/>
+          <g class="ticks" id="ticks"></g>
+          <g class="hand hour"><rect x="94.5" y="44" width="11" height="70" rx="1.5"/></g>
+          <g class="hand minute"><rect x="95.5" y="16" width="9" height="98" rx="1.5"/></g>
+          <g class="hand second"><rect x="99" y="34" width="2" height="92"/><circle cx="100" cy="44" r="9.5"/></g>
+          <circle cx="100" cy="100" r="4" fill="var(--text)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="hero-row">
+      <div class="hero-copy">
+        <p class="hero-for">Made for the <span class="rot" data-words="cafe|salon|bakery|cleaning crew|corner shop|small agency"><span class="word is-in">cafe</span></span></p>
+        <p class="lead">The employer logs the hours each person worked. Every employee sees the same month on their phone, day by day, the moment it changes. Pay is a switch, not a requirement.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="login.html?state=signup">Create your workspace <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost" href="#how">See how it works</a>
+        </div>
+        <p class="hero-note">Free for any team size. No card, no tiers, no per-seat pricing.</p>
+        <ul class="trust">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Android and web, same features</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>English and Swedish</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>CSV export of any month</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Self-host if you like</li>
+        </ul>
+      </div>
+
+      <div class="stage play" id="stage" aria-label="Example: an employer fills a week, the employee is notified and sees the same total">
+        <div class="phone-mini" aria-hidden="true">
+          <div class="pm-label">Maria's phone</div>
+          <div class="pm-val">22.5<small style="font-size:.5em;letter-spacing:0"> h</small></div>
+          <div class="pm-sub">+2 h vs last week</div>
+        </div>
+        <div class="card stage-card">
+          <div class="stage-head">
+            <div class="stage-title">Week 39<small>21 to 27 September, example workspace</small></div>
+            <span class="pill"><span class="dot" aria-hidden="true"></span>Nora is logging</span>
+          </div>
+          <div class="wk" role="table" aria-label="Week grid, hours per employee per day">
+            <div class="hd" aria-hidden="true"></div>
+            <div class="hd">Mon</div><div class="hd">Tue</div><div class="hd">Wed</div><div class="hd">Thu</div><div class="hd">Fri</div><div class="hd">Sat</div><div class="hd">Sun</div>
+            <div class="who"><span class="av">M</span><span>Maria</span></div>
+            <div class="cell fill" style="--i:0">4</div><div class="cell fill" style="--i:1">4</div><div class="cell fill" style="--i:2">6.5</div><div class="cell fill" style="--i:3">4</div><div class="cell fill" style="--i:4">4</div><div class="cell off">off</div><div class="cell off">off</div>
+            <div class="who"><span class="av c2">J</span><span>Jonas</span></div>
+            <div class="cell">8</div><div class="cell">8</div><div class="cell">8</div><div class="cell">8</div><div class="cell">6</div><div class="cell off">off</div><div class="cell off">off</div>
+            <div class="who"><span class="av c3">A</span><span>Ayla</span></div>
+            <div class="cell off">off</div><div class="cell">5</div><div class="cell">5</div><div class="cell off">off</div><div class="cell">5</div><div class="cell">6</div><div class="cell off">off</div>
+          </div>
+          <div class="stage-foot"><span>Week total</span><b>81.5 h</b></div>
+        </div>
+        <div class="toast" role="status" aria-hidden="true">
+          <div class="t-app brand"><svg viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg></div>
+          <div>
+            <div class="t-title">Klokka <span>now</span></div>
+            <div class="t-body">Nora added 5 days for you, 22.5 h in week 39. Tap to see the week.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker" aria-label="Examples of what Klokka tells people">
+    <div class="ticker-track">
+      <div class="set">
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>Nora added 5 days for Maria, 22.5 h</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>Jonas flagged Tuesday: worked 6 h, not 4</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>September closed: 486 h across 4 people</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Ayla accepted the invitation</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg>Same as yesterday: 4 h on Thursday</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Week 39 exported as CSV</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Flag resolved: Tuesday is now 6 h</span>
+        <span class="item"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg>Weekly digest sent to 2 people who asked for it</span>
+      </div>
+      <div class="set copy" aria-hidden="true">
+        <span class="item"><svg class="icon"><use href="#i-clock"/></svg>Nora added 5 days for Maria, 22.5 h</span>
+        <span class="item"><svg class="icon"><use href="#i-flag"/></svg>Jonas flagged Tuesday: worked 6 h, not 4</span>
+        <span class="item"><svg class="icon"><use href="#i-lock"/></svg>September closed: 486 h across 4 people</span>
+        <span class="item"><svg class="icon"><use href="#i-users"/></svg>Ayla accepted the invitation</span>
+        <span class="item"><svg class="icon"><use href="#i-zap"/></svg>Same as yesterday: 4 h on Thursday</span>
+        <span class="item"><svg class="icon"><use href="#i-download"/></svg>Week 39 exported as CSV</span>
+        <span class="item"><svg class="icon"><use href="#i-check"/></svg>Flag resolved: Tuesday is now 6 h</span>
+        <span class="item"><svg class="icon"><use href="#i-bell"/></svg>Weekly digest sent to 2 people who asked for it</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- how it works -->
+<section class="section how on-color" id="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">How it works</p>
+        <h2 class="h1">Three steps. Then it runs itself.</h2>
+      </div>
+      <p class="lead">Klokka does one job: the hours a person worked, agreed by both sides. Everything else in the app exists to make that job take seconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="n">01</div>
+        <h3>Invite</h3>
+        <p>Add a name and an email. They get one email, set a password and land in your workspace as an employee. Until then they show as Invited.</p>
+        <div class="vig" aria-hidden="true">
+          <div class="lbl">Email</div>
+          <div class="row" style="margin-top:8px"><span class="av" style="width:28px;height:28px;font-size:11px">N</span><div><b>Nora invited you to Klokka</b><div class="muted small">Café Nord, as employee</div></div></div>
+          <div class="row" style="margin-top:12px"><span class="btnm" style="margin-left:0">Accept invitation</span><span class="muted small">Expires in 7 days</span></div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="n">02</div>
+        <h3>Log hours</h3>
+        <p>Pick a person, pick a day, tap a chip. Or fill everyone's week in the grid like a spreadsheet. Every change is kept, with who and when.</p>
+        <div class="vig" aria-hidden="true">
+          <div class="row"><div><b>Maria</b><div class="muted small">Tuesday 22 September</div></div><span class="btnm">Save</span></div>
+          <div class="chips"><span class="chip">0.5</span><span class="chip">1</span><span class="chip">2</span><span class="chip on">4</span><span class="chip">8</span><span class="chip" style="background:transparent;box-shadow:inset 0 0 0 1px var(--border);font-weight:500">Same as yesterday</span></div>
+          <div class="row" style="margin-top:10px"><div class="line" style="width:60%"></div></div>
+        </div>
+      </div>
+      <div class="step reveal">
+        <div class="n">03</div>
+        <h3>Everyone sees</h3>
+        <p>The employee gets one notification for the sitting, not five. Both of you look at the same month and the same totals, for as long as the workspace exists.</p>
+        <div class="vig" aria-hidden="true">
+          <div class="notif">
+            <div class="t-app brand"><svg viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg></div>
+            <div><b>Nora added 5 days, 22.5 h</b><span>Week 39. Tap to see the week.</span></div>
+          </div>
+          <div class="row" style="margin-top:10px;justify-content:space-between"><span class="lbl">Your September</span><b class="num">142 h</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- employers -->
+<section class="section" id="employers">
+  <div class="container">
+    <div class="feature">
+      <div class="feature-copy reveal">
+        <div>
+          <p class="eyebrow">For employers</p>
+          <h2 class="h2">Log a week in a minute. Then get on with the day.</h2>
+        </div>
+        <p class="lead">Nothing to configure, nothing to learn. Open the week, type the hours, done. Klokka tells the people it concerns.</p>
+        <ul class="flist">
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-grid"/></svg></span><div><b>The week grid</b><p>Every employee, every day of the week, one screen. Tab across it like a spreadsheet.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-zap"/></svg></span><div><b>Quick chips</b><p>0.5, 1, 2, 4, 8 and a full day. Plus Same as yesterday for the days that repeat.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-note"/></svg></span><div><b>A note when it matters</b><p>Opened early, covered for Jonas, inventory night. One line, kept with the entry.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><div><b>Close the month</b><p>Lock it, export the CSV, hand it to whoever runs the pay. Unlock if something comes up.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg></span><div><b>Flags come to you</b><p>An employee disagrees, you get a push. Fix it or dismiss it; both sides are told.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-history"/></svg></span><div><b>History on every entry</b><p>Who changed what, and when. Visible to both of you.</p></div></li>
+        </ul>
+      </div>
+      <div class="feature-visual wg reveal">
+        <div class="card wg-card" aria-label="Example: the employer's week grid">
+          <div class="wg-head">
+            <div class="stage-title">Café Nord<small>Week 39, 21 to 27 September</small></div>
+            <div class="wg-tabs" aria-hidden="true"><span class="on">Week</span><span>Month</span></div>
+          </div>
+          <div class="wk" role="table" aria-label="Week grid, four employees">
+            <div class="hd" aria-hidden="true"></div>
+            <div class="hd">Mon</div><div class="hd">Tue</div><div class="hd">Wed</div><div class="hd">Thu</div><div class="hd">Fri</div><div class="hd">Sat</div><div class="hd">Sun</div>
+            <div class="who"><span class="av">M</span><span>Maria</span></div>
+            <div class="cell">4</div><div class="cell">4</div><div class="cell">6.5</div><div class="cell">4</div><div class="cell">4</div><div class="cell off">off</div><div class="cell off">off</div>
+            <div class="who"><span class="av c2">J</span><span>Jonas</span></div>
+            <div class="cell">8</div><div class="cell">8</div><div class="cell">8</div><div class="cell">8</div><div class="cell">6</div><div class="cell off">off</div><div class="cell off">off</div>
+            <div class="who"><span class="av c3">A</span><span>Ayla</span></div>
+            <div class="cell off">off</div><div class="cell">5</div><div class="cell edit">5<div class="wg-pop" aria-hidden="true"><span>0.5</span><span>1</span><span>2</span><span>4</span><span class="on">5</span><span>8</span><span class="same">Same as yesterday</span></div></div><div class="cell off">off</div><div class="cell">5</div><div class="cell">6</div><div class="cell off">off</div>
+            <div class="who"><span class="av" style="background:var(--chart-4);color:#fff">S</span><span>Sam</span></div>
+            <div class="cell">6</div><div class="cell">6</div><div class="cell off">off</div><div class="cell">6</div><div class="cell">8</div><div class="cell">4</div><div class="cell off">off</div>
+          </div>
+          <div class="wg-foot">
+            <span class="btnm"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Close September</span>
+            <span class="btnm ghost"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>Export CSV</span>
+            <span class="flag"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg>1 open flag</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- employees -->
+<section class="section" id="employees" style="background: var(--surface)">
+  <div class="container">
+    <div class="feature flip">
+      <div class="feature-copy reveal">
+        <div>
+          <p class="eyebrow">For employees</p>
+          <h2 class="h2">Your hours, on your phone, the moment they change.</h2>
+        </div>
+        <p class="lead">No asking, no photo of a paper sheet in the break room. The month is there with its total, and you are told every time it moves.</p>
+        <ul class="flist">
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg></span><div><b>See the month</b><p>Every day you worked, the total, the average per working day, and how it compares to last month.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-bell"/></svg></span><div><b>Get told, once</b><p>Hours added or changed? One notification per sitting, in the app and as a push.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-flag"/></svg></span><div><b>Flag what looks wrong</b><p>Worked 6 h, not 4? Say so on the entry. The employer gets it, you get the answer.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-share"/></svg></span><div><b>Share your month</b><p>A card that says Your September: 142 h, made to save or send.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg></span><div><b>Two employers, one app</b><p>Work at two places? Switch between workspaces; each keeps its own hours and its own colour.</p></div></li>
+          <li><span class="ic"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg></span><div><b>Dark mode, obviously</b><p>Follows your phone. Or pick one.</p></div></li>
+        </ul>
+      </div>
+      <div class="feature-visual phone-wrap reveal" style="container-type: inline-size">
+        <div class="phone" aria-label="Example: the employee's month view on a phone">
+          <span class="notch" aria-hidden="true"></span>
+          <div class="screen">
+            <div class="ph-top">
+              <div class="lbl">September 2026, Café Nord</div>
+              <div class="big">142<small> h</small></div>
+              <span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-up"/></svg>+9 h vs August</span>
+            </div>
+            <div class="cal" aria-hidden="true">
+              <div class="dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+              <div class="days">
+                <span class="d pad"></span>
+                <span class="d h">1</span><span class="d h">2</span><span class="d h">3</span><span class="d h lo">4</span><span class="d">5</span><span class="d">6</span>
+                <span class="d h">7</span><span class="d h">8</span><span class="d h">9</span><span class="d h">10</span><span class="d h">11</span><span class="d">12</span><span class="d">13</span>
+                <span class="d h">14</span><span class="d h">15</span><span class="d h lo">16</span><span class="d h">17</span><span class="d h">18</span><span class="d h lo">19</span><span class="d">20</span>
+                <span class="d h">21</span><span class="d h flag">22</span><span class="d h">23</span><span class="d h">24</span><span class="d h">25</span><span class="d">26</span><span class="d">27</span>
+                <span class="d h">28</span><span class="d h">29</span><span class="d h">30</span>
+              </div>
+            </div>
+            <div class="ph-list" aria-hidden="true">
+              <div class="n"><div class="t-app brand"><svg viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg></div><div><b>Nora added 5 days, 22.5 h</b><span>Week 39, just now</span></div></div>
+              <div class="n"><div class="t-app" style="background:var(--warning);color:var(--bg)"><svg class="icon"><use href="#i-flag"/></svg></div><div><b>Your flag on Tuesday 22 was fixed</b><span>Now 6 h. Yesterday</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- pay switch -->
+<section class="section pay on-color" id="pay" data-pay="off">
+  <div class="container">
+    <div class="feature">
+      <div class="feature-copy reveal">
+        <div>
+          <p class="eyebrow">The pay switch</p>
+          <h2 class="h1">Hours only. Or hours and pay.</h2>
+        </div>
+        <p class="lead">One switch in workspace settings. Off, Klokka is a clean record of hours and you do money elsewhere. On, every employee has an hourly rate and every hours figure gets a money figure beside it. The employee sees it too. That is the point.</p>
+        <button class="switch" id="pay-switch" type="button" role="switch" aria-checked="false"><span class="track" aria-hidden="true"></span>Show pay to employees</button>
+        <div class="pay-state" aria-hidden="true">
+          <div class="off"><b>Off</b><p>Hours only. Nobody sees a rate.</p></div>
+          <div class="on"><b>On</b><p>Rates per person. Money next to every hour.</p></div>
+        </div>
+      </div>
+      <div class="feature-visual reveal">
+        <div class="card" style="padding: clamp(16px, 3vw, 28px)">
+          <div class="stage-head"><div class="stage-title">September<small>Café Nord, example workspace</small></div><span class="pill">4 people</span></div>
+          <div class="pay-list">
+            <div class="pay-row"><span class="av">M</span><span>Maria</span><span class="h">22.5 h <span class="money">3 825 kr</span></span></div>
+            <div class="pay-row"><span class="av c2">J</span><span>Jonas</span><span class="h">38 h <span class="money">7 220 kr</span></span></div>
+            <div class="pay-row"><span class="av c3">A</span><span>Ayla</span><span class="h">21 h <span class="money">3 570 kr</span></span></div>
+          </div>
+          <div class="pay-total"><span>Week 39</span><span class="big num">81.5 h <span class="money">14 615 kr</span></span></div>
+          <p class="rate-note">Illustrative rates of 170 and 190 kr per hour. The currency follows the workspace.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- insights -->
+<section class="section insights" id="insights" data-pay="off">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Insights</p>
+        <h2 class="h2">The month, explained on one screen.</h2>
+      </div>
+      <p class="lead">Not a dashboard to configure. The six questions an employer asks every month, answered. Employees get their own three: hours, average per working day, best week.</p>
+    </div>
+    <div class="tiles" data-animate>
+      <div class="card tile span2 reveal">
+        <div class="lbl">Hours this month</div>
+        <svg class="spark" viewBox="0 0 200 44" preserveAspectRatio="none" aria-hidden="true">
+          <path class="area" d="M0 40 L0 30 L66 20 L133 14 L200 10 L200 44 Z"/>
+          <path d="M0 30 L66 20 L133 14 L200 10"/>
+          <circle cx="200" cy="10" r="4"/>
+        </svg>
+        <div class="val"><span data-count="486">486</span><small> h</small></div>
+        <span class="delta"><svg class="icon" aria-hidden="true"><use href="#i-up"/></svg>+31 h vs August</span>
+      </div>
+      <div class="card tile reveal">
+        <div class="lbl">Busiest day</div>
+        <div class="val">Friday</div>
+        <span class="delta muted" style="color: var(--text-muted)">26 h on average</span>
+      </div>
+      <div class="card tile reveal">
+        <div class="lbl">Projected month end</div>
+        <div class="val"><span data-count="612">612</span><small> h</small></div>
+        <span class="delta muted" style="color: var(--text-muted)">581 h in August</span>
+      </div>
+      <div class="card tile span2 reveal">
+        <div class="lbl">Per employee</div>
+        <div class="bars" role="list">
+          <div class="bar" role="listitem"><span>Jonas</span><div class="track"><div class="fill" style="--w:100%; --c: var(--chart-1)"></div></div><span class="v">152 h</span></div>
+          <div class="bar" role="listitem"><span>Maria</span><div class="track"><div class="fill" style="--w:78%; --c: var(--chart-2)"></div></div><span class="v">118 h</span></div>
+          <div class="bar" role="listitem"><span>Sam</span><div class="track"><div class="fill" style="--w:74%; --c: var(--chart-3)"></div></div><span class="v">112 h</span></div>
+          <div class="bar" role="listitem"><span>Ayla</span><div class="track"><div class="fill" style="--w:68%; --c: var(--chart-4)"></div></div><span class="v">104 h</span></div>
+        </div>
+        <div class="legend" aria-hidden="true"><span><i style="--c: var(--chart-1)"></i>Jonas</span><span><i style="--c: var(--chart-2)"></i>Maria</span><span><i style="--c: var(--chart-3)"></i>Sam</span><span><i style="--c: var(--chart-4)"></i>Ayla</span></div>
+      </div>
+      <div class="card tile reveal">
+        <div class="lbl">Weekday distribution</div>
+        <div class="cols" aria-label="Hours per weekday, Friday is the highest">
+          <div class="c"><i style="--h:78%"></i><span>M</span></div><div class="c"><i style="--h:74%"></i><span>T</span></div><div class="c"><i style="--h:80%"></i><span>W</span></div><div class="c"><i style="--h:82%"></i><span>T</span></div><div class="c top"><i style="--h:100%"></i><span>F</span></div><div class="c"><i style="--h:46%"></i><span>S</span></div><div class="c"><i style="--h:10%"></i><span>S</span></div>
+        </div>
+      </div>
+      <div class="card tile reveal">
+        <div class="lbl">Days with nothing logged</div>
+        <div class="val">2</div>
+        <span class="delta warn"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Two Saturdays. Tap to fill.</span>
+      </div>
+      <div class="card tile cost span2">
+        <div class="lbl">Labour cost this month</div>
+        <div class="val">85 660<small> kr</small></div>
+        <span class="delta muted" style="color: var(--text-muted)">Shows because the pay switch is on</span>
+      </div>
+    </div>
+    <p class="illustrative"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg>Example workspace with four people, September 2026. Illustrative numbers.</p>
+  </div>
+</section>
+
+<!-- open source -->
+<section class="section" id="open-source">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>
+        <p class="eyebrow">Free and open source</p>
+        <h2 class="h2">Free is not a plan. It is the licence.</h2>
+      </div>
+      <p class="lead">Klokka is MIT licensed. Use it, change it, run it for your own business or for others. The hosted instance we run is the same code, with no premium branch.</p>
+    </div>
+    <div class="oss">
+      <div class="card oss-big reveal">
+        <div class="mit" aria-label="MIT licence">MIT</div>
+        <p class="lead" style="max-width: 40ch">Permissive, short, and older than most of the businesses that will use this. Fork it on day one if you like.</p>
+        <div class="code" aria-label="Clone command">git clone https://github.com/prasannjeet/klokka</div>
+        <a class="gh" href="https://github.com/prasannjeet/klokka"><svg class="icon" aria-hidden="true"><use href="#i-github"/></svg>github.com/prasannjeet/klokka <span class="muted" style="font-weight:500">(public with the first release)</span></a>
+      </div>
+      <div class="oss-side">
+        <div class="card oss-item reveal"><b>No tiers, no seats</b><p>One product for a cafe of three and a cleaning firm of thirty. Nothing is held back behind a price.</p></div>
+        <div class="card oss-item reveal"><b>Your data leaves with you</b><p>CSV export of any month, any employee, any time. Self-host with one Docker image and a Postgres.</p></div>
+        <div class="card oss-item reveal"><b>Built in the open</b><p>The roadmap is the issue tracker. English and Swedish from day one, more languages by pull request.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- faq -->
+<section class="section" id="faq" style="padding-top: 0">
+  <div class="container">
+    <div class="section-head reveal" style="margin-bottom: var(--space-7)">
+      <div>
+        <p class="eyebrow">Questions</p>
+        <h2 class="h2">Before you ask.</h2>
+      </div>
+    </div>
+    <div class="faq reveal">
+      <details><summary>Can employees log their own hours?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">Not in the first version. The employer logs, the employee sees, and can flag an entry that looks wrong. A clock-in timer and self-logging are on the list, after the shared record is right.</p></details>
+      <details><summary>Is it really free?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">Yes. MIT licence, no tiers, no per-seat pricing. We run a hosted instance you can use, and you can run your own from the same code.</p></details>
+      <details><summary>Do I have to show pay?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">No. Pay is a workspace switch, off by default. Turn it on and every employee gets an hourly rate and sees money next to hours. Turn it off and it is hours only.</p></details>
+      <details><summary>Which languages?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">English and Swedish from day one, in both apps. The strings are shared between web and mobile, so the two never drift apart.</p></details>
+      <details><summary>Which phones?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">Android first, and the web app works in any phone browser. The code is iOS ready; the App Store build comes when the account does.</p></details>
+      <details><summary>Where does my data live?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">On our hosted instance in the EU, in a database that stores hours, not passwords. Sign-in is handled by Logto. Export or delete a workspace at any time.</p></details>
+      <details><summary>What happens when a month is closed?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">The month locks: no edits until the employer unlocks it. Employees are told, and the CSV is ready for whoever runs the pay.</p></details>
+      <details><summary>What is a flag?<svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><p class="a">An employee's way to say an entry is wrong, with a message. The employer fixes or dismisses it; both sides are notified and the history shows what happened.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- cta -->
+<section class="section" id="start" style="padding-top: 0">
+  <div class="container cta-band">
+    <div class="cta-dark reveal on-color">
+      <p class="eyebrow">Get started</p>
+      <h2 class="h2">Open a workspace. Invite one person. Log today.</h2>
+      <p class="lead">Five minutes from sign-up to the first logged hour. The invitation email does the rest.</p>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="login.html?state=signup">Create your workspace</a>
+        <a class="btn btn-ghost" href="login.html">Log in</a>
+      </div>
+    </div>
+    <div class="cta-light reveal on-color">
+      <div>
+        <p class="eyebrow">Already invited?</p>
+        <h2 class="h2">Got an invitation email?</h2>
+        <p class="lead" style="margin-top: var(--space-4)">Tap the link in it, set a password, and your hours are waiting.</p>
+      </div>
+      <div class="cta-actions"><a class="btn on-primary-btn" href="login.html?state=invite">Open the invitation</a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <span class="wordmark"><svg class="mark" viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg>klokka</span>
+        <p class="small muted" style="margin-top: 12px; max-width: 34ch">Hours in the open. Free, open source, built in Sweden for every place that pays by the hour.</p>
+      </div>
+      <div class="foot-cols">
+        <nav aria-label="Product"><h5>Product</h5><a href="#how">How it works</a><br><a href="#employers">For employers</a><br><a href="#employees">For employees</a><br><a href="#insights">Insights</a><br><a href="#pay">The pay switch</a></nav>
+        <nav aria-label="Open source"><h5>Open source</h5><a href="https://github.com/prasannjeet/klokka">GitHub</a><br><a href="#open-source">MIT licence</a><br><a href="#open-source">Self-host guide</a><br><a href="#open-source">Roadmap</a></nav>
+        <nav aria-label="Help"><h5>Help</h5><a href="#faq">FAQ</a><br><a href="#">Support</a><br><a href="#">Privacy</a><br><a href="#">Terms</a></nav>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>&copy; 2026 Klokka. MIT licensed.</span>
+      <span class="lang" aria-label="Language"><span class="on">EN</span><span>SV</span></span>
+    </div>
+  </div>
+  <div class="container foot-big" aria-hidden="true"><span class="reveal">klokka</span></div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SVG = "http://www.w3.org/2000/svg";
+
+  /* Railway clock: 60 ticks, hands synced to the real time. The second hand runs
+     the classic 58.5 s sweep and waits at twelve for the minute impulse. */
+  var ticks = document.getElementById("ticks");
+  if (ticks) {
+    for (var i = 0; i < 60; i++) {
+      var hour = i % 5 === 0;
+      var r = document.createElementNS(SVG, "rect");
+      r.setAttribute("class", "tick");
+      r.setAttribute("x", hour ? 96.5 : 98.6);
+      r.setAttribute("y", 9);
+      r.setAttribute("width", hour ? 7 : 2.8);
+      r.setAttribute("height", hour ? 24 : 9);
+      r.setAttribute("transform", "rotate(" + i * 6 + " 100 100)");
+      ticks.appendChild(r);
+    }
+    var now = new Date();
+    var s = now.getSeconds() + now.getMilliseconds() / 1000;
+    var m = now.getMinutes();
+    var h = now.getHours() % 12;
+    sync(".hand.second", s, s / 58.5 * 360);
+    sync(".hand.minute", m * 60 + s, m * 6);
+    sync(".hand.hour", h * 3600 + m * 60 + s, (h + m / 60) * 30);
+  }
+  function sync(sel, delay, deg) {
+    var el = document.querySelector(sel);
+    if (!el) return;
+    el.style.animationDelay = -delay + "s";
+    el.style.transform = "rotate(" + Math.min(deg, 360) + "deg)";
+  }
+
+  /* The rotating noun in "Made for the cafe" */
+  document.querySelectorAll(".rot").forEach(function (rot) {
+    var words = (rot.getAttribute("data-words") || "").split("|");
+    var word = rot.querySelector(".word");
+    if (!word || words.length < 2 || rm) return;
+    var i = 0;
+    setInterval(function () {
+      word.classList.remove("is-in");
+      word.classList.add("is-out");
+      setTimeout(function () {
+        i = (i + 1) % words.length;
+        word.textContent = words[i];
+        word.classList.remove("is-out");
+        word.classList.add("is-in");
+      }, 380);
+    }, 3400);
+  });
+
+  /* Hero stage: restart the CSS choreography every 9.2 s */
+  var stage = document.getElementById("stage");
+  if (stage && !rm) {
+    setInterval(function () {
+      stage.classList.remove("play");
+      void stage.offsetWidth;
+      stage.classList.add("play");
+    }, 9200);
+  }
+
+  /* Mobile menu */
+  var burger = document.querySelector(".nav-burger");
+  var menu = document.getElementById("menu");
+  var closeBtn = menu && menu.querySelector(".menu-close");
+  function openMenu() { menu.classList.add("is-open"); burger.setAttribute("aria-expanded", "true"); document.body.style.overflow = "hidden"; closeBtn.focus(); }
+  function shutMenu() { menu.classList.remove("is-open"); burger.setAttribute("aria-expanded", "false"); document.body.style.overflow = ""; burger.focus(); }
+  if (burger && menu) {
+    burger.addEventListener("click", openMenu);
+    closeBtn.addEventListener("click", shutMenu);
+    menu.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { if (menu.classList.contains("is-open")) shutMenu(); }); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menu.classList.contains("is-open")) shutMenu(); });
+  }
+
+  /* Pay switch drives the pay card and the insights cost tile */
+  var sw = document.getElementById("pay-switch");
+  var pay = document.getElementById("pay");
+  var ins = document.getElementById("insights");
+  if (sw) sw.addEventListener("click", function () {
+    var on = sw.getAttribute("aria-checked") !== "true";
+    sw.setAttribute("aria-checked", String(on));
+    pay.setAttribute("data-pay", on ? "on" : "off");
+    ins.setAttribute("data-pay", on ? "on" : "off");
+  });
+
+  /* In-view hooks: reveal fallback (no scroll timelines), bar fills, counters */
+  var needsFallback = !(window.CSS && CSS.supports && CSS.supports("animation-timeline: view()"));
+  var targets = document.querySelectorAll("[data-animate], [data-count]" + (needsFallback ? ", .reveal" : ""));
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        en.target.classList.add("is-in");
+        if (en.target.hasAttribute("data-count")) count(en.target);
+        io.unobserve(en.target);
+      });
+    }, { threshold: 0.3 });
+    targets.forEach(function (t) { io.observe(t); });
+  } else {
+    targets.forEach(function (t) { t.classList.add("is-in"); });
+  }
+  function count(el) {
+    var end = parseFloat(el.getAttribute("data-count"));
+    if (rm || isNaN(end)) return;
+    var start = performance.now(), dur = 1100;
+    (function tick(t) {
+      var p = Math.min(1, (t - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(end * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    })(start);
+  }
+})();
+</script>
+</body>
+</html>

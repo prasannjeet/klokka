@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en" data-theme="signal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Klokka: sign in</title>
+<meta name="description" content="Sign in to Klokka, accept an invitation, or create an employer account and your first workspace.">
+<link rel="stylesheet" href="_shell.css">
+<script src="_shell.js" defer></script>
+<style>
+/* =========================================================
+   Klokka sign-in mockup. Four states in one file:
+   signin | invite | signup | workspace   (?state=... or the state bar)
+   The card inside the dashed frame is Logto's hosted page; we brand it,
+   everything around it is ours.
+   ========================================================= */
+*, *::before, *::after { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+p { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+button, input, select { font: inherit; color: inherit; }
+svg { display: block; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.icon { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---- state bar (mockup only) ---- */
+.states { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 500; display: inline-flex; gap: 2px; padding: 4px; border-radius: 999px; background: color-mix(in srgb, var(--text) 8%, var(--bg)); border: 1px solid var(--border); backdrop-filter: blur(8px); font-size: 12.5px; font-weight: 600; max-width: calc(100vw - 24px); overflow-x: auto; scrollbar-width: none; }
+.states::-webkit-scrollbar { display: none; }
+.states .lbl { padding: 0 8px; align-self: center; color: var(--text-muted); font-weight: 600; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.states button { border: 0; background: transparent; padding: 7px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; color: var(--text-muted); }
+.states button[aria-pressed="true"] { background: var(--secondary); color: var(--on-secondary); }
+
+/* ---- layout ---- */
+.wrap { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+.wrap > *, .auth-inner, .card > *, .two > * { min-width: 0; }
+@media (min-width: 960px) { .wrap { grid-template-rows: none; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); } }
+.brand { position: relative; overflow: clip; background: var(--secondary); color: var(--on-secondary); padding: clamp(84px, 10vw, 120px) var(--gutter) clamp(28px, 4vw, 48px); display: flex; flex-direction: column; gap: var(--space-6); }
+@media (min-width: 960px) { .brand { padding: 40px clamp(28px, 4vw, 64px) 40px; min-height: 100dvh; position: sticky; top: 0; } }
+.brand .wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: var(--font-display-weight); font-stretch: var(--font-display-stretch); font-variation-settings: var(--font-display-variation); font-size: 24px; letter-spacing: -0.02em; }
+.brand .wordmark .mark { width: 30px; height: 30px; color: var(--primary); flex: none; }
+.brand-body { margin-top: auto; display: grid; gap: var(--space-5); max-width: 520px; }
+.brand h1 { font-size: calc(clamp(2rem, 4.4vw, 3.75rem) * var(--font-display-scale)); line-height: var(--font-display-leading); letter-spacing: var(--font-display-tracking); }
+.brand h1 .accent { color: var(--primary); text-shadow: var(--glow-text); }
+.brand p.lead { font-size: var(--text-lead); line-height: 1.5; opacity: 0.82; max-width: 40ch; text-wrap: pretty; }
+.brand ul.points { display: grid; gap: 10px; }
+.brand ul.points li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; opacity: 0.9; }
+.brand ul.points svg { width: 18px; height: 18px; color: var(--primary); margin-top: 2px; }
+.brand-foot { margin-top: var(--space-8); font-size: 12.5px; opacity: 0.6; display: none; }
+@media (min-width: 960px) { .brand-foot { display: block; } }
+.brand .clock-wrap { width: clamp(96px, 14vw, 180px); aspect-ratio: 1; position: absolute; right: var(--gutter); top: clamp(76px, 9vw, 40px); }
+@media (min-width: 960px) { .brand .clock-wrap { position: static; width: clamp(120px, 12vw, 200px); } }
+.rise { animation: rise var(--dur-rise) var(--ease-enter) both; }
+.rise.d1 { animation-delay: calc(var(--stagger) * 1); }
+.rise.d2 { animation-delay: calc(var(--stagger) * 2); }
+.rise.d3 { animation-delay: calc(var(--stagger) * 3); }
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+
+/* railway clock (same as the landing page) */
+.clock { width: 100%; height: 100%; }
+.clock .face { fill: var(--bg); stroke: color-mix(in srgb, var(--on-secondary) 30%, transparent); stroke-width: 3; }
+.clock .tick { fill: var(--text); }
+.clock .hand { transform-box: view-box; transform-origin: 100px 100px; fill: var(--text); }
+.clock .hand.second { fill: var(--primary); }
+.clock .hand.hour { animation: sweep 43200s linear infinite; }
+.clock .hand.minute { animation: sweep 3600s steps(60, end) infinite; }
+.clock .hand.second { animation: paddle var(--paddle-cycle) linear infinite; }
+@keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes paddle { 0% { transform: rotate(0deg); } 97.5% { transform: rotate(360deg); } 100% { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .clock .hand { animation: none !important; } }
+
+/* workspace tile (invite state and live preview) */
+.ws-tile { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding: 16px; border-radius: var(--radius-card); background: var(--bg); color: var(--text); box-shadow: var(--shadow-float); max-width: 380px; }
+.ws-tile .em { width: 56px; height: 56px; border-radius: var(--radius-lg); display: grid; place-items: center; font-size: 28px; background: var(--ws-color, var(--primary)); transition: background var(--dur-base) var(--ease-out); }
+.ws-tile b { display: block; font-size: 18px; }
+.ws-tile span { color: var(--text-muted); font-size: 13.5px; }
+.ws-tile .role { display: inline-flex; margin-top: 4px; padding: 3px 8px; border-radius: 999px; background: var(--surface-2); color: var(--text); font-size: 11.5px; font-weight: 600; }
+
+/* ---- auth column ---- */
+.auth { display: flex; flex-direction: column; padding: clamp(24px, 4vw, 48px) var(--gutter); }
+@media (min-width: 960px) { .auth { padding: 72px clamp(28px, 5vw, 80px) 40px; } }
+.auth-inner { width: min(100%, 460px); margin: auto; }
+@media (min-width: 960px) { .auth-inner { margin: auto 0 auto clamp(0px, 4vw, 40px); } }
+.auth-foot { margin-top: var(--space-8); font-size: 12.5px; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.auth-foot a:hover { color: var(--text); }
+
+/* the Logto frame */
+.logto { position: relative; padding: 14px; border: 1px dashed color-mix(in srgb, var(--accent) 60%, transparent); border-radius: calc(var(--radius-card) + 12px); }
+.logto .anno { position: absolute; top: -11px; left: 18px; padding: 3px 9px; border-radius: 999px; background: var(--bg); color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.card { background: var(--surface); border: var(--card-border); border-radius: var(--radius-card); box-shadow: var(--shadow-md); padding: clamp(22px, 4vw, 32px); }
+.card h2 { font-size: calc(var(--text-h2) * var(--font-display-scale)); line-height: var(--leading-h2); }
+.card .sub { margin-top: 8px; color: var(--text-muted); font-size: 15px; text-wrap: pretty; }
+.field { display: grid; gap: 6px; margin-top: 18px; }
+.field label { font-size: 13px; font-weight: 600; }
+.field label span { color: var(--text-muted); font-weight: 500; }
+.input { width: 100%; height: 48px; padding: 0 14px; border-radius: var(--radius-control); border: 1px solid var(--border); background: var(--bg); color: var(--text); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
+.input:hover { border-color: color-mix(in srgb, var(--text) 35%, var(--border)); }
+.input:focus { outline: none; border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 25%, transparent); }
+.input[readonly] { background: var(--surface-2); color: var(--text-muted); }
+.input::placeholder { color: color-mix(in srgb, var(--text-muted) 70%, transparent); }
+select.input { appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; }
+.pw { position: relative; }
+.pw .input { padding-right: 48px; }
+.pw button { position: absolute; right: 4px; top: 4px; width: 40px; height: 40px; border: 0; background: transparent; border-radius: var(--radius-control); display: grid; place-items: center; color: var(--text-muted); cursor: pointer; }
+.pw button:hover { color: var(--text); background: color-mix(in srgb, var(--text) 6%, transparent); }
+.hint { font-size: 12.5px; color: var(--text-muted); }
+.strength { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 4px; }
+.strength i { height: 4px; border-radius: 2px; background: var(--surface-2); }
+.strength i.on { background: var(--success); }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; font-size: 14px; }
+.row a { color: var(--accent); font-weight: 600; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 22px; border: 0; border-radius: var(--radius-control); font-weight: 600; font-size: 15px; cursor: pointer; transition: transform var(--dur-fast) var(--ease-out), filter var(--dur-fast); width: 100%; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.btn:active { transform: scale(0.985); }
+.btn-primary { background: var(--primary); color: var(--on-primary); box-shadow: var(--shadow-glow); }
+.btn-secondary { background: var(--secondary); color: var(--on-secondary); }
+.btn-ghost { background: transparent; box-shadow: inset 0 0 0 1px var(--border); width: auto; }
+.btn.mt { margin-top: 22px; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 4px; color: var(--text-muted); font-size: 12.5px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.after { margin-top: 20px; text-align: center; font-size: 14.5px; color: var(--text-muted); }
+.after a { color: var(--accent); font-weight: 600; }
+.legal { margin-top: 14px; font-size: 12px; color: var(--text-muted); text-align: center; text-wrap: pretty; }
+.legal a { text-decoration: underline; text-underline-offset: 2px; }
+.steps { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 12.5px; font-weight: 600; color: var(--text-muted); }
+.steps i { height: 4px; flex: 1; border-radius: 2px; background: var(--surface-2); }
+.steps i.on { background: var(--primary); }
+.two { display: grid; gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 480px) { .two { grid-template-columns: 1fr 1fr; } }
+.two .field { margin-top: 0; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: var(--radius-control); background: var(--surface-2); }
+.seg button { border: 0; background: transparent; padding: 10px; border-radius: calc(var(--radius-control) - 2px); font-weight: 600; cursor: pointer; color: var(--text-muted); }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); box-shadow: var(--shadow-sm); }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatches button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--c); cursor: pointer; position: relative; box-shadow: inset 0 0 0 2px color-mix(in srgb, #000 12%, transparent); transition: transform var(--dur-fast) var(--ease-enter); }
+.swatches button:hover { transform: scale(1.08); }
+.swatches button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
+.emojis { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; }
+.emojis button { aspect-ratio: 1; min-width: 0; padding: 0; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-md); font-size: 20px; cursor: pointer; display: grid; place-items: center; transition: transform var(--dur-fast) var(--ease-enter), border-color var(--dur-fast); }
+.emojis button:hover { transform: translateY(-2px); }
+.emojis button[aria-pressed="true"] { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
+.actions { display: flex; gap: 10px; margin-top: 22px; }
+.actions .btn-primary { flex: 1; }
+.note { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--radius-lg); background: var(--surface-2); font-size: 13.5px; color: var(--text-muted); margin-top: 18px; }
+.note svg { color: var(--accent); width: 18px; height: 18px; margin-top: 1px; }
+.state-panel { animation: rise var(--dur-slow) var(--ease-enter) both; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-mark" viewBox="0 0 2048 2048"><g fill="currentColor" fill-rule="evenodd">
+    <path d="M 993.935 281.428 C 1184.37 270.286 1371.71 333.334 1516.66 457.342 C 1666.68 586.798 1765.19 767.01 1779.65 965.903 C 1792.09 1130.26 1747.41 1293.86 1653.15 1429.08 C 1636.97 1452.31 1616.1 1477.37 1597.51 1498.81 C 1463.67 1650.11 1275.76 1742.81 1074.25 1756.93 C 1015.52 1759.82 955.727 1758.85 896.826 1758.9 L 638.411 1759.38 L 493.105 1759.95 C 469.938 1759.97 441.856 1761.51 419.445 1758.33 C 348.239 1748.22 287.957 1677.24 286.387 1605.91 C 285.495 1565.38 285.811 1524.61 285.812 1484.17 L 285.576 1271.42 L 285.888 1105.95 C 285.99 1067.88 285.355 1027.72 288.025 989.81 C 300.547 811.965 365.713 658.265 484.608 525.448 C 615.611 380.192 798.644 292.5 993.935 281.428 z M 1008.06 478.424 C 1009.44 478.286 1010.6 478.169 1011.99 478.114 C 1156.13 472.703 1296.5 524.818 1402.19 622.978 C 1509.79 722.065 1573.03 860.263 1577.67 1006.47 C 1582.67 1147.58 1527.43 1282.53 1431.13 1384.54 C 1334.67 1486.71 1194.17 1552.53 1053.63 1557.17 C 1021.47 1558.98 986.688 1556.6 954.327 1555.53 C 913.288 1554.43 872.238 1553.74 831.185 1553.45 C 766.785 1553.06 702.384 1553.63 638.001 1555.16 C 589.746 1556.35 541.013 1558.76 492.831 1559.16 C 492.815 1524.48 494.441 1488.21 494.89 1453.27 L 496.779 1218.21 C 496.661 1172.99 496.08 1127.77 495.036 1082.56 C 494.406 1052.19 492.77 1021.86 494.932 991.526 C 514.733 713.647 730.662 496.668 1008.06 478.424 z"/>
+    <path stroke="currentColor" stroke-width="26" stroke-linejoin="round" transform="translate(1037,1015) scale(1.3) translate(-1022,-1019)" d="M 1185.46 663.353 C 1252.28 657.053 1295.42 740.043 1255.68 791.762 C 1238.53 814.089 1208.74 838.808 1187.52 858.823 L 1029.91 1006.64 C 1095.65 1068.7 1164.85 1128.05 1230.32 1190.52 C 1247.86 1207.26 1259.85 1217.02 1267.3 1240.99 C 1273.83 1262.65 1271.49 1286.01 1260.8 1305.95 C 1250.83 1324.53 1233.82 1338.33 1213.58 1344.24 C 1190.2 1351.24 1167.84 1347.37 1146.74 1335.97 C 1133.57 1327.72 1101.56 1296.92 1087.65 1284.47 L 969.732 1177.59 C 948.723 1158.26 927.761 1138.41 906.502 1119.34 C 898.822 1112.44 886.06 1110.02 875.955 1105.98 C 866.962 1102.3 858.51 1097.42 850.832 1091.46 C 829.209 1074.56 813.407 1047.42 810.342 1019.98 C 807.029 990.899 815.49 961.703 833.837 938.9 C 851.32 917.089 869.074 907.788 894.258 899.599 C 897.515 898.54 910.842 886.703 914.098 883.741 C 959.86 842.109 1007.29 802.199 1053.15 760.701 C 1074.25 741.679 1095.48 722.805 1116.84 704.082 C 1141.44 682.318 1151.18 667.332 1185.46 663.353 z M 1186.35 709.125 C 1187.56 709.018 1188.77 708.941 1189.99 708.894 C 1199.92 708.487 1209.57 712.242 1216.62 719.254 C 1223.35 725.965 1227.01 735.166 1226.72 744.669 C 1226.51 749.977 1223.66 759.893 1220.34 763.563 C 1201.89 783.945 1178.01 804.872 1157.94 823.657 L 1013.78 958.242 L 1009.07 950.569 C 993.598 927.668 981.843 918.455 958.918 904.743 C 964.639 898.829 974.787 890.494 981.258 884.794 C 995.654 872.206 1009.93 859.485 1024.09 846.633 C 1072.72 802.456 1122.8 759.492 1172.53 716.562 C 1176.47 713.166 1181.56 711.028 1186.35 709.125 z M 1011.13 1056.9 C 1024.6 1068.34 1039.15 1082.42 1052.3 1094.46 C 1078.27 1118.13 1104.11 1141.94 1129.82 1165.89 C 1155.04 1189.38 1180.72 1212.32 1206.11 1235.61 C 1218.85 1247.3 1226.09 1258.45 1219.63 1276.42 C 1216.26 1285.62 1209.37 1293.11 1200.48 1297.24 C 1191.02 1301.66 1183.99 1300.56 1174.78 1297.46 C 1164.65 1292.17 1127.06 1256.66 1116.57 1247.36 C 1063.62 1200.39 1012.57 1152.09 958.88 1105.79 C 983.41 1093.18 996.29 1079.7 1011.13 1056.9 z M 911.078 946.489 C 943.694 943.234 972.752 967.086 975.917 999.71 C 979.082 1032.33 955.15 1061.33 922.517 1064.4 C 890.011 1067.46 861.156 1043.65 858.003 1011.15 C 854.851 978.651 878.59 949.731 911.078 946.489 z"/>
+  </g></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+</svg>
+
+<div class="states" role="group" aria-label="Mockup state">
+  <span class="lbl">State</span>
+  <button type="button" data-state="signin" aria-pressed="true">Sign in</button>
+  <button type="button" data-state="invite" aria-pressed="false">Invited</button>
+  <button type="button" data-state="signup" aria-pressed="false">Sign up</button>
+  <button type="button" data-state="workspace" aria-pressed="false">Workspace</button>
+</div>
+
+<div class="wrap">
+  <aside class="brand">
+    <a class="wordmark rise" href="landing.html" aria-label="Klokka, back to the start page">
+      <svg class="mark" viewBox="0 0 2048 2048" aria-hidden="true"><use href="#i-mark"/></svg>
+      klokka
+    </a>
+
+    <div class="clock-wrap rise d1" data-for="signin signup" role="img" aria-label="A railway clock showing the current time">
+      <svg class="clock" viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="face" cx="100" cy="100" r="97"/>
+        <g class="ticks" id="ticks"></g>
+        <g class="hand hour"><rect x="94.5" y="44" width="11" height="70" rx="1.5"/></g>
+        <g class="hand minute"><rect x="95.5" y="16" width="9" height="98" rx="1.5"/></g>
+        <g class="hand second"><rect x="99" y="34" width="2" height="92"/><circle cx="100" cy="44" r="9.5"/></g>
+        <circle cx="100" cy="100" r="4" fill="var(--text)"/>
+      </svg>
+    </div>
+
+    <div class="brand-body">
+      <div data-for="signin">
+        <h1 class="rise d1">One clock.<br><span class="accent">Both sides.</span></h1>
+        <p class="lead rise d2" style="margin-top: 16px">One account for everyone. Whether you run the place or work there comes from the workspace, not from where you sign in.</p>
+        <ul class="points rise d3" style="margin-top: 20px">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Employers and employees sign in here</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Several workspaces, one login</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Passwords never touch Klokka's database</li>
+        </ul>
+      </div>
+      <div data-for="invite" hidden>
+        <div class="ws-tile rise d1" style="--ws-color: var(--chart-3)"><span class="em" aria-hidden="true">&#9749;</span><div><b>Café Nord</b><span>Nora Lind, employer</span><br><span class="role">You join as employee</span></div></div>
+        <h1 class="rise d2" style="margin-top: 24px">Nora invited<br>you to <span class="accent">Café Nord.</span></h1>
+        <p class="lead rise d3" style="margin-top: 16px">Café Nord logs your hours in Klokka. Set a password and every one of them is yours to see, day by day, month by month.</p>
+      </div>
+      <div data-for="signup">
+        <h1 class="rise d1">Two minutes to the<br><span class="accent">first logged hour.</span></h1>
+        <ul class="points rise d2" style="margin-top: 20px">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Create your account</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Name your workspace, pick a colour</li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Invite one person and log today</li>
+        </ul>
+      </div>
+      <div data-for="workspace" hidden>
+        <p class="lead rise d1" style="opacity: 0.7; font-size: 14px">Preview: how it looks in the workspace switcher</p>
+        <div class="ws-tile rise d1" id="ws-preview" style="--ws-color: var(--primary); margin-top: 12px"><span class="em" id="pv-emoji" aria-hidden="true">&#9749;</span><div><b id="pv-name">Café Nord</b><span id="pv-meta">Sweden, SEK, week starts Monday</span></div></div>
+        <h1 class="rise d2" style="margin-top: 28px">Make it<br><span class="accent">your place.</span></h1>
+        <p class="lead rise d3" style="margin-top: 16px">Employees with two employers tell workspaces apart by colour and emoji. Pick something that is unmistakably you.</p>
+      </div>
+    </div>
+    <p class="brand-foot">Free and open source. MIT licence.</p>
+  </aside>
+
+  <main class="auth" id="main">
+    <div class="auth-inner">
+
+      <!-- Sign in (Logto) -->
+      <section class="state-panel" data-for="signin" aria-labelledby="h-signin">
+        <div class="logto">
+          <span class="anno">Logto hosted page, branded</span>
+          <form class="card" onsubmit="return false">
+            <h2 id="h-signin">Sign in</h2>
+            <p class="sub">Use the email your invitation was sent to, or the one you signed up with.</p>
+            <div class="field"><label for="si-email">Email</label><input class="input" id="si-email" type="email" autocomplete="username" placeholder="you@example.com"></div>
+            <div class="field"><label for="si-pw">Password</label><div class="pw"><input class="input" id="si-pw" type="password" autocomplete="current-password" placeholder="Your password"><button type="button" aria-label="Show password"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></button></div></div>
+            <div class="row"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" checked> Keep me signed in</label><a href="#">Forgot password?</a></div>
+            <button class="btn btn-primary mt" type="submit">Continue</button>
+            <p class="after">New here? <a href="?state=signup" data-go="signup">Create a workspace</a></p>
+          </form>
+        </div>
+        <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span>The card is rendered by Logto. Klokka supplies the logo, primary colour, font and dark mode through Logto's sign-in experience settings and custom CSS, so it matches the theme you see here. Social sign-in comes later.</span></div>
+      </section>
+
+      <!-- Invited (from the email link) -->
+      <section class="state-panel" data-for="invite" hidden aria-labelledby="h-invite">
+        <form class="card" onsubmit="return false">
+          <div class="steps" aria-label="Step 1 of 1"><span>Accept invitation</span><i class="on"></i></div>
+          <h2 id="h-invite">You have been invited by Café Nord</h2>
+          <p class="sub">Nora Lind added you as an employee. Choose a password and you are in.</p>
+          <div class="field"><label for="in-email">Email <span>(from the invitation)</span></label><input class="input" id="in-email" type="email" value="maria.lind@example.com" readonly></div>
+          <div class="field"><label for="in-pw">Choose a password</label><div class="pw"><input class="input" id="in-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters"><button type="button" aria-label="Show password"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></button></div><div class="strength" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><p class="hint">Longer beats complicated. A short sentence works well.</p></div>
+          <div class="field"><label for="in-pw2">Repeat password</label><input class="input" id="in-pw2" type="password" autocomplete="new-password" placeholder="Same again"></div>
+          <button class="btn btn-primary mt" type="submit">Join Café Nord <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <p class="legal">By joining you accept the <a href="#">terms</a> and the <a href="#">privacy policy</a>. Nora sees your hours; nobody else does.</p>
+          <p class="after">Already have a Klokka account? <a href="?state=signin" data-go="signin">Sign in to accept</a></p>
+        </form>
+        <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><span>Reached from the link in the invitation email. Logto creates the account with the invited email prefilled; the workspace, role and employer name come from the invitation, so the person never has to type them.</span></div>
+      </section>
+
+      <!-- Employer sign-up (Logto) -->
+      <section class="state-panel" data-for="signup" hidden aria-labelledby="h-signup">
+        <div class="logto">
+          <span class="anno">Logto hosted page, branded</span>
+          <form class="card" onsubmit="return false">
+            <div class="steps" aria-label="Step 1 of 2"><span>Step 1 of 2</span><i class="on"></i><i></i></div>
+            <h2 id="h-signup">Create your account</h2>
+            <p class="sub">This is your personal login. Your business gets its own workspace in the next step.</p>
+            <div class="field"><label for="su-name">Your name</label><input class="input" id="su-name" type="text" autocomplete="name" placeholder="Nora Lind"></div>
+            <div class="field"><label for="su-email">Email</label><input class="input" id="su-email" type="email" autocomplete="username" placeholder="you@example.com"></div>
+            <div class="field"><label for="su-pw">Password</label><div class="pw"><input class="input" id="su-pw" type="password" autocomplete="new-password" placeholder="At least 8 characters"><button type="button" aria-label="Show password"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg></button></div></div>
+            <button class="btn btn-primary mt" type="submit" data-go="workspace">Create account</button>
+            <p class="legal">By continuing you accept the <a href="#">terms</a> and the <a href="#">privacy policy</a>.</p>
+            <p class="after">Already have an account? <a href="?state=signin" data-go="signin">Sign in</a></p>
+          </form>
+        </div>
+      </section>
+
+      <!-- Create workspace (app side, step 2) -->
+      <section class="state-panel" data-for="workspace" hidden aria-labelledby="h-ws">
+        <form class="card" onsubmit="return false">
+          <div class="steps" aria-label="Step 2 of 2"><span>Step 2 of 2</span><i class="on"></i><i class="on"></i></div>
+          <h2 id="h-ws">Create your workspace</h2>
+          <p class="sub">One workspace is one business. You can open more later.</p>
+          <div class="field"><label for="ws-name">Workspace name</label><input class="input" id="ws-name" type="text" value="Café Nord" placeholder="The name of the place"></div>
+          <div class="two" style="margin-top: 18px">
+            <div class="field"><label for="ws-country">Country</label><select class="input" id="ws-country"><option value="SE" selected>Sweden</option><option value="NO">Norway</option><option value="DK">Denmark</option><option value="FI">Finland</option><option value="DE">Germany</option><option value="GB">United Kingdom</option></select></div>
+            <div class="field"><label for="ws-tz">Time zone</label><select class="input" id="ws-tz"><option selected>Europe/Stockholm</option><option>Europe/Oslo</option><option>Europe/Copenhagen</option><option>Europe/Helsinki</option><option>Europe/Berlin</option><option>Europe/London</option></select></div>
+          </div>
+          <div class="two" style="margin-top: 12px">
+            <div class="field"><label for="ws-cur">Currency <span>(only shown if pay is on)</span></label><select class="input" id="ws-cur"><option selected>SEK</option><option>NOK</option><option>DKK</option><option>EUR</option><option>GBP</option></select></div>
+            <div class="field"><label id="ws-week-l">Week starts on</label><div class="seg" role="group" aria-labelledby="ws-week-l"><button type="button" data-week="Monday" aria-pressed="true">Monday</button><button type="button" data-week="Sunday" aria-pressed="false">Sunday</button></div></div>
+          </div>
+          <div class="field"><label id="ws-col-l">Colour</label><div class="swatches" role="group" aria-labelledby="ws-col-l">
+            <button type="button" style="--c: var(--primary)" data-color="var(--primary)" aria-pressed="true" aria-label="Primary"></button>
+            <button type="button" style="--c: var(--chart-2)" data-color="var(--chart-2)" aria-pressed="false" aria-label="Blue"></button>
+            <button type="button" style="--c: var(--chart-3)" data-color="var(--chart-3)" aria-pressed="false" aria-label="Green"></button>
+            <button type="button" style="--c: var(--chart-4)" data-color="var(--chart-4)" aria-pressed="false" aria-label="Purple"></button>
+            <button type="button" style="--c: var(--pop-2)" data-color="var(--pop-2)" aria-pressed="false" aria-label="Yellow"></button>
+            <button type="button" style="--c: var(--secondary)" data-color="var(--secondary)" aria-pressed="false" aria-label="Ink"></button>
+          </div></div>
+          <div class="field"><label id="ws-em-l">Emoji</label><div class="emojis" role="group" aria-labelledby="ws-em-l">
+            <button type="button" aria-pressed="true" aria-label="Coffee">&#9749;</button><button type="button" aria-pressed="false" aria-label="Scissors">&#9986;</button><button type="button" aria-pressed="false" aria-label="Sparkles">&#10024;</button><button type="button" aria-pressed="false" aria-label="Bread">&#127838;</button><button type="button" aria-pressed="false" aria-label="Flower">&#127804;</button><button type="button" aria-pressed="false" aria-label="Bicycle">&#128690;</button><button type="button" aria-pressed="false" aria-label="Shopping bag">&#128717;</button><button type="button" aria-pressed="false" aria-label="Paint palette">&#127912;</button>
+          </div></div>
+          <div class="actions"><button class="btn btn-ghost" type="button" data-go="signup" aria-label="Back"><svg class="icon" aria-hidden="true"><use href="#i-back"/></svg></button><button class="btn btn-primary" type="submit">Create workspace</button></div>
+        </form>
+        <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span>Klokka's own screen, shown right after the Logto sign-up. Country sets the time zone and currency defaults; the rest can be changed in settings later. The workspace becomes a Logto organization with the creator as employer.</span></div>
+      </section>
+
+      <div class="auth-foot"><a href="landing.html">Back to klokka</a><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Help</a><span style="margin-left:auto">EN / SV</span></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var rm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var SVG = "http://www.w3.org/2000/svg";
+  var STATES = ["signin", "invite", "signup", "workspace"];
+
+  /* clock */
+  var ticks = document.getElementById("ticks");
+  if (ticks) {
+    for (var i = 0; i < 60; i++) {
+      var hour = i % 5 === 0;
+      var r = document.createElementNS(SVG, "rect");
+      r.setAttribute("class", "tick");
+      r.setAttribute("x", hour ? 96.5 : 98.6); r.setAttribute("y", 9);
+      r.setAttribute("width", hour ? 7 : 2.8); r.setAttribute("height", hour ? 24 : 9);
+      r.setAttribute("transform", "rotate(" + i * 6 + " 100 100)");
+      ticks.appendChild(r);
+    }
+    var now = new Date(), s = now.getSeconds() + now.getMilliseconds() / 1000, m = now.getMinutes(), h = now.getHours() % 12;
+    sync(".hand.second", s, s / 58.5 * 360); sync(".hand.minute", m * 60 + s, m * 6); sync(".hand.hour", h * 3600 + m * 60 + s, (h + m / 60) * 30);
+  }
+  function sync(sel, delay, deg) { var el = document.querySelector(sel); if (!el) return; el.style.animationDelay = -delay + "s"; el.style.transform = "rotate(" + Math.min(deg, 360) + "deg)"; }
+
+  /* state switching */
+  var params = new URLSearchParams(location.search);
+  var state = STATES.indexOf(params.get("state")) >= 0 ? params.get("state") : "signin";
+  function show(next) {
+    state = next;
+    document.querySelectorAll("[data-for]").forEach(function (el) {
+      var on = el.getAttribute("data-for").split(" ").indexOf(state) >= 0;
+      el.hidden = !on;
+      if (on && el.classList.contains("state-panel") && !rm) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
+    });
+    document.querySelectorAll(".states button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-state") === state)); });
+    document.title = "Klokka: " + { signin: "sign in", invite: "you are invited", signup: "create your account", workspace: "create your workspace" }[state];
+    var q = new URLSearchParams(location.search); q.set("state", state);
+    try { history.replaceState(null, "", "?" + q.toString()); } catch (e) { /* file:// in some browsers */ }
+    var first = document.querySelector('[data-for="' + state + '"].state-panel input:not([readonly])');
+    if (first && document.activeElement && document.activeElement.tagName === "BUTTON") first.focus({ preventScroll: true });
+  }
+  document.querySelectorAll(".states button").forEach(function (b) { b.addEventListener("click", function () { show(b.getAttribute("data-state")); }); });
+  document.querySelectorAll("[data-go]").forEach(function (el) { el.addEventListener("click", function (e) { e.preventDefault(); show(el.getAttribute("data-go")); }); });
+  show(state);
+
+  /* show password */
+  document.querySelectorAll(".pw button").forEach(function (b) {
+    b.addEventListener("click", function () { var i = b.parentElement.querySelector("input"); var t = i.type === "password"; i.type = t ? "text" : "password"; b.setAttribute("aria-label", t ? "Hide password" : "Show password"); });
+  });
+
+  /* workspace form: live preview */
+  var name = document.getElementById("ws-name"), pvName = document.getElementById("pv-name"), pvEmoji = document.getElementById("pv-emoji"), pvMeta = document.getElementById("pv-meta"), preview = document.getElementById("ws-preview");
+  var country = document.getElementById("ws-country"), cur = document.getElementById("ws-cur"), week = "Monday";
+  function meta() { pvMeta.textContent = country.options[country.selectedIndex].text + ", " + cur.value + ", week starts " + week; }
+  if (name) {
+    name.addEventListener("input", function () { pvName.textContent = name.value.trim() || "Your workspace"; });
+    country.addEventListener("change", meta); cur.addEventListener("change", meta);
+    document.querySelectorAll(".seg button").forEach(function (b) { b.addEventListener("click", function () { document.querySelectorAll(".seg button").forEach(function (x) { x.setAttribute("aria-pressed", "false"); }); b.setAttribute("aria-pressed", "true"); week = b.getAttribute("data-week"); meta(); }); });
+    document.querySelectorAll(".swatches button").forEach(function (b) { b.addEventListener("click", function () { document.querySelectorAll(".swatches button").forEach(function (x) { x.setAttribute("aria-pressed", "false"); }); b.setAttribute("aria-pressed", "true"); preview.style.setProperty("--ws-color", b.getAttribute("data-color")); }); });
+    document.querySelectorAll(".emojis button").forEach(function (b) { b.addEventListener("click", function () { document.querySelectorAll(".emojis button").forEach(function (x) { x.setAttribute("aria-pressed", "false"); }); b.setAttribute("aria-pressed", "true"); pvEmoji.textContent = b.textContent; }); });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,677 @@
+<title>Klokka Preliminary Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,400..900&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --paper: #FFFFFF; --ink: #0B0B0C; --mute: #5E5E5B; --line: #E4E4E0; --panel: #F4F4F1; --panel-2: #EBEBE7;
+    --accent: #FF4F00; --on-accent: #0B0B0C; --ok: #1B7F3B; --warn: #B4600A;
+    --display: "Archivo", "Helvetica Neue", Arial, sans-serif; --body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --radius: 6px; --gutter: clamp(16px, 4vw, 32px); --max: 1120px;
+    --ease: cubic-bezier(.2,.7,.2,1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0B0B0C; --ink: #F2F2EF; --mute: #A3A39E; --line: #26262A; --panel: #151517; --panel-2: #1E1E21;
+      --accent: #FF5A12; --on-accent: #0B0B0C; --ok: #4CC46F; --warn: #E8A04A; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0B0B0C; --ink: #F2F2EF; --mute: #A3A39E; --line: #26262A; --panel: #151517; --panel-2: #1E1E21;
+    --accent: #FF5A12; --on-accent: #0B0B0C; --ok: #4CC46F; --warn: #E8A04A; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  a:hover { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  h1, h2, h3, h4 { font-family: var(--display); font-variation-settings: "wdth" 112; letter-spacing: -0.01em; line-height: 1.05; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(44px, 9vw, 112px); font-weight: 800; font-variation-settings: "wdth" 125; letter-spacing: -0.03em; }
+  h2 { font-size: clamp(30px, 4.6vw, 52px); font-weight: 800; }
+  h3 { font-size: clamp(20px, 2.4vw, 26px); font-weight: 700; }
+  h4 { font-size: 16px; font-weight: 700; font-variation-settings: "wdth" 100; }
+  p { margin: 0; max-width: 68ch; }
+  .lead { font-size: clamp(18px, 2vw, 22px); line-height: 1.45; max-width: 60ch; }
+  .mute { color: var(--mute); }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+  .wrap { max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+  section.chapter { padding-block: clamp(56px, 8vw, 112px); border-top: 1px solid var(--line); scroll-margin-top: 64px; }
+  .chapter-head { display: grid; gap: 14px; margin-bottom: clamp(28px, 4vw, 48px); }
+  .stack { display: grid; gap: 18px; align-content: start; }
+  .stack-lg { display: grid; gap: clamp(28px, 4vw, 44px); align-content: start; }
+  .cols { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .cols-2 { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+
+  /* hairline grid of panels, Signal style */
+  .hgrid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .hgrid > * { background: var(--paper); padding: 20px; display: grid; gap: 8px; align-content: start; }
+  .hgrid .big { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 4vw, 44px); line-height: 1; font-variation-settings: "wdth" 112; letter-spacing: -0.02em; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); font-weight: 600; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+  td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--paper); }
+  .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+  .chip.ok .dot { background: var(--ok); } .chip.warn .dot { background: var(--warn); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); white-space: nowrap; }
+  .tag.api { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+
+  .callout { border-left: 4px solid var(--accent); background: var(--panel); padding: 18px 20px; display: grid; gap: 8px; }
+  .callout.ok { border-left-color: var(--ok); }
+  .steps { counter-reset: s; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .steps > li { list-style: none; background: var(--paper); padding: 18px 20px 18px 64px; position: relative; display: grid; gap: 6px; }
+  .steps > li::before { counter-increment: s; content: counter(s); position: absolute; left: 20px; top: 16px; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-family: var(--display); font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+  ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  ol.steps { margin: 0; padding: 0; }
+
+  /* top nav */
+  .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .topbar .wrap { display: flex; align-items: center; gap: 16px; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; white-space: nowrap; }
+  .brand svg { width: 28px; height: 28px; color: var(--accent); }
+  .topnav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; margin-left: auto; }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav a { font-size: 13px; padding: 6px 10px; border-radius: 999px; text-decoration: none; white-space: nowrap; color: var(--mute); }
+  .topnav a:hover, .topnav a.active { color: var(--ink); background: var(--panel); }
+
+  /* hero */
+  .hero { padding-block: clamp(48px, 8vw, 104px) clamp(40px, 6vw, 72px); display: grid; gap: 28px; }
+  .hero .status { display: flex; flex-wrap: wrap; gap: 8px; }
+  .hero-grid { display: grid; gap: 32px; grid-template-columns: 1fr; align-items: start; }
+  @media (min-width: 900px) { .hero-grid { grid-template-columns: 1.4fr 1fr; } }
+  .hero .mark { width: min(220px, 40vw); height: auto; color: var(--accent); justify-self: start; }
+  @media (min-width: 900px) { .hero .mark { justify-self: end; } }
+
+  /* mockup viewer */
+  .viewer { border: 1px solid var(--line); background: var(--panel); display: grid; }
+  .viewer .bar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--paper); font-size: 13px; }
+  .viewer .bar .group { display: inline-flex; gap: 4px; align-items: center; }
+  .viewer .bar .label { color: var(--mute); font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-right: 4px; }
+  .viewer button { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+  .viewer button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .viewer .open { margin-left: auto; text-decoration: none; font-size: 13px; color: var(--mute); }
+  .viewer .stage { position: relative; width: 100%; overflow: hidden; background: var(--panel-2); }
+  .viewer .stage.phone { display: grid; place-items: center; padding: 20px 0; }
+  .viewer iframe { border: 0; background: #fff; display: block; transform-origin: 0 0; }
+  .viewer .stage.phone iframe { border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .viewer .note { padding: 10px 14px; font-size: 13px; color: var(--mute); border-top: 1px solid var(--line); background: var(--paper); }
+
+  figure { margin: 0; display: grid; gap: 8px; }
+  figure img { width: 100%; height: auto; border: 1px solid var(--line); background: #fff; }
+  figcaption { font-size: 13px; color: var(--mute); }
+  .shots { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+
+  /* architecture diagram */
+  .arch { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+  .arch .box { border: 1px solid var(--line); background: var(--paper); padding: 14px 16px; display: grid; gap: 4px; }
+  .arch .box.core { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .arch .box .t { font-family: var(--display); font-weight: 700; font-size: 16px; }
+  .arch .box .d { font-size: 13px; color: var(--mute); }
+  .flow { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+  .flow > div { background: var(--paper); padding: 14px 16px; display: grid; gap: 4px; font-size: 14px; position: relative; }
+  .flow > div b { font-family: var(--display); font-size: 15px; }
+  .flow > div .who { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .decision { display: grid; gap: 6px; padding: 16px 0; border-bottom: 1px solid var(--line); grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .decision { grid-template-columns: 240px 1fr 220px; gap: 20px; align-items: start; } }
+  .decision .q { font-family: var(--display); font-weight: 700; font-size: 17px; }
+  .decision .rec { font-size: 14px; }
+  .decision .rec b { color: var(--accent); }
+
+  footer { border-top: 1px solid var(--line); padding-block: 40px 60px; font-size: 13px; color: var(--mute); }
+  @media (prefers-reduced-motion: no-preference) {
+    .rise { animation: rise .8s var(--ease) both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="klokka-mark" viewBox="0 0 2048 2048"><g fill="currentColor" fill-rule="evenodd">
+    <path d="M 993.935 281.428 C 1184.37 270.286 1371.71 333.334 1516.66 457.342 C 1666.68 586.798 1765.19 767.01 1779.65 965.903 C 1792.09 1130.26 1747.41 1293.86 1653.15 1429.08 C 1636.97 1452.31 1616.1 1477.37 1597.51 1498.81 C 1463.67 1650.11 1275.76 1742.81 1074.25 1756.93 C 1015.52 1759.82 955.727 1758.85 896.826 1758.9 L 638.411 1759.38 L 493.105 1759.95 C 469.938 1759.97 441.856 1761.51 419.445 1758.33 C 348.239 1748.22 287.957 1677.24 286.387 1605.91 C 285.495 1565.38 285.811 1524.61 285.812 1484.17 L 285.576 1271.42 L 285.888 1105.95 C 285.99 1067.88 285.355 1027.72 288.025 989.81 C 300.547 811.965 365.713 658.265 484.608 525.448 C 615.611 380.192 798.644 292.5 993.935 281.428 z M 1008.06 478.424 C 1009.44 478.286 1010.6 478.169 1011.99 478.114 C 1156.13 472.703 1296.5 524.818 1402.19 622.978 C 1509.79 722.065 1573.03 860.263 1577.67 1006.47 C 1582.67 1147.58 1527.43 1282.53 1431.13 1384.54 C 1334.67 1486.71 1194.17 1552.53 1053.63 1557.17 C 1021.47 1558.98 986.688 1556.6 954.327 1555.53 C 913.288 1554.43 872.238 1553.74 831.185 1553.45 C 766.785 1553.06 702.384 1553.63 638.001 1555.16 C 589.746 1556.35 541.013 1558.76 492.831 1559.16 C 492.815 1524.48 494.441 1488.21 494.89 1453.27 L 496.779 1218.21 C 496.661 1172.99 496.08 1127.77 495.036 1082.56 C 494.406 1052.19 492.77 1021.86 494.932 991.526 C 514.733 713.647 730.662 496.668 1008.06 478.424 z"/>
+    <path stroke="currentColor" stroke-width="26" stroke-linejoin="round" transform="translate(1037,1015) scale(1.3) translate(-1022,-1019)" d="M 1185.46 663.353 C 1252.28 657.053 1295.42 740.043 1255.68 791.762 C 1238.53 814.089 1208.74 838.808 1187.52 858.823 L 1029.91 1006.64 C 1095.65 1068.7 1164.85 1128.05 1230.32 1190.52 C 1247.86 1207.26 1259.85 1217.02 1267.3 1240.99 C 1273.83 1262.65 1271.49 1286.01 1260.8 1305.95 C 1250.83 1324.53 1233.82 1338.33 1213.58 1344.24 C 1190.2 1351.24 1167.84 1347.37 1146.74 1335.97 C 1133.57 1327.72 1101.56 1296.92 1087.65 1284.47 L 969.732 1177.59 C 948.723 1158.26 927.761 1138.41 906.502 1119.34 C 898.822 1112.44 886.06 1110.02 875.955 1105.98 C 866.962 1102.3 858.51 1097.42 850.832 1091.46 C 829.209 1074.56 813.407 1047.42 810.342 1019.98 C 807.029 990.899 815.49 961.703 833.837 938.9 C 851.32 917.089 869.074 907.788 894.258 899.599 C 897.515 898.54 910.842 886.703 914.098 883.741 C 959.86 842.109 1007.29 802.199 1053.15 760.701 C 1074.25 741.679 1095.48 722.805 1116.84 704.082 C 1141.44 682.318 1151.18 667.332 1185.46 663.353 z M 1186.35 709.125 C 1187.56 709.018 1188.77 708.941 1189.99 708.894 C 1199.92 708.487 1209.57 712.242 1216.62 719.254 C 1223.35 725.965 1227.01 735.166 1226.72 744.669 C 1226.51 749.977 1223.66 759.893 1220.34 763.563 C 1201.89 783.945 1178.01 804.872 1157.94 823.657 L 1013.78 958.242 L 1009.07 950.569 C 993.598 927.668 981.843 918.455 958.918 904.743 C 964.639 898.829 974.787 890.494 981.258 884.794 C 995.654 872.206 1009.93 859.485 1024.09 846.633 C 1072.72 802.456 1122.8 759.492 1172.53 716.562 C 1176.47 713.166 1181.56 711.028 1186.35 709.125 z M 1011.13 1056.9 C 1024.6 1068.34 1039.15 1082.42 1052.3 1094.46 C 1078.27 1118.13 1104.11 1141.94 1129.82 1165.89 C 1155.04 1189.38 1180.72 1212.32 1206.11 1235.61 C 1218.85 1247.3 1226.09 1258.45 1219.63 1276.42 C 1216.26 1285.62 1209.37 1293.11 1200.48 1297.24 C 1191.02 1301.66 1183.99 1300.56 1174.78 1297.46 C 1164.65 1292.17 1127.06 1256.66 1116.57 1247.36 C 1063.62 1200.39 1012.57 1152.09 958.88 1105.79 C 983.41 1093.18 996.29 1079.7 1011.13 1056.9 z M 911.078 946.489 C 943.694 943.234 972.752 967.086 975.917 999.71 C 979.082 1032.33 955.15 1061.33 922.517 1064.4 C 890.011 1067.46 861.156 1043.65 858.003 1011.15 C 854.851 978.651 878.59 949.731 911.078 946.489 z"/>
+  </g></symbol>
+</svg>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><svg><use href="#klokka-mark"/></svg> klokka</div>
+    <nav class="topnav" aria-label="Chapters">
+      <a href="#summary">Summary</a><a href="#decisions">Your decisions</a><a href="#product">Product</a><a href="#brand">Logo</a><a href="#design">Design</a><a href="#landing">Landing</a><a href="#login">Sign-in</a><a href="#web">Web app</a><a href="#mobile">Mobile</a><a href="#backend">Backend</a><a href="#auth">Accounts</a><a href="#hosting">Hosting</a><a href="#plan">Plan</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+<section class="hero wrap" id="summary">
+  <div class="status">
+    <span class="chip ok"><span class="dot"></span>Research done, verified</span>
+    <span class="chip ok"><span class="dot"></span>Mockups built, three themes</span>
+    <span class="chip"><span class="dot"></span>Logo picked, finals made</span>
+    <span class="chip warn"><span class="dot"></span>Nothing implemented yet</span>
+  </div>
+  <div class="hero-grid">
+    <div class="stack rise">
+      <span class="eyebrow">Preliminary report, 27 September 2026</span>
+      <h1>Klokka, before we build it.</h1>
+      <p class="lead">One clock, both sides: the employer logs the hours each employee worked, the employee sees the same month on their phone, and pay is a switch rather than a requirement. This page shows what we plan to build, how it will look on the web and on the phone, how the backend and sign-in work, where it will run, and the few decisions that are yours to make before implementation starts.</p>
+    </div>
+    <svg class="mark rise" aria-label="Klokka mark"><use href="#klokka-mark"/></svg>
+  </div>
+  <div class="hgrid">
+    <div><span class="eyebrow">Clients</span><span class="big">2 + 1</span><span class="mute">Android app (iOS-ready) and web app with full feature parity, plus the marketing site</span></div>
+    <div><span class="eyebrow">Stack</span><span class="big">Java 25</span><span class="mute">Quarkus API proven on JDK 25 today; Expo SDK 57; Next.js 16; Logto for accounts; PostgreSQL 18</span></div>
+    <div><span class="eyebrow">Plan</span><span class="big">12 / 40</span><span class="mute">Epics and stories, ready to mirror into Jira CHQ with the KLOKKA prefix</span></div>
+    <div><span class="eyebrow">Licence</span><span class="big">MIT</span><span class="mute">Public repository under your personal GitHub account, free for any team size</span></div>
+  </div>
+  <div class="callout">
+    <b>How to read this page.</b>
+    <p>Every mockup below is live: use the small bar in each viewer to switch between the three theme directions and between light and dark, and to see the page at desktop or phone width. The "Your decisions" chapter lists everything that waits on you; the rest are calls already made, with the reasons, and you can overrule any of them.</p>
+  </div>
+</section>
+<section class="chapter" id="decisions">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Your decisions</span>
+      <h2>Thirteen things only you can settle</h2>
+      <p class="lead">Everything else in this report is a call already made, with its reason. These wait on you. Each row has a recommendation, so a reply of "all recommended" is a valid answer.</p>
+    </div>
+    <div>
+      <div class="decision"><div class="q">1. Theme direction</div><div>Signal (Swiss: white, black, International Orange), Nightshift (the visible Kulram descendant, violet and magenta) or Clay (warm sand and terracotta). All three are complete in the tokens; every mockup switches between them live.</div><div class="rec"><b>Recommended:</b> Signal. Time is numerals, and Signal makes the numbers the design.</div></div>
+      <div class="decision"><div class="q">2. Logo weight and colour</div><div>The mark is #4's bubble with the hands at 4:10. Two weights exist (regular and heavy). The mark is drawn in a single colour, so it can follow the theme's primary (orange in Signal) or stay the concept pink.</div><div class="rec"><b>Recommended:</b> heavy weight, coloured by the theme (orange in Signal). Pink stays the answer if you pick Nightshift.</div></div>
+      <div class="decision"><div class="q">3. Sign-in on staging shares Kulram's Logto tenant</div><div>Our self-hosted Logto has one tenant. Klokka gets its own apps, API resource and roles there, but the sign-in page look, the organization template and the email connector are shared with Kulram on staging. Production gets its own Logto later.</div><div class="rec"><b>Recommended:</b> accept for staging. Also upgrade the staging Logto from 1.41.0 to 1.43.0 first (security fixes; your action).</div></div>
+      <div class="decision"><div class="q">4. Database on staging</div><div>A PostgreSQL 18 already runs on staging Coolify ("Common Resources"). Klokka can be a database with two roles on it, or get its own container.</div><div class="rec"><b>Recommended:</b> reuse the shared Postgres 18 with a dedicated <span class="mono">klokka</span> database.</div></div>
+      <div class="decision"><div class="q">5. Email port</div><div>Migadu documents port 465 with TLS; Kulram runs 587 with STARTTLS and it works.</div><div class="rec"><b>Recommended:</b> 587 STARTTLS, the proven one.</div></div>
+      <div class="decision"><div class="q">6. Android package id</div><div>Fixed forever once Firebase or a store knows it. The domain is still a placeholder, so this cannot be derived from it.</div><div class="rec"><b>Proposal:</b> <span class="mono">app.klokka.android</span> unless you already know the real domain.</div></div>
+      <div class="decision"><div class="q">7. Two accounts to create for push notifications</div><div>Even a locally built APK needs an Expo account (project id) and a Firebase project (Android push). Neither exists yet. Until they do, push is stubbed and the in-app notification center carries everything.</div><div class="rec"><b>Your action:</b> create both or hand over access when we reach the notifications epic.</div></div>
+      <div class="decision"><div class="q">8. How employees get the Android app in v1</div><div>A signed APK downloaded from the landing page and the invite page, or a Play Store listing (review time, developer account, store policies).</div><div class="rec"><b>Recommended:</b> sideloaded APK for v1, Play Store as a follow-up ticket.</div></div>
+      <div class="decision"><div class="q">9. Swedish at launch</div><div>English copy is written. Swedish for the landing page and the app catalogue is planned from day one (as Kulram does). The tagline "One clock. Both sides." needs a Swedish line that carries the idea, not the words.</div><div class="rec"><b>Recommended:</b> yes, sv default on the landing, en at /en, exactly like Kulram.</div></div>
+      <div class="decision"><div class="q">10. Who the landing speaks to</div><div>The rotating line says "Made for the cafe / salon / bakery / cleaning crew / corner shop / small agency".</div><div class="rec"><b>Question:</b> are these the customers you mean?</div></div>
+      <div class="decision"><div class="q">11. Real domain</div><div>Placeholders: example.com (landing), app.example.com (web app), api.example.com. Staging uses coolify.ooguy.com names until then.</div><div class="rec"><b>When you have it:</b> the domain feeds the package id, the Logto redirect URIs and the invite links.</div></div>
+      <div class="decision"><div class="q">12. Invitations cost two emails</div><div>Logto sends the invitation, then a verification code when the invitee signs up. With about 100 emails a month on staging that is 50 invitees. Fine for testing, and production gets its own quota.</div><div class="rec"><b>Recommended:</b> accept; keep every other notification on push and in-app.</div></div>
+      <div class="decision"><div class="q">13. Where Nexus runs</div><div>Image pushes and pulls work from this host, but the Coolify record for Nexus is stale, so the runbook cannot say which machine hosts it.</div><div class="rec"><b>Info only:</b> tell us, no blocker.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="product">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Product</span>
+      <h2>What Klokka does, in plain words</h2>
+      <p class="lead">A small employer with hourly workers opens Klokka every evening, taps each person's hours for the day, and is done. Every employee sees the same month on their phone the moment it changes. That is the whole product; everything else exists to make that loop trustworthy for both sides.</p>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Role</th><th>Who</th><th>What they can do</th></tr></thead>
+      <tbody>
+        <tr><td><b>Employer</b></td><td>Runs a cafe, cleaning firm, salon, shop or small agency with a handful of hourly workers</td><td>Creates a workspace, invites employees, logs hours per employee per day, reads the insights, decides whether pay is shown, locks a month, exports CSV</td></tr>
+        <tr><td><b>Employee</b></td><td>A worker at that business, on their own phone</td><td>Sees their hours by day, week and month, the totals, earnings if the employer switched pay on, gets a notification on every change, can flag an entry, can share a monthly card</td></tr>
+        <tr><td><b>Operator</b></td><td>Us, running the hosted instance</td><td>Sees workspaces, users, invite status, notification and email volume, service health. Never anyone's hours beyond aggregates</td></tr>
+      </tbody>
+    </table></div>
+    <p class="mute">A workspace is one business. A person can belong to several (a worker with two employers, an employer who also works somewhere), with a different role in each.</p>
+    <div class="stack">
+      <h3>The core loop</h3>
+      <ol class="steps">
+        <li><b>Sign up as employer, create a workspace.</b> Name, country and timezone, currency, week start day, a colour or emoji so several workspaces look different.</li>
+        <li><b>Add an employee.</b> Name, email, optional hourly rate. They get an invitation email, set a password, and land in the workspace as an employee. Until then they show as Invited.</li>
+        <li><b>Log hours.</b> Pick a person, a day, the hours: quick chips (0.5, 1, 2, 4, 8, full day), "same as yesterday", or the week grid that fills a whole team's week like a spreadsheet. One entry per person per day; every change keeps its history.</li>
+        <li><b>The employee is told.</b> Push and in-app notification when hours are added, changed or removed. A whole week entered in one sitting is one notification ("Nora added 5 days, 22.5 h"), not five.</li>
+        <li><b>Both sides see the month.</b> Calendar of hours per day, the month total, the average per working day, how it compares with last month. The employer sees it per employee and for the whole workspace.</li>
+        <li><b>Insights.</b> Employer: per-employee comparison, week-by-week trend, weekday distribution, busiest day, projected month end, days with nothing logged, labour cost if pay is on. Employee: hours this month, best week, streak, earnings if enabled.</li>
+        <li><b>Pay is a switch.</b> Off: Klokka is hours only. On: each employee has a rate and every hours figure gets a money figure next to it, on both clients.</li>
+        <li><b>Close the month.</b> Lock it (no edits without unlocking), export CSV per employee or for the workspace.</li>
+      </ol>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Small things that make it feel finished</h3>
+        <ul class="plain">
+          <li>Employee flags an entry ("I worked 4 h, not 2"); the employer fixes or dismisses; both are notified.</li>
+          <li>Notification center on both clients, with read state and per-user preferences.</li>
+          <li>Several workspaces per person, with a switcher.</li>
+          <li>Dark and light mode everywhere, following the device.</li>
+          <li>Avatars for people, a colour and emoji for each workspace.</li>
+          <li>Rounding rule (none, quarter hour, half hour) and a default day length for the "full day" chip.</li>
+          <li>A shareable monthly card ("your September: 142 h") as an image.</li>
+          <li>Opt-in weekly email digest, off by default.</li>
+          <li>Audit history on every entry, visible to both roles.</li>
+          <li>English and Swedish from day one, one shared catalogue for web, phone and notifications.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <h3>Deliberately not in v1</h3>
+        <ul class="plain">
+          <li>Employee self-logging or a clock-in timer</li>
+          <li>GPS, shift scheduling, invoicing</li>
+          <li>Payroll exports to Fortnox or Visma</li>
+          <li>Web push, SMS</li>
+          <li>iOS store build (no Apple account yet; the code stays iOS-ready)</li>
+          <li>Enterprise SSO</li>
+        </ul>
+        <div class="callout"><b>Parity is part of done.</b><p>Every feature ships on the API, the web app and the phone in the same ticket. A ticket that delivers one client is not done; deferring a client needs an explicit follow-up ticket. Both clients render the same numbers because totals and trends are computed once, by the API.</p></div>
+      </div>
+    </div>
+    <div class="stack">
+      <h3>Who gets told what</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Event</th><th>Employee</th><th>Employer</th><th>Channel</th></tr></thead>
+        <tbody>
+          <tr><td>Invited to a workspace</td><td>yes</td><td></td><td>Email (they have no app yet)</td></tr>
+          <tr><td>Invitation accepted</td><td></td><td>yes</td><td>Push + in-app</td></tr>
+          <tr><td>Hours added, changed or removed (coalesced per sitting)</td><td>yes</td><td></td><td>Push + in-app</td></tr>
+          <tr><td>Entry flagged</td><td></td><td>yes</td><td>Push + in-app</td></tr>
+          <tr><td>Flag resolved</td><td>yes</td><td></td><td>Push + in-app</td></tr>
+          <tr><td>Month closed</td><td>yes</td><td></td><td>Push + in-app</td></tr>
+          <tr><td>Weekly digest (opt-in)</td><td>yes</td><td>yes</td><td>Email</td></tr>
+        </tbody>
+      </table></div>
+      <p class="mute">Email is reserved for invitations and opt-in digests because the staging mailbox may send about 100 messages a month. Push goes through Expo's push service (Firebase on Android).</p>
+    </div>
+  </div>
+</section>
+<section class="chapter" id="brand">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Logo</span>
+      <h2>The mark: a bubble that tells the time</h2>
+      <p class="lead">You picked concept #4's speech-bubble silhouette and asked for the hands alone, set to 4:10, so the two hands read as the arms of a K. The final is composed from the two vector concepts you chose, so it is exact, not regenerated.</p>
+    </div>
+    <div class="cols-2">
+      <figure><img src="brand/final/preview-weights.png" alt="Final Klokka mark: regular and heavy hands on white, pink and white mono on dark"><figcaption>Left pair: regular vs heavy hands on white. Right pair: on dark, in the concept pink and in white mono. Files: transparent SVG and 1024 px PNG for each, in docs/brand/final/.</figcaption></figure>
+      <div class="stack">
+        <div class="hgrid" style="grid-template-columns: repeat(3, 1fr);">
+          <div style="place-items:center; padding: 28px 12px;"><svg width="72" height="72" style="color: var(--accent)"><use href="#klokka-mark"/></svg><span class="mute" style="font-size:12px">theme primary</span></div>
+          <div style="place-items:center; padding: 28px 12px;"><svg width="72" height="72" style="color: var(--ink)"><use href="#klokka-mark"/></svg><span class="mute" style="font-size:12px">ink</span></div>
+          <div style="place-items:center; padding: 28px 12px; background: #FD286B;"><svg width="72" height="72" style="color: #fff"><use href="#klokka-mark"/></svg><span style="font-size:12px; color:#fff">on pink</span></div>
+        </div>
+        <p>The mark is one colour, so it takes the theme's primary wherever it appears (orange in Signal, magenta in Nightshift, terracotta in Clay) and works in plain black or white. At favicon sizes the hollow hands fill in, so the icon set will get a solid-hands cut of the same shape.</p>
+        <p class="mute">Twenty-four concepts were explored on the way (four contact sheets in docs/brand/concepts/); the K-as-clock-hands idea from #5 and the bubble from #4 are what survived.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="design">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Design direction</span>
+      <h2>Three directions, one recommendation</h2>
+      <p class="lead">Klokka means "the clock". The recommended direction borrows from the most famous clock design there is, the Swiss railway clock: one grotesk, black on white, and a red paddle for a second hand that sweeps and waits at twelve. Time is numerals, so a Swiss system makes the product's own content the design. The other two directions are complete too, and every mockup switches between them live.</p>
+    </div>
+    <div class="hgrid">
+      <div><span class="eyebrow">Signal, recommended</span><span class="big" style="color:#FF4F00">Aa 22.5</span><p>White and near-black, one family (Archivo, expanded for display), International Orange as the only loud colour, hairline rules, huge numerals, no shadows. Trivially readable in both modes, cheap to render on any phone, and it keeps Kulram's motion without looking like Kulram.</p></div>
+      <div><span class="eyebrow">Nightshift</span><span class="big" style="color:#FF006E">Aa 22.5</span><p>Violet, magenta and cyan over deep night, Unbounded plus Inter, a glow on the primary, springy entrances. The visible descendant of the Kulram site. The fallback if you want the family resemblance at first glance.</p></div>
+      <div><span class="eyebrow">Clay</span><span class="big" style="color:#C8623A">Aa 22.5</span><p>Sand, terracotta and moss, Fraunces with Epilogue, big 28 px radii, a faint grain, gentle motion. Warm and friendly; the outlier if the other two feel too sharp.</p></div>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Motion: four moves, used with discipline</h3>
+        <ul class="plain">
+          <li><b>Rise.</b> Things enter by moving up a little and fading in, on Kulram's signature curve, revealed as you scroll.</li>
+          <li><b>Swap.</b> A line of text flips to the next one (the "Made for the cafe / salon / cleaning crew" rotator).</li>
+          <li><b>Pop.</b> Small things land with a tiny scale-up, staggered across a row: hour cells filling a week, chips, badges. Removal is a plain fade.</li>
+          <li><b>Paddle.</b> The clock, synced to real time, the only always-on motion. Reduced-motion settings show the final state of everything.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <h3>What we keep from the Kulram site</h3>
+        <p>The easing curve, the hero rise and stagger, the headline rotator mechanics, scroll-triggered reveals, count-up stats, the ticker marquee, the hairline card grids, alternating light and dark blocks ending in a giant cropped wordmark, chips as the interaction unit. What changes: the palette (Kulram is violet), the typeface (Kulram's slab serif says ledger; Klokka's wide grotesk says timetable), tight radii, no photography (the app itself, drawn in CSS, is the imagery), and a page built around the two roles instead of one promise.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="landing">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Marketing site, example.com</span>
+      <h2>The landing page</h2>
+      <p class="lead">Nav, a poster-size headline with the live railway clock, "how it works" in three steps, what employers get, what employees get, the pay switch story, an insights teaser, the open-source section, FAQ, and a footer. Everything drawn in code, no stock imagery. Scroll inside the frame; the week grid in the hero fills itself.</p>
+    </div>
+    <div class="viewer" data-src="design/mockups/landing.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+      <div class="bar">
+        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
+        <a class="open" target="_blank" rel="noopener" href="design/mockups/landing.html">Open full size</a>
+      </div>
+      <div class="stage"><iframe title="Landing page mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      <div class="note">Illustrative workspace and numbers. The Swedish version is planned as the default language at launch, with English at /en, like the Kulram site.</div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="login">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Sign-in and invitations</span>
+      <h2>One account for everyone</h2>
+      <p class="lead">Employers and employees sign in at the same place; whether you run the workspace or work there comes from the workspace, not from where you sign in. The card in the dashed frame is Logto's hosted page, which we brand; everything around it is ours. Four states: sign in, "you were invited", sign up, and create your workspace.</p>
+    </div>
+    <div class="viewer" data-src="design/mockups/login.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop" data-view="state=signin">
+      <div class="bar">
+        <div class="group"><span class="label">State</span><button data-set="view:state=signin" aria-pressed="true">Sign in</button><button data-set="view:state=invite" aria-pressed="false">Invited</button><button data-set="view:state=signup" aria-pressed="false">Sign up</button><button data-set="view:state=workspace" aria-pressed="false">Workspace</button></div>
+        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
+        <a class="open" target="_blank" rel="noopener" href="design/mockups/login.html">Open full size</a>
+      </div>
+      <div class="stage"><iframe title="Sign-in mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      <div class="note">Email and password only in v1; social sign-in later. Passwords never touch Klokka's own database.</div>
+    </div>
+  </div>
+</section>
+<section class="chapter" id="web">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Web app, app.example.com</span>
+      <h2>The employer's desk, the employee's page, the operator's console</h2>
+      <p class="lead">Three mockups, all live. The employer app is where the daily work happens, and the week grid is its hero: every person across every day, keyboard-fast, with one Save that sends one batch and one notification per person. The employee's page mirrors the phone. The operator console is ours to run the service.</p>
+    </div>
+    <div class="stack">
+      <h3>Employer</h3>
+      <p>Use the rail inside the frame: Overview, Week grid, Employees, Employee month, Settings, Notifications. Flip the "Show pay to employees" switch in Settings and watch rates, earnings and labour cost appear everywhere; try the keyboard in the grid (arrows, Enter, Escape) and the open flag on the Overview.</p>
+      <div class="viewer" data-src="design/mockups/web-employer.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+        <div class="bar">
+          <div class="group"><span class="label">Pay</span><button data-set="view:pay=off" aria-pressed="true">Hours only</button><button data-set="view:pay=on" aria-pressed="false">Pay on</button></div>
+          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
+          <a class="open" target="_blank" rel="noopener" href="design/mockups/web-employer.html">Open full size</a>
+        </div>
+        <div class="stage"><iframe title="Employer web app mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+        <div class="note">Illustrative workspace (Cafe Nord, four people, week 39). Everything shown maps to the chosen stack: Tailwind and shadcn components, Recharts for the charts, TanStack Table for the tables.</div>
+      </div>
+    </div>
+    <div class="stack">
+      <h3>Employee</h3>
+      <p>Maria belongs to two workspaces: Cafe Nord (pay on, so earnings show) and Salon Vega (hours only). The switcher in the frame swaps between them. My month, a day's detail with history and the flag dialog, notifications, the shareable card, and the profile with language and notification preferences.</p>
+      <div class="viewer" data-src="design/mockups/web-employee.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+        <div class="bar">
+          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
+          <a class="open" target="_blank" rel="noopener" href="design/mockups/web-employee.html">Open full size</a>
+        </div>
+        <div class="stage"><iframe title="Employee web mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      </div>
+    </div>
+    <div class="stack">
+      <h3>Operator console</h3>
+      <p>Only for the global platform-admin role. Workspaces, users, invitations (pending, accepted, expired, with resend), volume (the email meter against the monthly quota, push and in-app counts, coalescing savings) and health (p95 per app, dependencies, recent deploys). Denser type scale, hairline tables with sort, search, filters and paging; the same design system as the product, not an admin template.</p>
+      <div class="viewer" data-src="design/mockups/web-operator.html" data-width="1440" data-height="900" data-theme="signal" data-mode="light" data-device="desktop">
+        <div class="bar">
+          <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+          <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          <div class="group"><span class="label">Device</span><button data-set="device:desktop" aria-pressed="true">Desktop</button><button data-set="device:phone" aria-pressed="false">Phone</button></div>
+          <a class="open" target="_blank" rel="noopener" href="design/mockups/web-operator.html">Open full size</a>
+        </div>
+        <div class="stage"><iframe title="Operator console mockup" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="mobile">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Android app (iOS-ready)</span>
+      <h2>The app on a phone</h2>
+      <p class="lead">Twenty-three screens as phone frames: sign-in and invitation, the employer's day (every person as a card with a big quick-add, the add-hours sheet, the week, employees, a person's month, insights, settings, notifications, resolving a flag) and the employee's side (my month, a day with its history, flagging an entry, notifications, profile and workspace switcher, the shareable monthly card). The last row shows the hero screens in the other mode. Scroll inside the frame.</p>
+    </div>
+    <div class="viewer" data-src="design/mockups/mobile.html" data-width="1440" data-height="1000" data-theme="signal" data-mode="light" data-device="desktop">
+      <div class="bar">
+        <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+        <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+        <a class="open" target="_blank" rel="noopener" href="design/mockups/mobile.html">Open full size</a>
+      </div>
+      <div class="stage"><iframe title="Mobile screens gallery" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+      <div class="note">Everything here is buildable with plain React Native views, Reanimated and one SVG line chart: no chart library, no Skia, so the app stays small and fast on cheap Android phones.</div>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Try the navigation</h3>
+        <p>One live frame: the employer's tabs (Home, Week, Insights, Settings) and a quick-add that opens the add-hours sheet with the pop motion. Tap around.</p>
+        <div class="viewer" data-src="design/mockups/mobile-flow.html" data-theme="signal" data-mode="light" data-device="phone">
+          <div class="bar">
+            <div class="group"><span class="label">Theme</span><button data-set="theme:signal" aria-pressed="true">Signal</button><button data-set="theme:nightshift" aria-pressed="false">Nightshift</button><button data-set="theme:clay" aria-pressed="false">Clay</button></div>
+            <div class="group"><span class="label">Mode</span><button data-set="mode:light" aria-pressed="true">Light</button><button data-set="mode:dark" aria-pressed="false">Dark</button></div>
+          </div>
+          <div class="stage"><iframe title="Interactive phone frame" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe></div>
+        </div>
+      </div>
+      <div class="stack">
+        <h3>Decisions the phone forced</h3>
+        <ul class="plain">
+          <li><b>Sign-in is one button.</b> Logto opens in the system browser and hands back to the app, so there are no native password fields (same as Kulram's app).</li>
+          <li><b>Invitations are web-first.</b> A new employee has no app yet, so the invite link opens the web join page, which then offers the app. Inside the app, an invite to a second workspace is accepted in place.</li>
+          <li><b>The week grid becomes one person per page</b>, swiped left and right, with the next person peeking in; the spreadsheet stays on the web.</li>
+          <li><b>The share card never shows pay</b>, only hours, whatever the workspace setting.</li>
+          <li><b>Android first, iOS-ready.</b> No module without an iOS counterpart; the iOS build waits for an Apple account and runs in the cloud from this Linux host.</li>
+          <li><b>Distribution in v1</b> is a signed APK from the landing page (decision 8); a Play Store listing is a later ticket.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="backend">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Backend</span>
+      <h2>One API, one contract, two clients that cannot drift</h2>
+      <p class="lead">Both clients talk to a single Java API. The API's contract is written first, as one OpenAPI file, and from it we generate both the server's interfaces and the one TypeScript client the phone and the web share. A feature therefore cannot exist on one client and not the other by accident: the types come from the same file.</p>
+    </div>
+    <div class="arch">
+      <div class="box"><span class="t">Android app</span><span class="d">Expo SDK 57, React Native. Signs in with Logto directly, keeps the token in the secure store, calls the API with it.</span></div>
+      <div class="box"><span class="t">Web app</span><span class="d">Next.js 16. Logto session in an encrypted cookie; the browser never holds a token, a server route adds it to API calls.</span></div>
+      <div class="box core"><span class="t">Klokka API</span><span class="d">Quarkus on Java 25. Validates the Logto token, decides the role from its own membership table, computes every total, sends every notification.</span></div>
+      <div class="box"><span class="t">PostgreSQL 18</span><span class="d">Workspaces, memberships, hour entries with history, flags, month locks, notifications, push tokens, preferences.</span></div>
+      <div class="box"><span class="t">Logto</span><span class="d">Accounts, passwords, the hosted sign-in page, organizations (workspaces), invitations, roles.</span></div>
+      <div class="box"><span class="t">Expo push, FCM, SMTP</span><span class="d">Push to phones through Expo's service (Firebase on Android); invitation emails and opt-in digests through Migadu.</span></div>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>What was proven, not assumed</h3>
+        <ul class="plain">
+          <li>A throwaway Quarkus 3.39.5 project with every extension we need was created, packaged and tested on JDK 25 on this host: create 18 s, package 21 s, full test run green in 1 min 16 s (Postgres started automatically by the test tooling). Spring Boot is not needed.</li>
+          <li>The OpenAPI generator produced Quarkus server interfaces and a resource implementing them compiled on JDK 25.</li>
+          <li>Quarkus 3.40 LTS ships this week; we start on it. Quarkus 4 (November) is a planned upgrade ticket, not a v1 concern.</li>
+          <li>Versions are pinned below "latest" where latest breaks things: ESLint 10 crashes Next's config today, TypeScript 7 is not supported by the lint tooling, and Expo pins React 19.2.3 for the whole repo.</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <h3>Notifications engine</h3>
+        <p>Every change writes a row to a notification table. A sweeper runs every minute: when a person's pending rows have been quiet for 10 minutes (or 30 minutes have passed since the first one), it folds them into one message ("Nora added 5 days, 22.5 h") and sends it as push plus in-app. A second job checks Expo's delivery receipts and drops dead device tokens. The weekly digest is a scheduled job keyed by a unique row per week, so it can never send twice. Text is rendered by the API from the same sv/en catalogue the clients use, in the person's stored language.</p>
+      </div>
+    </div>
+    <div class="stack">
+      <h3>Data model</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Table</th><th>Holds</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">workspace</td><td>Name, Logto organization id, currency, timezone, week start, show-pay flag, rounding rule, default day length, colour, emoji</td><td>One per business</td></tr>
+          <tr><td class="mono">membership</td><td>Who belongs to which workspace, as EMPLOYER or EMPLOYEE; display name, email, hourly rate, status (Invited, Active, Deactivated)</td><td>The authorization source for every API call</td></tr>
+          <tr><td class="mono">hour_entry</td><td>Workspace, member, date, hours (two decimals), note, who created it, soft-delete marker</td><td>One row per person per day; edits replace, history keeps the old value</td></tr>
+          <tr><td class="mono">hour_entry_change</td><td>Before and after for hours and note, who, when</td><td>Visible to both roles</td></tr>
+          <tr><td class="mono">entry_flag</td><td>Employee's message, status (Open, Fixed, Dismissed), who resolved it</td><td></td></tr>
+          <tr><td class="mono">month_lock</td><td>Workspace, month, locked by, plus an unlock history</td><td>Locked months refuse edits everywhere</td></tr>
+          <tr><td class="mono">notification</td><td>Recipient, workspace, kind, payload, read state, coalescing state</td><td>Feeds the in-app center and the push sweeper</td></tr>
+          <tr><td class="mono">push_token</td><td>One row per device: token, provider (Expo now), platform</td><td>Deleted on sign-out and on a dead-token receipt</td></tr>
+          <tr><td class="mono">user_preference</td><td>Language, push on/off, digest on/off</td><td>Language is stored here so a closed phone still gets Swedish</td></tr>
+          <tr><td class="mono">digest_run</td><td>One row per digest week</td><td>Makes the weekly job idempotent</td></tr>
+        </tbody>
+      </table></div>
+      <p class="mute">Every child table carries the workspace id with a composite foreign key, so workspace isolation is enforced by the database as well as by the code. Passwords are never stored: identity lives in Logto.</p>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="auth">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Accounts and roles, with Logto</span>
+      <h2>How people get in, and what each one may do</h2>
+      <p class="lead">Logto is the account system: it owns email addresses and passwords, renders the sign-in page (branded to the theme), sends the invitation email, and knows which organization (workspace) a person belongs to with which role. Klokka mirrors that membership into its own database and makes every permission decision from there, so a stale token can never grant access to a workspace someone was removed from.</p>
+    </div>
+    <div class="flow">
+      <div><span class="who">Employer</span><b>Creates an account</b>Logto's hosted sign-up, email and password. Klokka gets a user id, never the password.</div>
+      <div><span class="who">API</span><b>Creates the workspace</b>Makes a Logto organization, assigns the EMPLOYER role, stores the workspace and the membership.</div>
+      <div><span class="who">Employer</span><b>Adds an employee</b>Name, email, optional rate. The API creates a Logto invitation valid for 7 days and the member shows as Invited.</div>
+      <div><span class="who">Logto</span><b>Sends the invitation</b>Through our mail account. The link opens app.example.com/join.</div>
+      <div><span class="who">Employee</span><b>Joins</b>Sets a password, verifies the email, lands in the workspace as EMPLOYEE, is offered the Android app or the web.</div>
+      <div><span class="who">API</span><b>Mirrors and notifies</b>Membership becomes Active, the employer gets "Maria joined".</div>
+    </div>
+    <div class="cols">
+      <div class="stack"><h4>Roles</h4><p><b>EMPLOYER</b> and <b>EMPLOYEE</b> are per workspace (a person can be both, in different workspaces). <b>platform-admin</b> is a global role for the operator console and is checked on every operator route.</p></div>
+      <div class="stack"><h4>On the phone</h4><p>Sign-in opens Logto in the system browser and returns to the app (the same flow Kulram's app uses today). The token lives in the secure store; the app never sees the password.</p></div>
+      <div class="stack"><h4>On the web</h4><p>The session is an encrypted cookie. The browser never holds an API token; a server route adds it to each API call, which also means no cross-origin setup on the API.</p></div>
+      <div class="stack"><h4>Staging reality</h4><p>Our self-hosted Logto has a single tenant, so on staging Klokka shares the sign-in experience with Kulram (decision 3). Production gets its own instance.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="hosting">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Hosting and releases</span>
+      <h2>Staging on Coolify now, production by tag later</h2>
+      <p class="lead">Exactly the shape the Kulram site uses today: each app is a Docker image in our Nexus registry, deployed as an image app on the staging Coolify. No CI for now; one script builds, pushes and deploys. Production is added later on a version tag, following the standing runbook, with its own Logto and database.</p>
+    </div>
+    <div class="hgrid">
+      <div><span class="eyebrow">klokka-api</span><span class="big">8080</span><span class="mute">Quarkus fast-jar on a Java 25 runtime image, health at /q/health/ready, 512 MB</span></div>
+      <div><span class="eyebrow">klokka-web</span><span class="big">3000</span><span class="mute">Next.js standalone, settings read at runtime so one image serves every environment, health at /healthz</span></div>
+      <div><span class="eyebrow">klokka-landing</span><span class="big">3000</span><span class="mute">Next.js static site, like kulram-web, sv and en</span></div>
+      <div><span class="eyebrow">Postgres 18</span><span class="big">klokka</span><span class="mute">A database with two roles on the shared staging Postgres (decision 4)</span></div>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Release path (no CI yet)</h3>
+        <ol class="steps">
+          <li><b>Build</b> the three images locally with an immutable tag (git short sha).</li>
+          <li><b>Push</b> to docker.nexus.coolify.ooguy.com (credentials already on this host).</li>
+          <li><b>Deploy</b> by setting the image tag on the Coolify app with instant deploy, so Coolify's own record always names what is running. Rollback is the same call with an older tag.</li>
+        </ol>
+        <p class="mute">Secrets (database roles, Logto client ids and keys, SMTP, Expo access token) live only in Coolify environment variables and in gitignored local files.</p>
+      </div>
+      <div class="stack">
+        <h3>Developing on this host</h3>
+        <ul class="plain">
+          <li><b>API alone:</b> Quarkus dev mode starts its own Postgres container; nothing to configure.</li>
+          <li><b>Whole stack:</b> docker compose with Postgres 18 and Mailpit (catches every email locally); sign-in against the staging Logto with a localhost redirect registered.</li>
+          <li><b>Web:</b> dev server on the LAN address (192.168.0.16) so a phone can open it; verified with a real browser, not localhost.</li>
+          <li><b>Phone:</b> no emulator on this machine; Metro on port 8083, the debug APK served over the LAN and installed on your Android phone, exactly like the Kulram loop. Gradle runs on JDK 21 (JDK 25 breaks the native build step).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="plan">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Plan</span>
+      <h2>Twelve epics, forty stories, in build order</h2>
+      <p class="lead">Already in Jira project CHQ as CHQ-93 to CHQ-144, every summary prefixed KLOKKA and every feature story carrying its parity section (API, web, mobile). Anything you change in this review is changed there too. Foundations first, then the loop from sign-up to the employee seeing their month, then notifications, insights, pay, and polish.</p>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>#</th><th>Epic</th><th>Stories</th><th>What it delivers</th></tr></thead>
+      <tbody>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-93" target="_blank" rel="noopener">CHQ-93</a><br><span class="mute">E0</span></td><td><b>Foundations</b></td><td class="num">7</td><td>Monorepo, API skeleton on Quarkus + JDK 25, the OpenAPI contract and generated client, Logto objects on staging, end-to-end sign-in proof, Docker images + release script, local dev stack</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-94" target="_blank" rel="noopener">CHQ-94</a><br><span class="mute">E1</span></td><td><b>Identity and workspaces</b></td><td class="num">5</td><td>Employer sign-up and workspace creation, invite employee, accept invitation, workspace switcher, member management</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-95" target="_blank" rel="noopener">CHQ-95</a><br><span class="mute">E2</span></td><td><b>Logging hours</b></td><td class="num">4</td><td>Single entry with chips and notes, the week grid, change history, month lock</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-96" target="_blank" rel="noopener">CHQ-96</a><br><span class="mute">E3</span></td><td><b>Seeing hours</b></td><td class="num">3</td><td>Employee month view, employer per-employee view and totals, the calendar heat-map</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-97" target="_blank" rel="noopener">CHQ-97</a><br><span class="mute">E4</span></td><td><b>Insights</b></td><td class="num">3</td><td>Employer dashboard, employee dashboard, "nothing logged" nudges</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-98" target="_blank" rel="noopener">CHQ-98</a><br><span class="mute">E5</span></td><td><b>Pay</b></td><td class="num">3</td><td>Show-pay toggle and rates, money next to hours everywhere, CSV export</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-99" target="_blank" rel="noopener">CHQ-99</a><br><span class="mute">E6</span></td><td><b>Notifications</b></td><td class="num">5</td><td>Push infrastructure, in-app center, coalescing, invitation email and digest, preferences</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-100" target="_blank" rel="noopener">CHQ-100</a><br><span class="mute">E7</span></td><td><b>Flags and corrections</b></td><td class="num">1</td><td>Employee flags, employer resolves, both notified</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-101" target="_blank" rel="noopener">CHQ-101</a><br><span class="mute">E8</span></td><td><b>Brand and design system</b></td><td class="num">4</td><td>Tokens package, logo finals and app icons, shareable monthly card, dark mode</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-102" target="_blank" rel="noopener">CHQ-102</a><br><span class="mute">E9</span></td><td><b>Landing site</b></td><td class="num">1</td><td>The approved landing page, sv and en, SEO, Docker, staging</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-103" target="_blank" rel="noopener">CHQ-103</a><br><span class="mute">E10</span></td><td><b>Operator console</b></td><td class="num">1</td><td>Workspaces, users, invitations, volume, health; web only by decision</td></tr>
+        <tr><td class="num"><a href="https://cleanhq.atlassian.net/browse/CHQ-104" target="_blank" rel="noopener">CHQ-104</a><br><span class="mute">E11</span></td><td><b>Quality and release</b></td><td class="num">3</td><td>Test pyramid on all three, staging smoke with real accounts on a phone and a browser, v1 release and open-source hygiene</td></tr>
+      </tbody>
+    </table></div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>What exists in the repository today</h3>
+        <ul class="plain">
+          <li>README, AGENTS.md (conventions, parity rule, stack, ports, environments), MIT licence, agents-CLI onboarding</li>
+          <li>docs/PRODUCT_BRIEF.md, docs/DECISIONS.md, docs/JIRA_PLAN.md</li>
+          <li>docs/research: backend and infra, web, mobile (verified, cited, with scratch proofs)</li>
+          <li>docs/design: direction, tokens for three themes, the mockups and their screenshots</li>
+          <li>docs/brand: 24 concepts and the final mark in SVG and PNG</li>
+          <li>No application code, by design, until you approve</li>
+        </ul>
+      </div>
+      <div class="stack">
+        <h3>What happens on approval</h3>
+        <ol class="steps">
+          <li><b>Lock the choices</b> from the decisions chapter into DECISIONS.md and the tokens.</li>
+          <li><b>Adjust the Jira ladder</b> for anything this review changes, and push the repository to GitHub (public, MIT).</li>
+          <li><b>Start E0</b>: the monorepo, the API on JDK 25, the contract, Logto objects on staging, and the first deploy of three empty apps, so every later story lands on a running system.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</main>
+<footer><div class="wrap">Klokka preliminary report. Illustrative names and numbers throughout (Nordlys Cafe, Maria, Jonas, Ayla are examples). Sources: docs/PRODUCT_BRIEF.md, docs/DECISIONS.md, docs/research/*.md, docs/design/DIRECTION.md in the repository.</div></footer>
+<script>
+  // Mockup viewers: theme / mode / device switching by rebuilding the iframe src; scale desktop frames to fit.
+  (function () {
+    const viewers = document.querySelectorAll('.viewer');
+    function layout(v) {
+      const stage = v.querySelector('.stage'), frame = v.querySelector('iframe');
+      const device = v.dataset.device || 'desktop';
+      const w = stage.clientWidth;
+      if (device === 'phone') {
+        stage.classList.add('phone');
+        const scale = Math.min(1, (w - 40) / 390);
+        frame.width = 390; frame.height = 844; frame.style.transform = 'scale(' + scale + ')';
+        frame.style.transformOrigin = 'top center';
+        stage.style.height = Math.round(844 * scale + 40) + 'px';
+      } else {
+        stage.classList.remove('phone');
+        const fw = Number(v.dataset.width || 1440), fh = Number(v.dataset.height || 900);
+        const scale = Math.min(1, w / fw);
+        frame.width = fw; frame.height = fh; frame.style.transform = 'scale(' + scale + ')';
+        frame.style.transformOrigin = '0 0';
+        stage.style.height = Math.round(fh * scale) + 'px';
+      }
+    }
+    function src(v) {
+      const base = v.dataset.src, q = [];
+      q.push('theme=' + (v.dataset.theme || 'signal'));
+      if (v.dataset.mode && v.dataset.mode !== 'auto') q.push('mode=' + v.dataset.mode);
+      q.push('bar=0');
+      if (v.dataset.view) q.push(v.dataset.view);
+      return base + (base.includes('?') ? '&' : '?') + q.join('&');
+    }
+    viewers.forEach(v => {
+      const frame = v.querySelector('iframe');
+      v.querySelectorAll('button[data-set]').forEach(b => {
+        b.addEventListener('click', () => {
+          const [k, val] = b.dataset.set.split(':');
+          v.dataset[k] = val;
+          b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+          if (k === 'device') layout(v); else frame.src = src(v);
+          const open = v.querySelector('.open'); if (open) open.href = src(v).replace('&bar=0', '').replace('?bar=0', '');
+        });
+      });
+      frame.src = src(v); layout(v);
+      const open = v.querySelector('.open'); if (open) open.href = src(v).replace('&bar=0', '').replace('?bar=0', '');
+    });
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(() => viewers.forEach(layout), 120); });
+    // active chapter in the top nav
+    const links = [...document.querySelectorAll('.topnav a')];
+    const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
+    document.querySelectorAll('section[id]').forEach(s => obs.observe(s));
+  })();
+</script>
