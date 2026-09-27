@@ -12,6 +12,7 @@ apps/mobile/google-services.json
 node_modules/
 .next/
 dist/
+!packages/tokens/dist/
 .expo/
 *.tsbuildinfo
 # Java / Maven
@@ -20,8 +21,8 @@ target/
 # Generated native projects (expo prebuild)
 apps/mobile/android/
 apps/mobile/ios/
-# Generated clients (regenerated on build)
-packages/api-client/src/generated/
+# Generated outputs that ARE committed (guarded by regenerate-and-diff checks): packages/api-client/src/generated,
+# packages/tokens/dist, packages/core/src/i18n/catalogue.generated.ts. Only Maven's target/ is ignored.
 # Tooling
 .idea/
 .vscode/

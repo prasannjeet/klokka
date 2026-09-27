@@ -1,0 +1,29 @@
+{
+  "name": "@klokka/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Klokka's platform-neutral core: the typed sv/en string catalogue (JSON, also read by the API), hours parsing and rounding, month and week geometry, and Intl formatters.",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./hours": "./src/hours.ts",
+    "./month": "./src/month.ts",
+    "./format": "./src/format.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./i18n/sv.json": "./i18n/sv.json",
+    "./i18n/en.json": "./i18n/en.json"
+  },
+  "files": [
+    "src",
+    "i18n"
+  ],
+  "scripts": {
+    "generate": "node scripts/gen-i18n.ts",
+    "gen-i18n": "node scripts/gen-i18n.ts",
+    "check": "node scripts/gen-i18n.ts --check",
+    "build": "node scripts/gen-i18n.ts --check && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  }
+}

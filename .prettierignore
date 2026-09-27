@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+.expo/
+target/
+package-lock.json
+docs/
+apps/api/
+packages/api-client/src/generated/
+packages/core/src/i18n/catalogue.generated.ts
+packages/tokens/dist/
+*.md
+.agents/
+.claude/
+.codex/
+.vscode/
+CLAUDE.md

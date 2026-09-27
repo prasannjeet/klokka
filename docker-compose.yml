@@ -1,0 +1,41 @@
+# Local dev stack: Postgres 18 + Mailpit. The API alone can run on Quarkus Dev Services instead; this is
+# for running the whole stack (API jar + web + landing + phone) against one database and one inbox.
+# Ports are chosen not to collide with Kulram (5432 / 8082 / 8899 / 8081) or with the other projects on
+# this host (5433 is sawerashree's Postgres). Override with KLOKKA_PG_PORT / KLOKKA_MAILPIT_* in .env.
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: klokka-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${KLOKKA_DB_NAME:-klokka}
+      POSTGRES_USER: ${KLOKKA_DB_USER:-klokka}
+      POSTGRES_PASSWORD: ${KLOKKA_DB_PASSWORD:-klokka}
+    ports:
+      - '${KLOKKA_PG_PORT:-5434}:5432'
+    volumes:
+      - klokka-postgres:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${KLOKKA_DB_USER:-klokka} -d ${KLOKKA_DB_NAME:-klokka}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: klokka-mailpit
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: '1'
+      MP_SMTP_AUTH_ALLOW_INSECURE: '1'
+    ports:
+      - '${KLOKKA_MAILPIT_UI_PORT:-8025}:8025'
+      - '${KLOKKA_MAILPIT_SMTP_PORT:-1025}:1025'
+    healthcheck:
+      test: ['CMD', '/mailpit', 'readyz']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  klokka-postgres:
