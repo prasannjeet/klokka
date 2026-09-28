@@ -97,6 +97,9 @@ class NotificationAndPushTest {
         assertThat(message.get("title")).isEqualTo("Notify Corp: Nora Lind lade till 3 dagar, 12,5 h");
         assertThat(message.get("body")).isEqualTo("12,5 h i vecka 39.");
         assertThat(((Map<String, Object>) message.get("data")).get("notificationId")).isEqualTo(id.toString());
+        // The phone's allowlisted deep link and Android channel (registerPushToken in the contract).
+        assertThat(((Map<String, Object>) message.get("data")).get("url")).isEqualTo("/w/" + ws + "/members/" + maria + "/month/2026-09");
+        assertThat(message.get("channelId")).isEqualTo("hours");
         assertThat(data.scalar("select pushed_at from notification where id = ?", id)).isNotNull();
         assertThat(data.count("select count(*) from push_delivery where notification_id = ? and status = 'SENT'", id)).isEqualTo(1);
         sweeper.sweep();

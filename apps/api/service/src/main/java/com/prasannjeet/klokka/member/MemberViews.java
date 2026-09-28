@@ -51,6 +51,7 @@ public final class MemberViews {
                 .hourlyRate(rate ? m.hourlyRate : null)
                 .invitedAt(m.invitedAt.atOffset(ZoneOffset.UTC))
                 .joinedAt(m.joinedAt == null ? null : m.joinedAt.atOffset(ZoneOffset.UTC))
+                .deactivatedAt(m.deactivatedAt == null ? null : m.deactivatedAt.atOffset(ZoneOffset.UTC))
                 .month(new MemberMonthFigures()
                         .month(month.toString())
                         .hours(hours == null ? BigDecimal.ZERO : hours)

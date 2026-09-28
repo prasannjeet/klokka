@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Klokka API
- * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. 
+ * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`). 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -38,6 +38,17 @@ import {
     ProblemFromJSON,
     ProblemToJSON,
 } from '../models/Problem';
+
+export interface GetFlagRequest {
+    /**
+     * 
+     */
+    workspaceId: string;
+    /**
+     * 
+     */
+    flagId: string;
+}
 
 export interface ListFlagsRequest {
     /**
@@ -84,6 +95,69 @@ export interface ResolveFlagRequest {
  * 
  */
 export class FlagsApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for getFlag without sending the request
+     */
+    async getFlagRequestOpts(requestParameters: GetFlagRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['workspaceId'] == null) {
+            throw new runtime.RequiredError(
+                'workspaceId',
+                'Required parameter "workspaceId" was null or undefined when calling getFlag().'
+            );
+        }
+
+        if (requestParameters['flagId'] == null) {
+            throw new runtime.RequiredError(
+                'flagId',
+                'Required parameter "flagId" was null or undefined when calling getFlag().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/workspaces/{workspaceId}/flags/{flagId}`;
+        urlPath = urlPath.replace('{workspaceId}', encodeURIComponent(String(requestParameters['workspaceId'])));
+        urlPath = urlPath.replace('{flagId}', encodeURIComponent(String(requestParameters['flagId'])));
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * The resolve screen opened from a push, a notification row or the Home card has only the flag id. A flag about someone else is a 404, not a hint that it exists.
+     * One flag (employer, or the member it is about)
+     */
+    async getFlagRaw(requestParameters: GetFlagRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Flag>> {
+        const requestOptions = await this.getFlagRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => FlagFromJSON(jsonValue));
+    }
+
+    /**
+     * The resolve screen opened from a push, a notification row or the Home card has only the flag id. A flag about someone else is a 404, not a hint that it exists.
+     * One flag (employer, or the member it is about)
+     */
+    async getFlag(requestParameters: GetFlagRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Flag> {
+        const response = await this.getFlagRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for listFlags without sending the request

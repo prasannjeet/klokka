@@ -39,13 +39,15 @@ class InvitationResourceTest {
     UUID ws;
     UUID invited;
     String token;
+    String slug;
 
     @BeforeEach
     void setUp() {
         data = new TestData(dataSource);
         Fake.reset();
         data.user(NORA, "nora@cafenord.example", "Nora Lind");
-        ws = data.workspace("Invite Corp", "invite-" + UUID.randomUUID().toString().substring(0, 8), false, "NONE", "Europe/Stockholm");
+        slug = "invite-" + UUID.randomUUID().toString().substring(0, 8);
+        ws = data.workspace("Invite Corp", slug, false, "NONE", "Europe/Stockholm");
         data.member(ws, NORA, "EMPLOYER", "Nora Lind", "nora@cafenord.example", null, "ACTIVE");
         token = "inv_" + UUID.randomUUID().toString().replace("-", "");
         invited = data.invited(ws, "Lina Ahmed", "lina@example.com", token, clock.instant(), clock.instant().plusSeconds(7 * 86400), "logto_inv_" + token.substring(4, 12));
@@ -86,6 +88,7 @@ class InvitationResourceTest {
                 .body("workspaceId", is(ws.toString()))
                 .body("membershipId", is(invited.toString()))
                 .body("workspaceName", is("Invite Corp"))
+                .body("workspaceSlug", is(slug))
                 .body("role", is("EMPLOYEE"));
         assertThat(data.query("select status, logto_user_id from membership where id = ?", invited)).containsExactly(List.of("ACTIVE", LINA));
         assertThat(data.scalar("select joined_at from membership where id = ?", invited)).isNotNull();

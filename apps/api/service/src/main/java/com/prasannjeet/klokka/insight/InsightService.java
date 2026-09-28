@@ -7,6 +7,7 @@ import com.prasannjeet.klokka.auth.WorkspaceAccess;
 import com.prasannjeet.klokka.contract.model.BusiestDay;
 import com.prasannjeet.klokka.contract.model.CurrentWeek;
 import com.prasannjeet.klokka.contract.model.CurrentWeekDay;
+import com.prasannjeet.klokka.contract.model.NothingLoggedDay;
 import com.prasannjeet.klokka.contract.model.MemberInsights;
 import com.prasannjeet.klokka.contract.model.MemberMonth;
 import com.prasannjeet.klokka.contract.model.MemberMonthDay;
@@ -241,7 +242,7 @@ public class InsightService {
                 .weekByWeek(months.weekTotals(id, null, ym))
                 .weekdayDistribution(distribution)
                 .busiestDay(busiest)
-                .nothingLoggedDays(nothingLogged)
+                .nothingLoggedDays(nothingLogged.stream().map(d -> new NothingLoggedDay().date(d)).toList())
                 .currentWeek(currentWeek(a, today, activeMembers))
                 .openFlags((int) flags.countOpen(id, null));
     }

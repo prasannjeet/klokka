@@ -103,6 +103,15 @@ public class FlagService {
                 .toList();
     }
 
+    // The employer sees every flag; a member only their own, and someone else's is a 404 rather than a hint.
+    @Transactional
+    public Flag get(UUID workspaceId, UUID flagId) {
+        Access a = access.member(workspaceId);
+        EntryFlagEntity flag = flags.findFlag(a.workspaceId(), flagId).orElseThrow(() -> notFound("Flag " + flagId));
+        if (!a.employer() && !flag.membershipId.equals(a.membership().id)) throw notFound("Flag " + flagId);
+        return view(a, flag, entries.findEntry(a.workspaceId(), flag.entryId).orElseThrow(() -> notFound("Entry " + flag.entryId)));
+    }
+
     @Transactional
     public Flag resolve(UUID workspaceId, UUID flagId, FlagResolve body) {
         Access a = access.employer(workspaceId);

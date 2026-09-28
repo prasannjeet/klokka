@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Klokka API
- * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. 
+ * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`). 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -34,6 +34,13 @@ import {
     MemberStatusToJSON,
     MemberStatusToJSONTyped,
 } from './MemberStatus';
+import type { Rounding } from './Rounding';
+import {
+    RoundingFromJSON,
+    RoundingFromJSONTyped,
+    RoundingToJSON,
+    RoundingToJSONTyped,
+} from './Rounding';
 import type { WorkspaceColour } from './WorkspaceColour';
 import {
     WorkspaceColourFromJSON,
@@ -97,6 +104,14 @@ export interface MyWorkspace {
      */
     weekStart: WeekStart;
     /**
+     * 
+     */
+    rounding: Rounding;
+    /**
+     * The "Full day" chip and the preview of what the rounding rule makes of a typed value.
+     */
+    defaultDayHours: number;
+    /**
      * Active plus invited members; for employers ("Employer, 4 people").
      */
     memberCount?: number | null;
@@ -132,6 +147,8 @@ export function instanceOfMyWorkspace(value: object): value is MyWorkspace {
     if (!('currency' in value) || value['currency'] === undefined) return false;
     if (!('timezone' in value) || value['timezone'] === undefined) return false;
     if (!('weekStart' in value) || value['weekStart'] === undefined) return false;
+    if (!('rounding' in value) || value['rounding'] === undefined) return false;
+    if (!('defaultDayHours' in value) || value['defaultDayHours'] === undefined) return false;
     if (!('hoursThisMonth' in value) || value['hoursThisMonth'] === undefined) return false;
     if (!('unreadNotifications' in value) || value['unreadNotifications'] === undefined) return false;
     return true;
@@ -159,6 +176,8 @@ export function MyWorkspaceFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'currency': json['currency'],
         'timezone': json['timezone'],
         'weekStart': WeekStartFromJSON(json['weekStart']),
+        'rounding': RoundingFromJSON(json['rounding']),
+        'defaultDayHours': json['defaultDayHours'],
         'memberCount': json['memberCount'] === undefined ? undefined : json['memberCount'] === null ? null : json['memberCount'],
         'employerName': json['employerName'] === undefined ? undefined : json['employerName'] === null ? null : json['employerName'],
         'hoursThisMonth': json['hoursThisMonth'],
@@ -189,6 +208,8 @@ export function MyWorkspaceToJSONTyped(value?: MyWorkspace | null, ignoreDiscrim
         'currency': value['currency'],
         'timezone': value['timezone'],
         'weekStart': WeekStartToJSON(value['weekStart']),
+        'rounding': RoundingToJSON(value['rounding']),
+        'defaultDayHours': value['defaultDayHours'],
         'memberCount': value['memberCount'],
         'employerName': value['employerName'],
         'hoursThisMonth': value['hoursThisMonth'],

@@ -44,6 +44,10 @@ public class EntryWriter {
     @Inject
     Clock clock;
 
+    public boolean isLocked(Access access, YearMonth month) {
+        return locks.isLocked(access.workspaceId(), month);
+    }
+
     public void requireUnlocked(Access access, YearMonth month) {
         if (locks.isLocked(access.workspaceId(), month)) {
             throw new KlokkaException(MONTH_LOCKED, Formats.month(month, com.prasannjeet.klokka.contract.model.Language.EN)

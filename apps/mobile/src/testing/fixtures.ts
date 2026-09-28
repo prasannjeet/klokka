@@ -253,7 +253,7 @@ export const insightsFixture: WorkspaceInsights = {
   ],
   weekdayDistribution: [],
   busiestDay: { weekday: 'WEDNESDAY', avgHours: 22 },
-  nothingLoggedDays: [d('2026-09-18')],
+  nothingLoggedDays: [{ date: d('2026-09-18') }],
   currentWeek: {
     isoWeek: 39,
     from: d('2026-09-21'),
@@ -344,6 +344,8 @@ export const employerMeFixture: Me = {
       currency: 'SEK',
       timezone: 'Europe/Stockholm',
       weekStart: 'MONDAY',
+      rounding: 'NONE',
+      defaultDayHours: 8,
       memberCount: 4,
       employerName: 'Nora Lind',
       hoursThisMonth: 335.5,

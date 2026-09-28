@@ -43,9 +43,7 @@ export function JoinView({
   const accept = useMutation({
     mutationFn: async () => {
       const accepted = await api.invitations.acceptInvitation({ token });
-      const me = await api.me.getMe();
-      const ws = me.workspaces.find((w) => w.workspaceId === accepted.workspaceId);
-      return { accepted, href: ws ? `/w/${ws.slug}` : '/' };
+      return { accepted, href: `/w/${accepted.workspaceSlug}` };
     },
     onSuccess: (result) => setJoined(result),
     onError: async (error) => setProblem(await toProblem(error)),

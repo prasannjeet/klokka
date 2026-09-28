@@ -1,6 +1,7 @@
 package com.prasannjeet.klokka.me;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.empty;
@@ -93,6 +94,8 @@ class MeResourceTest {
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.memberCount", nullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.hoursThisMonth", is(4.5f))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.showPay", is(true))
+                .body("workspaces.find { it.workspaceId == '" + workspace + "' }.rounding", notNullValue())
+                .body("workspaces.find { it.workspaceId == '" + workspace + "' }.defaultDayHours", notNullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.currency", is("SEK"))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.unreadNotifications", is(0));
     }

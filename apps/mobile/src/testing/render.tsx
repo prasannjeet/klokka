@@ -118,6 +118,8 @@ export const meFixture: Me = {
       currency: 'SEK',
       timezone: 'Europe/Stockholm',
       weekStart: 'MONDAY',
+      rounding: 'NONE',
+      defaultDayHours: 8,
       memberCount: 5,
       employerName: 'Nora Lind',
       hoursThisMonth: 92.5,

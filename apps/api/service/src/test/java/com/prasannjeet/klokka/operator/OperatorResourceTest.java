@@ -64,7 +64,7 @@ class OperatorResourceTest {
     void workspacesUsersAndInvitationsArePagedAggregates() {
         given().when().get("/v1/operator/workspaces?q=" + slug + "&month=2026-09").then().statusCode(200)
                 .body("items", hasSize(1)).body("total", is(1)).body("page", is(1)).body("pageSize", is(12))
-                .body("items[0].slug", is(slug)).body("items[0].memberCount", is(3)).body("items[0].activeCount", is(2)).body("items[0].invitedCount", is(1))
+                .body("items[0].slug", is(slug)).body("items[0].colour", notNullValue()).body("items[0].memberCount", is(3)).body("items[0].activeCount", is(2)).body("items[0].invitedCount", is(1))
                 .body("items[0].monthHours", is(4.0f)).body("items[0].showPay", is(true)).body("items[0].lastActivityAt", notNullValue())
                 .body("summary.month", is("2026-09")).body("summary.workspaces", greaterThanOrEqualTo(1)).body("summary.membersInvited", greaterThanOrEqualTo(1));
         given().when().get("/v1/operator/workspaces?pay=false&q=" + slug).then().statusCode(200).body("items", hasSize(0));

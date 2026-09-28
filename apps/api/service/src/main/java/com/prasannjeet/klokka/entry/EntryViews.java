@@ -57,6 +57,7 @@ public final class EntryViews {
                 .hours(e.hours)
                 .note(e.note)
                 .earnings(rate ? MemberViews.earnings(e.hours, member.hourlyRate) : null)
+                .hourlyRate(rate ? member.hourlyRate : null)
                 .locked(locked)
                 .createdAt(e.createdAt.atOffset(ZoneOffset.UTC))
                 .createdBy(names.actor(e.createdBy))

@@ -23,6 +23,11 @@ public class FlagResource implements FlagsApi {
     }
 
     @Override
+    public Flag getFlag(UUID workspaceId, UUID flagId) {
+        return service.get(workspaceId, flagId);
+    }
+
+    @Override
     public Flag raiseFlag(UUID workspaceId, UUID entryId, FlagCreate flagCreate) {
         return service.raise(workspaceId, entryId, flagCreate);
     }

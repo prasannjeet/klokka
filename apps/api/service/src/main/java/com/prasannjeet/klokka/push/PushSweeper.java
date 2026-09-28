@@ -6,6 +6,8 @@ import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.i18n.Catalogue;
 import com.prasannjeet.klokka.i18n.Text;
 import com.prasannjeet.klokka.notification.NotificationPayload;
+import com.prasannjeet.klokka.notification.NotificationLinks;
+import com.prasannjeet.klokka.notification.NotificationService;
 import com.prasannjeet.klokka.notification.NotificationRepository;
 import com.prasannjeet.klokka.notification.NotificationTexts;
 import com.prasannjeet.klokka.persistence.NotificationEntity;
@@ -38,6 +40,9 @@ public class PushSweeper {
 
     @Inject
     NotificationRepository repository;
+
+    @Inject
+    NotificationService notifications;
 
     @Inject
     NotificationTexts texts;
@@ -90,8 +95,10 @@ public class PushSweeper {
             data.put("notificationId", row.id.toString());
             data.put("kind", row.kind.toString());
             if (row.workspaceId != null) data.put("workspaceId", row.workspaceId.toString());
+            data.put("url", NotificationLinks.url(row.kind, notifications.link(row, payload)));
+            String channel = NotificationLinks.channel(row.kind);
             for (String token : deviceTokens) {
-                messages.add(new ExpoModels.Message(token, title, rendered.body(), data, "default", "default", "high"));
+                messages.add(new ExpoModels.Message(token, title, rendered.body(), data, "default", channel, "high"));
                 owners.add(row);
                 tokens.add(token);
             }

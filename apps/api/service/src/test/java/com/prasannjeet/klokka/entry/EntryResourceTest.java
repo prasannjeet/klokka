@@ -115,7 +115,9 @@ class EntryResourceTest {
         given().contentType("application/json")
                 .body("{\"items\":[{\"membershipId\":\"" + maria + "\",\"workDate\":\"2026-09-07\",\"hours\":4},{\"membershipId\":\"" + maria + "\",\"workDate\":\"2026-08-31\",\"hours\":4}]}")
                 .when().post("/v1/workspaces/" + ws + "/entries/batch")
-                .then().statusCode(409).body("code", is("MONTH_LOCKED"));
+                .then().statusCode(409).body("code", is("MONTH_LOCKED"))
+                // Only the cell in the closed month is named, so the grid rings that one and not the open September cell.
+                .body("errors", hasSize(1)).body("errors[0].field", is("items[1].workDate")).body("errors[0].message", is("August 2026 is closed"));
         assertThat(data.count("select count(*) from hour_entry where membership_id = ? and work_date = '2026-09-07'", maria)).isZero();
     }
 

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { formatDate, formatHours, formatTime } from '@klokka/core';
 import { useWorkspaceOrThrow } from '@/data/me';
-import { useEntryHistory, useFlags, useResolveFlag } from '@/data/workspace';
+import { useEntryHistory, useFlag, useResolveFlag } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { toIsoDate } from '@/lib/dates';
@@ -40,8 +40,8 @@ function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
   const router = useRouter();
   const toast = useToast();
   const workspace = useWorkspaceOrThrow();
-  const flags = useFlags(workspace.workspaceId);
-  const flag = flags.data?.find((f) => f.id === flagId) ?? null;
+  const flagQuery = useFlag(workspace.workspaceId, flagId);
+  const flag = flagQuery.data ?? null;
   const history = useEntryHistory(workspace.workspaceId, flag?.entryId);
   const resolve = useResolveFlag(workspace.workspaceId);
 
@@ -68,7 +68,7 @@ function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
     }
   };
 
-  if (flags.data && !flag) {
+  if (flagQuery.isError || (flagQuery.isSuccess && !flag)) {
     return (
       <Screen testID="flag-missing">
         <Header title={t('flags.title')} back large={false} />

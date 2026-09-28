@@ -270,7 +270,7 @@ function PerPerson({ data }: { data: WorkspaceInsights }) {
 function Nudge({ data, slug }: { data: WorkspaceInsights; slug: string }) {
   const t = useT();
   const locale = useLocale();
-  const days = data.nothingLoggedDays.map(isoOf);
+  const days = data.nothingLoggedDays.map((d) => isoOf(d.date));
   if (days.length === 0) return null;
   const list = new Intl.ListFormat(intlLocale(locale), { type: 'conjunction' }).format(
     days.map((d) => formatDate(d, locale, 'weekdayDay')),

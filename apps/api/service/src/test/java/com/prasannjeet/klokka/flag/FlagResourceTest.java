@@ -76,14 +76,39 @@ class FlagResourceTest {
     }
 
     @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void oneFlagIsReadableByItsMember() {
+        String flagId = given().contentType("application/json").body("{\"reason\":\"MORE\",\"suggestedHours\":6,\"message\":\"I worked 6 h\"}")
+                .when().post("/v1/workspaces/" + ws + "/entries/" + entry + "/flags").then().statusCode(201).extract().path("id");
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(200)
+                .body("id", is(flagId)).body("status", is("OPEN")).body("memberName", is("Maria Lind")).body("suggestedHours", is(6.0f));
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + UUID.randomUUID()).then().statusCode(404).body("code", is("NOT_FOUND"));
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void theEmployerReadsAnyFlagOfTheWorkspace() {
+        UUID flagId = UUID.randomUUID();
+        data.run("insert into entry_flag (id, workspace_id, entry_id, membership_id, raised_by, reason, message, logged_hours, status) values (?, ?, ?, ?, ?, 'MORE', 'x', 4, 'OPEN')",
+                flagId, ws, entry, maria, MARIA);
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(200)
+                .body("id", is(flagId.toString())).body("membershipId", is(maria.toString())).body("entryId", is(entry.toString()));
+    }
+
+    @Test
     @TestSecurity(user = JONAS)
     @OidcSecurity(claims = {@Claim(key = "sub", value = JONAS)})
     void anotherMemberCannotFlagOrSeeIt() {
         given().contentType("application/json").body("{\"reason\":\"MORE\",\"message\":\"not mine\"}")
                 .when().post("/v1/workspaces/" + ws + "/entries/" + entry + "/flags").then().statusCode(403);
+        UUID flagId = UUID.randomUUID();
         data.run("insert into entry_flag (id, workspace_id, entry_id, membership_id, raised_by, reason, message, logged_hours, status) values (?, ?, ?, ?, ?, 'MORE', 'x', 4, 'OPEN')",
-                UUID.randomUUID(), ws, entry, maria, MARIA);
+                flagId, ws, entry, maria, MARIA);
         given().when().get("/v1/workspaces/" + ws + "/flags").then().statusCode(200).body("", hasSize(0));
+        // Someone else's flag is a 404, not a hint that it exists.
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(404).body("code", is("NOT_FOUND"));
     }
 
     @Test

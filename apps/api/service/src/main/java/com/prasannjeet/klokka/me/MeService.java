@@ -203,6 +203,8 @@ public class MeService {
                 .currency(workspace.currency)
                 .timezone(workspace.timezone)
                 .weekStart(workspace.weekStart)
+                .rounding(workspace.rounding)
+                .defaultDayHours(workspace.defaultDayHours)
                 .memberCount(employer ? (int) repository.memberCount(workspace.id) : null)
                 .employerName(employer ? null : repository.employerName(workspace.id).orElse(null))
                 .hoursThisMonth(repository.hoursBetween(workspace.id, employer ? null : membership.id, from, to))

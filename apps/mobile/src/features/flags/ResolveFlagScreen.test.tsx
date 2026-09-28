@@ -33,7 +33,7 @@ describe('ResolveFlagScreen (employer)', () => {
   it('faces the two numbers, shows the history, and fixes with the suggested hours', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
-      listFlags: [flagFixture],
+      getFlag: flagFixture,
       getEntryHistory: history,
       resolveFlag: { ...flagFixture, status: 'FIXED' },
     });
@@ -56,7 +56,7 @@ describe('ResolveFlagScreen (employer)', () => {
   it('dismisses by keeping the logged hours', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
-      listFlags: [flagFixture],
+      getFlag: flagFixture,
       getEntryHistory: history,
       resolveFlag: { ...flagFixture, status: 'DISMISSED' },
     });

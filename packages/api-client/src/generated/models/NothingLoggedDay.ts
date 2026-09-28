@@ -12,46 +12,53 @@
  * Do not edit the class manually.
  */
 
-
+import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
 /**
  * 
  * @export
+ * @interface NothingLoggedDay
  */
-export const EntryChangeKind = {
-    Created: 'CREATED',
-    Updated: 'UPDATED',
-    Deleted: 'DELETED',
-    Flagged: 'FLAGGED',
-    FlagFixed: 'FLAG_FIXED',
-    FlagDismissed: 'FLAG_DISMISSED',
-} as const;
-export type EntryChangeKind = typeof EntryChangeKind[keyof typeof EntryChangeKind];
+export interface NothingLoggedDay {
+    /**
+     * 
+     */
+    date: Date;
+}
 
+/**
+ * Check if a given object implements the NothingLoggedDay interface.
+ */
+export function instanceOfNothingLoggedDay(value: object): value is NothingLoggedDay {
+    if (!('date' in value) || value['date'] === undefined) return false;
+    return true;
+}
 
-export function instanceOfEntryChangeKind(value: any): boolean {
-    for (const key in EntryChangeKind) {
-        if (Object.prototype.hasOwnProperty.call(EntryChangeKind, key)) {
-            if (EntryChangeKind[key as keyof typeof EntryChangeKind] === value) {
-                return true;
-            }
-        }
+export function NothingLoggedDayFromJSON(json: any): NothingLoggedDay {
+    return NothingLoggedDayFromJSONTyped(json, false);
+}
+
+export function NothingLoggedDayFromJSONTyped(json: any, ignoreDiscriminator: boolean): NothingLoggedDay {
+    if (json == null) {
+        return json;
     }
-    return false;
+    return {
+        
+        'date': (json['date'] == null ? json['date'] : parseDate(json['date'])),
+    };
 }
 
-export function EntryChangeKindFromJSON(json: any): EntryChangeKind {
-    return EntryChangeKindFromJSONTyped(json, false);
+export function NothingLoggedDayToJSON(json: any): NothingLoggedDay {
+    return NothingLoggedDayToJSONTyped(json, false);
 }
 
-export function EntryChangeKindFromJSONTyped(json: any, ignoreDiscriminator: boolean): EntryChangeKind {
-    return json as EntryChangeKind;
-}
+export function NothingLoggedDayToJSONTyped(value?: NothingLoggedDay | null, ignoreDiscriminator: boolean = false): any {
+    if (value == null) {
+        return value;
+    }
 
-export function EntryChangeKindToJSON(value?: EntryChangeKind | null): any {
-    return value as any;
-}
-
-export function EntryChangeKindToJSONTyped(value: any, ignoreDiscriminator: boolean): EntryChangeKind {
-    return value as EntryChangeKind;
+    return {
+        
+        'date': value['date'] == null ? value['date'] : serializeDate(value['date']),
+    };
 }
 

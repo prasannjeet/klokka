@@ -141,6 +141,6 @@ public class InvitationService {
     }
 
     private static InvitationAccepted accepted(MembershipEntity m, WorkspaceEntity w) {
-        return new InvitationAccepted().workspaceId(w.id).membershipId(m.id).workspaceName(w.name).role(m.role);
+        return new InvitationAccepted().workspaceId(w.id).membershipId(m.id).workspaceName(w.name).workspaceSlug(w.slug).role(m.role);
     }
 }

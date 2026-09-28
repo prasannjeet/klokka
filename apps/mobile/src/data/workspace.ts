@@ -118,6 +118,15 @@ export function useFlags(workspaceId: string, status?: FlagStatus) {
   });
 }
 
+// One flag by id (the resolve screen opened from a push, a notification row or the Home card).
+export function useFlag(workspaceId: string, flagId: string) {
+  const api = useApi();
+  return useQuery({
+    queryKey: keys.flag(workspaceId, flagId),
+    queryFn: () => api.flags.getFlag({ workspaceId, flagId }),
+  });
+}
+
 export function useNotifications(workspaceId: string | null, unreadOnly: boolean) {
   const api = useApi();
   return useInfiniteQuery({
