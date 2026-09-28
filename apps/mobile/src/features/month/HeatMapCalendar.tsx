@@ -55,8 +55,9 @@ export function mixHex(a: string, b: string, ratio: number): string {
 
 // Days with hours are tinted green by how full they are and a flagged day red (CHQ-145, the same as the
 // web): the success and danger tokens at low strength over the cell, so the numbers keep the text colour
-// and their contrast in both modes.
-export const HEAT_STRENGTH = [0.16, 0.24, 0.32, 0.4, 0.48] as const;
+// and their contrast in both modes. The top step is the web's top (40%): stronger, the dark mode's text
+// falls under 4.5:1 on the month's busiest day.
+export const HEAT_STRENGTH = [0.16, 0.22, 0.28, 0.34, 0.4] as const;
 export const FLAG_STRENGTH = 0.3;
 
 export function heatFills(theme: Theme): string[] {
