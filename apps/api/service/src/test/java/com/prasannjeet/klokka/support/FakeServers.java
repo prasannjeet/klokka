@@ -76,6 +76,8 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         state.put("pushSends", new ArrayList<List<Map<String, Object>>>());
         state.put("receiptRequests", new ArrayList<List<String>>());
         state.put("listOrganizationsCalls", 0);
+        state.put("managementAuthorizations", new ArrayList<String>());
+        state.put("expoAuthorizations", new ArrayList<String>());
         users.clear();
     }
 
@@ -102,8 +104,10 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
                 state.put("tokenRequests", (int) state.get("tokenRequests") + 1);
                 respond(exchange, 200, "{\"access_token\":\"fake-m2m-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}");
             } else if (path.startsWith("/api/")) {
+                this.<String>list("managementAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 management(exchange, method, path.substring(4), body);
             } else if (path.startsWith("/expo/")) {
+                this.<String>list("expoAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 expo(exchange, path.substring(5), body);
             } else {
                 respond(exchange, 404, "{\"message\":\"no route " + path + "\"}");
