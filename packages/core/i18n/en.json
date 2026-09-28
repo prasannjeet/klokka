@@ -495,6 +495,8 @@
     },
     "hoursRemoved": {
       "title": "{name} removed {date}.",
+      "titleMany_one": "{name} removed {count} day",
+      "titleMany_other": "{name} removed {count} days",
       "body": "{hours} was taken off your month."
     },
     "inviteAccepted": {

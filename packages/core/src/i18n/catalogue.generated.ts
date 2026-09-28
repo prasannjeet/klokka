@@ -391,6 +391,8 @@ export const sv = {
   "notifications.hoursChanged.title": "{name} ändrade {date}.",
   "notifications.hoursRemoved.body": "{hours} togs bort från din månad.",
   "notifications.hoursRemoved.title": "{name} tog bort {date}.",
+  "notifications.hoursRemoved.titleMany_one": "{name} tog bort {count} dag",
+  "notifications.hoursRemoved.titleMany_other": "{name} tog bort {count} dagar",
   "notifications.inviteAccepted.body": "{name} är nu anställd på {workspace}.",
   "notifications.inviteAccepted.title": "{name} accepterade din inbjudan.",
   "notifications.markAllRead": "Markera alla som lästa",
@@ -1275,6 +1277,8 @@ export const en = {
   "notifications.hoursChanged.title": "{name} changed {date}.",
   "notifications.hoursRemoved.body": "{hours} was taken off your month.",
   "notifications.hoursRemoved.title": "{name} removed {date}.",
+  "notifications.hoursRemoved.titleMany_one": "{name} removed {count} day",
+  "notifications.hoursRemoved.titleMany_other": "{name} removed {count} days",
   "notifications.inviteAccepted.body": "{name} is now an employee of {workspace}.",
   "notifications.inviteAccepted.title": "{name} accepted your invitation.",
   "notifications.markAllRead": "Mark all as read",
@@ -2149,6 +2153,7 @@ export type MessageParams = {
   "notifications.hoursChanged.title": { date: string | number; name: string | number };
   "notifications.hoursRemoved.body": { hours: string | number };
   "notifications.hoursRemoved.title": { date: string | number; name: string | number };
+  "notifications.hoursRemoved.titleMany": { count: string | number; name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
   "notifications.markAllRead": Record<never, never>;
@@ -2645,6 +2650,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "nav.notificationsUnread",
   "notifications.hoursAdded.titleForYou",
   "notifications.hoursAdded.title",
+  "notifications.hoursRemoved.titleMany",
   "operator.invitations.expireTomorrow",
   "operator.invitations.resent",
   "overview.nothingLoggedDays",

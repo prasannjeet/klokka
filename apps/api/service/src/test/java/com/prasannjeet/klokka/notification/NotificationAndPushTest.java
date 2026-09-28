@@ -67,6 +67,26 @@ class NotificationAndPushTest {
         clock.reset();
     }
 
+    @Inject
+    NotificationTexts texts;
+
+    @Test
+    void aSittingThatOnlyClearedDaysReadsAsARemoval() {
+        Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("actorName", "Nora Lind");
+        payload.put("changes", Map.of(
+                "2026-09-29", Map.of("before", new BigDecimal("2.00")),
+                "2026-10-01", Map.of("before", new BigDecimal("3.00"))));
+        NotificationTexts.Rendered sv = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
+                com.prasannjeet.klokka.contract.model.Language.SV, "SEK");
+        assertThat(sv.title()).isEqualTo("Nora Lind tog bort 2 dagar");
+        assertThat(sv.body()).isEqualTo("5 h togs bort från din månad.");
+        assertThat(sv.detail()).isEqualTo("tis 29 sep till tors 1 okt");
+        NotificationTexts.Rendered en = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
+                com.prasannjeet.klokka.contract.model.Language.EN, "SEK");
+        assertThat(en.title()).isEqualTo("Nora Lind removed 2 days");
+    }
+
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
