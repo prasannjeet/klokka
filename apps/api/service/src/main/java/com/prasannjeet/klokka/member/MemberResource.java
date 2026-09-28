@@ -1,7 +1,5 @@
 package com.prasannjeet.klokka.member;
 
-import static com.prasannjeet.klokka.error.KlokkaException.notImplemented;
-
 import com.prasannjeet.klokka.contract.api.MembersApi;
 import com.prasannjeet.klokka.contract.model.Member;
 import com.prasannjeet.klokka.contract.model.MemberInvite;
@@ -12,7 +10,7 @@ import jakarta.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 
-// /workspaces/{id}/members (CHQ-113); update and remove arrive with CHQ-116.
+// /workspaces/{id}/members (CHQ-113, CHQ-116).
 @Authenticated
 public class MemberResource implements MembersApi {
 
@@ -36,7 +34,7 @@ public class MemberResource implements MembersApi {
 
     @Override
     public void removeMember(UUID workspaceId, UUID membershipId) {
-        throw notImplemented("removeMember");
+        service.remove(workspaceId, membershipId);
     }
 
     @Override
@@ -46,6 +44,6 @@ public class MemberResource implements MembersApi {
 
     @Override
     public Member updateMember(UUID workspaceId, UUID membershipId, MemberUpdate memberUpdate) {
-        throw notImplemented("updateMember");
+        return service.update(workspaceId, membershipId, memberUpdate);
     }
 }

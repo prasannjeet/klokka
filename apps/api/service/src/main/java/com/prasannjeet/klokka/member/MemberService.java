@@ -1,5 +1,7 @@
 package com.prasannjeet.klokka.member;
 
+import static com.prasannjeet.klokka.contract.model.MemberStatus.ACTIVE;
+import static com.prasannjeet.klokka.contract.model.MemberStatus.DEACTIVATED;
 import static com.prasannjeet.klokka.contract.model.MemberStatus.INVITED;
 import static com.prasannjeet.klokka.error.KlokkaException.validation;
 import static com.prasannjeet.klokka.error.ProblemCode.CONFLICT;
@@ -10,6 +12,7 @@ import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.contract.model.Member;
 import com.prasannjeet.klokka.contract.model.MemberInvite;
 import com.prasannjeet.klokka.contract.model.MemberStatus;
+import com.prasannjeet.klokka.contract.model.MemberUpdate;
 import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import com.prasannjeet.klokka.error.KlokkaException;
@@ -20,6 +23,7 @@ import com.prasannjeet.klokka.month.Months;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
+import com.prasannjeet.klokka.rest.JsonFieldPresence;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -35,7 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-// Members of a workspace (CHQ-113): invitations through Logto organization invitations, resend, expiry.
+// Members of a workspace (CHQ-113, CHQ-116): invitations through Logto organization invitations, PATCH with
+// absent-versus-null semantics, deactivate instead of delete once hours exist so history stays visible.
 @ApplicationScoped
 public class MemberService {
 
@@ -58,6 +63,9 @@ public class MemberService {
 
     @Inject
     KlokkaConfig config;
+
+    @Inject
+    JsonFieldPresence presence;
 
     @Inject
     Clock clock;
@@ -109,6 +117,55 @@ public class MemberService {
         memberships.persistMember(id, m);
         sendInvitation(a, m, now);
         return view(a, m, Months.current(a.workspace(), clock));
+    }
+
+    @Transactional
+    public Member update(UUID workspaceId, UUID membershipId, MemberUpdate update) {
+        Access a = access.employer(workspaceId);
+        MembershipEntity m = access.target(a, membershipId);
+        if (update.getDisplayName() != null) {
+            String name = update.getDisplayName().trim();
+            if (name.isEmpty()) throw validation("displayName", "must not be blank");
+            m.displayName = name;
+        }
+        if (presence.sent("hourlyRate")) m.hourlyRate = update.getHourlyRate();
+        if (update.getStatus() != null && update.getStatus() != m.status) {
+            MemberStatus wanted = update.getStatus();
+            if (m.role == Role.EMPLOYER) throw new KlokkaException(CONFLICT, "The employer's own membership cannot change status.");
+            if (m.status == INVITED || wanted == INVITED) {
+                throw new KlokkaException(CONFLICT, "An invited member becomes active by accepting the invitation.");
+            }
+            if (wanted == DEACTIVATED) {
+                m.status = DEACTIVATED;
+                m.deactivatedAt = clock.instant();
+            } else {
+                m.status = ACTIVE;
+                m.deactivatedAt = null;
+            }
+        }
+        return view(a, m, Months.current(a.workspace(), clock));
+    }
+
+    @Transactional
+    public void remove(UUID workspaceId, UUID membershipId) {
+        Access a = access.employer(workspaceId);
+        MembershipEntity m = access.target(a, membershipId);
+        if (m.role == Role.EMPLOYER) throw new KlokkaException(CONFLICT, "The employer cannot be removed from their own workspace.");
+        WorkspaceId id = a.workspaceId();
+        if (m.status == INVITED) {
+            logto.revokeInvitationQuietly(m.logtoInvitationId);
+            memberships.deleteMember(id, m);
+            return;
+        }
+        if (entries.hasLiveEntries(id, m.id)) {
+            if (m.status == ACTIVE) {
+                m.status = DEACTIVATED;
+                m.deactivatedAt = clock.instant();
+            }
+            return;
+        }
+        if (m.userId != null) logto.removeMember(a.workspace().logtoOrgId, m.userId);
+        memberships.deleteMember(id, m);
     }
 
     @Transactional
