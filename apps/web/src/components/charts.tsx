@@ -35,7 +35,7 @@ export function Spark({
   }));
   return (
     <div className="chart spark" role="img" aria-label={label}>
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer width="100%" height={height} key={locale}>
         <AreaChart
           data={data}
           margin={{ top: 10, right: 14, left: 14, bottom: 0 }}
@@ -94,7 +94,7 @@ export function Columns({
   const reduced = useReducedMotion();
   return (
     <div className="chart" role="img" aria-label={label}>
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer width="100%" height={height} key={locale}>
         <BarChart
           data={[...points]}
           margin={{ top: showValues ? 18 : 4, right: 4, left: 4, bottom: 0 }}
@@ -108,9 +108,9 @@ export function Columns({
             isAnimationActive={!reduced}
             minPointSize={2}
           >
-            {points.map((p) => (
+            {points.map((p, i) => (
               <Cell
-                key={p.label}
+                key={i}
                 fill={TONE_FILL[p.tone ?? 'base']}
                 stroke={p.tone === 'empty' ? 'var(--border)' : 'none'}
               />

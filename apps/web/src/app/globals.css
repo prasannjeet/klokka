@@ -3901,3 +3901,18 @@
     font-size: 12.5px;
   }
 }
+
+@layer components {
+  textarea.input {
+    border-radius: var(--radius-lg);
+  }
+  /* Segments with long labels (Swedish runs 20 to 30 % longer) stack on narrow phones. */
+  @media (max-width: 479px) {
+    .seg.block.stack {
+      grid-auto-flow: row;
+    }
+    .seg.block.stack button {
+      white-space: normal;
+    }
+  }
+}

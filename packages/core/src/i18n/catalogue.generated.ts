@@ -608,6 +608,15 @@ export const sv = {
   "web.employees.withdrawTitle": "Dra tillbaka inbjudan till {name}?",
   "web.employees.withdrawn": "Inbjudan till {name} är tillbakadragen.",
   "web.errorPage.title": "Något gick fel",
+  "web.flags.hoursField": "Timmar",
+  "web.flags.hoursLabel": "Timmar du jobbade (valfritt)",
+  "web.flags.messageRequired": "Skriv ett kort meddelande så att {name} vet vad som ska rättas.",
+  "web.flags.onDay": "h den {date}",
+  "web.flags.reason": "Vad är fel",
+  "web.flags.sent": "Flaggan skickad till {name}.",
+  "web.flags.who": "{name}, {date}",
+  "web.flags.youFlagged": "Du har flaggat den här posten. Arbetsgivaren tittar på det.",
+  "web.flags.youSuggested": "Du har flaggat den: {suggested} i stället för {logged}. Arbetsgivaren tittar på det.",
   "web.join.acceptedBody": "Varje timme {employer} loggar för dig syns i Klokka i samma stund som den ändras. Hämta appen för notiser i mobilen, eller fortsätt här.",
   "web.join.alreadyAccepted": "Den här inbjudan är redan accepterad.",
   "web.join.appHint": "En direkt nedladdning för Android så länge Klokka inte finns i Google Play.",
@@ -692,6 +701,22 @@ export const sv = {
   "web.operator.volume.noDays": "Inga notiser den här månaden än.",
   "web.operator.volume.perDayLabel": "Notiser per dag, push och i appen",
   "web.operator.volume.push": "Push",
+  "web.overview.lastMonthOver": "{month} är slut; det här är de slutliga siffrorna.",
+  "web.overview.noRecent": "Inget nytt än.",
+  "web.overview.nothingLoggedAll": "Varje arbetsdag hittills har timmar.",
+  "web.overview.projectedLine": "Beräknat månadsslut {projected}, {lastMonth}",
+  "web.profile.appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast.",
+  "web.profile.employerAt_one": "Arbetsgivare på {count} arbetsplats",
+  "web.profile.employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+  "web.profile.nameRequired": "Namnet kan inte vara tomt.",
+  "web.settings.dayLengthInvalid": "Ange en daglängd mellan 0,25 och 24 timmar.",
+  "web.settings.noDevice": "Ingen telefon är inloggad på det här kontot än.",
+  "web.settings.payDemoLabel": "{name}, en hel dag",
+  "web.settings.payHiddenBody": "Klokka visar bara timmar, för dig och för varje anställd.",
+  "web.settings.payHiddenTitle": "Lön är dold",
+  "web.settings.payShownBody": "Varje anställd ser sin timlön och intjäning från och med nu.",
+  "web.settings.payShownTitle": "Lön visas nu",
+  "web.settings.saved": "Sparat",
   "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
   "web.shell.operatorConsole": "Operatörskonsol",
   "web.signIn.backToStart": "Tillbaka till klokka",
@@ -1395,6 +1420,15 @@ export const en = {
   "web.employees.withdrawTitle": "Withdraw the invitation to {name}?",
   "web.employees.withdrawn": "Invitation to {name} withdrawn.",
   "web.errorPage.title": "Something went wrong",
+  "web.flags.hoursField": "Hours",
+  "web.flags.hoursLabel": "Hours you worked (optional)",
+  "web.flags.messageRequired": "Write a short message so {name} knows what to fix.",
+  "web.flags.onDay": "h on {date}",
+  "web.flags.reason": "What is wrong",
+  "web.flags.sent": "Flag sent to {name}.",
+  "web.flags.who": "{name}, {date}",
+  "web.flags.youFlagged": "You flagged this entry. The employer is looking at it.",
+  "web.flags.youSuggested": "You flagged it: {suggested} instead of {logged}. The employer is looking at it.",
   "web.join.acceptedBody": "Every hour {employer} logs for you shows up in Klokka the moment it changes. Get the app for notifications on your phone, or carry on here.",
   "web.join.alreadyAccepted": "This invitation has already been accepted.",
   "web.join.appHint": "A direct download for Android while Klokka is not in Google Play yet.",
@@ -1479,6 +1513,22 @@ export const en = {
   "web.operator.volume.noDays": "No notifications this month yet.",
   "web.operator.volume.perDayLabel": "Notifications per day, push and in-app",
   "web.operator.volume.push": "Push",
+  "web.overview.lastMonthOver": "{month} is over; these are its final figures.",
+  "web.overview.noRecent": "Nothing new yet.",
+  "web.overview.nothingLoggedAll": "Every working day so far has hours.",
+  "web.overview.projectedLine": "Projected month end {projected}, {lastMonth}",
+  "web.profile.appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put.",
+  "web.profile.employerAt_one": "Employer at {count} workspace",
+  "web.profile.employerAt_other": "Employer at {count} workspaces",
+  "web.profile.nameRequired": "Your name cannot be empty.",
+  "web.settings.dayLengthInvalid": "Enter a day length between 0.25 and 24 hours.",
+  "web.settings.noDevice": "No phone is signed in on this account yet.",
+  "web.settings.payDemoLabel": "{name}, a full day",
+  "web.settings.payHiddenBody": "Klokka shows hours only, for you and for every employee.",
+  "web.settings.payHiddenTitle": "Pay is hidden",
+  "web.settings.payShownBody": "Every employee sees their rate and earnings from now on.",
+  "web.settings.payShownTitle": "Pay is now shown",
+  "web.settings.saved": "Saved",
   "web.shell.clockLabel": "A railway clock showing the current time",
   "web.shell.operatorConsole": "Operator console",
   "web.signIn.backToStart": "Back to klokka",
@@ -2167,6 +2217,15 @@ export type MessageParams = {
   "web.employees.withdrawTitle": { name: string | number };
   "web.employees.withdrawn": { name: string | number };
   "web.errorPage.title": Record<never, never>;
+  "web.flags.hoursField": Record<never, never>;
+  "web.flags.hoursLabel": Record<never, never>;
+  "web.flags.messageRequired": { name: string | number };
+  "web.flags.onDay": { date: string | number };
+  "web.flags.reason": Record<never, never>;
+  "web.flags.sent": { name: string | number };
+  "web.flags.who": { date: string | number; name: string | number };
+  "web.flags.youFlagged": Record<never, never>;
+  "web.flags.youSuggested": { logged: string | number; suggested: string | number };
   "web.join.acceptedBody": { employer: string | number };
   "web.join.alreadyAccepted": Record<never, never>;
   "web.join.appHint": Record<never, never>;
@@ -2248,6 +2307,21 @@ export type MessageParams = {
   "web.operator.volume.noDays": Record<never, never>;
   "web.operator.volume.perDayLabel": Record<never, never>;
   "web.operator.volume.push": Record<never, never>;
+  "web.overview.lastMonthOver": { month: string | number };
+  "web.overview.noRecent": Record<never, never>;
+  "web.overview.nothingLoggedAll": Record<never, never>;
+  "web.overview.projectedLine": { lastMonth: string | number; projected: string | number };
+  "web.profile.appearanceHint": Record<never, never>;
+  "web.profile.employerAt": { count: string | number };
+  "web.profile.nameRequired": Record<never, never>;
+  "web.settings.dayLengthInvalid": Record<never, never>;
+  "web.settings.noDevice": Record<never, never>;
+  "web.settings.payDemoLabel": { name: string | number };
+  "web.settings.payHiddenBody": Record<never, never>;
+  "web.settings.payHiddenTitle": Record<never, never>;
+  "web.settings.payShownBody": Record<never, never>;
+  "web.settings.payShownTitle": Record<never, never>;
+  "web.settings.saved": Record<never, never>;
   "web.shell.clockLabel": Record<never, never>;
   "web.shell.operatorConsole": Record<never, never>;
   "web.signIn.backToStart": Record<never, never>;
@@ -2365,6 +2439,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "web.month.daysWithHours",
   "web.month.editedTimes",
   "web.operator.volume.inDays",
+  "web.profile.employerAt",
   "web.week.notify",
   "web.week.savedBody",
   "web.week.unsaved",

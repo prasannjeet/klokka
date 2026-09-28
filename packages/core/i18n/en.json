@@ -899,6 +899,39 @@
       "seeMonth": "See the month",
       "seeEmployees": "See employees",
       "unreadDot": "Unread"
+    },
+    "overview": {
+      "projectedLine": "Projected month end {projected}, {lastMonth}",
+      "lastMonthOver": "{month} is over; these are its final figures.",
+      "noRecent": "Nothing new yet.",
+      "nothingLoggedAll": "Every working day so far has hours."
+    },
+    "settings": {
+      "saved": "Saved",
+      "payShownTitle": "Pay is now shown",
+      "payShownBody": "Every employee sees their rate and earnings from now on.",
+      "payHiddenTitle": "Pay is hidden",
+      "payHiddenBody": "Klokka shows hours only, for you and for every employee.",
+      "dayLengthInvalid": "Enter a day length between 0.25 and 24 hours.",
+      "noDevice": "No phone is signed in on this account yet.",
+      "payDemoLabel": "{name}, a full day"
+    },
+    "profile": {
+      "employerAt_one": "Employer at {count} workspace",
+      "employerAt_other": "Employer at {count} workspaces",
+      "nameRequired": "Your name cannot be empty.",
+      "appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put."
+    },
+    "flags": {
+      "sent": "Flag sent to {name}.",
+      "messageRequired": "Write a short message so {name} knows what to fix.",
+      "reason": "What is wrong",
+      "hoursLabel": "Hours you worked (optional)",
+      "hoursField": "Hours",
+      "onDay": "h on {date}",
+      "who": "{name}, {date}",
+      "youSuggested": "You flagged it: {suggested} instead of {logged}. The employer is looking at it.",
+      "youFlagged": "You flagged this entry. The employer is looking at it."
     }
   }
 }

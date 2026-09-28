@@ -33,9 +33,11 @@ export function clockIn(timeZone: string, now: Date = new Date()): { h: number; 
   return { h: Number(p.hour), m: Number(p.minute), s: Number(p.second) + now.getMilliseconds() / 1000 };
 }
 
-// A Date from the generated client (a work date parsed as UTC midnight) back to its ISO date.
-export function isoOf(date: Date): IsoDate {
-  return date.toISOString().slice(0, 10);
+// A Date from the generated client (a work date parsed as UTC midnight) back to its ISO date. The generated
+// client leaves arrays of dates as strings at runtime while typing them as Date[] (WorkspaceInsights
+// nothingLoggedDays; docs/CONTRACT_REQUESTS.md), so strings are accepted too.
+export function isoOf(date: Date | string): IsoDate {
+  return typeof date === 'string' ? date.slice(0, 10) : date.toISOString().slice(0, 10);
 }
 
 // An ISO date as the Date the generated client wants for `date`-format parameters.

@@ -4,11 +4,13 @@
 // user, all or unread, mark one by opening it or all at once. Push carries the same items on the phone.
 import { useState } from 'react';
 import { ChoiceGroup } from '@/components/choice-group';
+import { FlagActions } from '@/components/flag-resolve';
 import { Icon } from '@/components/icons';
 import { NotificationItem } from '@/components/notification-item';
 import { ViewHeader } from '@/components/view-header';
 import { useT } from '@/lib/i18n';
 import { useMarkAllRead, useNotifications } from '@/lib/notifications';
+import { useFlags } from '@/lib/queries';
 import { useWorkspace } from '@/lib/workspace';
 
 export function NotificationsView() {
@@ -17,6 +19,9 @@ export function NotificationsView() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const list = useNotifications(ws.id, filter === 'unread');
   const markAll = useMarkAllRead(ws.id);
+  // A flag notification carries the resolve actions while the flag is still open (CHQ-135).
+  const openFlags = useFlags(ws.id, 'OPEN');
+  const flagById = new Map((ws.isEmployer ? (openFlags.data ?? []) : []).map((f) => [f.id, f]));
   const [now] = useState(() => new Date());
   const items = list.data?.pages.flatMap((p) => p.items) ?? [];
   const unread = list.data?.pages[0]?.unreadCount ?? ws.my.unreadNotifications;
@@ -71,6 +76,11 @@ export function NotificationsView() {
               employer={ws.isEmployer}
               timeZone={ws.timezone}
               now={now}
+              actions={(() => {
+                const flag =
+                  n.kind === 'ENTRY_FLAGGED' && n.link.flagId ? flagById.get(n.link.flagId) : undefined;
+                return flag?.status === 'OPEN' ? <FlagActions ws={ws} flag={flag} compact /> : undefined;
+              })()}
             />
           ))}
         </div>

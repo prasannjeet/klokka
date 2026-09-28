@@ -24,6 +24,7 @@ import { CalendarHeatmap } from './calendar-heatmap';
 import { Spark } from './charts';
 import { HoursDelta } from './delta';
 import { EntryHistory } from './entry-history';
+import { FlagDialog } from './flag-dialog';
 import { FlowNumber } from './flow-number';
 import { Icon } from './icons';
 import { Money } from './money';
@@ -179,7 +180,7 @@ export function EmployeeMonth() {
               label={t('month.calendarLabelMine', { month: monthName })}
             />
           </div>
-          <DayDetail day={selectedDay} date={selected} employer={employer} locked={mm.locked} />
+          <DayDetail key={selected ?? 'none'} day={selectedDay} date={selected} employer={employer} />
         </div>
       ) : null}
     </section>
@@ -190,16 +191,15 @@ function DayDetail({
   day,
   date,
   employer,
-  locked: _locked,
 }: {
   day: MemberMonthDay | null;
   date: IsoDate | null;
   employer: string;
-  locked: boolean;
 }) {
   const t = useT();
   const locale = useLocale();
   const ws = useWorkspace();
+  const [flagging, setFlagging] = useState(false);
   if (!date) {
     return (
       <div className="card pad dd">
@@ -234,11 +234,45 @@ function DayDetail({
               </div>
             </div>
           ) : null}
+          {day.flag?.status === 'OPEN' ? (
+            <div className="flag-open" role="status">
+              <b>
+                <Icon name="flag" />
+                {t('overview.openFlag')}
+              </b>
+              <span>
+                {day.flag.suggestedHours != null
+                  ? t('web.flags.youSuggested', {
+                      suggested: formatHours(day.flag.suggestedHours, locale),
+                      logged: formatHours(day.hours, locale),
+                    })
+                  : t('web.flags.youFlagged')}
+              </span>
+            </div>
+          ) : null}
           {day.entryId ? (
             <>
               <h3>{t('entry.history')}</h3>
               <EntryHistory workspaceId={ws.id} entryId={day.entryId} timeZone={ws.timezone} />
             </>
+          ) : null}
+          {day.entryId && day.flag?.status !== 'OPEN' ? (
+            <div className="acts">
+              <button className="btn btn-ghost btn-sm" type="button" onClick={() => setFlagging(true)}>
+                <Icon name="flag" />
+                {t('flags.flagThisEntry')}
+              </button>
+              <span className="hint">{t('flags.flagThisEntryHint', { name: employer })}</span>
+              <FlagDialog
+                ws={ws}
+                entryId={day.entryId}
+                date={date}
+                loggedHours={day.hours}
+                employer={employer}
+                open={flagging}
+                onClose={() => setFlagging(false)}
+              />
+            </div>
           ) : null}
         </>
       ) : (

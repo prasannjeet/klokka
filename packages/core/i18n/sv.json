@@ -899,6 +899,39 @@
       "seeMonth": "Se månaden",
       "seeEmployees": "Se anställda",
       "unreadDot": "Oläst"
+    },
+    "overview": {
+      "projectedLine": "Beräknat månadsslut {projected}, {lastMonth}",
+      "lastMonthOver": "{month} är slut; det här är de slutliga siffrorna.",
+      "noRecent": "Inget nytt än.",
+      "nothingLoggedAll": "Varje arbetsdag hittills har timmar."
+    },
+    "settings": {
+      "saved": "Sparat",
+      "payShownTitle": "Lön visas nu",
+      "payShownBody": "Varje anställd ser sin timlön och intjäning från och med nu.",
+      "payHiddenTitle": "Lön är dold",
+      "payHiddenBody": "Klokka visar bara timmar, för dig och för varje anställd.",
+      "dayLengthInvalid": "Ange en daglängd mellan 0,25 och 24 timmar.",
+      "noDevice": "Ingen telefon är inloggad på det här kontot än.",
+      "payDemoLabel": "{name}, en hel dag"
+    },
+    "profile": {
+      "employerAt_one": "Arbetsgivare på {count} arbetsplats",
+      "employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+      "nameRequired": "Namnet kan inte vara tomt.",
+      "appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast."
+    },
+    "flags": {
+      "sent": "Flaggan skickad till {name}.",
+      "messageRequired": "Skriv ett kort meddelande så att {name} vet vad som ska rättas.",
+      "reason": "Vad är fel",
+      "hoursLabel": "Timmar du jobbade (valfritt)",
+      "hoursField": "Timmar",
+      "onDay": "h den {date}",
+      "who": "{name}, {date}",
+      "youSuggested": "Du har flaggat den: {suggested} i stället för {logged}. Arbetsgivaren tittar på det.",
+      "youFlagged": "Du har flaggat den här posten. Arbetsgivaren tittar på det."
     }
   }
 }
