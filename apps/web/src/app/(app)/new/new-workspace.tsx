@@ -6,7 +6,7 @@
 // the email's local part, which is what invitations and notifications would show (staging: "admin invited you").
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
+import { useState, useSyncExternalStore, type CSSProperties, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
 import { BrandPanel } from '@/components/brand-panel';
@@ -32,6 +32,10 @@ import { WORKSPACE_EMOJIS, colourVar } from '@/lib/visual';
 // the first render hydrates cleanly.
 const START_COUNTRY = 'SE';
 
+// The browser's time zone never changes while the page is open, so there is nothing to subscribe to.
+const noSubscription = () => () => {};
+const noServerZone = () => null;
+
 export function NewWorkspace() {
   const t = useT();
   const locale = useLocale();
@@ -45,13 +49,12 @@ export function NewWorkspace() {
   const [yourName, setYourName] = useState(me.user.name);
   const [yourNameMissing, setYourNameMissing] = useState(false);
   const [country, setCountry] = useState(START_COUNTRY);
-  const [timezone, setTimezone] = useState(COUNTRIES[START_COUNTRY]?.timezone ?? 'Europe/Stockholm');
-  // The browser's zone is the default (CHQ-145), read after hydration so the server render (UTC)
-  // never disagrees with the first client render; picking a country still proposes its zone.
-  useEffect(() => {
-    const zone = browserTimeZone();
-    if (zone) setTimezone(zone);
-  }, []);
+  // The zone the person picked (directly or through the country); until then the browser's own zone
+  // (CHQ-145), else the start country's. The browser's zone is read as an external store with no server
+  // snapshot, so the server render and the hydrating render agree and the client then shows its own zone.
+  const [pickedZone, setTimezone] = useState<string | null>(null);
+  const browserZone = useSyncExternalStore(noSubscription, browserTimeZone, noServerZone);
+  const timezone = pickedZone ?? browserZone ?? COUNTRIES[START_COUNTRY]?.timezone ?? 'Europe/Stockholm';
   const [currency, setCurrency] = useState(COUNTRIES[START_COUNTRY]?.currency ?? 'SEK');
   const [weekStart, setWeekStart] = useState<WeekStart>('MONDAY');
   const [colour, setColour] = useState<WorkspaceColour>('PRIMARY');
