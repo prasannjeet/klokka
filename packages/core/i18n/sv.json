@@ -761,7 +761,17 @@
       "invitedOn": "Inbjuden {sent}, går ut {expires}",
       "invitationExpired": "Inbjudan gick ut {date}",
       "perHourSuffix": "{currency} per timme",
-      "emptyTitle": "Ingen här än"
+      "emptyTitle": "Ingen här än",
+      "moreFor": "Mer för {name}",
+      "deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
+      "reactivatedToast": "{name} är aktiv igen.",
+      "withdraw": "Dra tillbaka inbjudan",
+      "withdrawTitle": "Dra tillbaka inbjudan till {name}?",
+      "withdrawHint": "Länken i mejlet slutar fungera och {name} försvinner från listan.",
+      "withdrawn": "Inbjudan till {name} är tillbakadragen.",
+      "rateTitle": "Timlön för {name}",
+      "rateSaved": "Timlönen för {name} är sparad.",
+      "noRate": "Ingen timlön"
     }
   }
 }

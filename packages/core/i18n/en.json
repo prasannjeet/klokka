@@ -761,7 +761,17 @@
       "invitedOn": "Invited {sent}, expires {expires}",
       "invitationExpired": "Invitation expired {date}",
       "perHourSuffix": "{currency} per hour",
-      "emptyTitle": "No one here yet"
+      "emptyTitle": "No one here yet",
+      "moreFor": "More for {name}",
+      "deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
+      "reactivatedToast": "{name} is active again.",
+      "withdraw": "Withdraw invitation",
+      "withdrawTitle": "Withdraw the invitation to {name}?",
+      "withdrawHint": "The link in the email stops working and {name} disappears from the list.",
+      "withdrawn": "Invitation to {name} withdrawn.",
+      "rateTitle": "Hourly rate for {name}",
+      "rateSaved": "Rate saved for {name}.",
+      "noRate": "No rate"
     }
   }
 }

@@ -589,11 +589,21 @@ export const sv = {
   "web.emoji.star": "Stjärna",
   "web.emoji.sun": "Sol",
   "web.emoji.wave": "Våg",
+  "web.employees.deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
   "web.employees.emptyTitle": "Ingen här än",
   "web.employees.invitationExpired": "Inbjudan gick ut {date}",
   "web.employees.invited": "Inbjudan skickad till {email}.",
   "web.employees.invitedOn": "Inbjuden {sent}, går ut {expires}",
+  "web.employees.moreFor": "Mer för {name}",
+  "web.employees.noRate": "Ingen timlön",
   "web.employees.perHourSuffix": "{currency} per timme",
+  "web.employees.rateSaved": "Timlönen för {name} är sparad.",
+  "web.employees.rateTitle": "Timlön för {name}",
+  "web.employees.reactivatedToast": "{name} är aktiv igen.",
+  "web.employees.withdraw": "Dra tillbaka inbjudan",
+  "web.employees.withdrawHint": "Länken i mejlet slutar fungera och {name} försvinner från listan.",
+  "web.employees.withdrawTitle": "Dra tillbaka inbjudan till {name}?",
+  "web.employees.withdrawn": "Inbjudan till {name} är tillbakadragen.",
   "web.errorPage.title": "Något gick fel",
   "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
   "web.newWorkspace.headlineA": "Gör det till",
@@ -1263,11 +1273,21 @@ export const en = {
   "web.emoji.star": "Star",
   "web.emoji.sun": "Sun",
   "web.emoji.wave": "Wave",
+  "web.employees.deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
   "web.employees.emptyTitle": "No one here yet",
   "web.employees.invitationExpired": "Invitation expired {date}",
   "web.employees.invited": "Invitation sent to {email}.",
   "web.employees.invitedOn": "Invited {sent}, expires {expires}",
+  "web.employees.moreFor": "More for {name}",
+  "web.employees.noRate": "No rate",
   "web.employees.perHourSuffix": "{currency} per hour",
+  "web.employees.rateSaved": "Rate saved for {name}.",
+  "web.employees.rateTitle": "Hourly rate for {name}",
+  "web.employees.reactivatedToast": "{name} is active again.",
+  "web.employees.withdraw": "Withdraw invitation",
+  "web.employees.withdrawHint": "The link in the email stops working and {name} disappears from the list.",
+  "web.employees.withdrawTitle": "Withdraw the invitation to {name}?",
+  "web.employees.withdrawn": "Invitation to {name} withdrawn.",
   "web.errorPage.title": "Something went wrong",
   "web.newWorkspace.currencyNote": "(only shown if pay is on)",
   "web.newWorkspace.headlineA": "Make it",
@@ -1922,11 +1942,21 @@ export type MessageParams = {
   "web.emoji.star": Record<never, never>;
   "web.emoji.sun": Record<never, never>;
   "web.emoji.wave": Record<never, never>;
+  "web.employees.deactivatedToast": { name: string | number };
   "web.employees.emptyTitle": Record<never, never>;
   "web.employees.invitationExpired": { date: string | number };
   "web.employees.invited": { email: string | number };
   "web.employees.invitedOn": { expires: string | number; sent: string | number };
+  "web.employees.moreFor": { name: string | number };
+  "web.employees.noRate": Record<never, never>;
   "web.employees.perHourSuffix": { currency: string | number };
+  "web.employees.rateSaved": { name: string | number };
+  "web.employees.rateTitle": { name: string | number };
+  "web.employees.reactivatedToast": { name: string | number };
+  "web.employees.withdraw": Record<never, never>;
+  "web.employees.withdrawHint": { name: string | number };
+  "web.employees.withdrawTitle": { name: string | number };
+  "web.employees.withdrawn": { name: string | number };
   "web.errorPage.title": Record<never, never>;
   "web.newWorkspace.currencyNote": Record<never, never>;
   "web.newWorkspace.headlineA": Record<never, never>;
