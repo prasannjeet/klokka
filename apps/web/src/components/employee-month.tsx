@@ -29,6 +29,7 @@ import { FlowNumber } from './flow-number';
 import { Icon } from './icons';
 import { Money } from './money';
 import { MonthNav } from './month-nav';
+import { ShareCard } from './share-card';
 import { ViewHeader } from './view-header';
 
 export function EmployeeMonth() {
@@ -63,7 +64,15 @@ export function EmployeeMonth() {
         id="h-my-month"
         title={t('month.titleMine', { month: formatMonthName(month, locale, locale === 'en') })}
         sub={`${ws.my.name}. ${employer ? t('month.subtitleMine', { name: employer }) : ''}`}
-        actions={<MonthNav month={month} current={current} onChange={setMonth} />}
+        actions={
+          <>
+            <MonthNav month={month} current={current} onChange={setMonth} />
+            <a className="btn btn-secondary" href="#share-card">
+              <Icon name="share" />
+              {t('month.shareMyMonth')}
+            </a>
+          </>
+        }
       />
 
       {mi ? (
@@ -183,6 +192,8 @@ export function EmployeeMonth() {
           <DayDetail key={selected ?? 'none'} day={selectedDay} date={selected} employer={employer} />
         </div>
       ) : null}
+
+      {mi ? <ShareCard month={month} insights={mi} /> : null}
     </section>
   );
 }
