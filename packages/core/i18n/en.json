@@ -703,5 +703,23 @@
     "NOT_IMPLEMENTED": "Not available yet.",
     "INTERNAL": "Something went wrong on our side. Try again in a moment.",
     "NETWORK": "No connection. Check your network and try again."
+  },
+  "mobile": {
+    "welcome": {
+      "taglineA": "One clock.",
+      "taglineB": "Both sides."
+    },
+    "auth": {
+      "signInFailed": "Sign-in did not go through. Try again."
+    },
+    "noWorkspaces": {
+      "title": "No workspace yet",
+      "body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create a workspace here."
+    },
+    "chooseWorkspace": {
+      "hint_one": "You belong to {count} workspace. Switch any time from Profile.",
+      "hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
+      "rolesHint": "Roles are per workspace. An employer who also works for someone sees both here."
+    }
   }
 }

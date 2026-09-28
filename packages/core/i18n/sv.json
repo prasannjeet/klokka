@@ -703,5 +703,23 @@
     "NOT_IMPLEMENTED": "Inte tillgängligt än.",
     "INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
     "NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen."
+  },
+  "mobile": {
+    "welcome": {
+      "taglineA": "En klocka.",
+      "taglineB": "Båda sidor."
+    },
+    "auth": {
+      "signInFailed": "Inloggningen gick inte igenom. Försök igen."
+    },
+    "noWorkspaces": {
+      "title": "Ingen arbetsplats än",
+      "body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här."
+    },
+    "chooseWorkspace": {
+      "hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
+      "hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
+      "rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här."
+    }
   }
 }

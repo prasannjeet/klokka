@@ -233,6 +233,14 @@ export const sv = {
   "invitation.wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
   "invitation.youHaveBeenInvited": "Du har bjudits in av {workspace}",
   "invitation.yourEmail": "Din e-post",
+  "mobile.auth.signInFailed": "Inloggningen gick inte igenom. Försök igen.",
+  "mobile.chooseWorkspace.hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här.",
+  "mobile.noWorkspaces.body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här.",
+  "mobile.noWorkspaces.title": "Ingen arbetsplats än",
+  "mobile.welcome.taglineA": "En klocka.",
+  "mobile.welcome.taglineB": "Båda sidor.",
   "month.avgPerWorkingDay": "Snitt per arbetsdag",
   "month.avgPerWorkingDayShort": "{hours} per arbetsdag",
   "month.bestWeek": "Bästa veckan",
@@ -865,6 +873,14 @@ export const en = {
   "invitation.wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
   "invitation.youHaveBeenInvited": "You have been invited by {workspace}",
   "invitation.yourEmail": "Your email",
+  "mobile.auth.signInFailed": "Sign-in did not go through. Try again.",
+  "mobile.chooseWorkspace.hint_one": "You belong to {count} workspace. Switch any time from Profile.",
+  "mobile.chooseWorkspace.hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
+  "mobile.chooseWorkspace.rolesHint": "Roles are per workspace. An employer who also works for someone sees both here.",
+  "mobile.noWorkspaces.body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create a workspace here.",
+  "mobile.noWorkspaces.title": "No workspace yet",
+  "mobile.welcome.taglineA": "One clock.",
+  "mobile.welcome.taglineB": "Both sides.",
   "month.avgPerWorkingDay": "Average per working day",
   "month.avgPerWorkingDayShort": "{hours} per working day",
   "month.bestWeek": "Best week",
@@ -1493,6 +1509,13 @@ export type MessageParams = {
   "invitation.wrongAccount": { email: string | number };
   "invitation.youHaveBeenInvited": { workspace: string | number };
   "invitation.yourEmail": Record<never, never>;
+  "mobile.auth.signInFailed": Record<never, never>;
+  "mobile.chooseWorkspace.hint": { count: string | number };
+  "mobile.chooseWorkspace.rolesHint": Record<never, never>;
+  "mobile.noWorkspaces.body": Record<never, never>;
+  "mobile.noWorkspaces.title": Record<never, never>;
+  "mobile.welcome.taglineA": Record<never, never>;
+  "mobile.welcome.taglineB": Record<never, never>;
   "month.avgPerWorkingDay": Record<never, never>;
   "month.avgPerWorkingDayShort": { hours: string | number };
   "month.bestWeek": Record<never, never>;
@@ -1892,6 +1915,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "entry.editedTimes",
   "flags.openFlags",
   "insights.streakDays",
+  "mobile.chooseWorkspace.hint",
   "month.daysNewestFirst",
   "month.workingDays",
   "nav.notificationsUnread",
