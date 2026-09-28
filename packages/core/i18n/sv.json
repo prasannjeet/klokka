@@ -723,6 +723,38 @@
     },
     "notFound": {
       "title": "Här finns inget"
+    },
+    "newWorkspace": {
+      "headlineA": "Gör det till",
+      "headlineB": "ditt ställe.",
+      "currencyNote": "(visas bara om lön är på)",
+      "nameRequired": "Ge arbetsplatsen ett namn."
+    },
+    "colour": {
+      "PRIMARY": "Magenta",
+      "BLUE": "Hallon",
+      "GREEN": "Blågrön",
+      "PURPLE": "Bärnsten",
+      "YELLOW": "Gul",
+      "INK": "Violett"
+    },
+    "emoji": {
+      "coffee": "Kaffe",
+      "scissors": "Sax",
+      "sparkles": "Gnistor",
+      "bread": "Bröd",
+      "flower": "Blomma",
+      "bicycle": "Cykel",
+      "bag": "Shoppingkasse",
+      "palette": "Färgpalett",
+      "sun": "Sol",
+      "star": "Stjärna",
+      "cat": "Katt",
+      "rocket": "Raket",
+      "leaf": "Löv",
+      "wave": "Våg",
+      "music": "Musik",
+      "bee": "Bi"
     }
   }
 }

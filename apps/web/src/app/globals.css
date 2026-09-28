@@ -3690,6 +3690,9 @@
   .auth-card .field + .field {
     margin-top: 18px;
   }
+  .auth-card .two .field {
+    margin-top: 0;
+  }
   .auth-card .btn {
     min-height: 50px;
   }

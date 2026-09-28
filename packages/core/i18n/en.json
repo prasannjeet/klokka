@@ -723,6 +723,38 @@
     },
     "notFound": {
       "title": "Nothing here"
+    },
+    "newWorkspace": {
+      "headlineA": "Make it",
+      "headlineB": "your place.",
+      "currencyNote": "(only shown if pay is on)",
+      "nameRequired": "Give the workspace a name."
+    },
+    "colour": {
+      "PRIMARY": "Magenta",
+      "BLUE": "Raspberry",
+      "GREEN": "Teal",
+      "PURPLE": "Amber",
+      "YELLOW": "Yellow",
+      "INK": "Violet"
+    },
+    "emoji": {
+      "coffee": "Coffee",
+      "scissors": "Scissors",
+      "sparkles": "Sparkles",
+      "bread": "Bread",
+      "flower": "Flower",
+      "bicycle": "Bicycle",
+      "bag": "Shopping bag",
+      "palette": "Paint palette",
+      "sun": "Sun",
+      "star": "Star",
+      "cat": "Cat",
+      "rocket": "Rocket",
+      "leaf": "Leaf",
+      "wave": "Wave",
+      "music": "Music",
+      "bee": "Bee"
     }
   }
 }

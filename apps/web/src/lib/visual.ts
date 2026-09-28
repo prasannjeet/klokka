@@ -24,8 +24,30 @@ export function colourVar(colour: WorkspaceColour): string {
   return COLOUR_VAR[colour] ?? COLOUR_VAR.PRIMARY;
 }
 
-export const WORKSPACE_EMOJIS = ['☕', '✂️', '✨', '🍞', '🌼', '🚲', '🛍️', '🎨'] as const;
-export const AVATAR_EMOJIS = ['☀️', '⭐', '🐱', '🚀', '🌿', '🌊', '🎵', '🐝'] as const;
+// Emoji choices with the catalogue key of their accessible name.
+export const WORKSPACE_EMOJIS = [
+  ['\u2615', 'coffee'],
+  ['\u2702\uFE0F', 'scissors'],
+  ['\u2728', 'sparkles'],
+  ['\uD83C\uDF5E', 'bread'],
+  ['\uD83C\uDF3C', 'flower'],
+  ['\uD83D\uDEB2', 'bicycle'],
+  ['\uD83D\uDECD\uFE0F', 'bag'],
+  ['\uD83C\uDFA8', 'palette'],
+] as const;
+
+export const AVATAR_EMOJIS = [
+  ['\u2600\uFE0F', 'sun'],
+  ['\u2B50', 'star'],
+  ['\uD83D\uDC31', 'cat'],
+  ['\uD83D\uDE80', 'rocket'],
+  ['\uD83C\uDF3F', 'leaf'],
+  ['\uD83C\uDF0A', 'wave'],
+  ['\uD83C\uDFB5', 'music'],
+  ['\uD83D\uDC1D', 'bee'],
+] as const;
+
+export type EmojiName = (typeof WORKSPACE_EMOJIS)[number][1] | (typeof AVATAR_EMOJIS)[number][1];
 
 // Avatar fill per person, cycling through the chart order so neighbours differ.
 const AVATAR_CLASSES = ['', 'p', 'c3', 'c4', 'c2'] as const;

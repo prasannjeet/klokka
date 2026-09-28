@@ -567,7 +567,33 @@ export const sv = {
   "status.openForEdits": "Öppen för ändringar",
   "status.pending": "Väntar",
   "status.revoked": "Återkallad",
+  "web.colour.BLUE": "Hallon",
+  "web.colour.GREEN": "Blågrön",
+  "web.colour.INK": "Violett",
+  "web.colour.PRIMARY": "Magenta",
+  "web.colour.PURPLE": "Bärnsten",
+  "web.colour.YELLOW": "Gul",
+  "web.emoji.bag": "Shoppingkasse",
+  "web.emoji.bee": "Bi",
+  "web.emoji.bicycle": "Cykel",
+  "web.emoji.bread": "Bröd",
+  "web.emoji.cat": "Katt",
+  "web.emoji.coffee": "Kaffe",
+  "web.emoji.flower": "Blomma",
+  "web.emoji.leaf": "Löv",
+  "web.emoji.music": "Musik",
+  "web.emoji.palette": "Färgpalett",
+  "web.emoji.rocket": "Raket",
+  "web.emoji.scissors": "Sax",
+  "web.emoji.sparkles": "Gnistor",
+  "web.emoji.star": "Stjärna",
+  "web.emoji.sun": "Sol",
+  "web.emoji.wave": "Våg",
   "web.errorPage.title": "Något gick fel",
+  "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
+  "web.newWorkspace.headlineA": "Gör det till",
+  "web.newWorkspace.headlineB": "ditt ställe.",
+  "web.newWorkspace.nameRequired": "Ge arbetsplatsen ett namn.",
   "web.notFound.title": "Här finns inget",
   "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
   "web.shell.operatorConsole": "Operatörskonsol",
@@ -1210,7 +1236,33 @@ export const en = {
   "status.openForEdits": "Open for edits",
   "status.pending": "Pending",
   "status.revoked": "Revoked",
+  "web.colour.BLUE": "Raspberry",
+  "web.colour.GREEN": "Teal",
+  "web.colour.INK": "Violet",
+  "web.colour.PRIMARY": "Magenta",
+  "web.colour.PURPLE": "Amber",
+  "web.colour.YELLOW": "Yellow",
+  "web.emoji.bag": "Shopping bag",
+  "web.emoji.bee": "Bee",
+  "web.emoji.bicycle": "Bicycle",
+  "web.emoji.bread": "Bread",
+  "web.emoji.cat": "Cat",
+  "web.emoji.coffee": "Coffee",
+  "web.emoji.flower": "Flower",
+  "web.emoji.leaf": "Leaf",
+  "web.emoji.music": "Music",
+  "web.emoji.palette": "Paint palette",
+  "web.emoji.rocket": "Rocket",
+  "web.emoji.scissors": "Scissors",
+  "web.emoji.sparkles": "Sparkles",
+  "web.emoji.star": "Star",
+  "web.emoji.sun": "Sun",
+  "web.emoji.wave": "Wave",
   "web.errorPage.title": "Something went wrong",
+  "web.newWorkspace.currencyNote": "(only shown if pay is on)",
+  "web.newWorkspace.headlineA": "Make it",
+  "web.newWorkspace.headlineB": "your place.",
+  "web.newWorkspace.nameRequired": "Give the workspace a name.",
   "web.notFound.title": "Nothing here",
   "web.shell.clockLabel": "A railway clock showing the current time",
   "web.shell.operatorConsole": "Operator console",
@@ -1838,7 +1890,33 @@ export type MessageParams = {
   "status.openForEdits": Record<never, never>;
   "status.pending": Record<never, never>;
   "status.revoked": Record<never, never>;
+  "web.colour.BLUE": Record<never, never>;
+  "web.colour.GREEN": Record<never, never>;
+  "web.colour.INK": Record<never, never>;
+  "web.colour.PRIMARY": Record<never, never>;
+  "web.colour.PURPLE": Record<never, never>;
+  "web.colour.YELLOW": Record<never, never>;
+  "web.emoji.bag": Record<never, never>;
+  "web.emoji.bee": Record<never, never>;
+  "web.emoji.bicycle": Record<never, never>;
+  "web.emoji.bread": Record<never, never>;
+  "web.emoji.cat": Record<never, never>;
+  "web.emoji.coffee": Record<never, never>;
+  "web.emoji.flower": Record<never, never>;
+  "web.emoji.leaf": Record<never, never>;
+  "web.emoji.music": Record<never, never>;
+  "web.emoji.palette": Record<never, never>;
+  "web.emoji.rocket": Record<never, never>;
+  "web.emoji.scissors": Record<never, never>;
+  "web.emoji.sparkles": Record<never, never>;
+  "web.emoji.star": Record<never, never>;
+  "web.emoji.sun": Record<never, never>;
+  "web.emoji.wave": Record<never, never>;
   "web.errorPage.title": Record<never, never>;
+  "web.newWorkspace.currencyNote": Record<never, never>;
+  "web.newWorkspace.headlineA": Record<never, never>;
+  "web.newWorkspace.headlineB": Record<never, never>;
+  "web.newWorkspace.nameRequired": Record<never, never>;
   "web.notFound.title": Record<never, never>;
   "web.shell.clockLabel": Record<never, never>;
   "web.shell.operatorConsole": Record<never, never>;
