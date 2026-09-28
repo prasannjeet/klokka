@@ -53,7 +53,8 @@ and in Coolify, do not keep both. Current keys:
   `KLOKKA_WEB_BASE_URL`, `DB_URL` (JDBC, no password), `DB_APP_USER`, `DB_MIGRATE_USER`, `MAIL_HOST`,
   `MAIL_PORT`. Still to set (secret): `LOGTO_M2M_CLIENT_SECRET` (logto.json), `DB_APP_PASSWORD` and
   `DB_MIGRATE_PASSWORD` (postgres.json), `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` (smtp.json),
-  `EXPO_ACCESS_TOKEN` (expo.json), `KLOKKA_PUSH_QUIET_MINUTES`, `JAVA_OPTS`.
+  `KLOKKA_EXPO_ACCESS_TOKEN` (expo.json), `KLOKKA_PUSH_QUIET_WINDOW` and `KLOKKA_PUSH_MAX_DELAY` (ISO durations,
+  `docs/DEPLOYMENT.md`), `JAVA_OPTS`.
 - `klokka-web`: `LOGTO_ENDPOINT`, `LOGTO_APP_ID`, `LOGTO_BASE_URL`, `KLOKKA_API_RESOURCE`, `API_BASE_URL`,
   `NEXT_PUBLIC_API_BASE_URL`. Still to set: `LOGTO_APP_SECRET` (logto.json), `LOGTO_COOKIE_SECRET`
   (generate, 32+ chars).

@@ -127,13 +127,19 @@ export function usePushRuntime() {
       });
       await rememberPushToken(token);
     })().catch(() => undefined);
-    const rotation = Notifications.addPushTokenListener(({ data }) => {
-      void api.me
-        .registerPushToken({
-          pushTokenRegistration: { token: String(data), platform: Platform.OS === 'ios' ? 'IOS' : 'ANDROID' },
-        })
-        .then(() => rememberPushToken(String(data)))
-        .catch(() => undefined);
+    // The listener hands over the raw FCM/APNs device token, which Expo cannot deliver to (CHQ-145: every
+    // such row answered DeviceNotRegistered and was deleted, and sign-out then forgot the real Expo token).
+    // It is converted to the Expo token for this install first, and only a new one is registered. Passing the
+    // device token skips the native fetch, so the conversion cannot fire this listener again.
+    const rotation = Notifications.addPushTokenListener((devicePushToken) => {
+      void (async () => {
+        const { data: token } = await Notifications.getExpoPushTokenAsync({ devicePushToken });
+        if ((await rememberedPushToken()) === token) return;
+        await api.me.registerPushToken({
+          pushTokenRegistration: { token, platform: Platform.OS === 'ios' ? 'IOS' : 'ANDROID' },
+        });
+        await rememberPushToken(token);
+      })().catch(() => undefined);
     });
     return () => {
       cancelled = true;

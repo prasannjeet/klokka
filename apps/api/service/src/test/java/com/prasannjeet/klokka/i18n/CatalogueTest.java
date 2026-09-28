@@ -49,11 +49,11 @@ class CatalogueTest {
 
     @Test
     void interpolationAndPluralsFollowTheCatalogue() {
-        assertThat(catalogue.plural(Language.EN, Text.HOURS_ADDED_TITLE.key(), 1, Map.of("name", "Nora", "hours", "4")))
-                .isEqualTo("Nora added 1 day, 4 h");
-        assertThat(catalogue.plural(Language.SV, Text.HOURS_ADDED_TITLE.key(), 5, Map.of("name", "Nora", "hours", "22,5")))
-                .isEqualTo("Nora lade till 5 dagar, 22,5 h");
-        assertThatThrownBy(() -> catalogue.t(Language.EN, Text.HOURS_ADDED_BODY.key(), Map.of("hours", "4 h")))
+        assertThat(catalogue.plural(Language.EN, Text.HOURS_ADDED.key(), 1, Map.of("name", "Nora")))
+                .isEqualTo("Nora added 1 day");
+        assertThat(catalogue.plural(Language.SV, Text.HOURS_ADDED.key(), 5, Map.of("name", "Nora")))
+                .isEqualTo("Nora la till 5 dagar");
+        assertThatThrownBy(() -> catalogue.t(Language.EN, Text.HOURS_BODY_WEEK.key(), Map.of("workspace", "Kafé Nord", "days", "Mon 28 Sept 5 h")))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("{week}");
         assertThatThrownBy(() -> catalogue.t(Language.EN, "no.such.key")).isInstanceOf(IllegalArgumentException.class);
     }

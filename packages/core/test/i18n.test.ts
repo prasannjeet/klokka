@@ -56,7 +56,7 @@ describe('the catalogue files', () => {
   });
 
   it('seed the strings the mockups show', () => {
-    expect(enJson['notifications.hoursAdded.title_other']).toBe('{name} added {count} days, {hours} h');
+    expect(enJson['notifications.hours.added_other']).toBe('{name} added {count} days');
     expect(enJson['week.fullDay']).toBe('Full day');
     expect(enJson['settings.showPay']).toBe('Show pay to employees');
     expect(svJson['nav.myMonth']).toBe('Min månad');
@@ -65,8 +65,8 @@ describe('the catalogue files', () => {
 
 describe('t()', () => {
   it('interpolates named placeholders', () => {
-    expect(t('en', 'notifications.hoursChanged.title', { name: 'Nora', date: 'Wed 23 Sep' })).toBe(
-      'Nora changed Wed 23 Sep.',
+    expect(t('en', 'notifications.hours.changedOne', { name: 'Nora', date: 'Wednesday 23 Sept' })).toBe(
+      'Nora changed Wednesday 23 Sept',
     );
     expect(t('sv', 'week.noteFor', { name: 'Maria', date: 'onsdag 23' })).toBe(
       'Anteckning för Maria, onsdag 23',
@@ -74,12 +74,9 @@ describe('t()', () => {
   });
 
   it('picks the plural form by count', () => {
-    expect(t('en', 'notifications.hoursAdded.title', { name: 'Maria', count: 5, hours: '22.5' })).toBe(
-      'Maria added 5 days, 22.5 h',
-    );
-    expect(t('en', 'notifications.hoursAdded.title', { name: 'Maria', count: 1, hours: '4' })).toBe(
-      'Maria added 1 day, 4 h',
-    );
+    expect(t('en', 'notifications.hours.added', { name: 'Maria', count: 5 })).toBe('Maria added 5 days');
+    expect(t('en', 'notifications.hours.added', { name: 'Maria', count: 1 })).toBe('Maria added 1 day');
+    expect(t('sv', 'notifications.hours.added', { name: 'Maria', count: 2 })).toBe('Maria la till 2 dagar');
     expect(t('sv', 'common.people', { count: 4 })).toBe('4 personer');
     expect(t('sv', 'common.people', { count: 1 })).toBe('1 person');
     expect(t('en', 'common.days', { count: 0 })).toBe('0 days');

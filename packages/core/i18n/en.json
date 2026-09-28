@@ -484,50 +484,51 @@
     "employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
     "empty": "Nothing yet. You will hear about it here the moment something changes.",
     "emptyUnread": "All caught up.",
-    "hoursAdded": {
-      "title_one": "{name} added {count} day, {hours} h",
-      "title_other": "{name} added {count} days, {hours} h",
-      "titleForYou_one": "{name} added {count} day for you.",
-      "titleForYou_other": "{name} added {count} days for you.",
-      "body": "{hours} in week {week}.",
-      "range": "{from} to {to}"
-    },
-    "hoursChanged": {
-      "title": "{name} changed {date}.",
-      "body": "{before} is now {after}.",
+    "hours": {
+      "addedOne": "{name} added {date}",
+      "changedOne": "{name} changed {date}",
+      "added_one": "{name} added {count} day",
+      "added_other": "{name} added {count} days",
+      "changed_one": "{name} changed {count} day",
+      "changed_other": "{name} changed {count} days",
+      "removed_one": "{name} removed {count} day",
+      "removed_other": "{name} removed {count} days",
+      "bodyOne": "{workspace}: {hours}",
+      "bodyChangedOne": "{workspace}: {hours}, was {before}",
+      "bodyWeek": "{workspace}, week {week}: {days}",
+      "bodyDays": "{workspace}: {days}",
+      "rangeWeek": "{workspace}, week {week}: {from} to {to}, {hours}",
+      "range": "{workspace}: {from} to {to}, {hours}",
+      "day": "{date} {hours}",
+      "dayRemoved": "{date} removed",
       "note": "Note: \"{note}\""
     },
-    "hoursRemoved": {
-      "title": "{name} removed {date}.",
-      "titleMany_one": "{name} removed {count} day",
-      "titleMany_other": "{name} removed {count} days",
-      "body": "{hours} was taken off your month."
-    },
     "inviteAccepted": {
-      "title": "{name} accepted your invitation.",
-      "body": "{name} is now an employee of {workspace}."
+      "title": "{name} accepted your invitation",
+      "body": "{workspace}: {name} is now an employee"
     },
     "entryFlagged": {
-      "title": "{name} flagged {date}.",
-      "body": "Logged {logged}, {name} says {suggested}"
+      "title": "{name} flagged {date}",
+      "body": "{workspace}: logged {logged}, says {suggested}",
+      "bodyMessage": "{workspace}: \"{message}\""
     },
     "flagFixed": {
-      "title": "{name} fixed your flag.",
-      "body": "{date} is now {hours}."
+      "title": "{name} fixed your flag",
+      "body": "{workspace}: {date} is now {hours}"
     },
     "flagDismissed": {
-      "title": "{name} kept {date} at {hours}.",
-      "body": "Your flag was reviewed and the entry stays as logged."
+      "title": "{name} reviewed your flag",
+      "body": "{workspace}: {date} stays at {hours}"
     },
     "monthClosed": {
-      "title": "{month} is closed.",
-      "body": "{hours}, {money}.",
-      "bodyHoursOnly": "{hours}.",
-      "hint": "{name} locked the month. Share your card from Profile."
+      "title": "{name} closed {month}",
+      "body": "{workspace}: {hours}, {money}",
+      "bodyHoursOnly": "{workspace}: {hours}",
+      "hint": "Nothing changes until it is reopened. Share your card from Profile."
     },
     "monthReopened": {
-      "title": "{month} was reopened.",
-      "body": "{name} unlocked the month. Entries can change again."
+      "title": "{name} reopened {month}",
+      "body": "{workspace}: entries can change again"
     }
   },
   "email": {
@@ -829,9 +830,6 @@
       "note": "Note",
       "rate": "Hourly rate",
       "amount": "Amount"
-    },
-    "push": {
-      "workspacePrefix": "{workspace}: {title}"
     }
   },
   "web": {

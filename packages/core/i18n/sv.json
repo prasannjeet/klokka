@@ -484,50 +484,51 @@
     "employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
     "empty": "Inget än. Du får veta det här i samma stund som något ändras.",
     "emptyUnread": "Allt är läst.",
-    "hoursAdded": {
-      "title_one": "{name} lade till {count} dag, {hours} h",
-      "title_other": "{name} lade till {count} dagar, {hours} h",
-      "titleForYou_one": "{name} lade till {count} dag för dig.",
-      "titleForYou_other": "{name} lade till {count} dagar för dig.",
-      "body": "{hours} i vecka {week}.",
-      "range": "{from} till {to}"
-    },
-    "hoursChanged": {
-      "title": "{name} ändrade {date}.",
-      "body": "{before} är nu {after}.",
+    "hours": {
+      "addedOne": "{name} la till {date}",
+      "changedOne": "{name} ändrade {date}",
+      "added_one": "{name} la till {count} dag",
+      "added_other": "{name} la till {count} dagar",
+      "changed_one": "{name} ändrade {count} dag",
+      "changed_other": "{name} ändrade {count} dagar",
+      "removed_one": "{name} tog bort {count} dag",
+      "removed_other": "{name} tog bort {count} dagar",
+      "bodyOne": "{workspace}: {hours}",
+      "bodyChangedOne": "{workspace}: {hours}, var {before}",
+      "bodyWeek": "{workspace}, vecka {week}: {days}",
+      "bodyDays": "{workspace}: {days}",
+      "rangeWeek": "{workspace}, vecka {week}: {from} till {to}, {hours}",
+      "range": "{workspace}: {from} till {to}, {hours}",
+      "day": "{date} {hours}",
+      "dayRemoved": "{date} borttagen",
       "note": "Anteckning: \"{note}\""
     },
-    "hoursRemoved": {
-      "title": "{name} tog bort {date}.",
-      "titleMany_one": "{name} tog bort {count} dag",
-      "titleMany_other": "{name} tog bort {count} dagar",
-      "body": "{hours} togs bort från din månad."
-    },
     "inviteAccepted": {
-      "title": "{name} accepterade din inbjudan.",
-      "body": "{name} är nu anställd på {workspace}."
+      "title": "{name} accepterade din inbjudan",
+      "body": "{workspace}: {name} är nu anställd"
     },
     "entryFlagged": {
-      "title": "{name} flaggade {date}.",
-      "body": "Loggat {logged}, {name} säger {suggested}"
+      "title": "{name} flaggade {date}",
+      "body": "{workspace}: loggat {logged}, säger {suggested}",
+      "bodyMessage": "{workspace}: \"{message}\""
     },
     "flagFixed": {
-      "title": "{name} rättade din flagga.",
-      "body": "{date} är nu {hours}."
+      "title": "{name} rättade din flagga",
+      "body": "{workspace}: {date} är nu {hours}"
     },
     "flagDismissed": {
-      "title": "{name} behöll {date} på {hours}.",
-      "body": "Din flagga är granskad och posten står kvar som loggad."
+      "title": "{name} granskade din flagga",
+      "body": "{workspace}: {date} står kvar på {hours}"
     },
     "monthClosed": {
-      "title": "{month} är stängd.",
-      "body": "{hours}, {money}.",
-      "bodyHoursOnly": "{hours}.",
-      "hint": "{name} låste månaden. Dela ditt kort från Profil."
+      "title": "{name} stängde {month}",
+      "body": "{workspace}: {hours}, {money}",
+      "bodyHoursOnly": "{workspace}: {hours}",
+      "hint": "Inget ändras förrän den öppnas igen. Dela ditt kort från Profil."
     },
     "monthReopened": {
-      "title": "{month} har öppnats igen.",
-      "body": "{name} låste upp månaden. Poster kan ändras igen."
+      "title": "{name} öppnade {month} igen",
+      "body": "{workspace}: poster kan ändras igen"
     }
   },
   "email": {
@@ -829,9 +830,6 @@
       "note": "Anteckning",
       "rate": "Timlön",
       "amount": "Belopp"
-    },
-    "push": {
-      "workspacePrefix": "{workspace}: {title}"
     }
   },
   "web": {

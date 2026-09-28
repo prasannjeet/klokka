@@ -14,7 +14,6 @@ export const sv = {
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar.",
   "api.email.greeting": "Hej {name},",
-  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Har du redan ett konto?",
   "auth.byContinuing": "Genom att fortsätta godkänner du {terms} och {privacy}.",
   "auth.continue": "Fortsätt",
@@ -381,35 +380,40 @@ export const sv = {
   "notifications.employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
   "notifications.empty": "Inget än. Du får veta det här i samma stund som något ändras.",
   "notifications.emptyUnread": "Allt är läst.",
-  "notifications.entryFlagged.body": "Loggat {logged}, {name} säger {suggested}",
-  "notifications.entryFlagged.title": "{name} flaggade {date}.",
+  "notifications.entryFlagged.body": "{workspace}: loggat {logged}, säger {suggested}",
+  "notifications.entryFlagged.bodyMessage": "{workspace}: \"{message}\"",
+  "notifications.entryFlagged.title": "{name} flaggade {date}",
   "notifications.filter": "Filter",
-  "notifications.flagDismissed.body": "Din flagga är granskad och posten står kvar som loggad.",
-  "notifications.flagDismissed.title": "{name} behöll {date} på {hours}.",
-  "notifications.flagFixed.body": "{date} är nu {hours}.",
-  "notifications.flagFixed.title": "{name} rättade din flagga.",
-  "notifications.hoursAdded.body": "{hours} i vecka {week}.",
-  "notifications.hoursAdded.range": "{from} till {to}",
-  "notifications.hoursAdded.titleForYou_one": "{name} lade till {count} dag för dig.",
-  "notifications.hoursAdded.titleForYou_other": "{name} lade till {count} dagar för dig.",
-  "notifications.hoursAdded.title_one": "{name} lade till {count} dag, {hours} h",
-  "notifications.hoursAdded.title_other": "{name} lade till {count} dagar, {hours} h",
-  "notifications.hoursChanged.body": "{before} är nu {after}.",
-  "notifications.hoursChanged.note": "Anteckning: \"{note}\"",
-  "notifications.hoursChanged.title": "{name} ändrade {date}.",
-  "notifications.hoursRemoved.body": "{hours} togs bort från din månad.",
-  "notifications.hoursRemoved.title": "{name} tog bort {date}.",
-  "notifications.hoursRemoved.titleMany_one": "{name} tog bort {count} dag",
-  "notifications.hoursRemoved.titleMany_other": "{name} tog bort {count} dagar",
-  "notifications.inviteAccepted.body": "{name} är nu anställd på {workspace}.",
-  "notifications.inviteAccepted.title": "{name} accepterade din inbjudan.",
+  "notifications.flagDismissed.body": "{workspace}: {date} står kvar på {hours}",
+  "notifications.flagDismissed.title": "{name} granskade din flagga",
+  "notifications.flagFixed.body": "{workspace}: {date} är nu {hours}",
+  "notifications.flagFixed.title": "{name} rättade din flagga",
+  "notifications.hours.addedOne": "{name} la till {date}",
+  "notifications.hours.added_one": "{name} la till {count} dag",
+  "notifications.hours.added_other": "{name} la till {count} dagar",
+  "notifications.hours.bodyChangedOne": "{workspace}: {hours}, var {before}",
+  "notifications.hours.bodyDays": "{workspace}: {days}",
+  "notifications.hours.bodyOne": "{workspace}: {hours}",
+  "notifications.hours.bodyWeek": "{workspace}, vecka {week}: {days}",
+  "notifications.hours.changedOne": "{name} ändrade {date}",
+  "notifications.hours.changed_one": "{name} ändrade {count} dag",
+  "notifications.hours.changed_other": "{name} ändrade {count} dagar",
+  "notifications.hours.day": "{date} {hours}",
+  "notifications.hours.dayRemoved": "{date} borttagen",
+  "notifications.hours.note": "Anteckning: \"{note}\"",
+  "notifications.hours.range": "{workspace}: {from} till {to}, {hours}",
+  "notifications.hours.rangeWeek": "{workspace}, vecka {week}: {from} till {to}, {hours}",
+  "notifications.hours.removed_one": "{name} tog bort {count} dag",
+  "notifications.hours.removed_other": "{name} tog bort {count} dagar",
+  "notifications.inviteAccepted.body": "{workspace}: {name} är nu anställd",
+  "notifications.inviteAccepted.title": "{name} accepterade din inbjudan",
   "notifications.markAllRead": "Markera alla som lästa",
-  "notifications.monthClosed.body": "{hours}, {money}.",
-  "notifications.monthClosed.bodyHoursOnly": "{hours}.",
-  "notifications.monthClosed.hint": "{name} låste månaden. Dela ditt kort från Profil.",
-  "notifications.monthClosed.title": "{month} är stängd.",
-  "notifications.monthReopened.body": "{name} låste upp månaden. Poster kan ändras igen.",
-  "notifications.monthReopened.title": "{month} har öppnats igen.",
+  "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
+  "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
+  "notifications.monthClosed.hint": "Inget ändras förrän den öppnas igen. Dela ditt kort från Profil.",
+  "notifications.monthClosed.title": "{name} stängde {month}",
+  "notifications.monthReopened.body": "{workspace}: poster kan ändras igen",
+  "notifications.monthReopened.title": "{name} öppnade {month} igen",
   "notifications.subtitleEmployee": "Varje gång dina timmar läggs till, ändras eller tas bort, en gång per tillfälle. Plus flaggor, stängda månader och inbjudningar.",
   "notifications.subtitleEmployer": "Det som hänt i {workspace} och rör dig. Anställda får sin egen lista.",
   "notifications.title": "Notiser",
@@ -919,7 +923,6 @@ export const en = {
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka is free and open source. You get this email because you turned it on in Settings.",
   "api.email.greeting": "Hi {name},",
-  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Already have an account?",
   "auth.byContinuing": "By continuing you accept the {terms} and the {privacy}.",
   "auth.continue": "Continue",
@@ -1286,35 +1289,40 @@ export const en = {
   "notifications.employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
   "notifications.empty": "Nothing yet. You will hear about it here the moment something changes.",
   "notifications.emptyUnread": "All caught up.",
-  "notifications.entryFlagged.body": "Logged {logged}, {name} says {suggested}",
-  "notifications.entryFlagged.title": "{name} flagged {date}.",
+  "notifications.entryFlagged.body": "{workspace}: logged {logged}, says {suggested}",
+  "notifications.entryFlagged.bodyMessage": "{workspace}: \"{message}\"",
+  "notifications.entryFlagged.title": "{name} flagged {date}",
   "notifications.filter": "Filter",
-  "notifications.flagDismissed.body": "Your flag was reviewed and the entry stays as logged.",
-  "notifications.flagDismissed.title": "{name} kept {date} at {hours}.",
-  "notifications.flagFixed.body": "{date} is now {hours}.",
-  "notifications.flagFixed.title": "{name} fixed your flag.",
-  "notifications.hoursAdded.body": "{hours} in week {week}.",
-  "notifications.hoursAdded.range": "{from} to {to}",
-  "notifications.hoursAdded.titleForYou_one": "{name} added {count} day for you.",
-  "notifications.hoursAdded.titleForYou_other": "{name} added {count} days for you.",
-  "notifications.hoursAdded.title_one": "{name} added {count} day, {hours} h",
-  "notifications.hoursAdded.title_other": "{name} added {count} days, {hours} h",
-  "notifications.hoursChanged.body": "{before} is now {after}.",
-  "notifications.hoursChanged.note": "Note: \"{note}\"",
-  "notifications.hoursChanged.title": "{name} changed {date}.",
-  "notifications.hoursRemoved.body": "{hours} was taken off your month.",
-  "notifications.hoursRemoved.title": "{name} removed {date}.",
-  "notifications.hoursRemoved.titleMany_one": "{name} removed {count} day",
-  "notifications.hoursRemoved.titleMany_other": "{name} removed {count} days",
-  "notifications.inviteAccepted.body": "{name} is now an employee of {workspace}.",
-  "notifications.inviteAccepted.title": "{name} accepted your invitation.",
+  "notifications.flagDismissed.body": "{workspace}: {date} stays at {hours}",
+  "notifications.flagDismissed.title": "{name} reviewed your flag",
+  "notifications.flagFixed.body": "{workspace}: {date} is now {hours}",
+  "notifications.flagFixed.title": "{name} fixed your flag",
+  "notifications.hours.addedOne": "{name} added {date}",
+  "notifications.hours.added_one": "{name} added {count} day",
+  "notifications.hours.added_other": "{name} added {count} days",
+  "notifications.hours.bodyChangedOne": "{workspace}: {hours}, was {before}",
+  "notifications.hours.bodyDays": "{workspace}: {days}",
+  "notifications.hours.bodyOne": "{workspace}: {hours}",
+  "notifications.hours.bodyWeek": "{workspace}, week {week}: {days}",
+  "notifications.hours.changedOne": "{name} changed {date}",
+  "notifications.hours.changed_one": "{name} changed {count} day",
+  "notifications.hours.changed_other": "{name} changed {count} days",
+  "notifications.hours.day": "{date} {hours}",
+  "notifications.hours.dayRemoved": "{date} removed",
+  "notifications.hours.note": "Note: \"{note}\"",
+  "notifications.hours.range": "{workspace}: {from} to {to}, {hours}",
+  "notifications.hours.rangeWeek": "{workspace}, week {week}: {from} to {to}, {hours}",
+  "notifications.hours.removed_one": "{name} removed {count} day",
+  "notifications.hours.removed_other": "{name} removed {count} days",
+  "notifications.inviteAccepted.body": "{workspace}: {name} is now an employee",
+  "notifications.inviteAccepted.title": "{name} accepted your invitation",
   "notifications.markAllRead": "Mark all as read",
-  "notifications.monthClosed.body": "{hours}, {money}.",
-  "notifications.monthClosed.bodyHoursOnly": "{hours}.",
-  "notifications.monthClosed.hint": "{name} locked the month. Share your card from Profile.",
-  "notifications.monthClosed.title": "{month} is closed.",
-  "notifications.monthReopened.body": "{name} unlocked the month. Entries can change again.",
-  "notifications.monthReopened.title": "{month} was reopened.",
+  "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
+  "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
+  "notifications.monthClosed.hint": "Nothing changes until it is reopened. Share your card from Profile.",
+  "notifications.monthClosed.title": "{name} closed {month}",
+  "notifications.monthReopened.body": "{workspace}: entries can change again",
+  "notifications.monthReopened.title": "{name} reopened {month}",
   "notifications.subtitleEmployee": "Every time your hours are added, changed or removed, once per sitting. Plus flags, closed months and invitations.",
   "notifications.subtitleEmployer": "What happened in {workspace} that concerns you. Employees get their own list.",
   "notifications.title": "Notifications",
@@ -1826,7 +1834,6 @@ export type MessageParams = {
   "api.email.digest.workspace": { emoji: string | number; workspace: string | number };
   "api.email.footer": Record<never, never>;
   "api.email.greeting": { name: string | number };
-  "api.push.workspacePrefix": { title: string | number; workspace: string | number };
   "auth.alreadyHaveAccount": Record<never, never>;
   "auth.byContinuing": { privacy: string | number; terms: string | number };
   "auth.continue": Record<never, never>;
@@ -2183,32 +2190,37 @@ export type MessageParams = {
   "notifications.employerKindsHint": Record<never, never>;
   "notifications.empty": Record<never, never>;
   "notifications.emptyUnread": Record<never, never>;
-  "notifications.entryFlagged.body": { logged: string | number; name: string | number; suggested: string | number };
+  "notifications.entryFlagged.body": { logged: string | number; suggested: string | number; workspace: string | number };
+  "notifications.entryFlagged.bodyMessage": { message: string | number; workspace: string | number };
   "notifications.entryFlagged.title": { date: string | number; name: string | number };
   "notifications.filter": Record<never, never>;
-  "notifications.flagDismissed.body": Record<never, never>;
-  "notifications.flagDismissed.title": { date: string | number; hours: string | number; name: string | number };
-  "notifications.flagFixed.body": { date: string | number; hours: string | number };
+  "notifications.flagDismissed.body": { date: string | number; hours: string | number; workspace: string | number };
+  "notifications.flagDismissed.title": { name: string | number };
+  "notifications.flagFixed.body": { date: string | number; hours: string | number; workspace: string | number };
   "notifications.flagFixed.title": { name: string | number };
-  "notifications.hoursAdded.body": { hours: string | number; week: string | number };
-  "notifications.hoursAdded.range": { from: string | number; to: string | number };
-  "notifications.hoursAdded.titleForYou": { count: string | number; name: string | number };
-  "notifications.hoursAdded.title": { count: string | number; hours: string | number; name: string | number };
-  "notifications.hoursChanged.body": { after: string | number; before: string | number };
-  "notifications.hoursChanged.note": { note: string | number };
-  "notifications.hoursChanged.title": { date: string | number; name: string | number };
-  "notifications.hoursRemoved.body": { hours: string | number };
-  "notifications.hoursRemoved.title": { date: string | number; name: string | number };
-  "notifications.hoursRemoved.titleMany": { count: string | number; name: string | number };
+  "notifications.hours.addedOne": { date: string | number; name: string | number };
+  "notifications.hours.added": { count: string | number; name: string | number };
+  "notifications.hours.bodyChangedOne": { before: string | number; hours: string | number; workspace: string | number };
+  "notifications.hours.bodyDays": { days: string | number; workspace: string | number };
+  "notifications.hours.bodyOne": { hours: string | number; workspace: string | number };
+  "notifications.hours.bodyWeek": { days: string | number; week: string | number; workspace: string | number };
+  "notifications.hours.changedOne": { date: string | number; name: string | number };
+  "notifications.hours.changed": { count: string | number; name: string | number };
+  "notifications.hours.day": { date: string | number; hours: string | number };
+  "notifications.hours.dayRemoved": { date: string | number };
+  "notifications.hours.note": { note: string | number };
+  "notifications.hours.range": { from: string | number; hours: string | number; to: string | number; workspace: string | number };
+  "notifications.hours.rangeWeek": { from: string | number; hours: string | number; to: string | number; week: string | number; workspace: string | number };
+  "notifications.hours.removed": { count: string | number; name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
   "notifications.markAllRead": Record<never, never>;
-  "notifications.monthClosed.body": { hours: string | number; money: string | number };
-  "notifications.monthClosed.bodyHoursOnly": { hours: string | number };
-  "notifications.monthClosed.hint": { name: string | number };
-  "notifications.monthClosed.title": { month: string | number };
-  "notifications.monthReopened.body": { name: string | number };
-  "notifications.monthReopened.title": { month: string | number };
+  "notifications.monthClosed.body": { hours: string | number; money: string | number; workspace: string | number };
+  "notifications.monthClosed.bodyHoursOnly": { hours: string | number; workspace: string | number };
+  "notifications.monthClosed.hint": Record<never, never>;
+  "notifications.monthClosed.title": { month: string | number; name: string | number };
+  "notifications.monthReopened.body": { workspace: string | number };
+  "notifications.monthReopened.title": { month: string | number; name: string | number };
   "notifications.subtitleEmployee": Record<never, never>;
   "notifications.subtitleEmployer": { workspace: string | number };
   "notifications.title": Record<never, never>;
@@ -2705,9 +2717,9 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "month.daysNewestFirst",
   "month.workingDays",
   "nav.notificationsUnread",
-  "notifications.hoursAdded.titleForYou",
-  "notifications.hoursAdded.title",
-  "notifications.hoursRemoved.titleMany",
+  "notifications.hours.added",
+  "notifications.hours.changed",
+  "notifications.hours.removed",
   "operator.invitations.expireTomorrow",
   "operator.invitations.resent",
   "overview.nothingLoggedDays",

@@ -71,10 +71,10 @@ public interface KlokkaConfig {
 
     interface Push {
         // "One notification per sitting": the sliding quiet window and its hard cap.
-        @WithDefault("PT10M")
+        @WithDefault("PT2M")
         Duration quietWindow();
 
-        @WithDefault("PT30M")
+        @WithDefault("PT10M")
         Duration maxDelay();
 
         // Messages per Expo push call (Expo accepts at most 100).

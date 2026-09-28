@@ -1810,8 +1810,9 @@ components:
       properties:
         token:
           type: string
-          description: From `getExpoPushTokenAsync({ projectId })`.
+          description: From `getExpoPushTokenAsync({ projectId })`. Only Expo push tokens are accepted; a raw FCM or APNs device token is refused with `400 VALIDATION` (CHQ-145, Expo cannot deliver to it).
           maxLength: 200
+          pattern: '^Expo(nent)?PushToken\[[^\]]+\]$'
           example: ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
         platform:
           $ref: '#/components/schemas/PushPlatform'

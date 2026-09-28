@@ -57,6 +57,12 @@ public final class Formats {
         return text.endsWith(".") ? text.substring(0, text.length() - 1) : text;
     }
 
+    // "Monday 29 Sept" (en) / "måndag 29 sep" (sv): a notification title's one day.
+    public static String dayDate(LocalDate date, Language language) {
+        String text = date.format(DateTimeFormatter.ofPattern("EEEE d MMM", locale(language)));
+        return text.endsWith(".") ? text.substring(0, text.length() - 1) : text;
+    }
+
     public static String longDate(LocalDate date, Language language) {
         return date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale(language)));
     }

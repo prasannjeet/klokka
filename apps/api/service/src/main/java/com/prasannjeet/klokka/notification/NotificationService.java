@@ -200,7 +200,8 @@ public class NotificationService {
     public Notification toNotification(NotificationEntity row, Language language) {
         WorkspaceEntity workspace = repository.workspaceOf(row).orElse(null);
         Map<String, Object> payload = NotificationPayload.read(mapper, row.payload);
-        NotificationTexts.Rendered rendered = texts.render(row.kind, payload, language, workspace == null ? "SEK" : workspace.currency);
+        NotificationTexts.Rendered rendered = texts.render(row.kind, payload, language,
+                workspace == null ? null : workspace.name, workspace == null ? "SEK" : workspace.currency);
         NotificationLink link = link(row, payload);
         return new Notification()
                 .id(row.id)
