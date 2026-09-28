@@ -1,14 +1,18 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { Platform, type ColorValue } from 'react-native';
+import { useActiveWorkspace } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useTheme } from '@/theme';
 import { Icon, type IconName } from '@/ui';
 
-// Bottom tabs per the mockup. The role-based split (employer: Home, Week, Insights, Settings;
-// employee: Month, Week, Notifications, Profile) arrives with sign-in and /me.
+// Bottom tabs per the mockup: the employer gets Home, Week, Insights, Settings; the employee gets
+// Month, Week, Notifications, Profile. One layout, the tabs that do not belong to the role are hidden.
 export default function TabsLayout() {
   const t = useT();
   const theme = useTheme();
+  const { workspace, me } = useActiveWorkspace();
+  if (me && !workspace) return <Redirect href="/" />;
+  const employer = workspace?.role === 'EMPLOYER';
   const icon =
     (name: IconName) =>
     ({ color }: { color: ColorValue }) => <Icon name={name} size={24} color={String(color)} />;
@@ -29,13 +33,39 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: theme.color.bg },
       }}
     >
-      <Tabs.Screen name="home" options={{ title: t('nav.home'), tabBarIcon: icon('home') }} />
-      <Tabs.Screen name="month" options={{ title: t('nav.month'), tabBarIcon: icon('calendar') }} />
+      <Tabs.Screen
+        name="home"
+        options={{ title: t('nav.home'), tabBarIcon: icon('home'), href: employer ? undefined : null }}
+      />
+      <Tabs.Screen
+        name="month"
+        options={{ title: t('nav.month'), tabBarIcon: icon('calendar'), href: employer ? null : undefined }}
+      />
       <Tabs.Screen name="week" options={{ title: t('nav.week'), tabBarIcon: icon('clock') }} />
-      <Tabs.Screen name="insights" options={{ title: t('nav.insights'), tabBarIcon: icon('bar-chart') }} />
-      <Tabs.Screen name="notifications" options={{ title: t('nav.notifications'), tabBarIcon: icon('bell') }} />
-      <Tabs.Screen name="settings" options={{ title: t('nav.settings'), tabBarIcon: icon('sliders') }} />
-      <Tabs.Screen name="profile" options={{ title: t('nav.profile'), tabBarIcon: icon('user') }} />
+      <Tabs.Screen
+        name="insights"
+        options={{
+          title: t('nav.insights'),
+          tabBarIcon: icon('bar-chart'),
+          href: employer ? undefined : null,
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: t('nav.notifications'),
+          tabBarIcon: icon('bell'),
+          href: employer ? null : undefined,
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{ title: t('nav.settings'), tabBarIcon: icon('sliders'), href: employer ? undefined : null }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{ title: t('nav.profile'), tabBarIcon: icon('user'), href: employer ? null : undefined }}
+      />
     </Tabs>
   );
 }
