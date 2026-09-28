@@ -141,7 +141,7 @@
   <div class="wrap">
     <div class="brand"><svg><use href="#klokka-mark"/></svg> klokka</div>
     <nav class="topnav" aria-label="Chapters">
-      <a href="#summary">Summary</a><a href="#decisions">Your decisions</a><a href="#product">Product</a><a href="#brand">Logo</a><a href="#design">Design</a><a href="#landing">Landing</a><a href="#login">Sign-in</a><a href="#web">Web app</a><a href="#mobile">Mobile</a><a href="#backend">Backend</a><a href="#auth">Accounts</a><a href="#hosting">Hosting</a><a href="#plan">Plan</a>
+      <a href="#summary">Summary</a><a href="#shipped">Shipped</a><a href="#decisions">Decisions</a><a href="#product">Product</a><a href="#brand">Logo</a><a href="#design">Design</a><a href="#landing">Landing</a><a href="#login">Sign-in</a><a href="#web">Web app</a><a href="#mobile">Mobile</a><a href="#backend">Backend</a><a href="#auth">Accounts</a><a href="#hosting">Hosting</a><a href="#plan">Plan</a>
     </nav>
   </div>
 </div>
@@ -152,12 +152,12 @@
     <span class="chip ok"><span class="dot"></span>Research done, verified</span>
     <span class="chip ok"><span class="dot"></span>Mockups built, three themes</span>
     <span class="chip ok"><span class="dot"></span>Logo picked, finals made</span><span class="chip ok"><span class="dot"></span>Decisions locked 27 Sep: Nightshift, own Logto, CI on our runners</span>
-    <span class="chip warn"><span class="dot"></span>Nothing implemented yet</span>
+    <span class="chip ok"><span class="dot"></span>v1.0.0 built, verified on staging, tagged</span>
   </div>
   <div class="hero-grid">
     <div class="stack rise">
-      <span class="eyebrow">Preliminary report, 27 September 2026, revised after your decisions</span>
-      <h1>Klokka, before we build it.</h1>
+      <span class="eyebrow">Report, 27 to 28 September 2026: plan, decisions, and what shipped</span>
+      <h1>Klokka, built.</h1>
       <p class="lead">One clock, both sides: the employer logs the hours each employee worked, the employee sees the same month on their phone, and pay is a switch rather than a requirement. This page shows what we plan to build, how it will look on the web and on the phone, how the backend and sign-in work, where it will run, and the few decisions that are yours to make before implementation starts.</p>
     </div>
     <svg class="mark rise" aria-label="Klokka mark"><use href="#klokka-mark"/></svg>
@@ -173,6 +173,47 @@
     <p>Every mockup below is live: use the small bar in each viewer to switch between the three theme directions and between light and dark, and to see the page at desktop or phone width. The "Your decisions" chapter lists everything that waits on you; the rest are calls already made, with the reasons, and you can overrule any of them.</p>
   </div>
 </section>
+<section class="chapter" id="shipped">
+  <div class="wrap stack-lg">
+    <div class="chapter-head">
+      <span class="eyebrow">Shipped, 28 September 2026</span>
+      <h2>Version 1.0.0 is running on staging</h2>
+      <p class="lead">Everything below this chapter was the plan. This is what exists now: the API, the web app, the landing site and the Android app, built and deployed by the pipeline on our own runners, verified end to end on staging with real accounts, reviewed, and tagged v1.0.0 in the public repository.</p>
+    </div>
+    <div class="hgrid">
+      <div><span class="eyebrow">Landing</span><span class="big">live</span><a href="https://klokka.coolify.ooguy.com" target="_blank" rel="noopener">klokka.coolify.ooguy.com</a><span class="mute">Swedish at /, English at /en, APK download button</span></div>
+      <div><span class="eyebrow">Web app</span><span class="big">live</span><a href="https://klokka-app.coolify.ooguy.com" target="_blank" rel="noopener">klokka-app.coolify.ooguy.com</a><span class="mute">Employer, employee and operator console; sign-in through Klokka's own Logto</span></div>
+      <div><span class="eyebrow">API</span><span class="big">live</span><a href="https://klokka-api.coolify.ooguy.com/q/health/ready" target="_blank" rel="noopener">klokka-api.coolify.ooguy.com</a><span class="mute">Quarkus on Java 25, 42 operations, contract published to Nexus</span></div>
+      <div><span class="eyebrow">Android</span><span class="big">APK</span><a href="https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk" target="_blank" rel="noopener">klokka-latest.apk</a><span class="mute">Signed release build from every push, package com.prasannjeet.klokka</span></div>
+    </div>
+    <div class="cols-2">
+      <div class="stack">
+        <h3>What was verified on staging</h3>
+        <ul class="plain">
+          <li>Employer sign-up through Logto (email code), workspace creation, an invitation email with a join link, the employee joining, and the employer's "invite accepted" notification.</li>
+          <li>Hours by chips and by the week grid with one Save, change history, the employee's month, one coalesced notification per sitting.</li>
+          <li>A flag raised by the employee and fixed by the employer, visible on both sides.</li>
+          <li>Pay on and off across every screen, CSV export, month lock and unlock.</li>
+          <li>Insights recomputed by hand against the logged week; language switch to Swedish including the next notification.</li>
+          <li>Operator console with the platform-admin account: workspaces, users, invitations, email volume against the quota, health.</li>
+          <li>The Android app built against staging; sign-in URL and every screen's operations checked without a phone attached.</li>
+        </ul>
+        <p class="mute">Full record: docs/STAGING_SMOKE.md. The review found 19 items, none blocking; one real defect (spreadsheet formula injection through employee names in the CSV) was fixed with tests; the rest are in docs/BACKLOG.md.</p>
+      </div>
+      <div class="stack">
+        <h3>Numbers</h3>
+        <div class="hgrid" style="grid-template-columns: repeat(2, 1fr);">
+          <div><span class="big">52</span><span class="mute">Jira issues, all with commits</span></div>
+          <div><span class="big">115</span><span class="mute">API tests, plus an integration test on the fast-jar</span></div>
+          <div><span class="big">160+</span><span class="mute">web and mobile tests, layout checks at five widths</span></div>
+          <div><span class="big">883</span><span class="mute">strings in the sv/en catalogue shared by all three</span></div>
+        </div>
+        <div class="callout"><b>Try it.</b><p>Create your own employer account on the web app with any email you can read, or sign in to the test workspace "Kafé Nord" with the logins in the handover message. Install the APK from the landing page (Android asks to allow installs from this source) and sign in with the same account.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="chapter" id="decisions">
   <div class="wrap stack-lg">
     <div class="chapter-head">
