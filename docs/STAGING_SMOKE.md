@@ -33,7 +33,7 @@ place for the owner: W39 logged (8, 8, 6, 8, 8 = 38 h, one note), one flag fixed
 | 9 | Contract requests | 12 done, 8 deferred, 1 no change (`2f2d6d2`, `178ff6c`) |
 | 10 | Rough edges | fixed as found, list below; plus `870f355` (all-removal sitting wording) |
 
-10 of 10 steps pass; 13 fix commits on `train/integration`, none pushed. Staging runs API `sha-870f355`, web
+10 of 10 steps pass; 12 code commits on `train/integration` (11 fixes plus the contract change) and 4 docs commits, none pushed. Staging runs API `sha-870f355`, web
 `sha-178ff6c` (the last web change), landing `sha-2544a8e` (unchanged).
 
 ## Stays open for the owner
