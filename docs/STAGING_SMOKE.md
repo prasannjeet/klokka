@@ -31,9 +31,9 @@ place for the owner: W39 logged (8, 8, 6, 8, 8 = 38 h, one note), one flag fixed
 | 7 | Operator console: workspaces, users, invitations, volume, health | PASS, fixes `b12c482` + `451483a` (operator "?"), `870d37b` (version) |
 | 8 | Mobile: debug APK served, CI `assembleRelease`, sign-in URL, same operations | PASS (no phone attached) |
 | 9 | Contract requests | 12 done, 8 deferred, 1 no change (`2f2d6d2`, `178ff6c`) |
-| 10 | Rough edges | fixed as found, list below; plus `870f355` and `adb266a` (a sitting that only cleared days, or added and cleared the same days) |
+| 10 | Rough edges | fixed as found, list below; plus `870f355`, `adb266a` and `06b14a3` (a sitting that only cleared days, or added and cleared the same days) |
 
-10 of 10 steps pass; 13 code commits on `train/integration` (12 fixes plus the contract change) and 5 docs commits, none pushed. Staging runs API `sha-adb266a`, web
+10 of 10 steps pass; 14 code commits on `train/integration` (13 fixes plus the contract change) and 6 docs commits, none pushed. Staging runs API `sha-06b14a3`, web
 `sha-178ff6c` (the last web change), landing `sha-2544a8e` (unchanged).
 
 ## Stays open for the owner
