@@ -20,7 +20,7 @@ export interface AppSheetProps {
   subtitle?: string | undefined;
   closeLabel: string;
   onDismiss?: () => void;
-  children: ReactNode;
+  children?: ReactNode;
   testID?: string;
 }
 
