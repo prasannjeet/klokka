@@ -108,9 +108,9 @@ public class NotificationTexts {
         int removed = 0;
         for (BigDecimal[] change : changes.values()) {
             if (change[1] != null) total = total.add(change[1]);
-            else if (change[0] != null) {
+            else {
                 removed++;
-                takenOff = takenOff.add(change[0]);
+                if (change[0] != null) takenOff = takenOff.add(change[0]);
             }
         }
         LocalDate from = changes.firstKey();

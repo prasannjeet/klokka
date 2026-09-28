@@ -90,6 +90,18 @@ class NotificationAndPushTest {
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aSittingThatAddsAndClearsTheSameDaysIsNoNews() {
+        String base = "/v1/workspaces/" + ws + "/members/" + maria + "/entries/";
+        given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-21").then().statusCode(200);
+        assertThat(data.count("select count(*) from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws)).isEqualTo(1);
+        given().when().delete(base + "2026-09-21").then().statusCode(204);
+        assertThat(data.count("select count(*) from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws))
+                .as("added and cleared within the quiet window: nothing to tell").isZero();
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
     void aSittingCoalescesWithASlidingWindowCappedAtThirtyMinutesAndRendersInSwedish() {
         String base = "/v1/workspaces/" + ws + "/members/" + maria + "/entries/";
         given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-21").then().statusCode(200);

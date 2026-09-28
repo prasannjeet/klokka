@@ -71,6 +71,14 @@ public class NotificationService {
         merged.put("before", change == null ? before : change.get("before"));
         merged.put("after", after);
         changes.put(date.toString(), merged);
+        // A sitting that nets to nothing (days added and cleared again before the push went out) is no news:
+        // the pending row goes, and nothing is created for it.
+        boolean netNothing = changes.values().stream()
+                .allMatch(c -> c instanceof Map<?, ?> m && m.get("before") == null && m.get("after") == null);
+        if (netNothing) {
+            if (row != null) repository.delete(row);
+            return;
+        }
         payload.put("actorId", actorId);
         payload.put("actorName", actorName);
         payload.put("membershipId", membershipId.toString());
