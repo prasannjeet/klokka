@@ -28,6 +28,8 @@ env:
   REGISTRY: docker.nexus.coolify.ooguy.com
   COOLIFY_URL: https://coolify.coolify.ooguy.com
   DOWNLOADS_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads
+  # Uploads go over the LAN straight to Nexus (the runners sit on it): the public proxy cuts large uploads at 60 s.
+  DOWNLOADS_UPLOAD_URL: http://192.168.0.4:8081/repository/klokka-downloads
   # Public staging URLs. The landing bakes them at build time; the web app reads its runtime env from Coolify.
   NEXT_PUBLIC_APP_URL: https://klokka-app.coolify.ooguy.com
   NEXT_PUBLIC_SITE_URL: https://klokka.coolify.ooguy.com
@@ -460,7 +462,7 @@ jobs:
         run: |
           set -euo pipefail
           for name in "klokka-${GITHUB_SHA::7}.apk" klokka-latest.apk; do
-            curl -sSf --max-time 300 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$APK" "$DOWNLOADS_URL/$name"
+            curl -sSf --max-time 900 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$APK" "$DOWNLOADS_UPLOAD_URL/$name"
             echo "published $DOWNLOADS_URL/$name"
           done
 
