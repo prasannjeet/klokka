@@ -220,6 +220,7 @@ export const routerState = {
   pushes: [] as unknown[],
   replaces: [] as unknown[],
   backs: 0,
+  dismissAlls: 0,
   params: {} as Record<string, string>,
 };
 export function expoRouterModule() {
@@ -238,6 +239,10 @@ export function expoRouterModule() {
       routerState.pushes.push(href);
     },
     canGoBack: () => true,
+    canDismiss: () => true,
+    dismissAll: () => {
+      routerState.dismissAlls += 1;
+    },
   };
   return {
     useRouter: () => router,

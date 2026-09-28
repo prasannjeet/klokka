@@ -21,6 +21,7 @@ import {
 } from '@/ui';
 import { WorkspaceRow } from '@/features/workspaces/WorkspaceRow';
 import { useSignOut } from '@/features/shell/useSignOut';
+import { enterApp } from '@/features/shell/enterApp';
 import { WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
 import { AppPreferenceRows, NotificationPreferenceRows } from './PreferenceRows';
 
@@ -111,7 +112,7 @@ export function ProfileScreen() {
               onPress={() => {
                 if (w.workspaceId !== workspace?.workspaceId) {
                   switchTo(w.workspaceId);
-                  router.replace('/');
+                  enterApp();
                 }
               }}
               testID={`workspace-${w.workspaceId}`}

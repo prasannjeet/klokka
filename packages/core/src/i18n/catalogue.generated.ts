@@ -254,6 +254,9 @@ export const sv = {
   "mobile.common.edit": "Ändra",
   "mobile.common.hoursShort": "{hours} h",
   "mobile.common.thisWeek": "Den här veckan",
+  "mobile.crash.body": "Något på den här skärmen gick fel. Den sparade kopian på telefonen rensades; dina timmar finns kvar på servern.",
+  "mobile.crash.restart": "Börja om",
+  "mobile.crash.title": "Klokka fick starta om",
   "mobile.day.editHours": "Ändra timmar",
   "mobile.day.noEntry": "Inget registrerat den här dagen.",
   "mobile.employees.joined": "Började {when}",
@@ -1140,6 +1143,9 @@ export const en = {
   "mobile.common.edit": "Edit",
   "mobile.common.hoursShort": "{hours} h",
   "mobile.common.thisWeek": "This week",
+  "mobile.crash.body": "Something on this screen went wrong. The saved copy on this phone was cleared; your hours are safe on the server.",
+  "mobile.crash.restart": "Start again",
+  "mobile.crash.title": "Klokka had to start again",
   "mobile.day.editHours": "Edit hours",
   "mobile.day.noEntry": "Nothing logged this day.",
   "mobile.employees.joined": "Joined {when}",
@@ -2021,6 +2027,9 @@ export type MessageParams = {
   "mobile.common.edit": Record<never, never>;
   "mobile.common.hoursShort": { hours: string | number };
   "mobile.common.thisWeek": Record<never, never>;
+  "mobile.crash.body": Record<never, never>;
+  "mobile.crash.restart": Record<never, never>;
+  "mobile.crash.title": Record<never, never>;
   "mobile.day.editHours": Record<never, never>;
   "mobile.day.noEntry": Record<never, never>;
   "mobile.employees.joined": { when: string | number };

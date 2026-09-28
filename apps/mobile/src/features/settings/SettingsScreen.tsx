@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Rounding, WeekStart, WorkspaceColour } from '@klokka/api-client';
 import { formatHours, stepHours } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useUpdateWorkspace, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
@@ -27,7 +26,7 @@ import {
   useToast,
   type SheetHandle,
 } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { OptionSheet } from '@/ui/OptionSheet';
 import { AppPreferenceRows, NotificationPreferenceRows } from '@/features/profile/PreferenceRows';
 import { WORKSPACE_COLOURS, WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
@@ -67,14 +66,13 @@ export function cityOf(timezone: string): string {
 
 // Settings (CHQ-127): the pay switch is the first row; below it time, notifications, app, workspace
 // and account. Every row saves as it changes.
-function SettingsScreenInner() {
+function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const toast = useToast();
-  const active = useWorkspaceOrThrow();
   const workspace = useWorkspace(active.workspaceId);
   const update = useUpdateWorkspace(active.workspaceId);
   const signOut = useSignOut();

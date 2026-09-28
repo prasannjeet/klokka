@@ -4,7 +4,6 @@ import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import type { Entry, Member } from '@klokka/api-client';
 import { addDays, formatDate, formatHours, formatWeekday, isoWeek, weekOf, type IsoDate } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import {
   sameDate,
   useEntries,
@@ -17,7 +16,7 @@ import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, EmptyState, Icon, Pill, PressableCard, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
 import { PushPrompt } from '@/features/push/PushPrompt';
 
@@ -74,14 +73,13 @@ function entryFor(entries: Entry[] | undefined, membershipId: string, date: IsoD
 
 // Home, Today (employer): every employee is a card with today's hours as the numeral and a quick add
 // on the right; the strip on top is the team's week; open flags sit below the people.
-function HomeScreenInner() {
+function HomeScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const reduced = useReducedMotion();
-  const workspace = useWorkspaceOrThrow();
   const today = todayIn(workspace.timezone);
   const week = weekOf(today, workspace.weekStart);
   const first = week[0] as IsoDate;

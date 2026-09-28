@@ -1,7 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { formatDate, formatHours, formatTime } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useEntryHistory, useFlag, useResolveFlag } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
@@ -20,7 +19,7 @@ import {
   haptic,
   useToast,
 } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { HistoryList } from '@/features/day/HistoryList';
 
 const styles = (t: Theme) =>
@@ -33,13 +32,12 @@ const styles = (t: Theme) =>
 
 // Resolve a flag (CHQ-135, employer): the two numbers face each other; the fix is one tap and
 // pre-filled with what the employee says, keeping the entry dismisses the flag. Both notify.
-function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
+function ResolveFlagScreenInner({ flagId, workspace }: { flagId: string } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const toast = useToast();
-  const workspace = useWorkspaceOrThrow();
   const flagQuery = useFlag(workspace.workspaceId, flagId);
   const flag = flagQuery.data ?? null;
   const history = useEntryHistory(workspace.workspaceId, flag?.entryId);

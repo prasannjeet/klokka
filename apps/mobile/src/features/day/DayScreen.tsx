@@ -9,12 +9,11 @@ import {
   isoWeek,
   type IsoDate,
 } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useEntries, useEntryHistory, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText, Avatar, Button, Card, EmptyState, Header, Numeral, Pill, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
 import { FlagSheet, type FlagSheetHandle } from '@/features/flags/FlagSheet';
 import { HistoryList } from './HistoryList';
@@ -27,12 +26,15 @@ const styles = (t: Theme) =>
 
 // Day detail (CHQ-119): one day, one number, and the full history of who changed it and when.
 // Flagging is the employee's only action; the employer edits through the same sheet as everywhere.
-function DayScreenInner({ membershipId, date }: { membershipId: string; date: IsoDate }) {
+function DayScreenInner({
+  membershipId,
+  date,
+  workspace,
+}: { membershipId: string; date: IsoDate } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
-  const workspace = useWorkspaceOrThrow();
   const employer = workspace.role === 'EMPLOYER';
   const entries = useEntries(workspace.workspaceId, date, date, membershipId);
   const entry = entries.data?.[0] ?? null;

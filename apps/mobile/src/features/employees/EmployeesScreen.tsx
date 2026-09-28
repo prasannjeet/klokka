@@ -4,7 +4,6 @@ import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import type { Member } from '@klokka/api-client';
 import { formatDate, formatHours, formatMonthName, formatRate } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useMembers, useResendInvitation } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, toIsoDate } from '@/lib/dates';
@@ -24,7 +23,7 @@ import {
   useToast,
   type SheetHandle,
 } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { AddEmployeeSheet } from './AddEmployeeSheet';
 
 const styles = (t: Theme) =>
@@ -63,14 +62,13 @@ function memberSubtitle(
 
 // Employees (CHQ-113, CHQ-116): month total per person, rate when pay is on, the invited state with
 // a resend, and the add-employee sheet from the floating button.
-function EmployeesScreenInner() {
+function EmployeesScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const toast = useToast();
-  const workspace = useWorkspaceOrThrow();
   const month = currentMonthIn(workspace.timezone);
   const members = useMembers(workspace.workspaceId, month);
   const resend = useResendInvitation(workspace.workspaceId);

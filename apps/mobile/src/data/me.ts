@@ -48,14 +48,6 @@ export function useActiveWorkspace(): {
   return { workspace, me, isLoading };
 }
 
-// The active workspace is required on every workspace screen; the router guarantees it by
-// redirecting to the chooser first, so a missing one here is a programming error.
-export function useWorkspaceOrThrow(): MyWorkspace {
-  const { workspace } = useActiveWorkspace();
-  if (!workspace) throw new Error('no active workspace');
-  return workspace;
-}
-
 export function useSwitchWorkspace() {
   const setActive = useAppStore((s) => s.setActiveWorkspace);
   return useCallback((workspaceId: string) => setActive(workspaceId), [setActive]);

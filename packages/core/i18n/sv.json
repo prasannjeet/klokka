@@ -798,6 +798,11 @@
     "invitation": {
       "loading": "Kontrollerar inbjudan",
       "notFound": "Länken till inbjudan är inte giltig. Be din arbetsgivare skicka en ny."
+    },
+    "crash": {
+      "title": "Klokka fick starta om",
+      "body": "Något på den här skärmen gick fel. Den sparade kopian på telefonen rensades; dina timmar finns kvar på servern.",
+      "restart": "Börja om"
     }
   },
   "api": {

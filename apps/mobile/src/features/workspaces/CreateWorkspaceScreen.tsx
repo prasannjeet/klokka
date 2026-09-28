@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
 import { useMe, useUpdateMe } from '@/data/me';
 import { useCreateWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { useAppStore } from '@/store/appStore';
+import { enterApp } from '@/features/shell/enterApp';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import {
   AppPressable,
@@ -69,7 +69,6 @@ export function CreateWorkspaceScreen() {
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
-  const router = useRouter();
   const toast = useToast();
   const create = useCreateWorkspace();
   const { data: me } = useMe();
@@ -111,7 +110,7 @@ export function CreateWorkspaceScreen() {
       });
       setActive(workspace.id);
       toast.show(t('workspace.created'));
-      router.replace('/');
+      enterApp();
     } catch (e) {
       setError(await problemMessage(e, t));
     }

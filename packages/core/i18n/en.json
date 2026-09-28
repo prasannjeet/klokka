@@ -798,6 +798,11 @@
     "invitation": {
       "loading": "Checking the invitation",
       "notFound": "This invitation link is not valid. Ask your employer to send a new one."
+    },
+    "crash": {
+      "title": "Klokka had to start again",
+      "body": "Something on this screen went wrong. The saved copy on this phone was cleared; your hours are safe on the server.",
+      "restart": "Start again"
     }
   },
   "api": {
