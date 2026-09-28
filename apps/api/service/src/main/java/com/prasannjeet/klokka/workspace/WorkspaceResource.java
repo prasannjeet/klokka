@@ -1,30 +1,32 @@
 package com.prasannjeet.klokka.workspace;
 
-import static com.prasannjeet.klokka.error.KlokkaException.notImplemented;
-
 import com.prasannjeet.klokka.contract.api.WorkspacesApi;
 import com.prasannjeet.klokka.contract.model.Workspace;
 import com.prasannjeet.klokka.contract.model.WorkspaceCreate;
 import com.prasannjeet.klokka.contract.model.WorkspaceUpdate;
 import io.quarkus.security.Authenticated;
+import jakarta.inject.Inject;
 import java.util.UUID;
 
-// E1 (CHQ-112): every operation answers 501 NOT_IMPLEMENTED until then, so the contract compiles against the server.
+// /workspaces (CHQ-112, CHQ-127): create, read, settings.
 @Authenticated
 public class WorkspaceResource implements WorkspacesApi {
 
+    @Inject
+    WorkspaceService service;
+
     @Override
     public Workspace createWorkspace(WorkspaceCreate workspaceCreate) {
-        throw notImplemented("createWorkspace");
+        return service.create(workspaceCreate);
     }
 
     @Override
     public Workspace getWorkspace(UUID workspaceId) {
-        throw notImplemented("getWorkspace");
+        return service.get(workspaceId);
     }
 
     @Override
     public Workspace updateWorkspace(UUID workspaceId, WorkspaceUpdate workspaceUpdate) {
-        throw notImplemented("updateWorkspace");
+        return service.update(workspaceId, workspaceUpdate);
     }
 }
