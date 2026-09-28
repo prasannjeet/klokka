@@ -149,7 +149,7 @@ export function ProfileScreen() {
           />
         </Card>
         <AppText variant="caption" tone="muted" align="center">
-          {t('profile.leavingHint')}
+          {t('profile.pastHoursHint')}
         </AppText>
       </Screen>
       <AppSheet

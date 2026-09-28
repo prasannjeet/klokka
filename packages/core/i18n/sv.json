@@ -198,7 +198,7 @@
     "payShown": "Lön visas.",
     "hoursOnly": "Bara timmar.",
     "thisMonth": "den här månaden",
-    "leavingHint": "Att lämna en arbetsplats gör arbetsgivaren, som avaktiverar dig. Dina tidigare timmar syns fortfarande för er båda.",
+    "pastHoursHint": "Dina tidigare timmar syns fortfarande för er båda.",
     "editProfile": "Redigera profil"
   },
   "overview": {

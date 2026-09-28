@@ -542,9 +542,9 @@ export const sv = {
   "profile.hint": "Ett konto för varje arbetsplats du tillhör. Ändringar sparas medan du gör dem.",
   "profile.hoursOnly": "Bara timmar.",
   "profile.initial": "Initial",
-  "profile.leavingHint": "Att lämna en arbetsplats gör arbetsgivaren, som avaktiverar dig. Dina tidigare timmar syns fortfarande för er båda.",
   "profile.name": "Namn",
   "profile.nameHint": "Så syns du för dina arbetsgivare.",
+  "profile.pastHoursHint": "Dina tidigare timmar syns fortfarande för er båda.",
   "profile.payShown": "Lön visas.",
   "profile.subtitle": "Avatar, språk, notiser",
   "profile.subtitleEmployer": "Avatar, språk, lösenord",
@@ -1431,9 +1431,9 @@ export const en = {
   "profile.hint": "One account for every workspace you belong to. Changes save as you make them.",
   "profile.hoursOnly": "Hours only.",
   "profile.initial": "Initial",
-  "profile.leavingHint": "Leaving a workspace is done by the employer, who deactivates you. Your past hours stay visible to both of you.",
   "profile.name": "Name",
   "profile.nameHint": "How you appear to your employers.",
+  "profile.pastHoursHint": "Your past hours stay visible to both of you.",
   "profile.payShown": "Pay shown.",
   "profile.subtitle": "Avatar, language, notifications",
   "profile.subtitleEmployer": "Avatar, language, password",
@@ -2305,9 +2305,9 @@ export type MessageParams = {
   "profile.hint": Record<never, never>;
   "profile.hoursOnly": Record<never, never>;
   "profile.initial": Record<never, never>;
-  "profile.leavingHint": Record<never, never>;
   "profile.name": Record<never, never>;
   "profile.nameHint": Record<never, never>;
+  "profile.pastHoursHint": Record<never, never>;
   "profile.payShown": Record<never, never>;
   "profile.subtitle": Record<never, never>;
   "profile.subtitleEmployer": Record<never, never>;

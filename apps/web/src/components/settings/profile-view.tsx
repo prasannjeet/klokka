@@ -241,7 +241,7 @@ export function ProfileView() {
           ))}
         </div>
         <p className="hint" style={{ marginTop: 12 }}>
-          {t('profile.leavingHint')}
+          {t('profile.pastHoursHint')}
         </p>
       </section>
 

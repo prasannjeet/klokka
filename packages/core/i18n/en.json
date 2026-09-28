@@ -198,7 +198,7 @@
     "payShown": "Pay shown.",
     "hoursOnly": "Hours only.",
     "thisMonth": "this month",
-    "leavingHint": "Leaving a workspace is done by the employer, who deactivates you. Your past hours stay visible to both of you.",
+    "pastHoursHint": "Your past hours stay visible to both of you.",
     "editProfile": "Edit profile"
   },
   "overview": {
