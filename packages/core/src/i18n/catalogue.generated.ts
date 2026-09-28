@@ -65,7 +65,7 @@ export const sv = {
   "common.signIn": "Logga in",
   "common.signOut": "Logga ut",
   "common.skipToContent": "Hoppa till innehållet",
-  "common.tagline": "En klocka. Båda sidor.",
+  "common.tagline": "En klocka. För båda.",
   "common.today": "I dag",
   "common.unread": "Olästa",
   "common.yesterday": "I går",
