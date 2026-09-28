@@ -1853,6 +1853,7 @@ components:
           $ref: '#/components/schemas/MemberStatus'
         showPay:
           type: boolean
+          description: For an employer the workspace's pay switch; for an employee whether they see pay, which needs the switch on AND an hourly rate (CHQ-145).
           example: true
         currency:
           type: string
@@ -2734,7 +2735,7 @@ components:
           example: 22
         labourCost:
           type: [number, 'null']
-          description: Sum of hours times each member's rate; null when pay is off.
+          description: Sum of hours times each member's rate; null when pay is off or no member of the month has a rate.
           example: 85660
         members:
           type: array
@@ -2862,6 +2863,7 @@ components:
           example: SEK
         showPay:
           type: boolean
+          description: Pay is on and this member has an hourly rate, so money figures are shown (CHQ-145); a member without a rate sees hours only.
           example: true
         hourlyRate:
           type: [number, 'null']
@@ -3182,6 +3184,7 @@ components:
           example: 20
         labourCost:
           type: [number, 'null']
+          description: Sum of hours times each member's rate; null when pay is off or no member of the month has a rate.
           example: 85660
         perMember:
           type: array
@@ -3336,6 +3339,7 @@ components:
           example: SEK
         showPay:
           type: boolean
+          description: Pay is on and this member has an hourly rate, so money figures are shown (CHQ-145); a member without a rate sees hours only.
           example: true
         hourlyRate:
           type: [number, 'null']

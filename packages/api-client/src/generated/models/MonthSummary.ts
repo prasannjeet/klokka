@@ -59,7 +59,7 @@ export interface MonthSummary {
      */
     workingDays: number;
     /**
-     * Sum of hours times each member's rate; null when pay is off.
+     * Sum of hours times each member's rate; null when pay is off or no member of the month has a rate.
      */
     labourCost?: number | null;
     /**

@@ -24,6 +24,12 @@ public final class MemberViews {
         return access.workspace().showPay && (access.employer() || access.isSelf(target.id));
     }
 
+    // Money is shown for a member only when the caller may see their rate AND they have one (CHQ-145): an
+    // employee without a rate sees hours only, on every screen, until the employer sets it.
+    public static boolean showsPay(Access access, MembershipEntity target) {
+        return maySeeRate(access, target) && target.hourlyRate != null;
+    }
+
     public static BigDecimal earnings(BigDecimal hours, BigDecimal rate) {
         if (hours == null || rate == null) return null;
         return hours.multiply(rate).setScale(2, RoundingMode.HALF_UP);

@@ -82,7 +82,10 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
 - `EntryBatchItem.hours` is optional as well as nullable: absent or `null` removes that day (a required
   nullable property would be rejected by the generated server validation).
 - Money fields (`earnings`, `hourlyRate`, `labourCost`, `money` in payloads) are `null` unless the workspace has
-  `showPay` on and the caller is the employer or the member themselves.
+  `showPay` on, the caller is the employer or the member themselves, and the member has an hourly rate (CHQ-145).
+  `showPay` on a member's month or insights, and on an employee's `MyWorkspace`, is that effective value: an
+  employee without a rate sees hours only until the employer sets one. `labourCost` is `null` while nobody in the
+  month has a rate.
 - Operator routes accept the `platform-admin` role from the `roles` claim or the `operator` scope from `scope`.
 - Batch problems name the cells: `errors[].field` is `items[<index>].<field>` for `400 VALIDATION`, and a
   `409 MONTH_LOCKED` on `POST entries/batch` lists every item in a closed month as `items[<index>].workDate`.

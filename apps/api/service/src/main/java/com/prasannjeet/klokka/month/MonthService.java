@@ -122,7 +122,8 @@ public class MonthService {
         Map<UUID, Long> days = entries.daysPerMember(id, ym.atDay(1), ym.atEndOfMonth());
         BigDecimal total = BigDecimal.ZERO;
         BigDecimal cost = BigDecimal.ZERO;
-        boolean costKnown = w.showPay;
+        // No cost at all rather than a cost of zero when nobody in the month has a rate (CHQ-145).
+        boolean costKnown = false;
         List<MemberMonthTotal> members = new ArrayList<>();
         for (MembershipEntity m : memberships.listMembers(id)) {
             BigDecimal h = hours.get(m.id);
@@ -130,7 +131,10 @@ public class MonthService {
             BigDecimal memberHours = h == null ? BigDecimal.ZERO : h;
             total = total.add(memberHours);
             BigDecimal earnings = w.showPay ? MemberViews.earnings(memberHours, m.hourlyRate) : null;
-            if (w.showPay && earnings != null) cost = cost.add(earnings);
+            if (earnings != null) {
+                cost = cost.add(earnings);
+                costKnown = true;
+            }
             members.add(new MemberMonthTotal().membershipId(m.id).name(m.displayName).status(m.status)
                     .hours(memberHours).daysWorked(days.getOrDefault(m.id, 0L).intValue()).earnings(earnings));
         }

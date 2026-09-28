@@ -88,7 +88,7 @@ export interface MyWorkspace {
      */
     memberStatus: MemberStatus;
     /**
-     * 
+     * For an employer the workspace's pay switch; for an employee whether they see pay, which needs the switch on AND an hourly rate (CHQ-145).
      */
     showPay: boolean;
     /**

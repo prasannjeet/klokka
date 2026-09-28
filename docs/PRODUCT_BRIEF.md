@@ -54,7 +54,8 @@ API fields and the contract keep `workspace`.
    Employee insights: hours this month, average per working day, best week, earnings if enabled.
 7. **Pay is optional**: a workspace toggle "show pay to employees". When on, each employee has an hourly
    rate and every hours figure gets a money figure next to it. When off, Klokka is hours only and the
-   employer does money elsewhere.
+   employer does money elsewhere. An employee without a rate sees hours only, even with pay on, until the
+   employer sets one (CHQ-145).
 8. **Close the month**: employer locks a month (no more edits without unlocking) and exports CSV.
 
 ## Small features that make it feel finished (owner said: add them, no approval needed)

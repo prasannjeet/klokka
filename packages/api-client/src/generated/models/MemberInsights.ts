@@ -44,7 +44,7 @@ export interface MemberInsights {
      */
     currency: string;
     /**
-     * 
+     * Pay is on and this member has an hourly rate, so money figures are shown (CHQ-145); a member without a rate sees hours only.
      */
     showPay: boolean;
     /**
