@@ -892,6 +892,13 @@
         "ms": "{value} ms",
         "noDeploys": "Inga driftsättningar registrerade än."
       }
+    },
+    "notifications": {
+      "loadMore": "Visa äldre",
+      "seeDay": "Se dagen",
+      "seeMonth": "Se månaden",
+      "seeEmployees": "Se anställda",
+      "unreadDot": "Oläst"
     }
   }
 }

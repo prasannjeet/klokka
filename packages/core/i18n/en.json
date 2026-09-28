@@ -892,6 +892,13 @@
         "ms": "{value} ms",
         "noDeploys": "No deploys recorded yet."
       }
+    },
+    "notifications": {
+      "loadMore": "Show older",
+      "seeDay": "See the day",
+      "seeMonth": "See the month",
+      "seeEmployees": "See employees",
+      "unreadDot": "Unread"
     }
   }
 }

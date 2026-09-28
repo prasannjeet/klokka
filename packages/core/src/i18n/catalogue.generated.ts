@@ -643,6 +643,11 @@ export const sv = {
   "web.newWorkspace.headlineB": "ditt ställe.",
   "web.newWorkspace.nameRequired": "Ge arbetsplatsen ett namn.",
   "web.notFound.title": "Här finns inget",
+  "web.notifications.loadMore": "Visa äldre",
+  "web.notifications.seeDay": "Se dagen",
+  "web.notifications.seeEmployees": "Se anställda",
+  "web.notifications.seeMonth": "Se månaden",
+  "web.notifications.unreadDot": "Oläst",
   "web.operator.account": "Konto",
   "web.operator.empty": "Inget matchar.",
   "web.operator.health.DEGRADED": "Försämrad",
@@ -1425,6 +1430,11 @@ export const en = {
   "web.newWorkspace.headlineB": "your place.",
   "web.newWorkspace.nameRequired": "Give the workspace a name.",
   "web.notFound.title": "Nothing here",
+  "web.notifications.loadMore": "Show older",
+  "web.notifications.seeDay": "See the day",
+  "web.notifications.seeEmployees": "See employees",
+  "web.notifications.seeMonth": "See the month",
+  "web.notifications.unreadDot": "Unread",
   "web.operator.account": "Account",
   "web.operator.empty": "Nothing matches.",
   "web.operator.health.DEGRADED": "Degraded",
@@ -2190,6 +2200,11 @@ export type MessageParams = {
   "web.newWorkspace.headlineB": Record<never, never>;
   "web.newWorkspace.nameRequired": Record<never, never>;
   "web.notFound.title": Record<never, never>;
+  "web.notifications.loadMore": Record<never, never>;
+  "web.notifications.seeDay": Record<never, never>;
+  "web.notifications.seeEmployees": Record<never, never>;
+  "web.notifications.seeMonth": Record<never, never>;
+  "web.notifications.unreadDot": Record<never, never>;
   "web.operator.account": Record<never, never>;
   "web.operator.empty": Record<never, never>;
   "web.operator.health.DEGRADED": Record<never, never>;
