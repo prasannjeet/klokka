@@ -14,6 +14,7 @@ FROM node:24-alpine AS deps
 WORKDIR /repo
 COPY --from=manifests /repo ./
 # Web dependencies plus the root toolchain (TypeScript for next build); sibling apps' dependencies are skipped.
+RUN npm install -g npm@11.9.0 --no-audit --no-fund
 RUN npm ci --workspace @klokka/web --include-workspace-root --no-audit --no-fund
 
 FROM deps AS build

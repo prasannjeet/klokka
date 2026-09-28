@@ -18,6 +18,7 @@ RUN mkdir /out \
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY --from=manifests /out ./
+RUN npm install -g npm@11.9.0 --no-audit --no-fund
 RUN npm ci --workspace @klokka/landing --include-workspace-root --no-audit --no-fund
 
 # ---- build ----
