@@ -717,6 +717,12 @@ export const sv = {
   "web.settings.payShownBody": "Varje anställd ser sin timlön och intjäning från och med nu.",
   "web.settings.payShownTitle": "Lön visas nu",
   "web.settings.saved": "Sparat",
+  "web.share.bestWeekValue": "bästa veckan {hours}",
+  "web.share.dayAverage": "{hours} om dagen",
+  "web.share.daysValue_one": "{count} dag",
+  "web.share.daysValue_other": "{count} dagar",
+  "web.share.downloaded": "Bilden är sparad.",
+  "web.share.failed": "Bilden kunde inte skapas. Försök igen.",
   "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
   "web.shell.operatorConsole": "Operatörskonsol",
   "web.signIn.backToStart": "Tillbaka till klokka",
@@ -1529,6 +1535,12 @@ export const en = {
   "web.settings.payShownBody": "Every employee sees their rate and earnings from now on.",
   "web.settings.payShownTitle": "Pay is now shown",
   "web.settings.saved": "Saved",
+  "web.share.bestWeekValue": "best week {hours}",
+  "web.share.dayAverage": "{hours} a day",
+  "web.share.daysValue_one": "{count} day",
+  "web.share.daysValue_other": "{count} days",
+  "web.share.downloaded": "Image saved.",
+  "web.share.failed": "The image could not be made. Try again.",
   "web.shell.clockLabel": "A railway clock showing the current time",
   "web.shell.operatorConsole": "Operator console",
   "web.signIn.backToStart": "Back to klokka",
@@ -2322,6 +2334,11 @@ export type MessageParams = {
   "web.settings.payShownBody": Record<never, never>;
   "web.settings.payShownTitle": Record<never, never>;
   "web.settings.saved": Record<never, never>;
+  "web.share.bestWeekValue": { hours: string | number };
+  "web.share.dayAverage": { hours: string | number };
+  "web.share.daysValue": { count: string | number };
+  "web.share.downloaded": Record<never, never>;
+  "web.share.failed": Record<never, never>;
   "web.shell.clockLabel": Record<never, never>;
   "web.shell.operatorConsole": Record<never, never>;
   "web.signIn.backToStart": Record<never, never>;
@@ -2440,6 +2457,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "web.month.editedTimes",
   "web.operator.volume.inDays",
   "web.profile.employerAt",
+  "web.share.daysValue",
   "web.week.notify",
   "web.week.savedBody",
   "web.week.unsaved",

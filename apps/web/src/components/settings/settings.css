@@ -1,0 +1,42 @@
+/* Settings and profile additions to the shared vocabulary in globals.css. Tokens only. */
+.saved-slot {
+  display: inline-flex;
+  margin-left: 8px;
+  vertical-align: middle;
+  min-height: 1em;
+}
+.srow .t-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px 0;
+}
+/* Long Swedish segment labels ("Närmaste 0,25 h") wrap instead of spilling out at phone widths. */
+.settings-seg {
+  display: grid;
+  width: 100%;
+}
+.settings-seg button {
+  white-space: normal;
+  line-height: 1.2;
+  padding-block: 6px;
+  text-align: center;
+}
+.settings-stack {
+  display: grid;
+  gap: 10px;
+}
+.day-length {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pf-actions {
+  margin-top: 16px;
+}
+/* The workspace rows' description spans must not restyle the emoji tile (it is a span too). */
+.pf-ws .row .ws-em {
+  display: grid;
+  font-size: 18px;
+  color: inherit;
+}

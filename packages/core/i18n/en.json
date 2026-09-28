@@ -932,6 +932,14 @@
       "who": "{name}, {date}",
       "youSuggested": "You flagged it: {suggested} instead of {logged}. The employer is looking at it.",
       "youFlagged": "You flagged this entry. The employer is looking at it."
+    },
+    "share": {
+      "failed": "The image could not be made. Try again.",
+      "downloaded": "Image saved.",
+      "dayAverage": "{hours} a day",
+      "bestWeekValue": "best week {hours}",
+      "daysValue_one": "{count} day",
+      "daysValue_other": "{count} days"
     }
   }
 }

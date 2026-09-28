@@ -932,6 +932,14 @@
       "who": "{name}, {date}",
       "youSuggested": "Du har flaggat den: {suggested} i stället för {logged}. Arbetsgivaren tittar på det.",
       "youFlagged": "Du har flaggat den här posten. Arbetsgivaren tittar på det."
+    },
+    "share": {
+      "failed": "Bilden kunde inte skapas. Försök igen.",
+      "downloaded": "Bilden är sparad.",
+      "dayAverage": "{hours} om dagen",
+      "bestWeekValue": "bästa veckan {hours}",
+      "daysValue_one": "{count} dag",
+      "daysValue_other": "{count} dagar"
     }
   }
 }
