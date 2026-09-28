@@ -2241,7 +2241,7 @@ components:
           type: [number, 'null']
           minimum: 0
           maximum: 100000
-          description: Null clears the rate.
+          description: Absent leaves the rate unchanged; an explicit null clears it.
           example: 175
         status:
           $ref: '#/components/schemas/MemberStatus'
@@ -2425,7 +2425,7 @@ components:
         note: Delivery day, stayed to unload.
     EntryBatchItem:
       type: object
-      required: [membershipId, workDate, hours]
+      required: [membershipId, workDate]
       properties:
         membershipId:
           type: string
@@ -2439,7 +2439,7 @@ components:
           type: [number, 'null']
           minimum: 0
           maximum: 24
-          description: Null removes the entry for that day.
+          description: Null or absent removes the entry for that day (a required nullable field would be rejected by the generated server validation).
           example: 4
         note:
           type: [string, 'null']
