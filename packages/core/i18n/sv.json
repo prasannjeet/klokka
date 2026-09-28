@@ -493,6 +493,7 @@
       "changed_other": "{name} ändrade {count} dagar",
       "removed_one": "{name} tog bort {count} dag",
       "removed_other": "{name} tog bort {count} dagar",
+      "reverted": "{name} ändrade dina timmar och ändrade tillbaka",
       "bodyOne": "{workspace}: {hours}",
       "bodyChangedOne": "{workspace}: {hours}, var {before}",
       "bodyWeek": "{workspace}, vecka {week}: {days}",

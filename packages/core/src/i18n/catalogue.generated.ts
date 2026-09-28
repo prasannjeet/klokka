@@ -405,6 +405,7 @@ export const sv = {
   "notifications.hours.rangeWeek": "{workspace}, vecka {week}: {from} till {to}, {hours}",
   "notifications.hours.removed_one": "{name} tog bort {count} dag",
   "notifications.hours.removed_other": "{name} tog bort {count} dagar",
+  "notifications.hours.reverted": "{name} ändrade dina timmar och ändrade tillbaka",
   "notifications.inviteAccepted.body": "{workspace}: {name} är nu anställd",
   "notifications.inviteAccepted.title": "{name} accepterade din inbjudan",
   "notifications.markAllRead": "Markera alla som lästa",
@@ -1314,6 +1315,7 @@ export const en = {
   "notifications.hours.rangeWeek": "{workspace}, week {week}: {from} to {to}, {hours}",
   "notifications.hours.removed_one": "{name} removed {count} day",
   "notifications.hours.removed_other": "{name} removed {count} days",
+  "notifications.hours.reverted": "{name} changed your hours and put them back",
   "notifications.inviteAccepted.body": "{workspace}: {name} is now an employee",
   "notifications.inviteAccepted.title": "{name} accepted your invitation",
   "notifications.markAllRead": "Mark all as read",
@@ -2212,6 +2214,7 @@ export type MessageParams = {
   "notifications.hours.range": { from: string | number; hours: string | number; to: string | number; workspace: string | number };
   "notifications.hours.rangeWeek": { from: string | number; hours: string | number; to: string | number; week: string | number; workspace: string | number };
   "notifications.hours.removed": { count: string | number; name: string | number };
+  "notifications.hours.reverted": { name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
   "notifications.markAllRead": Record<never, never>;

@@ -95,9 +95,8 @@ public class NotificationTexts {
         String name = str(payload, "actorName");
         TreeMap<LocalDate, BigDecimal[]> changes = changes(payload);
         changes.values().removeIf(c -> c[0] == null && c[1] == null);
-        if (changes.isEmpty()) {
-            return new Rendered(catalogue.plural(lang, Text.HOURS_CHANGED.key(), 0, Map.of("name", name)), where, null);
-        }
+        // Rows written before net-nothing sittings were dropped (06b14a3) can still hold days that went back.
+        if (changes.isEmpty()) return new Rendered(t(lang, Text.HOURS_REVERTED, Map.of("name", name)), where, null);
         boolean allAdded = changes.values().stream().allMatch(c -> c[0] == null);
         boolean allRemoved = changes.values().stream().allMatch(c -> c[1] == null);
         String note = strOrNull(payload, "note");

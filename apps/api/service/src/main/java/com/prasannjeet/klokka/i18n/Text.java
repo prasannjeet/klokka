@@ -9,6 +9,7 @@ public enum Text {
     HOURS_ADDED("notifications.hours.added", true),
     HOURS_CHANGED("notifications.hours.changed", true),
     HOURS_REMOVED("notifications.hours.removed", true),
+    HOURS_REVERTED("notifications.hours.reverted"),
     HOURS_BODY_ONE("notifications.hours.bodyOne"),
     HOURS_BODY_CHANGED_ONE("notifications.hours.bodyChangedOne"),
     HOURS_BODY_WEEK("notifications.hours.bodyWeek"),

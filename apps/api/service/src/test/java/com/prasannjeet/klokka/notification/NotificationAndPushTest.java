@@ -127,6 +127,9 @@ class NotificationAndPushTest {
         var mixed = hours(sitting("2026-09-28", "5", "6", "2026-09-29", "4", null), Language.EN);
         assertThat(mixed.title()).isEqualTo("Anna Admin changed 2 days");
         assertThat(mixed.body()).isEqualTo("Kafé Nord, week 40: Mon 28 Sept 6 h, Tue 29 Sept removed");
+        var reverted = hours(sitting("2026-09-28", null, null), Language.EN);
+        assertThat(reverted.title()).isEqualTo("Anna Admin changed your hours and put them back");
+        assertThat(reverted.body()).isEqualTo("Kafé Nord");
         for (var r : List.of(one, oneSv, changed, two, twoSv, five, removed, removedTwoWeeks, mixed)) {
             assertThat(r.body().length()).as(r.body()).isLessThanOrEqualTo(100);
         }
