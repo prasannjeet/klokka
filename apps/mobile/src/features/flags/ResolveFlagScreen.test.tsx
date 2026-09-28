@@ -72,3 +72,65 @@ describe('ResolveFlagScreen (employer)', () => {
     );
   });
 });
+
+describe('ResolveFlagScreen without a suggestion (CHQ-145)', () => {
+  const bare = {
+    ...flagFixture,
+    suggestedHours: null,
+    reason: 'LESS' as const,
+    message: 'That was not right.',
+  };
+
+  beforeEach(() => {
+    useAppStore.getState().setActiveWorkspace('ws-cafe');
+    routerState.backs = 0;
+  });
+
+  it('proposes the logged hours, never 0, and fixes with what the employer typed', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getFlag: bare,
+      getEntryHistory: history,
+      resolveFlag: { ...bare, status: 'FIXED' },
+    });
+    await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
+    expect(await screen.findByText('Flag from Maria')).toBeTruthy();
+    // No "Maria says 0 h" tile; the field starts at the logged 2 h.
+    expect(screen.queryByText('Maria says')).toBeNull();
+    expect(screen.getByTestId('flag-hours').props.value).toBe('2');
+    expect(screen.getByText('Change to 2 h')).toBeTruthy();
+    await fireEvent.changeText(screen.getByTestId('flag-hours'), '');
+    expect(screen.getByText('Enter hours between 0 and 24, like 2.5 or 7,5.')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('flag-fix'));
+    expect(api.calls.some((c) => c.op === 'resolveFlag')).toBe(false);
+    await fireEvent.changeText(screen.getByTestId('flag-hours'), '1,5');
+    await fireEvent.press(screen.getByTestId('flag-fix'));
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'resolveFlag')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        flagId: 'flag-1',
+        flagResolve: { action: 'FIX', hours: 1.5 },
+      }),
+    );
+  });
+
+  it('writes 0 h only when the employer typed 0', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getFlag: bare,
+      getEntryHistory: history,
+      resolveFlag: { ...bare, status: 'FIXED' },
+    });
+    await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
+    await screen.findByText('Flag from Maria');
+    await fireEvent.changeText(screen.getByTestId('flag-hours'), '0');
+    await fireEvent.press(screen.getByTestId('flag-fix'));
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'resolveFlag')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        flagId: 'flag-1',
+        flagResolve: { action: 'FIX', hours: 0 },
+      }),
+    );
+  });
+});

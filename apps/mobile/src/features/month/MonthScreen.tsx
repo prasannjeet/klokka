@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useMemberInsights, useMemberMonth } from '@/data/workspace';
 import { useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Button, EmptyState, Icon, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { PushPrompt } from '@/features/push/PushPrompt';
 import { MemberMonthView } from './MemberMonthView';
 
@@ -43,13 +42,12 @@ const styles = (t: Theme) =>
 
 // "My month" (CHQ-121): the employee's tab. The workspace chip switches employers, the bell opens
 // the notification centre. Everything below is the shared month view.
-function MonthScreenInner() {
+function MonthScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const params = useLocalSearchParams<{ month?: string }>();
-  const workspace = useWorkspaceOrThrow();
   const current = currentMonthIn(workspace.timezone);
   const [month, setMonth] = useState(typeof params.month === 'string' ? params.month : current);
   useEffect(() => {

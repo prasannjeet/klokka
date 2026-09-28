@@ -6,6 +6,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth';
 import { AuthGate } from '@/features/shell/AuthGate';
+import { installCrashGuard, RootErrorBoundary } from '@/features/shell/RootErrorBoundary';
 import { useSystemUi } from '@/features/shell/useSystemUi';
 import { LocaleProvider } from '@/i18n/LocaleProvider';
 import { useAppStore } from '@/store/appStore';
@@ -15,6 +16,7 @@ import { ToastProvider } from '@/ui';
 // Hold the splash until the persisted store has rehydrated and the session is restored, so the
 // first frame is already in the user's mode and language rather than flashing the defaults.
 void SplashScreen.preventAutoHideAsync();
+installCrashGuard();
 
 function Navigator() {
   const theme = useTheme();
@@ -23,9 +25,14 @@ function Navigator() {
   return (
     <>
       <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
-      <AuthGate userId={userId}>
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.bg } }} />
-      </AuthGate>
+      <RootErrorBoundary>
+        <AuthGate userId={userId}>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.bg } }}>
+            {/* The tabs are always the root of the history (enterApp): no back arrow, no back gesture. */}
+            <Stack.Screen name="(tabs)" options={{ headerBackVisible: false, gestureEnabled: false }} />
+          </Stack>
+        </AuthGate>
+      </RootErrorBoundary>
     </>
   );
 }

@@ -28,7 +28,7 @@ import {
  */
 export interface PushTokenRegistration {
     /**
-     * From `getExpoPushTokenAsync({ projectId })`.
+     * From `getExpoPushTokenAsync({ projectId })`. Only Expo push tokens are accepted; a raw FCM or APNs device token is refused with `400 VALIDATION` (CHQ-145, Expo cannot deliver to it).
      */
     token: string;
     /**

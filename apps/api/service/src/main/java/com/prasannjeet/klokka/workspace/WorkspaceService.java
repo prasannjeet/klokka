@@ -29,7 +29,6 @@ import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -179,12 +178,13 @@ public class WorkspaceService {
         return base + "-" + UUID.randomUUID().toString().substring(0, 8);
     }
 
+    // Region ids only (CHQ-145): ZoneId.of also accepts offsets such as "UTC+1" and stores them as "UTC+01:00",
+    // which Intl rejects on both clients, so anything outside the tz database's ids is a validation problem.
     static ZoneId zone(String timezone) {
-        try {
-            return ZoneId.of(timezone);
-        } catch (DateTimeException e) {
+        if (timezone == null || !ZoneId.getAvailableZoneIds().contains(timezone)) {
             throw validation("timezone", "is not an IANA time zone");
         }
+        return ZoneId.of(timezone);
     }
 
     static String currency(String code) {

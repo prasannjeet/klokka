@@ -12,13 +12,12 @@ import {
   previousMonth,
   WEEKDAYS,
 } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useWorkspaceInsights } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Card, EmptyState, Header, Icon, Numeral, Pill, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { Bars, TrendLine } from './charts';
 
 const styles = (t: Theme) =>
@@ -45,14 +44,13 @@ const styles = (t: Theme) =>
 
 // Insights (CHQ-124, CHQ-126): every number comes from the API read model (D9). Labour cost appears
 // only while pay is on (CHQ-128).
-function InsightsScreenInner() {
+function InsightsScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const params = useLocalSearchParams<{ month?: string }>();
-  const workspace = useWorkspaceOrThrow();
   const current = currentMonthIn(workspace.timezone);
   const [month, setMonth] = useState(typeof params.month === 'string' ? params.month : current);
   useEffect(() => {

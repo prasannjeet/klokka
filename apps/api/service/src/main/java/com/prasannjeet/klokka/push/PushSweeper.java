@@ -3,8 +3,6 @@ package com.prasannjeet.klokka.push;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.contract.model.Language;
-import com.prasannjeet.klokka.i18n.Catalogue;
-import com.prasannjeet.klokka.i18n.Text;
 import com.prasannjeet.klokka.notification.NotificationPayload;
 import com.prasannjeet.klokka.notification.NotificationLinks;
 import com.prasannjeet.klokka.notification.NotificationService;
@@ -48,9 +46,6 @@ public class PushSweeper {
     NotificationTexts texts;
 
     @Inject
-    Catalogue catalogue;
-
-    @Inject
     ObjectMapper mapper;
 
     @Inject
@@ -88,9 +83,9 @@ public class PushSweeper {
             if (deviceTokens.isEmpty()) continue;
             WorkspaceEntity workspace = repository.workspaceOf(row).orElse(null);
             Map<String, Object> payload = NotificationPayload.read(mapper, row.payload);
-            NotificationTexts.Rendered rendered = texts.render(row.kind, payload, recipient.language(), workspace == null ? "SEK" : workspace.currency);
-            String title = workspace == null ? rendered.title()
-                    : catalogue.t(recipient.language(), Text.PUSH_WORKSPACE_PREFIX.key(), Map.of("workspace", workspace.name, "title", rendered.title()));
+            NotificationTexts.Rendered rendered = texts.render(row.kind, payload, recipient.language(),
+                    workspace == null ? null : workspace.name, workspace == null ? "SEK" : workspace.currency);
+            String title = rendered.title();
             Map<String, Object> data = new HashMap<>();
             data.put("notificationId", row.id.toString());
             data.put("kind", row.kind.toString());

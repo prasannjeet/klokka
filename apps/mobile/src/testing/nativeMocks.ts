@@ -99,6 +99,9 @@ export const notificationState = {
   handler: null as null | { handleNotification: (n: unknown) => Promise<unknown> },
   token: 'ExponentPushToken[test]',
   badge: 0,
+  // The rotation listener and every getExpoPushTokenAsync call, so a test can emit a new device token.
+  tokenListeners: [] as ((token: { type: string; data: string }) => void)[],
+  expoTokenCalls: [] as unknown[],
   responseListeners: [] as ((response: unknown) => void)[],
   receivedListeners: [] as ((notification: unknown) => void)[],
   lastResponse: null as unknown,
@@ -126,8 +129,19 @@ export function notificationsModule() {
         canAskAgain: true,
       };
     },
-    getExpoPushTokenAsync: async () => ({ type: 'expo', data: notificationState.token }),
-    addPushTokenListener: () => ({ remove: () => undefined }),
+    getExpoPushTokenAsync: async (options?: { devicePushToken?: { data: string } }) => {
+      notificationState.expoTokenCalls.push(options);
+      const device = options?.devicePushToken?.data;
+      return { type: 'expo', data: device ? `ExponentPushToken[for-${device}]` : notificationState.token };
+    },
+    addPushTokenListener: (fn: (token: { type: string; data: string }) => void) => {
+      notificationState.tokenListeners.push(fn);
+      return {
+        remove: () => {
+          notificationState.tokenListeners = notificationState.tokenListeners.filter((f) => f !== fn);
+        },
+      };
+    },
     addNotificationResponseReceivedListener: (fn: (r: unknown) => void) => {
       notificationState.responseListeners.push(fn);
       return {
@@ -220,6 +234,7 @@ export const routerState = {
   pushes: [] as unknown[],
   replaces: [] as unknown[],
   backs: 0,
+  dismissAlls: 0,
   params: {} as Record<string, string>,
 };
 export function expoRouterModule() {
@@ -238,6 +253,10 @@ export function expoRouterModule() {
       routerState.pushes.push(href);
     },
     canGoBack: () => true,
+    canDismiss: () => true,
+    dismissAll: () => {
+      routerState.dismissAlls += 1;
+    },
   };
   return {
     useRouter: () => router,

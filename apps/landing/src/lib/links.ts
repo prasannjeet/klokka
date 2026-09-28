@@ -8,7 +8,7 @@ function origin(value: string | undefined, fallback: string): string {
 /** This site: canonical URLs, hreflang, sitemap, og:url. */
 export const siteUrl = origin(process.env.NEXT_PUBLIC_SITE_URL, 'https://klokka.coolify.ooguy.com');
 
-/** The web app: sign-up ("Create your workspace") and sign-in ("Log in"). */
+/** The web app: sign-up ("Create your business") and sign-in ("Log in"). */
 export const appUrl = origin(process.env.NEXT_PUBLIC_APP_URL, 'https://klokka-app.coolify.ooguy.com');
 
 /** The signed Android release APK, published to Nexus (raw) by CI (docs/DECISIONS.md D4, D13). */

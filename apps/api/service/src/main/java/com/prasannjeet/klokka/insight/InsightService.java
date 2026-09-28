@@ -127,7 +127,7 @@ public class InsightService {
                 .month(ym.toString())
                 .locked(locks.isLocked(id, ym))
                 .currency(w.currency)
-                .showPay(w.showPay)
+                .showPay(MemberViews.showsPay(a, m))
                 .hourlyRate(rate ? m.hourlyRate : null)
                 .days(days)
                 .totalHours(total)
@@ -174,13 +174,17 @@ public class InsightService {
         long activeMembers = all.stream().filter(m -> m.status == ACTIVE && m.role == Role.EMPLOYEE).count();
         List<MemberShare> shares = new ArrayList<>();
         BigDecimal labourCost = BigDecimal.ZERO;
+        boolean anyRate = false;
         for (MembershipEntity m : all) {
             BigDecimal h = perMember.get(m.id);
             boolean counts = (m.status == ACTIVE && m.role == Role.EMPLOYEE) || (h != null && h.signum() > 0);
             if (!counts) continue;
             BigDecimal hours = h == null ? BigDecimal.ZERO : h;
             BigDecimal earnings = w.showPay ? MemberViews.earnings(hours, m.hourlyRate) : null;
-            if (earnings != null) labourCost = labourCost.add(earnings);
+            if (earnings != null) {
+                labourCost = labourCost.add(earnings);
+                anyRate = true;
+            }
             shares.add(new MemberShare().membershipId(m.id).name(m.displayName).hours(hours)
                     .sharePercent(total.signum() == 0 ? BigDecimal.ZERO : hours.multiply(HUNDRED).divide(total, 1, RoundingMode.HALF_UP))
                     .earnings(earnings));
@@ -237,7 +241,7 @@ public class InsightService {
                 .avgHoursPerPersonPerWorkingDay(avgPerPerson)
                 .workingDays(workingDays)
                 .elapsedWorkingDays(elapsed)
-                .labourCost(w.showPay ? labourCost : null)
+                .labourCost(anyRate ? labourCost : null)
                 .perMember(shares)
                 .weekByWeek(months.weekTotals(id, null, ym))
                 .weekdayDistribution(distribution)
@@ -268,7 +272,7 @@ public class InsightService {
                 .month(ym.toString())
                 .asOf(asOf.isBefore(ym.atDay(1)) ? ym.atDay(1) : asOf)
                 .currency(w.currency)
-                .showPay(w.showPay)
+                .showPay(MemberViews.showsPay(a, m))
                 .hourlyRate(rate ? m.hourlyRate : null)
                 .totalHours(total)
                 .lastMonthHours(lastTotal)

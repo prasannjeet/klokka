@@ -147,7 +147,7 @@ export function WeekGrid({
                 'cell',
                 isWeekend(d) ? 'we' : '',
                 d > today ? 'future' : '',
-                isDirty(state, key) ? 'dirty' : '',
+                isDirty(state, key) ? 'dirty' : value.hours !== null ? 'has' : '',
                 value.note ? 'note' : '',
                 flagged(key) ? 'flagged' : '',
                 state.errors[key] || state.invalid[key] ? 'error' : '',

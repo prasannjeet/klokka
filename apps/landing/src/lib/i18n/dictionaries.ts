@@ -42,7 +42,7 @@ export const sv = {
     openSource: 'Öppen källkod',
     faq: 'Frågor',
     login: 'Logga in',
-    createWorkspace: 'Skapa arbetsplats',
+    createWorkspace: 'Skapa ett företag',
   },
   hero: {
     badge: 'Gratis och öppen källkod. MIT-licens.',
@@ -51,7 +51,7 @@ export const sv = {
     madeFor: 'Gjord för',
     words: ['kaféet', 'pizzerian', 'frisörsalongen', 'städfirman', 'bageriet', 'kvartersbutiken'],
     lead: 'Arbetsgivaren för in timmarna som var och en har jobbat. De anställda ser samma månad i mobilen, dag för dag, direkt när något ändras. Lönen är ett val, inte ett krav.',
-    primaryCta: 'Skapa din arbetsplats',
+    primaryCta: 'Skapa ditt företag',
     secondaryCta: 'Se hur det funkar',
     note: 'Gratis att använda, inget kort behövs.',
     trust: [
@@ -65,7 +65,7 @@ export const sv = {
   stage: {
     label: 'Exempel: arbetsgivaren fyller i en vecka, den anställda får en notis och ser samma summa',
     title: 'Vecka 39',
-    subtitle: '21–27 september, exempelarbetsplats',
+    subtitle: '21–27 september, exempelföretag',
     pill: 'Nora loggar',
     gridLabel: 'Veckorutnät, timmar per person och dag',
     days: ['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'],
@@ -97,7 +97,7 @@ export const sv = {
     steps: [
       {
         title: 'Bjud in',
-        body: 'Skriv namn och e-post. Personen får ett mejl, väljer ett lösenord och hamnar på din arbetsplats som anställd. Tills dess står det Inbjuden.',
+        body: 'Skriv namn och e-post. Personen får ett mejl, väljer ett lösenord och hamnar i ditt företag som anställd. Tills dess står det Inbjuden.',
       },
       {
         title: 'För in timmar',
@@ -105,7 +105,7 @@ export const sv = {
       },
       {
         title: 'Båda ser samma',
-        body: 'Den anställda får en notis för hela omgången, inte fem. Ni tittar på samma månad och samma summor, så länge arbetsplatsen finns.',
+        body: 'Den anställda får en notis för hela omgången, inte fem. Ni tittar på samma månad och samma summor, så länge företaget finns.',
       },
     ],
     invite: {
@@ -192,7 +192,7 @@ export const sv = {
       },
       {
         title: 'Två arbetsgivare, en app',
-        body: 'Jobbar du på två ställen? Byt mellan arbetsplatserna. Var och en har sina egna timmar och sin egen färg.',
+        body: 'Jobbar du på två ställen? Byt mellan företagen. Var och en har sina egna timmar och sin egen färg.',
       },
       {
         title: 'Mörkt läge, så klart',
@@ -218,17 +218,17 @@ export const sv = {
   pay: {
     eyebrow: 'Lön på eller av',
     title: 'Bara timmar. Eller timmar och lön.',
-    lead: 'Ett reglage i inställningarna för arbetsplatsen. Av: Klokka är en ren redovisning av timmar och pengarna sköter du någon annanstans. På: varje anställd har en timlön och varje timsiffra får ett belopp bredvid sig. Den anställda ser det också. Det är hela poängen.',
+    lead: 'Ett reglage i inställningarna för företaget. Av: Klokka är en ren redovisning av timmar och pengarna sköter du någon annanstans. På: varje anställd har en timlön och varje timsiffra får ett belopp bredvid sig. Den anställda ser det också. Det är hela poängen.',
     switchLabel: 'Visa lön för anställda',
     offTitle: 'Av',
     offBody: 'Bara timmar. Ingen ser någon timlön.',
     onTitle: 'På',
     onBody: 'Timlön per person. Pengar bredvid varje timme.',
     cardTitle: 'Vecka 39',
-    cardSubtitle: 'Café Nord, exempelarbetsplats',
+    cardSubtitle: 'Café Nord, exempelföretag',
     people: '3 personer',
     total: 'Veckans summa',
-    rateNote: 'Påhittade timlöner på 170 och 190 kr. Valutan följer arbetsplatsen.',
+    rateNote: 'Påhittade timlöner på 170 och 190 kr. Valutan följer företaget.',
   },
   insights: {
     eyebrow: 'Insikter',
@@ -249,7 +249,7 @@ export const sv = {
     emptySub: 'Två lördagar. Tryck för att fylla i.',
     cost: 'Lönekostnad den här månaden',
     costSub: 'Visas eftersom Visa lön är på',
-    illustrative: 'Exempelarbetsplats med fyra personer, september 2026. Påhittade siffror.',
+    illustrative: 'Exempelföretag med fyra personer, september 2026. Påhittade siffror.',
   },
   openSource: {
     eyebrow: 'Gratis och öppen källkod',
@@ -288,7 +288,7 @@ export const sv = {
       },
       {
         q: 'Måste jag visa lön?',
-        a: 'Nej. Lön är ett reglage för arbetsplatsen och det är av från början. Slå på det så får varje anställd en timlön och ser pengar bredvid timmarna. Slå av det så är det bara timmar.',
+        a: 'Nej. Lön är ett reglage för företaget och det är av från början. Slå på det så får varje anställd en timlön och ser pengar bredvid timmarna. Slå av det så är det bara timmar.',
       },
       {
         q: 'Vilka språk finns?',
@@ -314,10 +314,10 @@ export const sv = {
   },
   cta: {
     startEyebrow: 'Kom igång',
-    startTitle: 'Skapa en arbetsplats. Bjud in en person. För in timmar i dag.',
+    startTitle: 'Skapa ett företag. Bjud in en person. För in timmar i dag.',
     startLead:
       'Fem minuter från registreringen till den första timmen i Klokka. Inbjudningsmejlet sköter resten.',
-    create: 'Skapa din arbetsplats',
+    create: 'Skapa ditt företag',
     login: 'Logga in',
     invitedEyebrow: 'Redan inbjuden?',
     invitedTitle: 'Har du fått en inbjudan?',
@@ -342,7 +342,7 @@ export const sv = {
       issues: 'Ärenden och färdplan',
       faq: 'Frågor',
       login: 'Logga in',
-      create: 'Skapa arbetsplats',
+      create: 'Skapa ett företag',
     },
     copyright: '© 2026 Klokka. MIT-licens.',
   },
@@ -386,7 +386,7 @@ export const en: Dictionary = {
     openSource: 'Open source',
     faq: 'FAQ',
     login: 'Log in',
-    createWorkspace: 'Create workspace',
+    createWorkspace: 'Create a business',
   },
   hero: {
     badge: 'Free and open source. MIT licence.',
@@ -395,7 +395,7 @@ export const en: Dictionary = {
     madeFor: 'Made for the',
     words: ['cafe', 'salon', 'bakery', 'cleaning crew', 'corner shop', 'small agency'],
     lead: 'The employer logs the hours each person worked. Every employee sees the same month on their phone, day by day, the moment it changes. Pay is a switch, not a requirement.',
-    primaryCta: 'Create your workspace',
+    primaryCta: 'Create your business',
     secondaryCta: 'See how it works',
     note: 'Free to use, no card needed.',
     trust: [
@@ -409,7 +409,7 @@ export const en: Dictionary = {
   stage: {
     label: 'Example: an employer fills a week, the employee is notified and sees the same total',
     title: 'Week 39',
-    subtitle: '21 to 27 September, example workspace',
+    subtitle: '21 to 27 September, example business',
     pill: 'Nora is logging',
     gridLabel: 'Week grid, hours per person per day',
     days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -441,7 +441,7 @@ export const en: Dictionary = {
     steps: [
       {
         title: 'Invite',
-        body: 'Add a name and an email. They get one email, set a password and land in your workspace as an employee. Until then they show as Invited.',
+        body: 'Add a name and an email. They get one email, set a password and land in your business as an employee. Until then they show as Invited.',
       },
       {
         title: 'Log hours',
@@ -449,7 +449,7 @@ export const en: Dictionary = {
       },
       {
         title: 'Everyone sees',
-        body: 'The employee gets one notification for the sitting, not five. Both of you look at the same month and the same totals, for as long as the workspace exists.',
+        body: 'The employee gets one notification for the sitting, not five. Both of you look at the same month and the same totals, for as long as the business exists.',
       },
     ],
     invite: {
@@ -536,7 +536,7 @@ export const en: Dictionary = {
       },
       {
         title: 'Two employers, one app',
-        body: 'Work at two places? Switch between workspaces; each keeps its own hours and its own colour.',
+        body: 'Work at two places? Switch between businesses; each keeps its own hours and its own colour.',
       },
       {
         title: 'Dark mode, obviously',
@@ -562,17 +562,17 @@ export const en: Dictionary = {
   pay: {
     eyebrow: 'The pay switch',
     title: 'Hours only. Or hours and pay.',
-    lead: 'One switch in workspace settings. Off, Klokka is a clean record of hours and you do money elsewhere. On, every employee has an hourly rate and every hours figure gets a money figure beside it. The employee sees it too. That is the point.',
+    lead: 'One switch in the business settings. Off, Klokka is a clean record of hours and you do money elsewhere. On, every employee has an hourly rate and every hours figure gets a money figure beside it. The employee sees it too. That is the point.',
     switchLabel: 'Show pay to employees',
     offTitle: 'Off',
     offBody: 'Hours only. Nobody sees a rate.',
     onTitle: 'On',
     onBody: 'Rates per person. Money next to every hour.',
     cardTitle: 'Week 39',
-    cardSubtitle: 'Café Nord, example workspace',
+    cardSubtitle: 'Café Nord, example business',
     people: '3 people',
     total: 'Week total',
-    rateNote: 'Illustrative rates of SEK 170 and SEK 190 per hour. The currency follows the workspace.',
+    rateNote: 'Illustrative rates of SEK 170 and SEK 190 per hour. The currency follows the business.',
   },
   insights: {
     eyebrow: 'Insights',
@@ -593,7 +593,7 @@ export const en: Dictionary = {
     emptySub: 'Two Saturdays. Tap to fill.',
     cost: 'Labour cost this month',
     costSub: 'Shows because the pay switch is on',
-    illustrative: 'Example workspace with four people, September 2026. Illustrative numbers.',
+    illustrative: 'Example business with four people, September 2026. Illustrative numbers.',
   },
   openSource: {
     eyebrow: 'Free and open source',
@@ -632,7 +632,7 @@ export const en: Dictionary = {
       },
       {
         q: 'Do I have to show pay?',
-        a: 'No. Pay is a workspace switch, off by default. Turn it on and every employee gets an hourly rate and sees money next to hours. Turn it off and it is hours only.',
+        a: 'No. Pay is a switch per business, off by default. Turn it on and every employee gets an hourly rate and sees money next to hours. Turn it off and it is hours only.',
       },
       {
         q: 'Which languages?',
@@ -658,9 +658,9 @@ export const en: Dictionary = {
   },
   cta: {
     startEyebrow: 'Get started',
-    startTitle: 'Open a workspace. Invite one person. Log today.',
+    startTitle: 'Create a business. Invite one person. Log today.',
     startLead: 'Five minutes from sign-up to the first logged hour. The invitation email does the rest.',
-    create: 'Create your workspace',
+    create: 'Create your business',
     login: 'Log in',
     invitedEyebrow: 'Already invited?',
     invitedTitle: 'Got an invitation email?',
@@ -684,7 +684,7 @@ export const en: Dictionary = {
       issues: 'Issues and roadmap',
       faq: 'FAQ',
       login: 'Log in',
-      create: 'Create workspace',
+      create: 'Create a business',
     },
     copyright: '© 2026 Klokka. MIT licensed.',
   },

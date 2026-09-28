@@ -211,11 +211,9 @@ export function NotificationsScreen({ pushed }: { pushed?: boolean }) {
       {query.hasNextPage && !query.isFetchingNextPage ? (
         <Button label={t('common.next')} variant="ghost" compact onPress={() => void query.fetchNextPage()} />
       ) : null}
-      {items.length > 0 ? (
+      {items.length > 0 && workspace?.role === 'EMPLOYER' ? (
         <AppText variant="caption" tone="muted" align="center">
-          {workspace?.role === 'EMPLOYER'
-            ? t('notifications.employerKindsHint')
-            : t('notifications.channelsHintEmployee')}
+          {t('notifications.employerKindsHint')}
         </AppText>
       ) : null}
     </Screen>

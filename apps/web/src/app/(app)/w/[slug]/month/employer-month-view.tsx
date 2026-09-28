@@ -1,15 +1,15 @@
 'use client';
 
-// One employee's month for the employer (CHQ-122, mockup "Employee month"): pick a person, see the month's
-// figures from the API, the heat-map calendar and every day with who logged it and its history. Close the
-// month and export it from here too.
+// "Employee view" (CHQ-122, renamed in CHQ-145): pick a person from the dropdown, see the month's figures
+// from the API, the heat-map calendar and every day with who logged it and its history. Close the month and
+// export it from here too.
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { addMonths, formatHours, formatMoney, formatMonthName, type IsoDate } from '@klokka/core';
-import { Avatar } from '@/components/avatar';
 import { CalendarHeatmap } from '@/components/calendar-heatmap';
 import { CsvButton } from '@/components/csv-button';
 import { DayList } from '@/components/day-list';
+import { EmployerDayPanel } from '@/components/employer-day-panel';
 import { HoursDelta } from '@/components/delta';
 import { Icon } from '@/components/icons';
 import { Money } from '@/components/money';
@@ -19,7 +19,7 @@ import { ViewHeader } from '@/components/view-header';
 import { formatDay } from '@/lib/format';
 import { useLocale, useT } from '@/lib/i18n';
 import { useMemberMonth, useMembers, useMonthStatus, useWorkspaceDetails } from '@/lib/queries';
-import { monthIn, todayIn } from '@/lib/time';
+import { isoOf, monthIn, todayIn } from '@/lib/time';
 import { useMonthParam } from '@/lib/use-month-param';
 import { firstName } from '@/lib/visual';
 import { useWorkspace } from '@/lib/workspace';
@@ -43,9 +43,17 @@ export function EmployerMonthView() {
   const person = people.find((p) => p.id === chosen) ?? people[0] ?? null;
   const memberMonth = useMemberMonth(ws.id, person?.id ?? null, month);
   const status = useMonthStatus(ws.id, month);
-  const [selectedDay, setSelectedDay] = useState<IsoDate | null>(null);
+  const [picked, setPicked] = useState<IsoDate | null>(null);
 
   const mm = memberMonth.data;
+  // The day in the panel: the one picked in this month, else the newest open flag, else the newest day.
+  const withHours = (mm?.days ?? []).filter((d) => d.hours != null).map((d) => isoOf(d.date));
+  const flaggedDays = (mm?.days ?? []).filter((d) => d.flag?.status === 'OPEN').map((d) => isoOf(d.date));
+  const selectedDay =
+    picked && picked.slice(0, 7) === month
+      ? picked
+      : (flaggedDays.sort().at(-1) ?? withHours.sort().at(-1) ?? null);
+  const selectedInfo = mm?.days.find((d) => isoOf(d.date) === selectedDay) ?? null;
   const monthName = formatMonthName(month, locale, false);
   const lastMonthName = formatMonthName(addMonths(month, -1), locale, false);
   const name = person ? firstName(person.displayName) : '';
@@ -53,23 +61,37 @@ export function EmployerMonthView() {
   function choose(id: string) {
     const params = new URLSearchParams(search.toString());
     params.set('member', id);
-    setSelectedDay(null);
+    setPicked(null);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   function selectDay(date: IsoDate) {
-    setSelectedDay(date);
-    document.getElementById(`day-${date}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    setPicked(date);
+    document.getElementById('day-panel')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   return (
     <section className="view" aria-labelledby="h-month">
       <ViewHeader
         id="h-month"
-        title={person ? t('month.title', { name, month: monthName }) : t('nav.employeeMonth')}
+        title={t('nav.employeeView')}
         sub={person ? t('month.subtitle', { name }) : undefined}
         actions={
           <>
+            {people.length > 0 ? (
+              <select
+                className="input person-select"
+                aria-label={t('web.month.person')}
+                value={person?.id ?? ''}
+                onChange={(e) => choose(e.target.value)}
+              >
+                {people.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.displayName}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <MonthNav month={month} current={current} onChange={setMonth} />
             <MonthLockButton ws={ws} month={month} />
             {person ? (
@@ -91,21 +113,6 @@ export function EmployerMonthView() {
           <p>{t('web.month.noPeople')}</p>
         </div>
       ) : null}
-
-      <div className="people chips" role="group" aria-label={t('web.month.person')}>
-        {people.map((p, i) => (
-          <button
-            key={p.id}
-            type="button"
-            className="chip"
-            aria-pressed={p.id === person?.id}
-            onClick={() => choose(p.id)}
-          >
-            <Avatar name={p.displayName} emoji={p.avatarEmoji} index={i + 1} size="sm" />
-            {firstName(p.displayName)}
-          </button>
-        ))}
-      </div>
 
       {mm ? (
         <>
@@ -162,29 +169,39 @@ export function EmployerMonthView() {
           </div>
 
           <div className="twocol" style={{ marginTop: 16 }}>
-            <div className="card pad">
-              <div className="card-head">
-                <h2>{t('month.calendar')}</h2>
-                <span className={mm.locked ? 'pill ink' : 'pill'}>
-                  {mm.locked && status.data?.lockedAt && status.data.lockedBy
-                    ? t('web.month.closedBy', {
-                        date: formatDay(status.data.lockedAt, locale, ws.timezone),
-                        name: firstName(status.data.lockedBy.name),
-                      })
-                    : mm.locked
-                      ? t('status.monthClosed')
-                      : t('status.openForEdits')}
-                </span>
+            <div className="stack">
+              <div className="card pad">
+                <div className="card-head">
+                  <h2>{t('month.calendar')}</h2>
+                  <span className={mm.locked ? 'pill ink' : 'pill'}>
+                    {mm.locked && status.data?.lockedAt && status.data.lockedBy
+                      ? t('web.month.closedBy', {
+                          date: formatDay(status.data.lockedAt, locale, ws.timezone),
+                          name: firstName(status.data.lockedBy.name),
+                        })
+                      : mm.locked
+                        ? t('status.monthClosed')
+                        : t('status.openForEdits')}
+                  </span>
+                </div>
+                <CalendarHeatmap
+                  month={month}
+                  days={mm.days}
+                  weekStart={details.data?.weekStart ?? ws.my.weekStart}
+                  dayLength={details.data?.defaultDayHours ?? 8}
+                  today={today}
+                  selected={selectedDay}
+                  onSelect={selectDay}
+                  label={t('month.calendarLabel', { month: monthName })}
+                />
               </div>
-              <CalendarHeatmap
-                month={month}
-                days={mm.days}
-                weekStart={details.data?.weekStart ?? ws.my.weekStart}
-                dayLength={details.data?.defaultDayHours ?? 8}
-                today={today}
-                selected={selectedDay}
-                onSelect={selectDay}
-                label={t('month.calendarLabel', { month: monthName })}
+              <EmployerDayPanel
+                key={`${person?.id ?? ''}-${selectedDay ?? ''}`}
+                ws={ws}
+                day={selectedInfo}
+                date={selectedDay}
+                personName={person?.displayName ?? ''}
+                currency={mm.currency}
               />
             </div>
             <div className="card" style={{ overflow: 'hidden' }}>
@@ -196,12 +213,12 @@ export function EmployerMonthView() {
                 <p className="pad muted">{t('web.month.noDays', { month: monthName })}</p>
               ) : (
                 <DayList
-                  workspaceId={ws.id}
                   days={mm.days}
                   timeZone={ws.timezone}
                   showPay={ws.showPay}
                   currency={mm.currency}
-                  highlighted={selectedDay}
+                  selected={selectedDay}
+                  onSelect={selectDay}
                 />
               )}
             </div>

@@ -19,6 +19,13 @@ export const loadMe = cache(async (): Promise<Me> => {
   }
 });
 
+// Pages every member may open answer 404 to anyone outside the workspace.
+export async function requireMember(slug: string): Promise<MyWorkspace> {
+  const ws = (await loadMe()).workspaces.find((w) => w.slug === slug);
+  if (!ws) notFound();
+  return ws;
+}
+
 // Employer-only pages answer 404 to employees (the API refuses them too; this keeps the UI honest).
 export async function requireEmployer(slug: string): Promise<MyWorkspace> {
   const ws = (await loadMe()).workspaces.find((w) => w.slug === slug);

@@ -132,6 +132,14 @@ function workspaceFill(colors: Colors, colour: WorkspaceColour): string {
   }
 }
 
+// A token colour at an alpha, as #RRGGBBAA (React Native reads the 8-digit form): faint rules and
+// tints stay derived from the theme instead of becoming literal colours.
+export function withAlpha(hex: string, alpha: number): string {
+  if (!/^#[0-9a-fA-F]{6}$/.test(hex)) throw new RangeError(`withAlpha: expected #RRGGBB, got "${hex}"`);
+  const a = Math.round(Math.min(1, Math.max(0, alpha)) * 255);
+  return `${hex}${a.toString(16).padStart(2, '0')}`;
+}
+
 export function contrast(a: string, b: string): number {
   const [l1, l2] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number];
   return (l1 + 0.05) / (l2 + 0.05);

@@ -35,7 +35,12 @@ export const SCREENS: Record<Persona | 'public', string[]> = {
     '/w/cafe-nord/profile',
     '/new',
   ],
-  employee: ['/w/cafe-nord', '/w/cafe-nord/notifications', '/w/cafe-nord/profile'],
+  employee: [
+    '/w/cafe-nord',
+    '/w/cafe-nord/week?d=2026-09-23',
+    '/w/cafe-nord/notifications',
+    '/w/cafe-nord/profile',
+  ],
   operator: ['/ops/workspaces', '/ops/users', '/ops/invitations', '/ops/volume', '/ops/health'],
   public: [`/join?token=${INVITE}`, '/sign-in?reauth=1'],
 };

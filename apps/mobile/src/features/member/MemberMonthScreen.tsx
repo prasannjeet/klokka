@@ -2,13 +2,12 @@ import { useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { formatMonth, formatMonthName, type IsoMonth } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { useMember, useMemberMonth } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, todayIn } from '@/lib/dates';
 import { useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, EmptyState, Header, Icon, Pill, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { MemberMonthView } from '@/features/month/MemberMonthView';
 import { MemberActionsSheets, type MemberActionsHandle } from './MemberActionsSheets';
 import { MonthLockExport } from './MonthLockExport';
@@ -30,15 +29,15 @@ const styles = (t: Theme) =>
 function MemberMonthScreenInner({
   membershipId,
   initialMonth,
+  workspace,
 }: {
   membershipId: string;
   initialMonth?: IsoMonth | undefined;
-}) {
+} & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const s = useThemedStyles(styles);
   const router = useRouter();
-  const workspace = useWorkspaceOrThrow();
   const current = currentMonthIn(workspace.timezone);
   const [month, setMonth] = useState<IsoMonth>(initialMonth ?? current);
   const data = useMemberMonth(workspace.workspaceId, membershipId, month);

@@ -7,6 +7,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
+import com.prasannjeet.klokka.contract.model.Language;
+import com.prasannjeet.klokka.contract.model.NotificationKind;
 import com.prasannjeet.klokka.push.PushSweeper;
 import com.prasannjeet.klokka.support.Fake;
 import com.prasannjeet.klokka.support.FakeServers;
@@ -70,21 +72,92 @@ class NotificationAndPushTest {
     @Inject
     NotificationTexts texts;
 
-    @Test
-    void aSittingThatOnlyClearedDaysReadsAsARemoval() {
+    private static Map<String, Object> sitting(Object... dateBeforeAfter) {
+        Map<String, Object> changes = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < dateBeforeAfter.length; i += 3) {
+            Map<String, Object> change = new java.util.HashMap<>();
+            change.put("before", dateBeforeAfter[i + 1] == null ? null : new BigDecimal(dateBeforeAfter[i + 1].toString()));
+            change.put("after", dateBeforeAfter[i + 2] == null ? null : new BigDecimal(dateBeforeAfter[i + 2].toString()));
+            changes.put(dateBeforeAfter[i].toString(), change);
+        }
         Map<String, Object> payload = new java.util.HashMap<>();
-        payload.put("actorName", "Nora Lind");
-        payload.put("changes", Map.of(
-                "2026-09-29", Map.of("before", new BigDecimal("2.00")),
-                "2026-10-01", Map.of("before", new BigDecimal("3.00"))));
-        NotificationTexts.Rendered sv = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
-                com.prasannjeet.klokka.contract.model.Language.SV, "SEK");
-        assertThat(sv.title()).isEqualTo("Nora Lind tog bort 2 dagar");
-        assertThat(sv.body()).isEqualTo("5 h togs bort från din månad.");
-        assertThat(sv.detail()).isEqualTo("tis 29 sep till tors 1 okt");
-        NotificationTexts.Rendered en = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
-                com.prasannjeet.klokka.contract.model.Language.EN, "SEK");
-        assertThat(en.title()).isEqualTo("Nora Lind removed 2 days");
+        payload.put("actorName", "Anna Admin");
+        payload.put("changes", changes);
+        return payload;
+    }
+
+    private NotificationTexts.Rendered hours(Map<String, Object> payload, Language lang) {
+        return texts.render(NotificationKind.HOURS_CHANGED, payload, lang, "Kafé Nord", "SEK");
+    }
+
+    // CHQ-145: the title says who did what, the body where and which days; the same text for push and in-app.
+    @Test
+    void hoursTextsNameTheDayOrCountTheDaysWithTheBusinessInTheBody() {
+        var one = hours(sitting("2026-09-28", null, "5"), Language.EN);
+        assertThat(one.title()).isEqualTo("Anna Admin added Monday 28 Sept");
+        assertThat(one.body()).isEqualTo("Kafé Nord: 5 h");
+        var oneSv = hours(sitting("2026-09-28", null, "5"), Language.SV);
+        assertThat(oneSv.title()).isEqualTo("Anna Admin la till måndag 28 sep");
+        assertThat(oneSv.body()).isEqualTo("Kafé Nord: 5 h");
+
+        var changed = hours(sitting("2026-09-29", "5", "6"), Language.EN);
+        assertThat(changed.title()).isEqualTo("Anna Admin changed Tuesday 29 Sept");
+        assertThat(changed.body()).isEqualTo("Kafé Nord: 6 h, was 5 h");
+
+        var two = hours(sitting("2026-09-28", null, "5", "2026-09-29", null, "6"), Language.EN);
+        assertThat(two.title()).isEqualTo("Anna Admin added 2 days");
+        assertThat(two.body()).isEqualTo("Kafé Nord, week 40: Mon 28 Sept 5 h, Tue 29 Sept 6 h");
+        var twoSv = hours(sitting("2026-09-28", null, "5", "2026-09-29", null, "6"), Language.SV);
+        assertThat(twoSv.title()).isEqualTo("Anna Admin la till 2 dagar");
+        assertThat(twoSv.body()).isEqualTo("Kafé Nord, vecka 40: mån 28 sep 5 h, tis 29 sep 6 h");
+
+        var five = hours(sitting("2026-09-28", null, "8", "2026-09-29", null, "8", "2026-09-30", null, "8", "2026-10-01", null, "7",
+                "2026-10-02", null, "7"), Language.EN);
+        assertThat(five.title()).isEqualTo("Anna Admin added 5 days");
+        assertThat(five.body()).isEqualTo("Kafé Nord, week 40: Mon 28 Sept to Fri 2 Oct, 38 h");
+        assertThat(five.detail()).isNull();
+
+        var removed = hours(sitting("2026-09-29", "2", null), Language.EN);
+        assertThat(removed.title()).isEqualTo("Anna Admin removed 1 day");
+        assertThat(removed.body()).isEqualTo("Kafé Nord, week 40: Tue 29 Sept 2 h");
+        var removedTwoWeeks = hours(sitting("2026-09-27", "2", null, "2026-09-28", "3", null), Language.SV);
+        assertThat(removedTwoWeeks.title()).isEqualTo("Anna Admin tog bort 2 dagar");
+        assertThat(removedTwoWeeks.body()).isEqualTo("Kafé Nord: sön 27 sep 2 h, mån 28 sep 3 h");
+
+        var mixed = hours(sitting("2026-09-28", "5", "6", "2026-09-29", "4", null), Language.EN);
+        assertThat(mixed.title()).isEqualTo("Anna Admin changed 2 days");
+        assertThat(mixed.body()).isEqualTo("Kafé Nord, week 40: Mon 28 Sept 6 h, Tue 29 Sept removed");
+        var reverted = hours(sitting("2026-09-28", null, null), Language.EN);
+        assertThat(reverted.title()).isEqualTo("Anna Admin changed your hours and put them back");
+        assertThat(reverted.body()).isEqualTo("Kafé Nord");
+        for (var r : List.of(one, oneSv, changed, two, twoSv, five, removed, removedTwoWeeks, mixed)) {
+            assertThat(r.body().length()).as(r.body()).isLessThanOrEqualTo(100);
+        }
+    }
+
+    @Test
+    void theOtherKindsSayWhatHappenedAndWhere() {
+        Map<String, Object> flag = new java.util.HashMap<>(Map.of("actorName", "Test Testsson", "date", "2026-09-29",
+                "loggedHours", new BigDecimal("5.00"), "suggestedHours", new BigDecimal("6"), "message", "I stayed until closing."));
+        var flagged = texts.render(NotificationKind.ENTRY_FLAGGED, flag, Language.EN, "Kafé Nord", "SEK");
+        assertThat(flagged.title()).isEqualTo("Test Testsson flagged Tuesday 29 Sept");
+        assertThat(flagged.body()).isEqualTo("Kafé Nord: logged 5 h, says 6 h");
+        assertThat(flagged.detail()).isEqualTo("I stayed until closing.");
+        Map<String, Object> fixed = new java.util.HashMap<>(Map.of("actorName", "Anna Admin", "date", "2026-09-29", "hours", "6", "action", "FIX"));
+        var fixedSv = texts.render(NotificationKind.FLAG_RESOLVED, fixed, Language.SV, "Kafé Nord", "SEK");
+        assertThat(fixedSv.title()).isEqualTo("Anna Admin rättade din flagga");
+        assertThat(fixedSv.body()).isEqualTo("Kafé Nord: tis 29 sep är nu 6 h");
+        fixed.put("action", "DISMISS");
+        fixed.put("hours", "5");
+        var kept = texts.render(NotificationKind.FLAG_RESOLVED, fixed, Language.EN, "Kafé Nord", "SEK");
+        assertThat(kept.title()).isEqualTo("Anna Admin reviewed your flag");
+        assertThat(kept.body()).isEqualTo("Kafé Nord: Tue 29 Sept stays at 5 h");
+        var accepted = texts.render(NotificationKind.INVITE_ACCEPTED, Map.of("actorName", "Test Testsson"), Language.SV, "Kafé Nord", "SEK");
+        assertThat(accepted.title()).isEqualTo("Test Testsson accepterade din inbjudan");
+        assertThat(accepted.body()).isEqualTo("Kafé Nord: Test Testsson är nu anställd");
+        var reopened = texts.render(NotificationKind.MONTH_REOPENED, Map.of("actorName", "Anna Admin", "month", "2026-09"), Language.EN, "Kafé Nord", "SEK");
+        assertThat(reopened.title()).isEqualTo("Anna Admin reopened September 2026");
+        assertThat(reopened.body()).isEqualTo("Kafé Nord: entries can change again");
     }
 
     @Test
@@ -102,16 +175,18 @@ class NotificationAndPushTest {
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
-    void aSittingCoalescesWithASlidingWindowCappedAtThirtyMinutesAndRendersInSwedish() {
+    void aSittingCoalescesWithASlidingWindowCappedAtTenMinutesAndRendersInSwedish() {
         String base = "/v1/workspaces/" + ws + "/members/" + maria + "/entries/";
         given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-21").then().statusCode(200);
-        clock.set(MutableClock.DEFAULT.plusSeconds(8 * 60));
-        given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-22").then().statusCode(200);
+        // The in-app row exists from the first change; only the push waits for the quiet window.
         UUID id = (UUID) data.scalar("select id from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws);
-        assertThat(data.scalar("select push_due_at from notification where id = ?", id)).isEqualTo(MutableClock.DEFAULT.plusSeconds(18 * 60));
-        clock.set(MutableClock.DEFAULT.plusSeconds(25 * 60));
+        assertThat(data.scalar("select push_due_at from notification where id = ?", id)).isEqualTo(MutableClock.DEFAULT.plusSeconds(2 * 60));
+        clock.set(MutableClock.DEFAULT.plusSeconds(90));
+        given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-22").then().statusCode(200);
+        assertThat(data.scalar("select push_due_at from notification where id = ?", id)).isEqualTo(MutableClock.DEFAULT.plusSeconds(90 + 2 * 60));
+        clock.set(MutableClock.DEFAULT.plusSeconds(9 * 60));
         given().contentType("application/json").body("{\"hours\":4.5}").when().put(base + "2026-09-23").then().statusCode(200);
-        assertThat(data.scalar("select push_due_at from notification where id = ?", id)).as("capped at created + 30 min").isEqualTo(MutableClock.DEFAULT.plusSeconds(30 * 60));
+        assertThat(data.scalar("select push_due_at from notification where id = ?", id)).as("capped at created + 10 min").isEqualTo(MutableClock.DEFAULT.plusSeconds(10 * 60));
         assertThat(data.count("select count(*) from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws)).isEqualTo(1);
 
         // Not due yet: nothing is sent for this row (other tests' rows may be swept). Once due, one Expo message with
@@ -120,14 +195,14 @@ class NotificationAndPushTest {
         sweeper.sweep();
         assertThat(data.scalar("select pushed_at from notification where id = ?", id)).isNull();
         assertThat(messagesTo("ExponentPushToken[nt-maria]")).isEmpty();
-        clock.set(MutableClock.DEFAULT.plusSeconds(31 * 60));
+        clock.set(MutableClock.DEFAULT.plusSeconds(10 * 60 + 30));
         sweeper.sweep();
         List<Map<String, Object>> mine = messagesTo("ExponentPushToken[nt-maria]");
         assertThat(mine).hasSize(1);
         Map<String, Object> message = mine.get(0);
         assertThat(message.get("to")).isEqualTo("ExponentPushToken[nt-maria]");
-        assertThat(message.get("title")).isEqualTo("Notify Corp: Nora Lind lade till 3 dagar, 12,5 h");
-        assertThat(message.get("body")).isEqualTo("12,5 h i vecka 39.");
+        assertThat(message.get("title")).isEqualTo("Nora Lind la till 3 dagar");
+        assertThat(message.get("body")).isEqualTo("Notify Corp, vecka 39: mån 21 sep 4 h, tis 22 sep 4 h, ons 23 sep 4,5 h");
         assertThat(((Map<String, Object>) message.get("data")).get("notificationId")).isEqualTo(id.toString());
         // The phone's allowlisted deep link and Android channel (registerPushToken in the contract).
         assertThat(((Map<String, Object>) message.get("data")).get("url")).isEqualTo("/w/" + ws + "/members/" + maria + "/month/2026-09");
@@ -155,7 +230,8 @@ class NotificationAndPushTest {
         String cursor = given().when().get("/v1/notifications?workspaceId=" + ws + "&limit=2").then().statusCode(200)
                 .body("items", hasSize(2)).body("unreadCount", is(3)).body("nextCursor", notNullValue())
                 .body("items[0].kind", is("MONTH_CLOSED")).body("items[0].workspaceName", is("Notify Corp")).body("items[0].workspaceEmoji", is("☕"))
-                .body("items[0].title", is("Augusti 2026 är stängd.")).body("items[0].body", org.hamcrest.Matchers.matchesPattern("96 h, 15\\p{Z}840\\p{Z}kr\\.")).body("items[0].detail", is("Nora Lind låste månaden. Dela ditt kort från Profil."))
+                .body("items[0].title", is("Nora Lind stängde augusti 2026")).body("items[0].body", org.hamcrest.Matchers.matchesPattern("Notify Corp: 96 h, 15\\p{Z}840\\p{Z}kr"))
+                .body("items[0].detail", is("Inget ändras förrän den öppnas igen. Dela ditt kort från Profil."))
                 .body("items[0].link.month", is("2026-08")).body("items[0].link.membershipId", is(maria.toString())).body("items[0].readAt", nullValue())
                 .body("items[1].link.month", is("2026-07"))
                 .extract().path("nextCursor");
@@ -185,7 +261,8 @@ class NotificationAndPushTest {
         sweeper.sweep();
         assertThat(messagesTo(FakeServers.DEAD_TOKEN)).hasSize(1);
         assertThat(messagesTo("ExponentPushToken[nt-live]")).hasSize(1);
-        assertThat(messagesTo("ExponentPushToken[nt-live]").get(0).get("title")).isEqualTo("Notify Corp: August 2026 was reopened.");
+        assertThat(messagesTo("ExponentPushToken[nt-live]").get(0).get("title")).isEqualTo("Nora Lind reopened August 2026");
+        assertThat(messagesTo("ExponentPushToken[nt-live]").get(0).get("body")).isEqualTo("Notify Corp: entries can change again");
         assertThat(data.count("select count(*) from push_token where token = ?", FakeServers.DEAD_TOKEN)).as("DeviceNotRegistered at send deletes the token").isZero();
         assertThat(data.count("select count(*) from push_delivery where notification_id = ? and status = 'SENT'", id)).isEqualTo(2);
         assertThat(data.count("select count(*) from push_delivery where notification_id = ? and status = 'FAILED' and error_code = 'DeviceNotRegistered'", id)).isEqualTo(1);

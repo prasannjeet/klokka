@@ -4,13 +4,13 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { formatHours, formatMonth, formatNumber, type IsoMonth } from '@klokka/core';
 import { tokens } from '@klokka/tokens';
-import { useActiveWorkspace, useWorkspaceOrThrow } from '@/data/me';
+import { useActiveWorkspace } from '@/data/me';
 import { useMemberMonth } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText, Button, EmptyState, Header, Mark, Screen, useToast } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 
 const CARD = tokens.color.light;
 
@@ -36,13 +36,15 @@ const styles = (t: Theme) =>
 
 // The shareable monthly card (CHQ-138): hours and the workspace, never pay. Captured exactly as
 // shown with react-native-view-shot and handed to the system share sheet (which covers "save").
-function ShareScreenInner({ month: monthParam }: { month?: IsoMonth | undefined }) {
+function ShareScreenInner({
+  month: monthParam,
+  workspace,
+}: { month?: IsoMonth | undefined } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const toast = useToast();
-  const workspace = useWorkspaceOrThrow();
   const { me } = useActiveWorkspace();
   const month = monthParam ?? currentMonthIn(workspace.timezone);
   const data = useMemberMonth(workspace.workspaceId, workspace.membershipId, month);

@@ -6,7 +6,7 @@
 // the email's local part, which is what invitations and notifications would show (staging: "admin invited you").
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type CSSProperties, type FormEvent } from 'react';
+import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
 import { BrandPanel } from '@/components/brand-panel';
@@ -25,7 +25,7 @@ import { api } from '@/lib/api';
 import { useLocale, useT } from '@/lib/i18n';
 import { meKey, useMe } from '@/lib/me';
 import { fieldError, problemMessage, toProblem, type ProblemInfo } from '@/lib/problem';
-import { COUNTRIES, countryName } from '@/lib/regions';
+import { browserTimeZone, COUNTRIES, countryName } from '@/lib/regions';
 import { WORKSPACE_EMOJIS, colourVar } from '@/lib/visual';
 
 // Sweden first: the owner's market (docs/PRODUCT_BRIEF.md). The same on the server and in the browser, so
@@ -46,6 +46,12 @@ export function NewWorkspace() {
   const [yourNameMissing, setYourNameMissing] = useState(false);
   const [country, setCountry] = useState(START_COUNTRY);
   const [timezone, setTimezone] = useState(COUNTRIES[START_COUNTRY]?.timezone ?? 'Europe/Stockholm');
+  // The browser's zone is the default (CHQ-145), read after hydration so the server render (UTC)
+  // never disagrees with the first client render; picking a country still proposes its zone.
+  useEffect(() => {
+    const zone = browserTimeZone();
+    if (zone) setTimezone(zone);
+  }, []);
   const [currency, setCurrency] = useState(COUNTRIES[START_COUNTRY]?.currency ?? 'SEK');
   const [weekStart, setWeekStart] = useState<WeekStart>('MONDAY');
   const [colour, setColour] = useState<WorkspaceColour>('PRIMARY');

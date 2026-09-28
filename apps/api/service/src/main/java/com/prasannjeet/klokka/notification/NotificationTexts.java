@@ -1,9 +1,8 @@
 package com.prasannjeet.klokka.notification;
 
 import static com.prasannjeet.klokka.i18n.Formats.hours;
-import static com.prasannjeet.klokka.i18n.Formats.longDate;
+import static com.prasannjeet.klokka.i18n.Formats.dayDate;
 import static com.prasannjeet.klokka.i18n.Formats.money;
-import static com.prasannjeet.klokka.i18n.Formats.number;
 import static com.prasannjeet.klokka.i18n.Formats.shortDate;
 
 import com.prasannjeet.klokka.contract.model.Language;
@@ -33,101 +32,116 @@ public class NotificationTexts {
     @Inject
     Catalogue catalogue;
 
-    public Rendered render(NotificationKind kind, Map<String, Object> payload, Language lang, String currency) {
+    // Title says who did what, body says where and which days (CHQ-145), the same for the push and the in-app
+    // row; the business name leads the body, so a push needs no prefix.
+    public Rendered render(NotificationKind kind, Map<String, Object> payload, Language lang, String workspaceName, String currency) {
+        String where = workspaceName == null || workspaceName.isBlank() ? str(payload, "workspaceName") : workspaceName;
+        String name = str(payload, "actorName");
         return switch (kind) {
-            case HOURS_CHANGED -> hoursChanged(payload, lang);
+            case HOURS_CHANGED -> hoursChanged(payload, lang, where);
             case INVITE_ACCEPTED -> new Rendered(
-                    t(lang, Text.INVITE_ACCEPTED_TITLE, Map.of("name", str(payload, "actorName"))),
-                    t(lang, Text.INVITE_ACCEPTED_BODY, Map.of("name", str(payload, "actorName"), "workspace", str(payload, "workspaceName"))),
+                    t(lang, Text.INVITE_ACCEPTED_TITLE, Map.of("name", name)),
+                    t(lang, Text.INVITE_ACCEPTED_BODY, Map.of("name", name, "workspace", where)),
                     null);
             case ENTRY_FLAGGED -> {
-                String date = shortDate(LocalDate.parse(str(payload, "date")), lang);
+                String date = dayDate(LocalDate.parse(str(payload, "date")), lang);
                 BigDecimal suggested = decimal(payload.get("suggestedHours"));
-                String body = suggested == null ? str(payload, "message")
-                        : t(lang, Text.ENTRY_FLAGGED_BODY, Map.of("logged", hours(decimal(payload.get("loggedHours")), lang, catalogue),
-                                "name", str(payload, "actorName"), "suggested", hours(suggested, lang, catalogue)));
-                yield new Rendered(t(lang, Text.ENTRY_FLAGGED_TITLE, Map.of("name", str(payload, "actorName"), "date", date)),
-                        body, suggested == null ? null : str(payload, "message"));
+                String message = str(payload, "message");
+                String body = suggested == null
+                        ? t(lang, Text.ENTRY_FLAGGED_BODY_MESSAGE, Map.of("workspace", where, "message", clip(message)))
+                        : t(lang, Text.ENTRY_FLAGGED_BODY, Map.of("workspace", where,
+                                "logged", hours(decimal(payload.get("loggedHours")), lang, catalogue), "suggested", hours(suggested, lang, catalogue)));
+                yield new Rendered(t(lang, Text.ENTRY_FLAGGED_TITLE, Map.of("name", name, "date", date)), body,
+                        suggested == null || message.isBlank() ? null : message);
             }
             case FLAG_RESOLVED -> {
                 String date = shortDate(LocalDate.parse(str(payload, "date")), lang);
                 String hoursText = hours(decimal(payload.get("hours")), lang, catalogue);
+                Map<String, String> params = Map.of("workspace", where, "date", date, "hours", hoursText);
                 if ("FIX".equals(payload.get("action"))) {
-                    yield new Rendered(t(lang, Text.FLAG_FIXED_TITLE, Map.of("name", str(payload, "actorName"))),
-                            t(lang, Text.FLAG_FIXED_BODY, Map.of("date", date, "hours", hoursText)), strOrNull(payload, "note"));
+                    yield new Rendered(t(lang, Text.FLAG_FIXED_TITLE, Map.of("name", name)),
+                            t(lang, Text.FLAG_FIXED_BODY, params), strOrNull(payload, "note"));
                 }
-                yield new Rendered(t(lang, Text.FLAG_DISMISSED_TITLE, Map.of("name", str(payload, "actorName"), "date", date, "hours", hoursText)),
-                        t(lang, Text.FLAG_DISMISSED_BODY, Map.of()), strOrNull(payload, "note"));
+                yield new Rendered(t(lang, Text.FLAG_DISMISSED_TITLE, Map.of("name", name)),
+                        t(lang, Text.FLAG_DISMISSED_BODY, params), strOrNull(payload, "note"));
             }
             case MONTH_CLOSED -> {
                 String month = Formats.month(YearMonth.parse(str(payload, "month")), lang);
                 String hoursText = hours(decimal(payload.get("hours")), lang, catalogue);
                 BigDecimal moneyValue = decimal(payload.get("money"));
-                String body = moneyValue == null ? t(lang, Text.MONTH_CLOSED_BODY_HOURS_ONLY, Map.of("hours", hoursText))
-                        : t(lang, Text.MONTH_CLOSED_BODY, Map.of("hours", hoursText, "money", money(moneyValue, currency, lang)));
-                yield new Rendered(t(lang, Text.MONTH_CLOSED_TITLE, Map.of("month", capitalize(month))), body,
-                        t(lang, Text.MONTH_CLOSED_HINT, Map.of("name", str(payload, "actorName"))));
+                String body = moneyValue == null
+                        ? t(lang, Text.MONTH_CLOSED_BODY_HOURS_ONLY, Map.of("workspace", where, "hours", hoursText))
+                        : t(lang, Text.MONTH_CLOSED_BODY, Map.of("workspace", where, "hours", hoursText, "money", money(moneyValue, currency, lang)));
+                yield new Rendered(t(lang, Text.MONTH_CLOSED_TITLE, Map.of("name", name, "month", month)), body,
+                        t(lang, Text.MONTH_CLOSED_HINT, Map.of()));
             }
             case MONTH_REOPENED -> {
                 String month = Formats.month(YearMonth.parse(str(payload, "month")), lang);
-                yield new Rendered(t(lang, Text.MONTH_REOPENED_TITLE, Map.of("month", capitalize(month))),
-                        t(lang, Text.MONTH_REOPENED_BODY, Map.of("name", str(payload, "actorName"))), null);
+                yield new Rendered(t(lang, Text.MONTH_REOPENED_TITLE, Map.of("name", name, "month", month)),
+                        t(lang, Text.MONTH_REOPENED_BODY, Map.of("workspace", where)), null);
             }
         };
     }
 
-    // One sitting's changes: {date -> {before, after}}. A single create, update or removal gets its own wording;
-    // anything bigger becomes "{name} added N days, H h" with the week or the date range as the body.
-    private Rendered hoursChanged(Map<String, Object> payload, Language lang) {
+    // Days listed one by one up to this many; more become a range with the total.
+    private static final int LISTED_DAYS = 3;
+    // A flag message in a body is clipped so the body stays phone-sized; the full message is the detail.
+    private static final int MESSAGE_IN_BODY = 80;
+
+    // One sitting's changes: {date -> {before, after}}. The verb is what happened to every day: added, changed or
+    // removed (a mix reads as changed). One added or changed day names the day in the title; otherwise the title
+    // counts the days, and the body lists them (up to three) or gives the range and the total.
+    private Rendered hoursChanged(Map<String, Object> payload, Language lang, String where) {
         String name = str(payload, "actorName");
         TreeMap<LocalDate, BigDecimal[]> changes = changes(payload);
-        if (changes.isEmpty()) return new Rendered(t(lang, Text.HOURS_ADDED_TITLE.key() + "_other", Map.of("name", name, "count", "0", "hours", "0")), "", null);
-        if (changes.size() == 1) {
-            var entry = changes.firstEntry();
-            LocalDate date = entry.getKey();
-            BigDecimal before = entry.getValue()[0];
-            BigDecimal after = entry.getValue()[1];
-            String dateText = shortDate(date, lang);
-            if (before != null && after == null) {
-                return new Rendered(t(lang, Text.HOURS_REMOVED_TITLE, Map.of("name", name, "date", dateText)),
-                        t(lang, Text.HOURS_REMOVED_BODY, Map.of("hours", hours(before, lang, catalogue))), null);
-            }
-            if (before != null && after != null) {
-                String note = strOrNull(payload, "note");
-                return new Rendered(t(lang, Text.HOURS_CHANGED_TITLE, Map.of("name", name, "date", dateText)),
-                        t(lang, Text.HOURS_CHANGED_BODY, Map.of("before", hours(before, lang, catalogue), "after", hours(after, lang, catalogue))),
-                        note == null ? null : t(lang, Text.HOURS_CHANGED_NOTE, Map.of("note", note)));
-            }
-            BigDecimal total = after == null ? BigDecimal.ZERO : after;
-            return new Rendered(catalogue.plural(lang, Text.HOURS_ADDED_TITLE.key(), 1, Map.of("name", name, "hours", number(total, lang))),
-                    t(lang, Text.HOURS_ADDED_BODY, Map.of("hours", hours(total, lang, catalogue), "week", Integer.toString(date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)))),
-                    longDate(date, lang));
+        changes.values().removeIf(c -> c[0] == null && c[1] == null);
+        // Rows written before net-nothing sittings were dropped (06b14a3) can still hold days that went back.
+        if (changes.isEmpty()) return new Rendered(t(lang, Text.HOURS_REVERTED, Map.of("name", name)), where, null);
+        boolean allAdded = changes.values().stream().allMatch(c -> c[0] == null);
+        boolean allRemoved = changes.values().stream().allMatch(c -> c[1] == null);
+        String note = strOrNull(payload, "note");
+        if (changes.size() == 1 && !allRemoved) {
+            var only = changes.firstEntry();
+            String date = dayDate(only.getKey(), lang);
+            BigDecimal before = only.getValue()[0];
+            BigDecimal after = only.getValue()[1];
+            String title = t(lang, allAdded ? Text.HOURS_ADDED_ONE : Text.HOURS_CHANGED_ONE, Map.of("name", name, "date", date));
+            String body = before == null
+                    ? t(lang, Text.HOURS_BODY_ONE, Map.of("workspace", where, "hours", hours(after, lang, catalogue)))
+                    : t(lang, Text.HOURS_BODY_CHANGED_ONE, Map.of("workspace", where, "hours", hours(after, lang, catalogue), "before", hours(before, lang, catalogue)));
+            return new Rendered(title, body, note == null ? null : t(lang, Text.HOURS_NOTE, Map.of("note", note)));
         }
-        BigDecimal total = BigDecimal.ZERO;
-        BigDecimal takenOff = BigDecimal.ZERO;
-        int removed = 0;
-        for (BigDecimal[] change : changes.values()) {
-            if (change[1] != null) total = total.add(change[1]);
-            else {
-                removed++;
-                if (change[0] != null) takenOff = takenOff.add(change[0]);
-            }
-        }
+        Text verb = allAdded ? Text.HOURS_ADDED : allRemoved ? Text.HOURS_REMOVED : Text.HOURS_CHANGED;
+        String title = catalogue.plural(lang, verb.key(), changes.size(), Map.of("name", name));
         LocalDate from = changes.firstKey();
         LocalDate to = changes.lastKey();
-        String range = t(lang, Text.HOURS_ADDED_RANGE, Map.of("from", shortDate(from, lang), "to", shortDate(to, lang)));
-        // A sitting that only cleared days is a removal, not "added N days, 0 h" (staging, after two deletes).
-        if (removed == changes.size()) {
-            return new Rendered(catalogue.plural(lang, Text.HOURS_REMOVED_MANY_TITLE.key(), removed, Map.of("name", name)),
-                    t(lang, Text.HOURS_REMOVED_BODY, Map.of("hours", hours(takenOff, lang, catalogue))), range);
+        int week = from.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        boolean oneWeek = week == to.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) && from.get(IsoFields.WEEK_BASED_YEAR) == to.get(IsoFields.WEEK_BASED_YEAR);
+        String body;
+        if (changes.size() <= LISTED_DAYS) {
+            List<String> days = new ArrayList<>();
+            for (var e : changes.entrySet()) {
+                String date = shortDate(e.getKey(), lang);
+                BigDecimal after = e.getValue()[1];
+                days.add(after == null && !allRemoved
+                        ? t(lang, Text.HOURS_DAY_REMOVED, Map.of("date", date))
+                        : t(lang, Text.HOURS_DAY, Map.of("date", date, "hours", hours(after == null ? e.getValue()[0] : after, lang, catalogue))));
+            }
+            String list = String.join(", ", days);
+            body = oneWeek ? t(lang, Text.HOURS_BODY_WEEK, Map.of("workspace", where, "week", Integer.toString(week), "days", list))
+                    : t(lang, Text.HOURS_BODY_DAYS, Map.of("workspace", where, "days", list));
+        } else {
+            BigDecimal total = BigDecimal.ZERO;
+            for (BigDecimal[] c : changes.values()) total = total.add(allRemoved ? c[0] : c[1] == null ? BigDecimal.ZERO : c[1]);
+            Map<String, String> params = Map.of("workspace", where, "week", Integer.toString(week), "from", shortDate(from, lang),
+                    "to", shortDate(to, lang), "hours", hours(total, lang, catalogue));
+            body = t(lang, oneWeek ? Text.HOURS_RANGE_WEEK : Text.HOURS_RANGE, params);
         }
-        int weekFrom = from.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        int weekTo = to.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-        String title = catalogue.plural(lang, Text.HOURS_ADDED_TITLE.key(), changes.size(), Map.of("name", name, "hours", number(total, lang)));
-        String body = weekFrom == weekTo && from.getYear() == to.getYear()
-                ? t(lang, Text.HOURS_ADDED_BODY, Map.of("hours", hours(total, lang, catalogue), "week", Integer.toString(weekFrom)))
-                : range;
-        return new Rendered(title, body, range);
+        return new Rendered(title, body, null);
+    }
+
+    private static String clip(String message) {
+        return message.length() <= MESSAGE_IN_BODY ? message : message.substring(0, MESSAGE_IN_BODY - 1).stripTrailing() + "\u2026";
     }
 
     @SuppressWarnings("unchecked")

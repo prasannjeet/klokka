@@ -114,7 +114,9 @@ deleted from Coolify.
   `KLOKKA_LOGTO_M2M_CLIENT_ID`, `KLOKKA_LOGTO_M2M_CLIENT_SECRET*`, `KLOKKA_LOGTO_WEBHOOK_SIGNING_KEY*`,
   `KLOKKA_MAIL_HOST`, `KLOKKA_MAIL_PORT`, `KLOKKA_MAIL_USERNAME`, `KLOKKA_MAIL_PASSWORD*`, `KLOKKA_MAIL_FROM`,
   `KLOKKA_MAIL_START_TLS` (`REQUIRED`), `KLOKKA_MAIL_MONTHLY_QUOTA` (100), `KLOKKA_WEB_BASE_URL`,
-  `KLOKKA_EXPO_ACCESS_TOKEN*`, `KLOKKA_OPERATOR_API_URL` and `KLOKKA_OPERATOR_LANDING_URL` (the Health page's
+  `KLOKKA_EXPO_ACCESS_TOKEN*`, `KLOKKA_PUSH_QUIET_WINDOW` (`PT2M`) and `KLOKKA_PUSH_MAX_DELAY` (`PT10M`), set
+  2026-09-28 for CHQ-145 (the defaults were 10 and 30 minutes then; they are 2 and 10 now, so the variables only pin
+  them), `KLOKKA_OPERATOR_API_URL` and `KLOKKA_OPERATOR_LANDING_URL` (the Health page's
   probes), `JAVA_OPTS` (`-XX:MaxRAMPercentage=70` plus the JBoss log manager flag the Dockerfile's default
   carries). `KLOKKA_BUILD_VERSION` is baked into the image by `image.sh` (build argument), not set here.
 - `klokka-web` (`armlujpn5wkqd1d2nq0wkiiz`): `LOGTO_ENDPOINT`, `LOGTO_APP_ID`, `LOGTO_APP_SECRET*`,
@@ -127,6 +129,10 @@ deleted from Coolify.
   `NEXT_PUBLIC_APK_URL` (also passed as build arguments, since Next.js inlines `NEXT_PUBLIC_*` at build time).
 
 ### Staging specifics
+
+- Every variable shows twice in Coolify's env list, once for production deployments and once as the preview copy
+  (`is_preview`). A secret (`is_shown_once`, marked `*` above) answers `value: null` through the API; that means
+  hidden, not missing. What the container really has: `ssh testenv`, `docker exec <klokka-api container> env`.
 
 - Internal API address: the `klokka-api` app has the Coolify network alias `klokka-api`
   (`custom_network_aliases`), so on the `coolify` docker network `http://klokka-api:8080/v1` reaches it whatever
@@ -187,8 +193,8 @@ staging, `.env` locally. Secrets are marked; their values are in the named local
 | `KLOKKA_MAIL_MONTHLY_QUOTA` | no | Coolify | `100` (default) | the `email_send` ledger is checked against it before an invite |
 | `KLOKKA_EXPO_ACCESS_TOKEN` | no, secret | Coolify | `expo.json` | Expo enhanced push security; absent means no bearer on Expo calls |
 | `KLOKKA_EXPO_PUSH_URL` | no | none | default `https://exp.host/--/api/v2` | tests point it at a fake |
-| `KLOKKA_PUSH_QUIET_WINDOW` | no | none | `PT10M` | "one notification per sitting" sliding window |
-| `KLOKKA_PUSH_MAX_DELAY` | no | none | `PT30M` | cap on the sliding window |
+| `KLOKKA_PUSH_QUIET_WINDOW` | no | Coolify | `PT2M` (default `PT2M`) | "one push per sitting": the push waits this long after the last change (sliding); the in-app row exists from the first change |
+| `KLOKKA_PUSH_MAX_DELAY` | no | Coolify | `PT10M` (default `PT10M`) | cap on the sliding window, counted from the first change |
 | `KLOKKA_OPERATOR_API_URL` | no | Coolify | `https://klokka-api.coolify.ooguy.com` | probed by `/operator/health` as `api` |
 | `KLOKKA_OPERATOR_LANDING_URL` | no | Coolify | `https://klokka.coolify.ooguy.com` | probed as `landing` |
 | `KLOKKA_BUILD_VERSION` | no | CI | `0.1.0-<short sha>` | shown by `/operator/health` |

@@ -24,13 +24,14 @@ export function workspaceNav(slug: string, employer: boolean): NavItem[] {
       { href: base, label: 'nav.overview', tab: 'nav.overview', icon: 'home', exact: true },
       { href: `${base}/week`, label: 'nav.weekGrid', tab: 'nav.week', icon: 'grid' },
       { href: `${base}/employees`, label: 'nav.employees', tab: 'nav.people', icon: 'users' },
-      { href: `${base}/month`, label: 'nav.employeeMonth', tab: 'nav.month', icon: 'calendar' },
+      { href: `${base}/month`, label: 'nav.employeeView', tab: 'nav.month', icon: 'calendar' },
       notifications,
       { href: `${base}/settings`, label: 'nav.settings', tab: 'nav.settings', icon: 'settings' },
     ];
   }
   return [
     { href: base, label: 'nav.myMonth', tab: 'nav.myMonth', icon: 'calendar', exact: true },
+    { href: `${base}/week`, label: 'nav.week', tab: 'nav.week', icon: 'clock' },
     notifications,
     { href: `${base}/profile`, label: 'nav.profile', tab: 'nav.profile', icon: 'user' },
   ];

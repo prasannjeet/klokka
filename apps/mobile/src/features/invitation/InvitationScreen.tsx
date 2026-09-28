@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
 import { useApi } from '@/api/ApiProvider';
 import { keys } from '@/data/keys';
 import { useMe } from '@/data/me';
@@ -9,6 +8,7 @@ import { useAcceptInvitation } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemCode, problemMessage } from '@/lib/problems';
 import { useAppStore } from '@/store/appStore';
+import { enterApp } from '@/features/shell/enterApp';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText, Avatar, Button, Card, EmptyState, Header, Icon, Pill, Screen, useToast } from '@/ui';
 
@@ -29,7 +29,6 @@ export function InvitationScreen({ token }: { token: string }) {
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
-  const router = useRouter();
   const api = useApi();
   const toast = useToast();
   const { data: me } = useMe();
@@ -49,7 +48,7 @@ export function InvitationScreen({ token }: { token: string }) {
       const accepted = await accept.mutateAsync(token);
       setActive(accepted.workspaceId);
       toast.show(t('invitation.accepted', { workspace: accepted.workspaceName }));
-      router.replace('/');
+      enterApp();
     } catch (e) {
       const code = await problemCode(e);
       if (code === 'INVITATION_EXPIRED')
@@ -68,7 +67,7 @@ export function InvitationScreen({ token }: { token: string }) {
           icon="mail"
           title={t('mobile.invitation.notFound')}
           actionLabel={t('common.back')}
-          onAction={() => router.replace('/')}
+          onAction={enterApp}
         />
       </Screen>
     );
@@ -158,12 +157,7 @@ export function InvitationScreen({ token }: { token: string }) {
           loading={accept.isPending}
           testID="invitation-join"
         />
-        <Button
-          label={t('common.notNow')}
-          variant="outline"
-          onPress={() => router.replace('/')}
-          hapticKind="select"
-        />
+        <Button label={t('common.notNow')} variant="outline" onPress={enterApp} hapticKind="select" />
       </View>
     </Screen>
   );

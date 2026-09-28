@@ -14,21 +14,20 @@ export const sv = {
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar.",
   "api.email.greeting": "Hej {name},",
-  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Har du redan ett konto?",
   "auth.byContinuing": "Genom att fortsätta godkänner du {terms} och {privacy}.",
   "auth.continue": "Fortsätt",
   "auth.createAccount": "Skapa ditt konto",
   "auth.createAccountButton": "Skapa konto",
-  "auth.createAccountHint": "Det här är din personliga inloggning. Ditt företag får en egen arbetsplats i nästa steg.",
-  "auth.createWorkspace": "Skapa en arbetsplats",
+  "auth.createAccountHint": "Det här är din personliga inloggning. Du lägger till ditt företag i nästa steg.",
+  "auth.createWorkspace": "Skapa ett företag",
   "auth.email": "E-post",
   "auth.emailPlaceholder": "du@example.com",
   "auth.forgotPassword": "Glömt lösenordet?",
   "auth.freeAndOpenSource": "Gratis och öppen källkod. MIT-licens.",
   "auth.keepSignedIn": "Håll mig inloggad",
   "auth.newHere": "Ny här?",
-  "auth.oneAccount": "Ett konto för alla. Om du driver stället eller jobbar där avgörs av arbetsplatsen, inte av var du loggar in.",
+  "auth.oneAccount": "Ett konto för alla. Om du driver stället eller jobbar där avgörs av företaget, inte av var du loggar in.",
   "auth.password": "Lösenord",
   "auth.passwordPlaceholder": "Ditt lösenord",
   "auth.privacyPolicy": "integritetspolicyn",
@@ -117,7 +116,7 @@ export const sv = {
   "employees.ratesHiddenAddHint": "Timlöner är dolda medan Visa lön är av. Du kan lägga till en senare under Inställningar.",
   "employees.ratesHiddenHint": "Timlöner är dolda medan Visa lön är av. Slå på det under Inställningar.",
   "employees.ratesPrivateHint": "Timlöner visas bara för dig och för personen de gäller.",
-  "employees.ratesShownHint": "Timlöner visas eftersom lön är på för den här arbetsplatsen. Anställda ser sin egen timlön, aldrig varandras.",
+  "employees.ratesShownHint": "Timlöner visas eftersom lön är på för det här företaget. Anställda ser sin egen timlön, aldrig varandras.",
   "employees.reactivate": "Återaktivera",
   "employees.remove": "Ta bort",
   "employees.sendInvitation": "Skicka inbjudan",
@@ -158,11 +157,11 @@ export const sv = {
   "entry.todayLoggedAt": "I dag, loggad {time}",
   "errors.CONFLICT": "Någon ändrade det här samtidigt. Ladda om och försök igen.",
   "errors.FLAG_ALREADY_OPEN": "Den här posten har redan en öppen flagga.",
-  "errors.FORBIDDEN": "Det kan du inte göra på den här arbetsplatsen.",
+  "errors.FORBIDDEN": "Det kan du inte göra i det här företaget.",
   "errors.INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
   "errors.INVITATION_EMAIL_MISMATCH": "Inbjudan skickades till en annan e-postadress.",
   "errors.INVITATION_EXPIRED": "Inbjudan har gått ut.",
-  "errors.MEMBER_NOT_ACTIVE": "Den här personen är inte aktiv på arbetsplatsen.",
+  "errors.MEMBER_NOT_ACTIVE": "Den här personen är inte aktiv i företaget.",
   "errors.MONTH_LOCKED": "Den här månaden är stängd. Lås upp den först.",
   "errors.NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen.",
   "errors.NOT_FOUND": "Det finns inte längre.",
@@ -190,8 +189,12 @@ export const sv = {
   "flags.openInGrid": "Öppna i rutnätet",
   "flags.raised": "Skickad {when}",
   "flags.reasonLess": "Jag jobbade mindre",
+  "flags.reasonLessShort": "Jobbade mindre än loggat",
   "flags.reasonMore": "Jag jobbade mer",
+  "flags.reasonMoreShort": "Jobbade mer än loggat",
   "flags.reasonNotIn": "Jag var inte där",
+  "flags.reasonNotInShort": "Var inte där den dagen",
+  "flags.resolveFlag": "Hantera flaggan",
   "flags.resolvedDismissed": "Åtgärdad: du behöll {hours}.",
   "flags.resolvedFixed": "Åtgärdad: du ändrade {before} till {after}.",
   "flags.says": "{name} säger",
@@ -226,7 +229,7 @@ export const sv = {
   "invitation.continueOnWeb": "Fortsätt på webben",
   "invitation.emailFromInvitation": "E-post (från inbjudan)",
   "invitation.employer": "Arbetsgivare",
-  "invitation.employersCreateOnWeb": "Arbetsgivare skapar sin arbetsplats på webben.",
+  "invitation.employersCreateOnWeb": "Arbetsgivare skapar sitt företag på webben.",
   "invitation.expired": "Inbjudan har gått ut. Be {name} skicka en ny.",
   "invitation.invitedBy": "Du har bjudits in av",
   "invitation.invitedByWorkspace": "Inbjuden av {workspace}",
@@ -241,19 +244,22 @@ export const sv = {
   "invitation.repeatPasswordPlaceholder": "Samma igen",
   "invitation.signInToAccept": "Logga in för att acceptera",
   "invitation.title": "Inbjudan",
-  "invitation.workspace": "Arbetsplats",
+  "invitation.workspace": "Företag",
   "invitation.wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
   "invitation.youHaveBeenInvited": "Du har bjudits in av {workspace}",
   "invitation.yourEmail": "Din e-post",
   "mobile.auth.signInFailed": "Inloggningen gick inte igenom. Försök igen.",
-  "mobile.chooseWorkspace.hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
-  "mobile.chooseWorkspace.hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
-  "mobile.chooseWorkspace.rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här.",
+  "mobile.chooseWorkspace.hint_one": "Du tillhör {count} företag. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.hint_other": "Du tillhör {count} företag. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.rolesHint": "Roller gäller per företag. En arbetsgivare som också jobbar åt någon ser båda här.",
   "mobile.common.confirm": "Bekräfta",
   "mobile.common.done": "Klar",
   "mobile.common.edit": "Ändra",
   "mobile.common.hoursShort": "{hours} h",
   "mobile.common.thisWeek": "Den här veckan",
+  "mobile.crash.body": "Något på den här skärmen gick fel. Den sparade kopian på telefonen rensades; dina timmar finns kvar på servern.",
+  "mobile.crash.restart": "Börja om",
+  "mobile.crash.title": "Klokka fick starta om",
   "mobile.day.editHours": "Ändra timmar",
   "mobile.day.noEntry": "Inget registrerat den här dagen.",
   "mobile.employees.joined": "Började {when}",
@@ -276,18 +282,18 @@ export const sv = {
   "mobile.members.removed": "{name} togs bort.",
   "mobile.month.exported": "CSV klar att dela.",
   "mobile.month.unlocked": "{month} är öppen för ändringar igen.",
-  "mobile.noWorkspaces.body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här.",
-  "mobile.noWorkspaces.title": "Ingen arbetsplats än",
+  "mobile.noWorkspaces.body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa det här.",
+  "mobile.noWorkspaces.title": "Inget företag än",
   "mobile.notifications.openRow": "Öppna notis",
   "mobile.push.body": "Klokka skickar en push när timmar läggs till eller ändras, en flagga besvaras eller en månad stängs. Inget annat.",
   "mobile.push.bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
   "mobile.push.channelFlags": "Flaggor",
   "mobile.push.channelHours": "Timmar",
-  "mobile.push.channelWorkspace": "Arbetsplats",
+  "mobile.push.channelWorkspace": "Företag",
   "mobile.push.enable": "Slå på notiser",
   "mobile.push.title": "Få veta direkt när dina timmar ändras",
   "mobile.settings.account": "Konto",
-  "mobile.settings.editWorkspace": "Ändra arbetsplats",
+  "mobile.settings.editWorkspace": "Ändra företaget",
   "mobile.settings.saved": "Sparat.",
   "mobile.share.preparing": "Förbereder kortet",
   "mobile.week.personPager": "Personer, en per sida",
@@ -295,7 +301,10 @@ export const sv = {
   "mobile.welcome.taglineB": "Båda sidor.",
   "mobile.workspace.colourPick": "Välj en färg",
   "mobile.workspace.emojiPick": "Välj en emoji",
+  "mobile.workspace.timezoneChange": "Byt tidszon, nu {timezone}",
   "mobile.workspace.timezoneDevice": "Din telefon säger {timezone}.",
+  "mobile.workspace.timezoneNoMatch": "Ingen tidszon matchar det.",
+  "mobile.workspace.timezoneSearch": "Sök, till exempel Stockholm",
   "month.avgPerWorkingDay": "Snitt per arbetsdag",
   "month.avgPerWorkingDayShort": "{hours} per arbetsdag",
   "month.bestWeek": "Bästa veckan",
@@ -303,7 +312,7 @@ export const sv = {
   "month.calendarLabel": "{month}, timmar per dag",
   "month.calendarLabelMine": "{month}, dina timmar per dag",
   "month.closeMonth": "Stäng {month}",
-  "month.closeMonthHint": "{hours} fördelat på {people}. Ingen kan ändra {month} förrän du låser upp den. Alla på arbetsplatsen får veta det, och CSV-filen är klar för den som sköter lönen.",
+  "month.closeMonthHint": "{hours} fördelat på {people}. Ingen kan ändra {month} förrän du låser upp den. Alla i företaget får veta det, och CSV-filen är klar för den som sköter lönen.",
   "month.closeMonthTitle": "Stänga {month}?",
   "month.closed": "{month}, stängd",
   "month.days": "Dagar",
@@ -339,9 +348,9 @@ export const sv = {
   "month.workingDays_one": "{count} arbetsdag",
   "month.workingDays_other": "{count} arbetsdagar",
   "nav.backToApp": "Tillbaka till appen",
-  "nav.chooseWorkspace": "Välj arbetsplats",
-  "nav.createWorkspace": "Skapa arbetsplats",
-  "nav.employeeMonth": "Anställds månad",
+  "nav.chooseWorkspace": "Välj företag",
+  "nav.createWorkspace": "Skapa ett företag",
+  "nav.employeeView": "Anställd",
   "nav.employees": "Anställda",
   "nav.getAndroidApp": "Hämta Android-appen",
   "nav.health": "Status",
@@ -360,48 +369,52 @@ export const sv = {
   "nav.profile": "Profil",
   "nav.sections": "Avsnitt",
   "nav.settings": "Inställningar",
-  "nav.switchWorkspace": "Byt arbetsplats",
+  "nav.switchWorkspace": "Byt företag",
   "nav.users": "Användare",
   "nav.volume": "Volym",
   "nav.week": "Vecka",
   "nav.weekGrid": "Veckorutnät",
-  "nav.workspaceNavigation": "Navigering för arbetsplatsen",
-  "nav.workspaces": "Arbetsplatser",
-  "nav.yourOwnWorkspaces": "Dina egna arbetsplatser",
-  "notifications.channelsHintEmployee": "Samma saker kommer som push i din telefon. E-post bara för veckosammanfattningen, om du slår på den.",
-  "notifications.channelsHintEmployer": "I appen och som push kommer samma saker. E-post används bara för inbjudningar och den valfria sammanfattningen.",
+  "nav.workspaceNavigation": "Navigering för företaget",
+  "nav.workspaces": "Företag",
+  "nav.yourOwnWorkspaces": "Dina egna företag",
   "notifications.employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
   "notifications.empty": "Inget än. Du får veta det här i samma stund som något ändras.",
   "notifications.emptyUnread": "Allt är läst.",
-  "notifications.entryFlagged.body": "Loggat {logged}, {name} säger {suggested}",
-  "notifications.entryFlagged.title": "{name} flaggade {date}.",
+  "notifications.entryFlagged.body": "{workspace}: loggat {logged}, säger {suggested}",
+  "notifications.entryFlagged.bodyMessage": "{workspace}: \"{message}\"",
+  "notifications.entryFlagged.title": "{name} flaggade {date}",
   "notifications.filter": "Filter",
-  "notifications.flagDismissed.body": "Din flagga är granskad och posten står kvar som loggad.",
-  "notifications.flagDismissed.title": "{name} behöll {date} på {hours}.",
-  "notifications.flagFixed.body": "{date} är nu {hours}.",
-  "notifications.flagFixed.title": "{name} rättade din flagga.",
-  "notifications.hoursAdded.body": "{hours} i vecka {week}.",
-  "notifications.hoursAdded.range": "{from} till {to}",
-  "notifications.hoursAdded.titleForYou_one": "{name} lade till {count} dag för dig.",
-  "notifications.hoursAdded.titleForYou_other": "{name} lade till {count} dagar för dig.",
-  "notifications.hoursAdded.title_one": "{name} lade till {count} dag, {hours} h",
-  "notifications.hoursAdded.title_other": "{name} lade till {count} dagar, {hours} h",
-  "notifications.hoursChanged.body": "{before} är nu {after}.",
-  "notifications.hoursChanged.note": "Anteckning: \"{note}\"",
-  "notifications.hoursChanged.title": "{name} ändrade {date}.",
-  "notifications.hoursRemoved.body": "{hours} togs bort från din månad.",
-  "notifications.hoursRemoved.title": "{name} tog bort {date}.",
-  "notifications.hoursRemoved.titleMany_one": "{name} tog bort {count} dag",
-  "notifications.hoursRemoved.titleMany_other": "{name} tog bort {count} dagar",
-  "notifications.inviteAccepted.body": "{name} är nu anställd på {workspace}.",
-  "notifications.inviteAccepted.title": "{name} accepterade din inbjudan.",
+  "notifications.flagDismissed.body": "{workspace}: {date} står kvar på {hours}",
+  "notifications.flagDismissed.title": "{name} granskade din flagga",
+  "notifications.flagFixed.body": "{workspace}: {date} är nu {hours}",
+  "notifications.flagFixed.title": "{name} rättade din flagga",
+  "notifications.hours.addedOne": "{name} la till {date}",
+  "notifications.hours.added_one": "{name} la till {count} dag",
+  "notifications.hours.added_other": "{name} la till {count} dagar",
+  "notifications.hours.bodyChangedOne": "{workspace}: {hours}, var {before}",
+  "notifications.hours.bodyDays": "{workspace}: {days}",
+  "notifications.hours.bodyOne": "{workspace}: {hours}",
+  "notifications.hours.bodyWeek": "{workspace}, vecka {week}: {days}",
+  "notifications.hours.changedOne": "{name} ändrade {date}",
+  "notifications.hours.changed_one": "{name} ändrade {count} dag",
+  "notifications.hours.changed_other": "{name} ändrade {count} dagar",
+  "notifications.hours.day": "{date} {hours}",
+  "notifications.hours.dayRemoved": "{date} borttagen",
+  "notifications.hours.note": "Anteckning: \"{note}\"",
+  "notifications.hours.range": "{workspace}: {from} till {to}, {hours}",
+  "notifications.hours.rangeWeek": "{workspace}, vecka {week}: {from} till {to}, {hours}",
+  "notifications.hours.removed_one": "{name} tog bort {count} dag",
+  "notifications.hours.removed_other": "{name} tog bort {count} dagar",
+  "notifications.hours.reverted": "{name} ändrade dina timmar och ändrade tillbaka",
+  "notifications.inviteAccepted.body": "{workspace}: {name} är nu anställd",
+  "notifications.inviteAccepted.title": "{name} accepterade din inbjudan",
   "notifications.markAllRead": "Markera alla som lästa",
-  "notifications.monthClosed.body": "{hours}, {money}.",
-  "notifications.monthClosed.bodyHoursOnly": "{hours}.",
-  "notifications.monthClosed.hint": "{name} låste månaden. Dela ditt kort från Profil.",
-  "notifications.monthClosed.title": "{month} är stängd.",
-  "notifications.monthReopened.body": "{name} låste upp månaden. Poster kan ändras igen.",
-  "notifications.monthReopened.title": "{month} har öppnats igen.",
+  "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
+  "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
+  "notifications.monthClosed.hint": "Inget ändras förrän den öppnas igen. Dela ditt kort från Profil.",
+  "notifications.monthClosed.title": "{name} stängde {month}",
+  "notifications.monthReopened.body": "{workspace}: poster kan ändras igen",
+  "notifications.monthReopened.title": "{name} öppnade {month} igen",
   "notifications.subtitleEmployee": "Varje gång dina timmar läggs till, ändras eller tas bort, en gång per tillfälle. Plus flaggor, stängda månader och inbjudningar.",
   "notifications.subtitleEmployer": "Det som hänt i {workspace} och rör dig. Anställda får sin egen lista.",
   "notifications.title": "Notiser",
@@ -456,7 +469,7 @@ export const sv = {
   "operator.users.searchPlaceholder": "Sök på namn eller e-post",
   "operator.users.subtitle": "{count} personer inloggade via Logto. Klokka lagrar inga lösenord; identiteten finns där, medlemskapet här.",
   "operator.users.title": "Användare",
-  "operator.users.workspaces": "Arbetsplatser",
+  "operator.users.workspaces": "Företag",
   "operator.volume.bounced": "Studsade: {count}",
   "operator.volume.byKind": "Per typ",
   "operator.volume.coalescing": "Sammanslagning",
@@ -478,10 +491,10 @@ export const sv = {
   "operator.volume.subtitle": "{month}. SMTP-kontot skickar ungefär {quota} mejl i månaden, så e-post är reserverad för inbjudningar och den valfria sammanfattningen. Allt annat är push och i appen.",
   "operator.volume.title": "Notis- och e-postvolym",
   "operator.volume.verifications": "E-postverifieringar {count}",
-  "operator.workspaces.acrossAll": "Alla arbetsplatser sammanlagt, bara aggregat",
+  "operator.workspaces.acrossAll": "Alla företag sammanlagt, bara aggregat",
   "operator.workspaces.active": "Aktiva",
   "operator.workspaces.activeLast7": "Aktiva de senaste 7 dagarna",
-  "operator.workspaces.activeLast7Hint": "Arbetsplatser med minst en sparad post",
+  "operator.workspaces.activeLast7Hint": "Företag med minst en sparad post",
   "operator.workspaces.created": "Skapad",
   "operator.workspaces.hoursLoggedIn": "Loggade timmar i {month}",
   "operator.workspaces.invited": "Inbjudna",
@@ -492,11 +505,11 @@ export const sv = {
   "operator.workspaces.pay": "Lön",
   "operator.workspaces.payOff": "Lön av",
   "operator.workspaces.payOn": "Lön på",
-  "operator.workspaces.search": "Sök arbetsplatser",
+  "operator.workspaces.search": "Sök företag",
   "operator.workspaces.searchPlaceholder": "Sök på namn eller slug",
-  "operator.workspaces.subtitle": "{count} arbetsplatser på den hostade instansen, en per företag. Bara antal och datum.",
-  "operator.workspaces.title": "Arbetsplatser",
-  "operator.workspaces.workspace": "Arbetsplats",
+  "operator.workspaces.subtitle": "{count} företag på den hostade instansen. Bara antal och datum.",
+  "operator.workspaces.title": "Företag",
+  "operator.workspaces.workspace": "Företag",
   "overview.allNotifications": "Alla notiser",
   "overview.atEachRate": "efter varje persons timlön",
   "overview.avgPerWorkingDay": "Snitt per arbetsdag",
@@ -536,12 +549,12 @@ export const sv = {
   "profile.emojiAvatar": "Emoji-avatar",
   "profile.employeeOf": "Anställd. {name} loggar dina timmar.",
   "profile.employeeOfWithHours": "Anställd, {name}. {hours} den här månaden",
-  "profile.hint": "Ett konto för varje arbetsplats du tillhör. Ändringar sparas medan du gör dem.",
+  "profile.hint": "Ett konto för varje företag du tillhör. Ändringar sparas medan du gör dem.",
   "profile.hoursOnly": "Bara timmar.",
   "profile.initial": "Initial",
-  "profile.leavingHint": "Att lämna en arbetsplats gör arbetsgivaren, som avaktiverar dig. Dina tidigare timmar syns fortfarande för er båda.",
   "profile.name": "Namn",
   "profile.nameHint": "Så syns du för dina arbetsgivare.",
+  "profile.pastHoursHint": "Dina tidigare timmar syns fortfarande för er båda.",
   "profile.payShown": "Lön visas.",
   "profile.subtitle": "Avatar, språk, notiser",
   "profile.subtitleEmployer": "Avatar, språk, lösenord",
@@ -549,10 +562,10 @@ export const sv = {
   "profile.title": "Profil",
   "profile.uploadPhoto": "Ladda upp foto",
   "profile.uploadPhotoHint": "JPG eller PNG, beskuret kvadratiskt.",
-  "profile.workspaces": "Arbetsplatser",
+  "profile.workspaces": "Företag",
   "role.employee": "Anställd",
-  "role.employeeAtWorkspaces_one": "Anställd på {count} arbetsplats",
-  "role.employeeAtWorkspaces_other": "Anställd på {count} arbetsplatser",
+  "role.employeeAtWorkspaces_one": "Anställd på {count} företag",
+  "role.employeeAtWorkspaces_other": "Anställd på {count} företag",
   "role.employeeLoggedBy": "Anställd, loggas av {name}",
   "role.employeeLogsYourHours": "Anställd, {name} loggar dina timmar",
   "role.employer": "Arbetsgivare",
@@ -572,7 +585,7 @@ export const sv = {
   "settings.followDevice": "Följ enheten",
   "settings.fullDay": "Hel dag",
   "settings.fullDayChipHint": "Knappen Hel dag",
-  "settings.hint": "Ändringar sparas medan du gör dem. Alla på arbetsplatsen ser det nya namnet, färgen och emojin direkt.",
+  "settings.hint": "Ändringar sparas medan du gör dem. Alla i företaget ser det nya namnet, färgen och emojin direkt.",
   "settings.hours": "Timmar",
   "settings.language": "Språk",
   "settings.languageHint": "Appen och varje notis, även push när telefonen är låst.",
@@ -603,10 +616,10 @@ export const sv = {
   "settings.weeklyDigest": "Veckosammanfattning via e-post",
   "settings.weeklyDigestByEmail": "Veckosammanfattning via e-post",
   "settings.weeklyDigestHint": "Ett mejl på måndag morgon med förra veckans summor. Av som standard.",
-  "settings.workspace": "Arbetsplats",
+  "settings.workspace": "Företag",
   "share.aDay": "om dagen",
   "share.bestWeek": "bästa veckan",
-  "share.cardHint": "Kortet visar timmar och arbetsplatsen, aldrig lön. Dela det härifrån eller från appen i din telefon.",
+  "share.cardHint": "Kortet visar timmar och företaget, aldrig lön. Dela det härifrån eller från appen i din telefon.",
   "share.cardLabel": "Din {month}: {hours} timmar på {workspace}",
   "share.cardLabelDays": "Din {month} på {workspace}: {hours} timmar över {days} dagar",
   "share.cardSize": "1200 gånger 630, gjort för att spara eller skicka",
@@ -641,6 +654,11 @@ export const sv = {
   "web.csv.downloaded": "{file} har laddats ner.",
   "web.csv.monthBody": "Hela månaden, en rad per person och dag, med anteckningar.",
   "web.csv.personBody": "En rad per dag för {name}, med anteckningar.",
+  "web.dayList.changedBy": "Ändrad av {name}, {time}",
+  "web.dayList.dayOf": "Vecka {week}, {name}",
+  "web.dayList.logInGrid": "Logga i veckorutnätet",
+  "web.dayList.loggedBy": "Loggad av {name}, {time}",
+  "web.dayList.select": "{date}, {hours}. Visa dagen.",
   "web.emoji.bag": "Shoppingkasse",
   "web.emoji.bee": "Bi",
   "web.emoji.bicycle": "Cykel",
@@ -657,6 +675,10 @@ export const sv = {
   "web.emoji.star": "Stjärna",
   "web.emoji.sun": "Sol",
   "web.emoji.wave": "Våg",
+  "web.employeeWeek.days": "Dagar",
+  "web.employeeWeek.openDay": "{date}, {hours}. Öppna den i din månad.",
+  "web.employeeWeek.subtitle": "{from} till {to}. Timmarna {name} har loggat åt dig, dag för dag.",
+  "web.employeeWeek.subtitlePlain": "{from} till {to}. Dina timmar, dag för dag.",
   "web.employees.deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
   "web.employees.emptyTitle": "Ingen här än",
   "web.employees.invitationExpired": "Inbjudan gick ut {date}",
@@ -696,7 +718,7 @@ export const sv = {
   "web.join.toSignIn": "Till inloggningen",
   "web.month.closedBy": "Stängd {date} av {name}",
   "web.month.closedToast": "{month} är stängd.",
-  "web.month.closedToastBody": "Alla på arbetsplatsen får veta det, och CSV-filen är klar.",
+  "web.month.closedToastBody": "Alla i företaget får veta det, och CSV-filen är klar.",
   "web.month.daysWithHours_one": "{count} dag med timmar",
   "web.month.daysWithHours_other": "{count} dagar med timmar",
   "web.month.editedTimes_one": "ändrad {count} gång",
@@ -715,7 +737,7 @@ export const sv = {
   "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
   "web.newWorkspace.headlineA": "Gör det till",
   "web.newWorkspace.headlineB": "ditt ställe.",
-  "web.newWorkspace.nameRequired": "Ge arbetsplatsen ett namn.",
+  "web.newWorkspace.nameRequired": "Ge företaget ett namn.",
   "web.notFound.title": "Här finns inget",
   "web.notifications.loadMore": "Visa äldre",
   "web.notifications.seeDay": "Se dagen",
@@ -755,7 +777,7 @@ export const sv = {
   "web.operator.users.employeeAt": "Anställd på {count}",
   "web.operator.users.employerOf": "Arbetsgivare för {count}",
   "web.operator.users.never": "Aldrig",
-  "web.operator.users.noWorkspace": "Ingen arbetsplats",
+  "web.operator.users.noWorkspace": "Inget företag",
   "web.operator.users.pushNo": "Ingen",
   "web.operator.users.pushYes": "Registrerad",
   "web.operator.volume.count": "Antal",
@@ -771,8 +793,8 @@ export const sv = {
   "web.overview.nothingLoggedAll": "Varje arbetsdag hittills har timmar.",
   "web.overview.projectedLine": "Beräknat månadsslut {projected}, {lastMonth}",
   "web.profile.appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast.",
-  "web.profile.employerAt_one": "Arbetsgivare på {count} arbetsplats",
-  "web.profile.employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+  "web.profile.employerAt_one": "Arbetsgivare på {count} företag",
+  "web.profile.employerAt_other": "Arbetsgivare på {count} företag",
   "web.profile.nameRequired": "Namnet kan inte vara tomt.",
   "web.settings.dayLengthInvalid": "Ange en daglängd mellan 0,25 och 24 timmar.",
   "web.settings.noDevice": "Ingen telefon är inloggad på det här kontot än.",
@@ -796,7 +818,7 @@ export const sv = {
   "web.signIn.hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
   "web.signIn.pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
   "web.signIn.pointRoles": "Arbetsgivare och anställda loggar in här",
-  "web.signIn.pointWorkspaces": "Flera arbetsplatser, en inloggning",
+  "web.signIn.pointWorkspaces": "Flera företag, en inloggning",
   "web.week.cellLabel": "{name}, {date}",
   "web.week.discard": "Släng",
   "web.week.emptyBody": "Lägg till en anställd först. Inbjudna kan loggas direkt.",
@@ -861,18 +883,18 @@ export const sv = {
   "week.weekTotalPeople": "Den här veckan, {people}. Sparade poster ger varje person en notis per tillfälle.",
   "workspace.colour": "Färg",
   "workspace.colourAndEmoji": "Färg och emoji",
-  "workspace.colourAndEmojiHint": "Anställda med två arbetsgivare skiljer arbetsplatserna åt med dessa.",
+  "workspace.colourAndEmojiHint": "Anställda med två arbetsgivare skiljer företagen åt med dessa.",
   "workspace.country": "Land",
-  "workspace.createHint": "En arbetsplats är ett företag. Du kan öppna fler senare.",
+  "workspace.createHint": "Ett företag att börja med. Du kan lägga till fler senare.",
   "workspace.createStep": "Steg {step} av {total}",
-  "workspace.createTitle": "Skapa din arbetsplats",
-  "workspace.created": "Arbetsplatsen är skapad.",
+  "workspace.createTitle": "Skapa ditt företag",
+  "workspace.created": "Företaget är skapat.",
   "workspace.currency": "Valuta",
   "workspace.currencyHint": "Används för varje pengasiffra. Timlön sätts per person under Anställda.",
   "workspace.emoji": "Emoji",
   "workspace.makeItYourPlace": "Gör det till ditt ställe.",
   "workspace.monday": "Måndag",
-  "workspace.name": "Arbetsplatsens namn",
+  "workspace.name": "Företagets namn",
   "workspace.nameHint": "Namnet dina anställda ser i väljaren och i varje notis.",
   "workspace.namePlaceholder": "Namnet på stället",
   "workspace.summary": "{city}, {currency}, veckan börjar {weekStart}",
@@ -880,7 +902,9 @@ export const sv = {
   "workspace.switcherPreview": "Så här ser det ut i väljaren",
   "workspace.timezone": "Tidszon",
   "workspace.timezoneAndWeek": "Tidszon och vecka",
+  "workspace.timezoneEurope": "Europa",
   "workspace.timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
+  "workspace.timezoneWorld": "Resten av världen",
   "workspace.weekStart": "Veckan börjar",
   "workspace.weekStartsOn": "Veckan börjar på",
   "workspace.yourName": "Ditt namn",
@@ -900,21 +924,20 @@ export const en = {
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka is free and open source. You get this email because you turned it on in Settings.",
   "api.email.greeting": "Hi {name},",
-  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Already have an account?",
   "auth.byContinuing": "By continuing you accept the {terms} and the {privacy}.",
   "auth.continue": "Continue",
   "auth.createAccount": "Create your account",
   "auth.createAccountButton": "Create account",
-  "auth.createAccountHint": "This is your personal login. Your business gets its own workspace in the next step.",
-  "auth.createWorkspace": "Create a workspace",
+  "auth.createAccountHint": "This is your personal login. You add your business in the next step.",
+  "auth.createWorkspace": "Create a business",
   "auth.email": "Email",
   "auth.emailPlaceholder": "you@example.com",
   "auth.forgotPassword": "Forgot password?",
   "auth.freeAndOpenSource": "Free and open source. MIT licence.",
   "auth.keepSignedIn": "Keep me signed in",
   "auth.newHere": "New here?",
-  "auth.oneAccount": "One account for everyone. Whether you run the place or work there comes from the workspace, not from where you sign in.",
+  "auth.oneAccount": "One account for everyone. Whether you run the place or work there comes from the business, not from where you sign in.",
   "auth.password": "Password",
   "auth.passwordPlaceholder": "Your password",
   "auth.privacyPolicy": "privacy policy",
@@ -1003,7 +1026,7 @@ export const en = {
   "employees.ratesHiddenAddHint": "Hourly rates are hidden while Show pay is off. You can add one later in Settings.",
   "employees.ratesHiddenHint": "Hourly rates are hidden while Show pay is off. Turn it on in Settings.",
   "employees.ratesPrivateHint": "Rates are only shown to you and to the person they belong to.",
-  "employees.ratesShownHint": "Hourly rates are shown because pay is on for this workspace. Employees see their own rate, never each other's.",
+  "employees.ratesShownHint": "Hourly rates are shown because pay is on for this business. Employees see their own rate, never each other's.",
   "employees.reactivate": "Reactivate",
   "employees.remove": "Remove",
   "employees.sendInvitation": "Send invitation",
@@ -1044,11 +1067,11 @@ export const en = {
   "entry.todayLoggedAt": "Today, logged {time}",
   "errors.CONFLICT": "Someone changed this at the same time. Reload and try again.",
   "errors.FLAG_ALREADY_OPEN": "This entry already has an open flag.",
-  "errors.FORBIDDEN": "You cannot do that in this workspace.",
+  "errors.FORBIDDEN": "You cannot do that in this business.",
   "errors.INTERNAL": "Something went wrong on our side. Try again in a moment.",
   "errors.INVITATION_EMAIL_MISMATCH": "The invitation was sent to another email address.",
   "errors.INVITATION_EXPIRED": "The invitation has expired.",
-  "errors.MEMBER_NOT_ACTIVE": "This person is not active in the workspace.",
+  "errors.MEMBER_NOT_ACTIVE": "This person is not active in the business.",
   "errors.MONTH_LOCKED": "This month is closed. Unlock it first.",
   "errors.NETWORK": "No connection. Check your network and try again.",
   "errors.NOT_FOUND": "That no longer exists.",
@@ -1076,8 +1099,12 @@ export const en = {
   "flags.openInGrid": "Open in the grid",
   "flags.raised": "Raised {when}",
   "flags.reasonLess": "I worked less",
+  "flags.reasonLessShort": "Worked less than logged",
   "flags.reasonMore": "I worked more",
+  "flags.reasonMoreShort": "Worked more than logged",
   "flags.reasonNotIn": "I was not in",
+  "flags.reasonNotInShort": "Was not in that day",
+  "flags.resolveFlag": "Resolve the flag",
   "flags.resolvedDismissed": "Resolved: you kept {hours}.",
   "flags.resolvedFixed": "Resolved: you changed {before} to {after}.",
   "flags.says": "{name} says",
@@ -1112,7 +1139,7 @@ export const en = {
   "invitation.continueOnWeb": "Continue on the web",
   "invitation.emailFromInvitation": "Email (from the invitation)",
   "invitation.employer": "Employer",
-  "invitation.employersCreateOnWeb": "Employers create their workspace on the web.",
+  "invitation.employersCreateOnWeb": "Employers create their business on the web.",
   "invitation.expired": "This invitation has expired. Ask {name} to send a new one.",
   "invitation.invitedBy": "You were invited by",
   "invitation.invitedByWorkspace": "Invited by {workspace}",
@@ -1127,19 +1154,22 @@ export const en = {
   "invitation.repeatPasswordPlaceholder": "Same again",
   "invitation.signInToAccept": "Sign in to accept",
   "invitation.title": "Invitation",
-  "invitation.workspace": "Workspace",
+  "invitation.workspace": "Business",
   "invitation.wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
   "invitation.youHaveBeenInvited": "You have been invited by {workspace}",
   "invitation.yourEmail": "Your email",
   "mobile.auth.signInFailed": "Sign-in did not go through. Try again.",
-  "mobile.chooseWorkspace.hint_one": "You belong to {count} workspace. Switch any time from Profile.",
-  "mobile.chooseWorkspace.hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
-  "mobile.chooseWorkspace.rolesHint": "Roles are per workspace. An employer who also works for someone sees both here.",
+  "mobile.chooseWorkspace.hint_one": "You belong to {count} business. Switch any time from Profile.",
+  "mobile.chooseWorkspace.hint_other": "You belong to {count} businesses. Switch any time from Profile.",
+  "mobile.chooseWorkspace.rolesHint": "Roles are per business. An employer who also works for someone sees both here.",
   "mobile.common.confirm": "Confirm",
   "mobile.common.done": "Done",
   "mobile.common.edit": "Edit",
   "mobile.common.hoursShort": "{hours} h",
   "mobile.common.thisWeek": "This week",
+  "mobile.crash.body": "Something on this screen went wrong. The saved copy on this phone was cleared; your hours are safe on the server.",
+  "mobile.crash.restart": "Start again",
+  "mobile.crash.title": "Klokka had to start again",
   "mobile.day.editHours": "Edit hours",
   "mobile.day.noEntry": "Nothing logged this day.",
   "mobile.employees.joined": "Joined {when}",
@@ -1162,18 +1192,18 @@ export const en = {
   "mobile.members.removed": "{name} was removed.",
   "mobile.month.exported": "CSV ready to share.",
   "mobile.month.unlocked": "{month} is open for edits again.",
-  "mobile.noWorkspaces.body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create a workspace here.",
-  "mobile.noWorkspaces.title": "No workspace yet",
+  "mobile.noWorkspaces.body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create it here.",
+  "mobile.noWorkspaces.title": "No business yet",
   "mobile.notifications.openRow": "Open notification",
   "mobile.push.body": "Klokka sends a push when hours are added or changed, a flag is answered or a month is closed. Nothing else.",
   "mobile.push.bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
   "mobile.push.channelFlags": "Flags",
   "mobile.push.channelHours": "Hours",
-  "mobile.push.channelWorkspace": "Workspace",
+  "mobile.push.channelWorkspace": "Business",
   "mobile.push.enable": "Turn on notifications",
   "mobile.push.title": "Know the moment your hours change",
   "mobile.settings.account": "Account",
-  "mobile.settings.editWorkspace": "Edit workspace",
+  "mobile.settings.editWorkspace": "Edit business",
   "mobile.settings.saved": "Saved.",
   "mobile.share.preparing": "Preparing the card",
   "mobile.week.personPager": "People, one per page",
@@ -1181,7 +1211,10 @@ export const en = {
   "mobile.welcome.taglineB": "Both sides.",
   "mobile.workspace.colourPick": "Pick a colour",
   "mobile.workspace.emojiPick": "Pick an emoji",
+  "mobile.workspace.timezoneChange": "Change the time zone, now {timezone}",
   "mobile.workspace.timezoneDevice": "Your phone says {timezone}.",
+  "mobile.workspace.timezoneNoMatch": "No time zone matches that.",
+  "mobile.workspace.timezoneSearch": "Search, for example Stockholm",
   "month.avgPerWorkingDay": "Average per working day",
   "month.avgPerWorkingDayShort": "{hours} per working day",
   "month.bestWeek": "Best week",
@@ -1189,7 +1222,7 @@ export const en = {
   "month.calendarLabel": "{month}, hours per day",
   "month.calendarLabelMine": "{month}, your hours per day",
   "month.closeMonth": "Close {month}",
-  "month.closeMonthHint": "{hours} across {people}. Nobody can change {month} until you unlock it. Everyone in the workspace is told, and the CSV is ready for whoever runs the pay.",
+  "month.closeMonthHint": "{hours} across {people}. Nobody can change {month} until you unlock it. Everyone in the business is told, and the CSV is ready for whoever runs the pay.",
   "month.closeMonthTitle": "Close {month}?",
   "month.closed": "{month}, closed",
   "month.days": "Days",
@@ -1225,9 +1258,9 @@ export const en = {
   "month.workingDays_one": "{count} working day",
   "month.workingDays_other": "{count} working days",
   "nav.backToApp": "Back to the app",
-  "nav.chooseWorkspace": "Choose a workspace",
-  "nav.createWorkspace": "Create workspace",
-  "nav.employeeMonth": "Employee month",
+  "nav.chooseWorkspace": "Choose a business",
+  "nav.createWorkspace": "Create a business",
+  "nav.employeeView": "Employee view",
   "nav.employees": "Employees",
   "nav.getAndroidApp": "Get the Android app",
   "nav.health": "Health",
@@ -1246,48 +1279,52 @@ export const en = {
   "nav.profile": "Profile",
   "nav.sections": "Sections",
   "nav.settings": "Settings",
-  "nav.switchWorkspace": "Switch workspace",
+  "nav.switchWorkspace": "Switch business",
   "nav.users": "Users",
   "nav.volume": "Volume",
   "nav.week": "Week",
   "nav.weekGrid": "Week grid",
-  "nav.workspaceNavigation": "Workspace navigation",
-  "nav.workspaces": "Workspaces",
-  "nav.yourOwnWorkspaces": "Your own workspaces",
-  "notifications.channelsHintEmployee": "The same items arrive as push on your phone. Email only for the weekly digest, if you turn it on.",
-  "notifications.channelsHintEmployer": "In-app and push carry the same items. Email is only used for invitations and the opt-in digest.",
+  "nav.workspaceNavigation": "Business navigation",
+  "nav.workspaces": "Businesses",
+  "nav.yourOwnWorkspaces": "Your own businesses",
   "notifications.employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
   "notifications.empty": "Nothing yet. You will hear about it here the moment something changes.",
   "notifications.emptyUnread": "All caught up.",
-  "notifications.entryFlagged.body": "Logged {logged}, {name} says {suggested}",
-  "notifications.entryFlagged.title": "{name} flagged {date}.",
+  "notifications.entryFlagged.body": "{workspace}: logged {logged}, says {suggested}",
+  "notifications.entryFlagged.bodyMessage": "{workspace}: \"{message}\"",
+  "notifications.entryFlagged.title": "{name} flagged {date}",
   "notifications.filter": "Filter",
-  "notifications.flagDismissed.body": "Your flag was reviewed and the entry stays as logged.",
-  "notifications.flagDismissed.title": "{name} kept {date} at {hours}.",
-  "notifications.flagFixed.body": "{date} is now {hours}.",
-  "notifications.flagFixed.title": "{name} fixed your flag.",
-  "notifications.hoursAdded.body": "{hours} in week {week}.",
-  "notifications.hoursAdded.range": "{from} to {to}",
-  "notifications.hoursAdded.titleForYou_one": "{name} added {count} day for you.",
-  "notifications.hoursAdded.titleForYou_other": "{name} added {count} days for you.",
-  "notifications.hoursAdded.title_one": "{name} added {count} day, {hours} h",
-  "notifications.hoursAdded.title_other": "{name} added {count} days, {hours} h",
-  "notifications.hoursChanged.body": "{before} is now {after}.",
-  "notifications.hoursChanged.note": "Note: \"{note}\"",
-  "notifications.hoursChanged.title": "{name} changed {date}.",
-  "notifications.hoursRemoved.body": "{hours} was taken off your month.",
-  "notifications.hoursRemoved.title": "{name} removed {date}.",
-  "notifications.hoursRemoved.titleMany_one": "{name} removed {count} day",
-  "notifications.hoursRemoved.titleMany_other": "{name} removed {count} days",
-  "notifications.inviteAccepted.body": "{name} is now an employee of {workspace}.",
-  "notifications.inviteAccepted.title": "{name} accepted your invitation.",
+  "notifications.flagDismissed.body": "{workspace}: {date} stays at {hours}",
+  "notifications.flagDismissed.title": "{name} reviewed your flag",
+  "notifications.flagFixed.body": "{workspace}: {date} is now {hours}",
+  "notifications.flagFixed.title": "{name} fixed your flag",
+  "notifications.hours.addedOne": "{name} added {date}",
+  "notifications.hours.added_one": "{name} added {count} day",
+  "notifications.hours.added_other": "{name} added {count} days",
+  "notifications.hours.bodyChangedOne": "{workspace}: {hours}, was {before}",
+  "notifications.hours.bodyDays": "{workspace}: {days}",
+  "notifications.hours.bodyOne": "{workspace}: {hours}",
+  "notifications.hours.bodyWeek": "{workspace}, week {week}: {days}",
+  "notifications.hours.changedOne": "{name} changed {date}",
+  "notifications.hours.changed_one": "{name} changed {count} day",
+  "notifications.hours.changed_other": "{name} changed {count} days",
+  "notifications.hours.day": "{date} {hours}",
+  "notifications.hours.dayRemoved": "{date} removed",
+  "notifications.hours.note": "Note: \"{note}\"",
+  "notifications.hours.range": "{workspace}: {from} to {to}, {hours}",
+  "notifications.hours.rangeWeek": "{workspace}, week {week}: {from} to {to}, {hours}",
+  "notifications.hours.removed_one": "{name} removed {count} day",
+  "notifications.hours.removed_other": "{name} removed {count} days",
+  "notifications.hours.reverted": "{name} changed your hours and put them back",
+  "notifications.inviteAccepted.body": "{workspace}: {name} is now an employee",
+  "notifications.inviteAccepted.title": "{name} accepted your invitation",
   "notifications.markAllRead": "Mark all as read",
-  "notifications.monthClosed.body": "{hours}, {money}.",
-  "notifications.monthClosed.bodyHoursOnly": "{hours}.",
-  "notifications.monthClosed.hint": "{name} locked the month. Share your card from Profile.",
-  "notifications.monthClosed.title": "{month} is closed.",
-  "notifications.monthReopened.body": "{name} unlocked the month. Entries can change again.",
-  "notifications.monthReopened.title": "{month} was reopened.",
+  "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
+  "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
+  "notifications.monthClosed.hint": "Nothing changes until it is reopened. Share your card from Profile.",
+  "notifications.monthClosed.title": "{name} closed {month}",
+  "notifications.monthReopened.body": "{workspace}: entries can change again",
+  "notifications.monthReopened.title": "{name} reopened {month}",
   "notifications.subtitleEmployee": "Every time your hours are added, changed or removed, once per sitting. Plus flags, closed months and invitations.",
   "notifications.subtitleEmployer": "What happened in {workspace} that concerns you. Employees get their own list.",
   "notifications.title": "Notifications",
@@ -1342,7 +1379,7 @@ export const en = {
   "operator.users.searchPlaceholder": "Search by name or email",
   "operator.users.subtitle": "{count} people signed in through Logto. Klokka stores no passwords; identity lives there, membership lives here.",
   "operator.users.title": "Users",
-  "operator.users.workspaces": "Workspaces",
+  "operator.users.workspaces": "Businesses",
   "operator.volume.bounced": "Bounced: {count}",
   "operator.volume.byKind": "By kind",
   "operator.volume.coalescing": "Coalescing",
@@ -1364,10 +1401,10 @@ export const en = {
   "operator.volume.subtitle": "{month}. The SMTP account sends about {quota} emails a month, so email is reserved for invitations and the opt-in digest. Everything else is push and in-app.",
   "operator.volume.title": "Notification and email volume",
   "operator.volume.verifications": "Email verifications {count}",
-  "operator.workspaces.acrossAll": "Across all workspaces, aggregate only",
+  "operator.workspaces.acrossAll": "Across all businesses, aggregate only",
   "operator.workspaces.active": "Active",
   "operator.workspaces.activeLast7": "Active in the last 7 days",
-  "operator.workspaces.activeLast7Hint": "Workspaces with at least one saved entry",
+  "operator.workspaces.activeLast7Hint": "Businesses with at least one saved entry",
   "operator.workspaces.created": "Created",
   "operator.workspaces.hoursLoggedIn": "Hours logged in {month}",
   "operator.workspaces.invited": "Invited",
@@ -1378,11 +1415,11 @@ export const en = {
   "operator.workspaces.pay": "Pay",
   "operator.workspaces.payOff": "Pay off",
   "operator.workspaces.payOn": "Pay on",
-  "operator.workspaces.search": "Search workspaces",
+  "operator.workspaces.search": "Search businesses",
   "operator.workspaces.searchPlaceholder": "Search by name or slug",
-  "operator.workspaces.subtitle": "{count} workspaces on the hosted instance, one per business. Counts and dates only.",
-  "operator.workspaces.title": "Workspaces",
-  "operator.workspaces.workspace": "Workspace",
+  "operator.workspaces.subtitle": "{count} businesses on the hosted instance. Counts and dates only.",
+  "operator.workspaces.title": "Businesses",
+  "operator.workspaces.workspace": "Business",
   "overview.allNotifications": "All notifications",
   "overview.atEachRate": "at each person's rate",
   "overview.avgPerWorkingDay": "Average per working day",
@@ -1422,12 +1459,12 @@ export const en = {
   "profile.emojiAvatar": "Emoji avatar",
   "profile.employeeOf": "Employee. {name} logs your hours.",
   "profile.employeeOfWithHours": "Employee, {name}. {hours} this month",
-  "profile.hint": "One account for every workspace you belong to. Changes save as you make them.",
+  "profile.hint": "One account for every business you belong to. Changes save as you make them.",
   "profile.hoursOnly": "Hours only.",
   "profile.initial": "Initial",
-  "profile.leavingHint": "Leaving a workspace is done by the employer, who deactivates you. Your past hours stay visible to both of you.",
   "profile.name": "Name",
   "profile.nameHint": "How you appear to your employers.",
+  "profile.pastHoursHint": "Your past hours stay visible to both of you.",
   "profile.payShown": "Pay shown.",
   "profile.subtitle": "Avatar, language, notifications",
   "profile.subtitleEmployer": "Avatar, language, password",
@@ -1435,10 +1472,10 @@ export const en = {
   "profile.title": "Profile",
   "profile.uploadPhoto": "Upload photo",
   "profile.uploadPhotoHint": "JPG or PNG, cropped square.",
-  "profile.workspaces": "Workspaces",
+  "profile.workspaces": "Businesses",
   "role.employee": "Employee",
-  "role.employeeAtWorkspaces_one": "Employee at {count} workspace",
-  "role.employeeAtWorkspaces_other": "Employee at {count} workspaces",
+  "role.employeeAtWorkspaces_one": "Employee at {count} business",
+  "role.employeeAtWorkspaces_other": "Employee at {count} businesses",
   "role.employeeLoggedBy": "Employee, logged by {name}",
   "role.employeeLogsYourHours": "Employee, {name} logs your hours",
   "role.employer": "Employer",
@@ -1458,7 +1495,7 @@ export const en = {
   "settings.followDevice": "Follow device",
   "settings.fullDay": "Full day",
   "settings.fullDayChipHint": "The Full day chip",
-  "settings.hint": "Changes save as you make them. Everyone in the workspace sees the new name, colour and emoji at once.",
+  "settings.hint": "Changes save as you make them. Everyone in the business sees the new name, colour and emoji at once.",
   "settings.hours": "Hours",
   "settings.language": "Language",
   "settings.languageHint": "The app and every notification, including push while your phone is locked.",
@@ -1489,10 +1526,10 @@ export const en = {
   "settings.weeklyDigest": "Weekly email digest",
   "settings.weeklyDigestByEmail": "Weekly digest by email",
   "settings.weeklyDigestHint": "One email on Monday morning with last week's totals. Off by default.",
-  "settings.workspace": "Workspace",
+  "settings.workspace": "Business",
   "share.aDay": "a day",
   "share.bestWeek": "best week",
-  "share.cardHint": "The card shows hours and the workspace, never pay. Share it from here or from the app on your phone.",
+  "share.cardHint": "The card shows hours and the business, never pay. Share it from here or from the app on your phone.",
   "share.cardLabel": "Your {month}: {hours} hours at {workspace}",
   "share.cardLabelDays": "Your {month} at {workspace}: {hours} hours over {days} days",
   "share.cardSize": "1200 by 630, made to save or send",
@@ -1527,6 +1564,11 @@ export const en = {
   "web.csv.downloaded": "{file} downloaded.",
   "web.csv.monthBody": "The whole month, one row per person and day, with notes.",
   "web.csv.personBody": "One row per day for {name}, with notes.",
+  "web.dayList.changedBy": "Changed by {name}, {time}",
+  "web.dayList.dayOf": "Week {week}, {name}",
+  "web.dayList.logInGrid": "Log it in the week grid",
+  "web.dayList.loggedBy": "Logged by {name}, {time}",
+  "web.dayList.select": "{date}, {hours}. Show the day.",
   "web.emoji.bag": "Shopping bag",
   "web.emoji.bee": "Bee",
   "web.emoji.bicycle": "Bicycle",
@@ -1543,6 +1585,10 @@ export const en = {
   "web.emoji.star": "Star",
   "web.emoji.sun": "Sun",
   "web.emoji.wave": "Wave",
+  "web.employeeWeek.days": "Days",
+  "web.employeeWeek.openDay": "{date}, {hours}. Open it in your month.",
+  "web.employeeWeek.subtitle": "{from} to {to}. The hours {name} logged for you, day by day.",
+  "web.employeeWeek.subtitlePlain": "{from} to {to}. Your hours, day by day.",
   "web.employees.deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
   "web.employees.emptyTitle": "No one here yet",
   "web.employees.invitationExpired": "Invitation expired {date}",
@@ -1582,7 +1628,7 @@ export const en = {
   "web.join.toSignIn": "Go to sign in",
   "web.month.closedBy": "Closed {date} by {name}",
   "web.month.closedToast": "{month} is closed.",
-  "web.month.closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+  "web.month.closedToastBody": "Everyone in the business is told, and the CSV is ready.",
   "web.month.daysWithHours_one": "{count} day with hours",
   "web.month.daysWithHours_other": "{count} days with hours",
   "web.month.editedTimes_one": "edited {count} time",
@@ -1601,7 +1647,7 @@ export const en = {
   "web.newWorkspace.currencyNote": "(only shown if pay is on)",
   "web.newWorkspace.headlineA": "Make it",
   "web.newWorkspace.headlineB": "your place.",
-  "web.newWorkspace.nameRequired": "Give the workspace a name.",
+  "web.newWorkspace.nameRequired": "Give the business a name.",
   "web.notFound.title": "Nothing here",
   "web.notifications.loadMore": "Show older",
   "web.notifications.seeDay": "See the day",
@@ -1641,7 +1687,7 @@ export const en = {
   "web.operator.users.employeeAt": "Employee at {count}",
   "web.operator.users.employerOf": "Employer of {count}",
   "web.operator.users.never": "Never",
-  "web.operator.users.noWorkspace": "No workspace",
+  "web.operator.users.noWorkspace": "No business",
   "web.operator.users.pushNo": "None",
   "web.operator.users.pushYes": "Registered",
   "web.operator.volume.count": "Count",
@@ -1657,8 +1703,8 @@ export const en = {
   "web.overview.nothingLoggedAll": "Every working day so far has hours.",
   "web.overview.projectedLine": "Projected month end {projected}, {lastMonth}",
   "web.profile.appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put.",
-  "web.profile.employerAt_one": "Employer at {count} workspace",
-  "web.profile.employerAt_other": "Employer at {count} workspaces",
+  "web.profile.employerAt_one": "Employer at {count} business",
+  "web.profile.employerAt_other": "Employer at {count} businesses",
   "web.profile.nameRequired": "Your name cannot be empty.",
   "web.settings.dayLengthInvalid": "Enter a day length between 0.25 and 24 hours.",
   "web.settings.noDevice": "No phone is signed in on this account yet.",
@@ -1682,7 +1728,7 @@ export const en = {
   "web.signIn.hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
   "web.signIn.pointPasswords": "Passwords never touch Klokka's database",
   "web.signIn.pointRoles": "Employers and employees sign in here",
-  "web.signIn.pointWorkspaces": "Several workspaces, one login",
+  "web.signIn.pointWorkspaces": "Several businesses, one login",
   "web.week.cellLabel": "{name}, {date}",
   "web.week.discard": "Discard",
   "web.week.emptyBody": "Add an employee first. Invited people can be logged right away.",
@@ -1747,18 +1793,18 @@ export const en = {
   "week.weekTotalPeople": "This week, {people}. Saved entries notify each person once per sitting.",
   "workspace.colour": "Colour",
   "workspace.colourAndEmoji": "Colour and emoji",
-  "workspace.colourAndEmojiHint": "Employees with two employers tell workspaces apart by these.",
+  "workspace.colourAndEmojiHint": "Employees with two employers tell businesses apart by these.",
   "workspace.country": "Country",
-  "workspace.createHint": "One workspace is one business. You can open more later.",
+  "workspace.createHint": "One business to start with. You can add more later.",
   "workspace.createStep": "Step {step} of {total}",
-  "workspace.createTitle": "Create your workspace",
-  "workspace.created": "Workspace created.",
+  "workspace.createTitle": "Create your business",
+  "workspace.created": "Business created.",
   "workspace.currency": "Currency",
   "workspace.currencyHint": "Used for every money figure. Rates are set per person in Employees.",
   "workspace.emoji": "Emoji",
   "workspace.makeItYourPlace": "Make it your place.",
   "workspace.monday": "Monday",
-  "workspace.name": "Workspace name",
+  "workspace.name": "Business name",
   "workspace.nameHint": "The name your employees see in the switcher and in every notification.",
   "workspace.namePlaceholder": "The name of the place",
   "workspace.summary": "{city}, {currency}, week starts {weekStart}",
@@ -1766,7 +1812,9 @@ export const en = {
   "workspace.switcherPreview": "How it looks in the switcher",
   "workspace.timezone": "Time zone",
   "workspace.timezoneAndWeek": "Time zone and week",
+  "workspace.timezoneEurope": "Europe",
   "workspace.timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
+  "workspace.timezoneWorld": "Rest of the world",
   "workspace.weekStart": "Week starts",
   "workspace.weekStartsOn": "Week starts on",
   "workspace.yourName": "Your name",
@@ -1788,7 +1836,6 @@ export type MessageParams = {
   "api.email.digest.workspace": { emoji: string | number; workspace: string | number };
   "api.email.footer": Record<never, never>;
   "api.email.greeting": { name: string | number };
-  "api.push.workspacePrefix": { title: string | number; workspace: string | number };
   "auth.alreadyHaveAccount": Record<never, never>;
   "auth.byContinuing": { privacy: string | number; terms: string | number };
   "auth.continue": Record<never, never>;
@@ -1959,8 +2006,12 @@ export type MessageParams = {
   "flags.openInGrid": Record<never, never>;
   "flags.raised": { when: string | number };
   "flags.reasonLess": Record<never, never>;
+  "flags.reasonLessShort": Record<never, never>;
   "flags.reasonMore": Record<never, never>;
+  "flags.reasonMoreShort": Record<never, never>;
   "flags.reasonNotIn": Record<never, never>;
+  "flags.reasonNotInShort": Record<never, never>;
+  "flags.resolveFlag": Record<never, never>;
   "flags.resolvedDismissed": { hours: string | number };
   "flags.resolvedFixed": { after: string | number; before: string | number };
   "flags.says": { name: string | number };
@@ -2021,6 +2072,9 @@ export type MessageParams = {
   "mobile.common.edit": Record<never, never>;
   "mobile.common.hoursShort": { hours: string | number };
   "mobile.common.thisWeek": Record<never, never>;
+  "mobile.crash.body": Record<never, never>;
+  "mobile.crash.restart": Record<never, never>;
+  "mobile.crash.title": Record<never, never>;
   "mobile.day.editHours": Record<never, never>;
   "mobile.day.noEntry": Record<never, never>;
   "mobile.employees.joined": { when: string | number };
@@ -2062,7 +2116,10 @@ export type MessageParams = {
   "mobile.welcome.taglineB": Record<never, never>;
   "mobile.workspace.colourPick": Record<never, never>;
   "mobile.workspace.emojiPick": Record<never, never>;
+  "mobile.workspace.timezoneChange": { timezone: string | number };
   "mobile.workspace.timezoneDevice": { timezone: string | number };
+  "mobile.workspace.timezoneNoMatch": Record<never, never>;
+  "mobile.workspace.timezoneSearch": Record<never, never>;
   "month.avgPerWorkingDay": Record<never, never>;
   "month.avgPerWorkingDayShort": { hours: string | number };
   "month.bestWeek": Record<never, never>;
@@ -2106,7 +2163,7 @@ export type MessageParams = {
   "nav.backToApp": Record<never, never>;
   "nav.chooseWorkspace": Record<never, never>;
   "nav.createWorkspace": Record<never, never>;
-  "nav.employeeMonth": Record<never, never>;
+  "nav.employeeView": Record<never, never>;
   "nav.employees": Record<never, never>;
   "nav.getAndroidApp": Record<never, never>;
   "nav.health": Record<never, never>;
@@ -2132,37 +2189,41 @@ export type MessageParams = {
   "nav.workspaceNavigation": Record<never, never>;
   "nav.workspaces": Record<never, never>;
   "nav.yourOwnWorkspaces": Record<never, never>;
-  "notifications.channelsHintEmployee": Record<never, never>;
-  "notifications.channelsHintEmployer": Record<never, never>;
   "notifications.employerKindsHint": Record<never, never>;
   "notifications.empty": Record<never, never>;
   "notifications.emptyUnread": Record<never, never>;
-  "notifications.entryFlagged.body": { logged: string | number; name: string | number; suggested: string | number };
+  "notifications.entryFlagged.body": { logged: string | number; suggested: string | number; workspace: string | number };
+  "notifications.entryFlagged.bodyMessage": { message: string | number; workspace: string | number };
   "notifications.entryFlagged.title": { date: string | number; name: string | number };
   "notifications.filter": Record<never, never>;
-  "notifications.flagDismissed.body": Record<never, never>;
-  "notifications.flagDismissed.title": { date: string | number; hours: string | number; name: string | number };
-  "notifications.flagFixed.body": { date: string | number; hours: string | number };
+  "notifications.flagDismissed.body": { date: string | number; hours: string | number; workspace: string | number };
+  "notifications.flagDismissed.title": { name: string | number };
+  "notifications.flagFixed.body": { date: string | number; hours: string | number; workspace: string | number };
   "notifications.flagFixed.title": { name: string | number };
-  "notifications.hoursAdded.body": { hours: string | number; week: string | number };
-  "notifications.hoursAdded.range": { from: string | number; to: string | number };
-  "notifications.hoursAdded.titleForYou": { count: string | number; name: string | number };
-  "notifications.hoursAdded.title": { count: string | number; hours: string | number; name: string | number };
-  "notifications.hoursChanged.body": { after: string | number; before: string | number };
-  "notifications.hoursChanged.note": { note: string | number };
-  "notifications.hoursChanged.title": { date: string | number; name: string | number };
-  "notifications.hoursRemoved.body": { hours: string | number };
-  "notifications.hoursRemoved.title": { date: string | number; name: string | number };
-  "notifications.hoursRemoved.titleMany": { count: string | number; name: string | number };
+  "notifications.hours.addedOne": { date: string | number; name: string | number };
+  "notifications.hours.added": { count: string | number; name: string | number };
+  "notifications.hours.bodyChangedOne": { before: string | number; hours: string | number; workspace: string | number };
+  "notifications.hours.bodyDays": { days: string | number; workspace: string | number };
+  "notifications.hours.bodyOne": { hours: string | number; workspace: string | number };
+  "notifications.hours.bodyWeek": { days: string | number; week: string | number; workspace: string | number };
+  "notifications.hours.changedOne": { date: string | number; name: string | number };
+  "notifications.hours.changed": { count: string | number; name: string | number };
+  "notifications.hours.day": { date: string | number; hours: string | number };
+  "notifications.hours.dayRemoved": { date: string | number };
+  "notifications.hours.note": { note: string | number };
+  "notifications.hours.range": { from: string | number; hours: string | number; to: string | number; workspace: string | number };
+  "notifications.hours.rangeWeek": { from: string | number; hours: string | number; to: string | number; week: string | number; workspace: string | number };
+  "notifications.hours.removed": { count: string | number; name: string | number };
+  "notifications.hours.reverted": { name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
   "notifications.markAllRead": Record<never, never>;
-  "notifications.monthClosed.body": { hours: string | number; money: string | number };
-  "notifications.monthClosed.bodyHoursOnly": { hours: string | number };
-  "notifications.monthClosed.hint": { name: string | number };
-  "notifications.monthClosed.title": { month: string | number };
-  "notifications.monthReopened.body": { name: string | number };
-  "notifications.monthReopened.title": { month: string | number };
+  "notifications.monthClosed.body": { hours: string | number; money: string | number; workspace: string | number };
+  "notifications.monthClosed.bodyHoursOnly": { hours: string | number; workspace: string | number };
+  "notifications.monthClosed.hint": Record<never, never>;
+  "notifications.monthClosed.title": { month: string | number; name: string | number };
+  "notifications.monthReopened.body": { workspace: string | number };
+  "notifications.monthReopened.title": { month: string | number; name: string | number };
   "notifications.subtitleEmployee": Record<never, never>;
   "notifications.subtitleEmployer": { workspace: string | number };
   "notifications.title": Record<never, never>;
@@ -2296,9 +2357,9 @@ export type MessageParams = {
   "profile.hint": Record<never, never>;
   "profile.hoursOnly": Record<never, never>;
   "profile.initial": Record<never, never>;
-  "profile.leavingHint": Record<never, never>;
   "profile.name": Record<never, never>;
   "profile.nameHint": Record<never, never>;
+  "profile.pastHoursHint": Record<never, never>;
   "profile.payShown": Record<never, never>;
   "profile.subtitle": Record<never, never>;
   "profile.subtitleEmployer": Record<never, never>;
@@ -2396,6 +2457,11 @@ export type MessageParams = {
   "web.csv.downloaded": { file: string | number };
   "web.csv.monthBody": Record<never, never>;
   "web.csv.personBody": { name: string | number };
+  "web.dayList.changedBy": { name: string | number; time: string | number };
+  "web.dayList.dayOf": { name: string | number; week: string | number };
+  "web.dayList.logInGrid": Record<never, never>;
+  "web.dayList.loggedBy": { name: string | number; time: string | number };
+  "web.dayList.select": { date: string | number; hours: string | number };
   "web.emoji.bag": Record<never, never>;
   "web.emoji.bee": Record<never, never>;
   "web.emoji.bicycle": Record<never, never>;
@@ -2412,6 +2478,10 @@ export type MessageParams = {
   "web.emoji.star": Record<never, never>;
   "web.emoji.sun": Record<never, never>;
   "web.emoji.wave": Record<never, never>;
+  "web.employeeWeek.days": Record<never, never>;
+  "web.employeeWeek.openDay": { date: string | number; hours: string | number };
+  "web.employeeWeek.subtitle": { from: string | number; name: string | number; to: string | number };
+  "web.employeeWeek.subtitlePlain": { from: string | number; to: string | number };
   "web.employees.deactivatedToast": { name: string | number };
   "web.employees.emptyTitle": Record<never, never>;
   "web.employees.invitationExpired": { date: string | number };
@@ -2627,7 +2697,9 @@ export type MessageParams = {
   "workspace.switcherPreview": Record<never, never>;
   "workspace.timezone": Record<never, never>;
   "workspace.timezoneAndWeek": Record<never, never>;
+  "workspace.timezoneEurope": Record<never, never>;
   "workspace.timezoneHint": Record<never, never>;
+  "workspace.timezoneWorld": Record<never, never>;
   "workspace.weekStart": Record<never, never>;
   "workspace.weekStartsOn": Record<never, never>;
   "workspace.yourName": Record<never, never>;
@@ -2648,9 +2720,9 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "month.daysNewestFirst",
   "month.workingDays",
   "nav.notificationsUnread",
-  "notifications.hoursAdded.titleForYou",
-  "notifications.hoursAdded.title",
-  "notifications.hoursRemoved.titleMany",
+  "notifications.hours.added",
+  "notifications.hours.changed",
+  "notifications.hours.removed",
   "operator.invitations.expireTomorrow",
   "operator.invitations.resent",
   "overview.nothingLoggedDays",

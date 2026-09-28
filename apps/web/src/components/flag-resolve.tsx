@@ -48,7 +48,19 @@ export function useResolveFlag(ws: WorkspaceView, flag: Flag) {
   });
 }
 
-export function FlagActions({ ws, flag, compact }: { ws: WorkspaceView; flag: Flag; compact?: boolean }) {
+// `inPanel`: the day panel of the Employee view (CHQ-145) already shows the day, so no link, and dismissing
+// reads as what it does: keep the logged hours.
+export function FlagActions({
+  ws,
+  flag,
+  compact,
+  inPanel,
+}: {
+  ws: WorkspaceView;
+  flag: Flag;
+  compact?: boolean;
+  inPanel?: boolean;
+}) {
   const t = useT();
   const locale = useLocale();
   const resolve = useResolveFlag(ws, flag);
@@ -77,7 +89,7 @@ export function FlagActions({ ws, flag, compact }: { ws: WorkspaceView; flag: Fl
       >
         {t('flags.setTo', { hours: formatHours(target, locale) })}
       </button>
-      {!compact ? (
+      {inPanel ? null : !compact ? (
         <Link className="btn btn-ghost btn-sm" href={`/w/${ws.slug}/week?d=${date}`}>
           {t('flags.openInGrid')}
         </Link>
@@ -95,7 +107,9 @@ export function FlagActions({ ws, flag, compact }: { ws: WorkspaceView; flag: Fl
         disabled={resolve.isPending}
         onClick={() => resolve.mutate(null)}
       >
-        {t('common.dismiss')}
+        {inPanel
+          ? t('flags.keepHours', { hours: formatHours(flag.loggedHours, locale) })
+          : t('common.dismiss')}
       </button>
       <Dialog
         open={fixing}

@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { formatDate, formatHours, formatTime } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
+import { formatDate, formatHours, formatTime, parseHours } from '@klokka/core';
 import { useEntryHistory, useFlag, useResolveFlag } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
@@ -17,10 +17,11 @@ import {
   Numeral,
   Pill,
   Screen,
+  TextField,
   haptic,
   useToast,
 } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { HistoryList } from '@/features/day/HistoryList';
 
 const styles = (t: Theme) =>
@@ -31,33 +32,39 @@ const styles = (t: Theme) =>
     actions: { gap: t.space[2] },
   });
 
-// Resolve a flag (CHQ-135, employer): the two numbers face each other; the fix is one tap and
-// pre-filled with what the employee says, keeping the entry dismisses the flag. Both notify.
-function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
+// Resolve a flag (CHQ-135, employer): the two numbers face each other; the fix is an editable hours field
+// pre-filled with what the employee says, or with the logged hours when they suggested none (CHQ-145, like
+// the web: 0 h is only ever written when the employer typed it). Keeping the entry dismisses the flag.
+// Both notify.
+function ResolveFlagScreenInner({ flagId, workspace }: { flagId: string } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const toast = useToast();
-  const workspace = useWorkspaceOrThrow();
   const flagQuery = useFlag(workspace.workspaceId, flagId);
   const flag = flagQuery.data ?? null;
   const history = useEntryHistory(workspace.workspaceId, flag?.entryId);
   const resolve = useResolveFlag(workspace.workspaceId);
+  const [typed, setTyped] = useState<string | null>(null);
+  const proposed = flag ? (flag.suggestedHours ?? flag.loggedHours) : null;
+  const hoursText = typed ?? (proposed == null ? '' : formatHours(proposed, locale, { unit: false }));
+  const fixHours = parseHours(hoursText);
 
   const act = async (action: 'FIX' | 'DISMISS') => {
     if (!flag) return;
+    if (action === 'FIX' && fixHours === null) return;
     try {
       await resolve.mutateAsync({
         flagId,
-        resolve: action === 'FIX' ? { action, hours: flag.suggestedHours ?? 0 } : { action },
+        resolve: action === 'FIX' && fixHours !== null ? { action, hours: fixHours } : { action: 'DISMISS' },
       });
       void haptic('success');
       toast.show(
-        action === 'FIX'
+        action === 'FIX' && fixHours !== null
           ? t('flags.resolvedFixed', {
               before: formatHours(flag.loggedHours, locale),
-              after: formatHours(flag.suggestedHours ?? 0, locale),
+              after: formatHours(fixHours, locale),
             })
           : t('flags.resolvedDismissed', { hours: formatHours(flag.loggedHours, locale) }),
       );
@@ -105,16 +112,18 @@ function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
             variant="h1"
           />
         </Card>
-        <Card style={s.tile}>
-          <AppText variant="small" tone="muted">
-            {t('flags.says', { name: first })}
-          </AppText>
-          <Numeral
-            value={formatHours(flag.suggestedHours ?? 0, locale, { unit: false })}
-            unit={t('common.hourUnit')}
-            variant="h1"
-          />
-        </Card>
+        {flag.suggestedHours != null ? (
+          <Card style={s.tile}>
+            <AppText variant="small" tone="muted">
+              {t('flags.says', { name: first })}
+            </AppText>
+            <Numeral
+              value={formatHours(flag.suggestedHours, locale, { unit: false })}
+              unit={t('common.hourUnit')}
+              variant="h1"
+            />
+          </Card>
+        ) : null}
       </View>
       <Card tint>
         <View style={s.quote}>
@@ -135,10 +144,24 @@ function ResolveFlagScreenInner({ flagId }: { flagId: string }) {
       </View>
       {open ? (
         <View style={s.actions}>
+          <TextField
+            label={t('web.flags.hoursField')}
+            value={hoursText}
+            onChangeText={setTyped}
+            keyboardType="decimal-pad"
+            suffix={t('common.hourUnit')}
+            error={fixHours === null ? t('entry.invalidHours') : undefined}
+            testID="flag-hours"
+          />
           <Button
-            label={t('flags.changeTo', { hours: formatHours(flag.suggestedHours ?? 0, locale) })}
+            label={
+              fixHours === null
+                ? t('flags.changeTo', { hours: hoursText })
+                : t('flags.changeTo', { hours: formatHours(fixHours, locale) })
+            }
             icon="check"
             onPress={() => void act('FIX')}
+            disabled={fixHours === null}
             loading={resolve.isPending}
             testID="flag-fix"
           />

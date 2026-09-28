@@ -49,7 +49,7 @@
     "week": "Vecka",
     "employees": "Anställda",
     "people": "Personer",
-    "employeeMonth": "Anställds månad",
+    "employeeView": "Anställd",
     "month": "Månad",
     "myMonth": "Min månad",
     "insights": "Insikter",
@@ -59,20 +59,20 @@
     "settings": "Inställningar",
     "profile": "Profil",
     "home": "Hem",
-    "workspaces": "Arbetsplatser",
+    "workspaces": "Företag",
     "users": "Användare",
     "invitations": "Inbjudningar",
     "volume": "Volym",
     "health": "Status",
     "operator": "Operatör",
     "backToApp": "Tillbaka till appen",
-    "yourOwnWorkspaces": "Dina egna arbetsplatser",
-    "createWorkspace": "Skapa arbetsplats",
-    "switchWorkspace": "Byt arbetsplats",
-    "chooseWorkspace": "Välj arbetsplats",
+    "yourOwnWorkspaces": "Dina egna företag",
+    "createWorkspace": "Skapa ett företag",
+    "switchWorkspace": "Byt företag",
+    "chooseWorkspace": "Välj företag",
     "getAndroidApp": "Hämta Android-appen",
     "sections": "Avsnitt",
-    "workspaceNavigation": "Navigering för arbetsplatsen",
+    "workspaceNavigation": "Navigering för företaget",
     "klokkaHome": "Klokka, hem"
   },
   "role": {
@@ -84,8 +84,8 @@
     "employeeLoggedBy": "Anställd, loggas av {name}",
     "logsYourHours": "{name} loggar dina timmar",
     "employeeLogsYourHours": "Anställd, {name} loggar dina timmar",
-    "employeeAtWorkspaces_one": "Anställd på {count} arbetsplats",
-    "employeeAtWorkspaces_other": "Anställd på {count} arbetsplatser",
+    "employeeAtWorkspaces_one": "Anställd på {count} företag",
+    "employeeAtWorkspaces_other": "Anställd på {count} företag",
     "youJoinAsEmployee": "Du går med som anställd"
   },
   "status": {
@@ -104,16 +104,18 @@
     "openForEdits": "Öppen för ändringar"
   },
   "workspace": {
-    "name": "Arbetsplatsens namn",
+    "name": "Företagets namn",
     "namePlaceholder": "Namnet på stället",
     "nameHint": "Namnet dina anställda ser i väljaren och i varje notis.",
     "colourAndEmoji": "Färg och emoji",
-    "colourAndEmojiHint": "Anställda med två arbetsgivare skiljer arbetsplatserna åt med dessa.",
+    "colourAndEmojiHint": "Anställda med två arbetsgivare skiljer företagen åt med dessa.",
     "colour": "Färg",
     "emoji": "Emoji",
     "switcherPreview": "Så här ser det ut i väljaren",
     "country": "Land",
     "timezone": "Tidszon",
+    "timezoneEurope": "Europa",
+    "timezoneWorld": "Resten av världen",
     "timezoneAndWeek": "Tidszon och vecka",
     "timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
     "weekStartsOn": "Veckan börjar på",
@@ -123,19 +125,19 @@
     "currency": "Valuta",
     "currencyHint": "Används för varje pengasiffra. Timlön sätts per person under Anställda.",
     "summary": "{city}, {currency}, veckan börjar {weekStart}",
-    "createTitle": "Skapa din arbetsplats",
-    "createHint": "En arbetsplats är ett företag. Du kan öppna fler senare.",
+    "createTitle": "Skapa ditt företag",
+    "createHint": "Ett företag att börja med. Du kan lägga till fler senare.",
     "yourName": "Ditt namn",
     "yourNameHint": "Anställda ser det här namnet i inbjudan och i varje notis.",
     "yourNameRequired": "Ange ditt namn.",
     "createStep": "Steg {step} av {total}",
     "makeItYourPlace": "Gör det till ditt ställe.",
-    "created": "Arbetsplatsen är skapad."
+    "created": "Företaget är skapat."
   },
   "settings": {
     "title": "Inställningar",
-    "hint": "Ändringar sparas medan du gör dem. Alla på arbetsplatsen ser det nya namnet, färgen och emojin direkt.",
-    "workspace": "Arbetsplats",
+    "hint": "Ändringar sparas medan du gör dem. Alla i företaget ser det nya namnet, färgen och emojin direkt.",
+    "workspace": "Företag",
     "hours": "Timmar",
     "time": "Tid",
     "rounding": "Avrundning",
@@ -179,7 +181,7 @@
   },
   "profile": {
     "title": "Profil",
-    "hint": "Ett konto för varje arbetsplats du tillhör. Ändringar sparas medan du gör dem.",
+    "hint": "Ett konto för varje företag du tillhör. Ändringar sparas medan du gör dem.",
     "subtitle": "Avatar, språk, notiser",
     "subtitleEmployer": "Avatar, språk, lösenord",
     "avatar": "Avatar",
@@ -192,13 +194,13 @@
     "nameHint": "Så syns du för dina arbetsgivare.",
     "email": "E-post",
     "emailHint": "Din inloggning. Ändra den på kontosidan.",
-    "workspaces": "Arbetsplatser",
+    "workspaces": "Företag",
     "employeeOf": "Anställd. {name} loggar dina timmar.",
     "employeeOfWithHours": "Anställd, {name}. {hours} den här månaden",
     "payShown": "Lön visas.",
     "hoursOnly": "Bara timmar.",
     "thisMonth": "den här månaden",
-    "leavingHint": "Att lämna en arbetsplats gör arbetsgivaren, som avaktiverar dig. Dina tidigare timmar syns fortfarande för er båda.",
+    "pastHoursHint": "Dina tidigare timmar syns fortfarande för er båda.",
     "editProfile": "Redigera profil"
   },
   "overview": {
@@ -346,7 +348,7 @@
     "lockMonth": "Lås månaden",
     "unlockMonth": "Lås upp månaden",
     "closeMonthTitle": "Stänga {month}?",
-    "closeMonthHint": "{hours} fördelat på {people}. Ingen kan ändra {month} förrän du låser upp den. Alla på arbetsplatsen får veta det, och CSV-filen är klar för den som sköter lönen.",
+    "closeMonthHint": "{hours} fördelat på {people}. Ingen kan ändra {month} förrän du låser upp den. Alla i företaget får veta det, och CSV-filen är klar för den som sköter lönen.",
     "closeMonth": "Stäng {month}",
     "closed": "{month}, stängd",
     "shareMyMonth": "Dela min månad",
@@ -393,7 +395,7 @@
     "ratesHiddenHint": "Timlöner är dolda medan Visa lön är av. Slå på det under Inställningar.",
     "ratesHiddenAddHint": "Timlöner är dolda medan Visa lön är av. Du kan lägga till en senare under Inställningar.",
     "ratesPrivateHint": "Timlöner visas bara för dig och för personen de gäller.",
-    "ratesShownHint": "Timlöner visas eftersom lön är på för den här arbetsplatsen. Anställda ser sin egen timlön, aldrig varandras.",
+    "ratesShownHint": "Timlöner visas eftersom lön är på för det här företaget. Anställda ser sin egen timlön, aldrig varandras.",
     "sendInvitation": "Skicka inbjudan",
     "invitationSent": "Inbjudan skickad {when}.",
     "untilAccepts": "Tills {name} accepterar visas hen som Inbjuden. Du kan logga hens timmar direkt.",
@@ -410,7 +412,7 @@
     "addedYou": "{name} har lagt till dig som anställd. Varje timme hen loggar för dig dyker upp här, dag för dag.",
     "invitedYouTo": "{name} bjöd in dig till {workspace}.",
     "logsYourHoursHint": "{workspace} loggar dina timmar i Klokka. Välj ett lösenord så är varenda en av dem din att se, dag för dag, månad för månad.",
-    "workspace": "Arbetsplats",
+    "workspace": "Företag",
     "employer": "Arbetsgivare",
     "yourEmail": "Din e-post",
     "emailFromInvitation": "E-post (från inbjudan)",
@@ -426,7 +428,7 @@
     "alreadyHaveAccount": "Har du redan ett Klokka-konto?",
     "signInToAccept": "Logga in för att acceptera",
     "openLinkFirst": "Har du fått en inbjudan? Öppna länken i mejlet först, logga sedan in här.",
-    "employersCreateOnWeb": "Arbetsgivare skapar sin arbetsplats på webben.",
+    "employersCreateOnWeb": "Arbetsgivare skapar sitt företag på webben.",
     "expired": "Inbjudan har gått ut. Be {name} skicka en ny.",
     "wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
     "accepted": "Du gick med i {workspace}.",
@@ -443,6 +445,9 @@
     "reasonMore": "Jag jobbade mer",
     "reasonLess": "Jag jobbade mindre",
     "reasonNotIn": "Jag var inte där",
+    "reasonMoreShort": "Jobbade mer än loggat",
+    "reasonLessShort": "Jobbade mindre än loggat",
+    "reasonNotInShort": "Var inte där den dagen",
     "hoursYouWorked": "Timmar du jobbade",
     "entrySays": "h, posten säger {hours}",
     "message": "Meddelande",
@@ -456,6 +461,7 @@
     "setTo": "Sätt till {hours}",
     "changeTo": "Ändra till {hours}",
     "keepHours": "Behåll {hours}",
+    "resolveFlag": "Hantera flaggan",
     "toldEitherWay": "{name} får veta det oavsett.",
     "openInGrid": "Öppna i rutnätet",
     "fixTitle": "Sätta {date} till {hours}?",
@@ -475,55 +481,55 @@
     "subtitleEmployee": "Varje gång dina timmar läggs till, ändras eller tas bort, en gång per tillfälle. Plus flaggor, stängda månader och inbjudningar.",
     "filter": "Filter",
     "markAllRead": "Markera alla som lästa",
-    "channelsHintEmployer": "I appen och som push kommer samma saker. E-post används bara för inbjudningar och den valfria sammanfattningen.",
-    "channelsHintEmployee": "Samma saker kommer som push i din telefon. E-post bara för veckosammanfattningen, om du slår på den.",
     "employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
     "empty": "Inget än. Du får veta det här i samma stund som något ändras.",
     "emptyUnread": "Allt är läst.",
-    "hoursAdded": {
-      "title_one": "{name} lade till {count} dag, {hours} h",
-      "title_other": "{name} lade till {count} dagar, {hours} h",
-      "titleForYou_one": "{name} lade till {count} dag för dig.",
-      "titleForYou_other": "{name} lade till {count} dagar för dig.",
-      "body": "{hours} i vecka {week}.",
-      "range": "{from} till {to}"
-    },
-    "hoursChanged": {
-      "title": "{name} ändrade {date}.",
-      "body": "{before} är nu {after}.",
+    "hours": {
+      "addedOne": "{name} la till {date}",
+      "changedOne": "{name} ändrade {date}",
+      "added_one": "{name} la till {count} dag",
+      "added_other": "{name} la till {count} dagar",
+      "changed_one": "{name} ändrade {count} dag",
+      "changed_other": "{name} ändrade {count} dagar",
+      "removed_one": "{name} tog bort {count} dag",
+      "removed_other": "{name} tog bort {count} dagar",
+      "reverted": "{name} ändrade dina timmar och ändrade tillbaka",
+      "bodyOne": "{workspace}: {hours}",
+      "bodyChangedOne": "{workspace}: {hours}, var {before}",
+      "bodyWeek": "{workspace}, vecka {week}: {days}",
+      "bodyDays": "{workspace}: {days}",
+      "rangeWeek": "{workspace}, vecka {week}: {from} till {to}, {hours}",
+      "range": "{workspace}: {from} till {to}, {hours}",
+      "day": "{date} {hours}",
+      "dayRemoved": "{date} borttagen",
       "note": "Anteckning: \"{note}\""
     },
-    "hoursRemoved": {
-      "title": "{name} tog bort {date}.",
-      "titleMany_one": "{name} tog bort {count} dag",
-      "titleMany_other": "{name} tog bort {count} dagar",
-      "body": "{hours} togs bort från din månad."
-    },
     "inviteAccepted": {
-      "title": "{name} accepterade din inbjudan.",
-      "body": "{name} är nu anställd på {workspace}."
+      "title": "{name} accepterade din inbjudan",
+      "body": "{workspace}: {name} är nu anställd"
     },
     "entryFlagged": {
-      "title": "{name} flaggade {date}.",
-      "body": "Loggat {logged}, {name} säger {suggested}"
+      "title": "{name} flaggade {date}",
+      "body": "{workspace}: loggat {logged}, säger {suggested}",
+      "bodyMessage": "{workspace}: \"{message}\""
     },
     "flagFixed": {
-      "title": "{name} rättade din flagga.",
-      "body": "{date} är nu {hours}."
+      "title": "{name} rättade din flagga",
+      "body": "{workspace}: {date} är nu {hours}"
     },
     "flagDismissed": {
-      "title": "{name} behöll {date} på {hours}.",
-      "body": "Din flagga är granskad och posten står kvar som loggad."
+      "title": "{name} granskade din flagga",
+      "body": "{workspace}: {date} står kvar på {hours}"
     },
     "monthClosed": {
-      "title": "{month} är stängd.",
-      "body": "{hours}, {money}.",
-      "bodyHoursOnly": "{hours}.",
-      "hint": "{name} låste månaden. Dela ditt kort från Profil."
+      "title": "{name} stängde {month}",
+      "body": "{workspace}: {hours}, {money}",
+      "bodyHoursOnly": "{workspace}: {hours}",
+      "hint": "Inget ändras förrän den öppnas igen. Dela ditt kort från Profil."
     },
     "monthReopened": {
-      "title": "{month} har öppnats igen.",
-      "body": "{name} låste upp månaden. Poster kan ändras igen."
+      "title": "{name} öppnade {month} igen",
+      "body": "{workspace}: poster kan ändras igen"
     }
   },
   "email": {
@@ -557,7 +563,7 @@
     "aDay": "om dagen",
     "bestWeek": "bästa veckan",
     "hoursOnlyNoPay": "Bara timmar, ingen lön",
-    "cardHint": "Kortet visar timmar och arbetsplatsen, aldrig lön. Dela det härifrån eller från appen i din telefon.",
+    "cardHint": "Kortet visar timmar och företaget, aldrig lön. Dela det härifrån eller från appen i din telefon.",
     "includeBestWeek": "Ta med bästa veckan och snittet",
     "shared": "Delat.",
     "saved": "Sparat i dina bilder."
@@ -574,9 +580,9 @@
     "forgotPassword": "Glömt lösenordet?",
     "continue": "Fortsätt",
     "newHere": "Ny här?",
-    "createWorkspace": "Skapa en arbetsplats",
+    "createWorkspace": "Skapa ett företag",
     "createAccount": "Skapa ditt konto",
-    "createAccountHint": "Det här är din personliga inloggning. Ditt företag får en egen arbetsplats i nästa steg.",
+    "createAccountHint": "Det här är din personliga inloggning. Du lägger till ditt företag i nästa steg.",
     "yourName": "Ditt namn",
     "createAccountButton": "Skapa konto",
     "terms": "villkoren",
@@ -584,7 +590,7 @@
     "byContinuing": "Genom att fortsätta godkänner du {terms} och {privacy}.",
     "alreadyHaveAccount": "Har du redan ett konto?",
     "welcomeBody": "Din arbetsgivare loggar timmarna. Du ser varenda en av dem, i samma stund som de ändras.",
-    "oneAccount": "Ett konto för alla. Om du driver stället eller jobbar där avgörs av arbetsplatsen, inte av var du loggar in.",
+    "oneAccount": "Ett konto för alla. Om du driver stället eller jobbar där avgörs av företaget, inte av var du loggar in.",
     "freeAndOpenSource": "Gratis och öppen källkod. MIT-licens.",
     "signedOut": "Du är utloggad."
   },
@@ -592,21 +598,21 @@
     "title": "Operatör",
     "aggregatesOnly": "Bara aggregat. Konsolen visar aldrig en persons timmar, anteckningar eller timlön.",
     "workspaces": {
-      "title": "Arbetsplatser",
-      "subtitle": "{count} arbetsplatser på den hostade instansen, en per företag. Bara antal och datum.",
+      "title": "Företag",
+      "subtitle": "{count} företag på den hostade instansen. Bara antal och datum.",
       "newThisMonth": "{delta} i {month}",
       "members": "Medlemmar",
       "membersBreakdown": "{active} aktiva, {invited} inbjudna, {deactivated} avaktiverade",
       "hoursLoggedIn": "Loggade timmar i {month}",
-      "acrossAll": "Alla arbetsplatser sammanlagt, bara aggregat",
+      "acrossAll": "Alla företag sammanlagt, bara aggregat",
       "activeLast7": "Aktiva de senaste 7 dagarna",
-      "activeLast7Hint": "Arbetsplatser med minst en sparad post",
-      "search": "Sök arbetsplatser",
+      "activeLast7Hint": "Företag med minst en sparad post",
+      "search": "Sök företag",
       "searchPlaceholder": "Sök på namn eller slug",
       "pay": "Lön",
       "payOn": "Lön på",
       "payOff": "Lön av",
-      "workspace": "Arbetsplats",
+      "workspace": "Företag",
       "invited": "Inbjudna",
       "active": "Aktiva",
       "created": "Skapad",
@@ -621,7 +627,7 @@
       "employers": "Arbetsgivare",
       "employees": "Anställda",
       "person": "Person",
-      "workspaces": "Arbetsplatser",
+      "workspaces": "Företag",
       "language": "Språk",
       "push": "Push",
       "pushHint": "Push visar om en enhetstoken är registrerad, aldrig själva token.",
@@ -697,11 +703,11 @@
   "errors": {
     "VALIDATION": "Något i formuläret stämmer inte. Kontrollera de markerade fälten.",
     "UNAUTHENTICATED": "Din session har gått ut. Logga in igen.",
-    "FORBIDDEN": "Det kan du inte göra på den här arbetsplatsen.",
+    "FORBIDDEN": "Det kan du inte göra i det här företaget.",
     "NOT_FOUND": "Det finns inte längre.",
     "CONFLICT": "Någon ändrade det här samtidigt. Ladda om och försök igen.",
     "MONTH_LOCKED": "Den här månaden är stängd. Lås upp den först.",
-    "MEMBER_NOT_ACTIVE": "Den här personen är inte aktiv på arbetsplatsen.",
+    "MEMBER_NOT_ACTIVE": "Den här personen är inte aktiv i företaget.",
     "INVITATION_EXPIRED": "Inbjudan har gått ut.",
     "INVITATION_EMAIL_MISMATCH": "Inbjudan skickades till en annan e-postadress.",
     "FLAG_ALREADY_OPEN": "Den här posten har redan en öppen flagga.",
@@ -718,13 +724,13 @@
       "signInFailed": "Inloggningen gick inte igenom. Försök igen."
     },
     "noWorkspaces": {
-      "title": "Ingen arbetsplats än",
-      "body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här."
+      "title": "Inget företag än",
+      "body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa det här."
     },
     "chooseWorkspace": {
-      "hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
-      "hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
-      "rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här."
+      "hint_one": "Du tillhör {count} företag. Byt när som helst från Profil.",
+      "hint_other": "Du tillhör {count} företag. Byt när som helst från Profil.",
+      "rolesHint": "Roller gäller per företag. En arbetsgivare som också jobbar åt någon ser båda här."
     },
     "employees": {
       "joined": "Började {when}"
@@ -753,7 +759,7 @@
     },
     "settings": {
       "account": "Konto",
-      "editWorkspace": "Ändra arbetsplats",
+      "editWorkspace": "Ändra företaget",
       "saved": "Sparat."
     },
     "push": {
@@ -763,7 +769,7 @@
       "enable": "Slå på notiser",
       "channelHours": "Timmar",
       "channelFlags": "Flaggor",
-      "channelWorkspace": "Arbetsplats"
+      "channelWorkspace": "Företag"
     },
     "flags": {
       "sent": "Flaggan är skickad. {name} har fått en notis.",
@@ -780,7 +786,10 @@
     "workspace": {
       "timezoneDevice": "Din telefon säger {timezone}.",
       "emojiPick": "Välj en emoji",
-      "colourPick": "Välj en färg"
+      "colourPick": "Välj en färg",
+      "timezoneSearch": "Sök, till exempel Stockholm",
+      "timezoneNoMatch": "Ingen tidszon matchar det.",
+      "timezoneChange": "Byt tidszon, nu {timezone}"
     },
     "share": {
       "preparing": "Förbereder kortet"
@@ -798,6 +807,11 @@
     "invitation": {
       "loading": "Kontrollerar inbjudan",
       "notFound": "Länken till inbjudan är inte giltig. Be din arbetsgivare skicka en ny."
+    },
+    "crash": {
+      "title": "Klokka fick starta om",
+      "body": "Något på den här skärmen gick fel. Den sparade kopian på telefonen rensades; dina timmar finns kvar på servern.",
+      "restart": "Börja om"
     }
   },
   "api": {
@@ -817,9 +831,6 @@
       "note": "Anteckning",
       "rate": "Timlön",
       "amount": "Belopp"
-    },
-    "push": {
-      "workspacePrefix": "{workspace}: {title}"
     }
   },
   "web": {
@@ -831,7 +842,7 @@
       "headlineA": "En klocka.",
       "headlineB": "Båda sidor.",
       "pointRoles": "Arbetsgivare och anställda loggar in här",
-      "pointWorkspaces": "Flera arbetsplatser, en inloggning",
+      "pointWorkspaces": "Flera företag, en inloggning",
       "pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
       "hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
       "backToStart": "Tillbaka till klokka"
@@ -846,7 +857,7 @@
       "headlineA": "Gör det till",
       "headlineB": "ditt ställe.",
       "currencyNote": "(visas bara om lön är på)",
-      "nameRequired": "Ge arbetsplatsen ett namn."
+      "nameRequired": "Ge företaget ett namn."
     },
     "colour": {
       "PRIMARY": "Magenta",
@@ -930,7 +941,7 @@
     },
     "month": {
       "closedToast": "{month} är stängd.",
-      "closedToastBody": "Alla på arbetsplatsen får veta det, och CSV-filen är klar.",
+      "closedToastBody": "Alla i företaget får veta det, och CSV-filen är klar.",
       "unlockedToast": "{month} är öppen igen.",
       "unlockedToastBody": "Poster kan ändras igen. Stäng den när du är klar.",
       "saveFirst": "Spara eller släng ändringarna innan du stänger månaden.",
@@ -966,7 +977,7 @@
       "users": {
         "employerOf": "Arbetsgivare för {count}",
         "employeeAt": "Anställd på {count}",
-        "noWorkspace": "Ingen arbetsplats",
+        "noWorkspace": "Inget företag",
         "pushYes": "Registrerad",
         "pushNo": "Ingen",
         "created": "Skapad",
@@ -1035,8 +1046,8 @@
       "payDemoLabel": "{name}, en hel dag"
     },
     "profile": {
-      "employerAt_one": "Arbetsgivare på {count} arbetsplats",
-      "employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+      "employerAt_one": "Arbetsgivare på {count} företag",
+      "employerAt_other": "Arbetsgivare på {count} företag",
       "nameRequired": "Namnet kan inte vara tomt.",
       "appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast."
     },
@@ -1058,6 +1069,19 @@
       "bestWeekValue": "bästa veckan {hours}",
       "daysValue_one": "{count} dag",
       "daysValue_other": "{count} dagar"
+    },
+    "employeeWeek": {
+      "subtitle": "{from} till {to}. Timmarna {name} har loggat åt dig, dag för dag.",
+      "subtitlePlain": "{from} till {to}. Dina timmar, dag för dag.",
+      "openDay": "{date}, {hours}. Öppna den i din månad.",
+      "days": "Dagar"
+    },
+    "dayList": {
+      "loggedBy": "Loggad av {name}, {time}",
+      "changedBy": "Ändrad av {name}, {time}",
+      "select": "{date}, {hours}. Visa dagen.",
+      "dayOf": "Vecka {week}, {name}",
+      "logInGrid": "Logga i veckorutnätet"
     }
   }
 }

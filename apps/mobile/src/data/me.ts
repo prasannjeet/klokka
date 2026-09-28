@@ -10,7 +10,9 @@ export function useMe() {
   const api = useApi();
   const setTheme = useAppStore((s) => s.setThemePreference);
   const setLocale = useAppStore((s) => s.setLocalePreference);
-  const query = useQuery({ queryKey: keys.me, queryFn: () => api.me.getMe() });
+  // Polled while the app is in the foreground (TanStack pauses the interval in the background), so the
+  // unread badge and the notification centre catch up without a push (CHQ-145), like the web.
+  const query = useQuery({ queryKey: keys.me, queryFn: () => api.me.getMe(), refetchInterval: 60_000 });
   // Mirror the server-side preferences into the local store so the next cold start is right at once.
   useEffect(() => {
     const prefs = query.data?.preferences;
@@ -46,14 +48,6 @@ export function useActiveWorkspace(): {
       setActive(null);
   }, [me, setActive, storedId, workspace]);
   return { workspace, me, isLoading };
-}
-
-// The active workspace is required on every workspace screen; the router guarantees it by
-// redirecting to the chooser first, so a missing one here is a programming error.
-export function useWorkspaceOrThrow(): MyWorkspace {
-  const { workspace } = useActiveWorkspace();
-  if (!workspace) throw new Error('no active workspace');
-  return workspace;
 }
 
 export function useSwitchWorkspace() {

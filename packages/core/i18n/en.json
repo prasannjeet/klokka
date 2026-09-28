@@ -49,7 +49,7 @@
     "week": "Week",
     "employees": "Employees",
     "people": "People",
-    "employeeMonth": "Employee month",
+    "employeeView": "Employee view",
     "month": "Month",
     "myMonth": "My month",
     "insights": "Insights",
@@ -59,20 +59,20 @@
     "settings": "Settings",
     "profile": "Profile",
     "home": "Home",
-    "workspaces": "Workspaces",
+    "workspaces": "Businesses",
     "users": "Users",
     "invitations": "Invitations",
     "volume": "Volume",
     "health": "Health",
     "operator": "Operator",
     "backToApp": "Back to the app",
-    "yourOwnWorkspaces": "Your own workspaces",
-    "createWorkspace": "Create workspace",
-    "switchWorkspace": "Switch workspace",
-    "chooseWorkspace": "Choose a workspace",
+    "yourOwnWorkspaces": "Your own businesses",
+    "createWorkspace": "Create a business",
+    "switchWorkspace": "Switch business",
+    "chooseWorkspace": "Choose a business",
     "getAndroidApp": "Get the Android app",
     "sections": "Sections",
-    "workspaceNavigation": "Workspace navigation",
+    "workspaceNavigation": "Business navigation",
     "klokkaHome": "Klokka, home"
   },
   "role": {
@@ -84,8 +84,8 @@
     "employeeLoggedBy": "Employee, logged by {name}",
     "logsYourHours": "{name} logs your hours",
     "employeeLogsYourHours": "Employee, {name} logs your hours",
-    "employeeAtWorkspaces_one": "Employee at {count} workspace",
-    "employeeAtWorkspaces_other": "Employee at {count} workspaces",
+    "employeeAtWorkspaces_one": "Employee at {count} business",
+    "employeeAtWorkspaces_other": "Employee at {count} businesses",
     "youJoinAsEmployee": "You join as employee"
   },
   "status": {
@@ -104,16 +104,18 @@
     "openForEdits": "Open for edits"
   },
   "workspace": {
-    "name": "Workspace name",
+    "name": "Business name",
     "namePlaceholder": "The name of the place",
     "nameHint": "The name your employees see in the switcher and in every notification.",
     "colourAndEmoji": "Colour and emoji",
-    "colourAndEmojiHint": "Employees with two employers tell workspaces apart by these.",
+    "colourAndEmojiHint": "Employees with two employers tell businesses apart by these.",
     "colour": "Colour",
     "emoji": "Emoji",
     "switcherPreview": "How it looks in the switcher",
     "country": "Country",
     "timezone": "Time zone",
+    "timezoneEurope": "Europe",
+    "timezoneWorld": "Rest of the world",
     "timezoneAndWeek": "Time zone and week",
     "timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
     "weekStartsOn": "Week starts on",
@@ -123,19 +125,19 @@
     "currency": "Currency",
     "currencyHint": "Used for every money figure. Rates are set per person in Employees.",
     "summary": "{city}, {currency}, week starts {weekStart}",
-    "createTitle": "Create your workspace",
-    "createHint": "One workspace is one business. You can open more later.",
+    "createTitle": "Create your business",
+    "createHint": "One business to start with. You can add more later.",
     "yourName": "Your name",
     "yourNameHint": "Employees see this name on the invitation and on every notification.",
     "yourNameRequired": "Enter your name.",
     "createStep": "Step {step} of {total}",
     "makeItYourPlace": "Make it your place.",
-    "created": "Workspace created."
+    "created": "Business created."
   },
   "settings": {
     "title": "Settings",
-    "hint": "Changes save as you make them. Everyone in the workspace sees the new name, colour and emoji at once.",
-    "workspace": "Workspace",
+    "hint": "Changes save as you make them. Everyone in the business sees the new name, colour and emoji at once.",
+    "workspace": "Business",
     "hours": "Hours",
     "time": "Time",
     "rounding": "Rounding",
@@ -179,7 +181,7 @@
   },
   "profile": {
     "title": "Profile",
-    "hint": "One account for every workspace you belong to. Changes save as you make them.",
+    "hint": "One account for every business you belong to. Changes save as you make them.",
     "subtitle": "Avatar, language, notifications",
     "subtitleEmployer": "Avatar, language, password",
     "avatar": "Avatar",
@@ -192,13 +194,13 @@
     "nameHint": "How you appear to your employers.",
     "email": "Email",
     "emailHint": "Your sign-in. Change it from the account page.",
-    "workspaces": "Workspaces",
+    "workspaces": "Businesses",
     "employeeOf": "Employee. {name} logs your hours.",
     "employeeOfWithHours": "Employee, {name}. {hours} this month",
     "payShown": "Pay shown.",
     "hoursOnly": "Hours only.",
     "thisMonth": "this month",
-    "leavingHint": "Leaving a workspace is done by the employer, who deactivates you. Your past hours stay visible to both of you.",
+    "pastHoursHint": "Your past hours stay visible to both of you.",
     "editProfile": "Edit profile"
   },
   "overview": {
@@ -346,7 +348,7 @@
     "lockMonth": "Lock month",
     "unlockMonth": "Unlock month",
     "closeMonthTitle": "Close {month}?",
-    "closeMonthHint": "{hours} across {people}. Nobody can change {month} until you unlock it. Everyone in the workspace is told, and the CSV is ready for whoever runs the pay.",
+    "closeMonthHint": "{hours} across {people}. Nobody can change {month} until you unlock it. Everyone in the business is told, and the CSV is ready for whoever runs the pay.",
     "closeMonth": "Close {month}",
     "closed": "{month}, closed",
     "shareMyMonth": "Share my month",
@@ -393,7 +395,7 @@
     "ratesHiddenHint": "Hourly rates are hidden while Show pay is off. Turn it on in Settings.",
     "ratesHiddenAddHint": "Hourly rates are hidden while Show pay is off. You can add one later in Settings.",
     "ratesPrivateHint": "Rates are only shown to you and to the person they belong to.",
-    "ratesShownHint": "Hourly rates are shown because pay is on for this workspace. Employees see their own rate, never each other's.",
+    "ratesShownHint": "Hourly rates are shown because pay is on for this business. Employees see their own rate, never each other's.",
     "sendInvitation": "Send invitation",
     "invitationSent": "Invitation sent {when}.",
     "untilAccepts": "Until {name} accepts they show as Invited. You can log their hours right away.",
@@ -410,7 +412,7 @@
     "addedYou": "{name} added you as an employee. Every hour they log for you shows up here, day by day.",
     "invitedYouTo": "{name} invited you to {workspace}.",
     "logsYourHoursHint": "{workspace} logs your hours in Klokka. Set a password and every one of them is yours to see, day by day, month by month.",
-    "workspace": "Workspace",
+    "workspace": "Business",
     "employer": "Employer",
     "yourEmail": "Your email",
     "emailFromInvitation": "Email (from the invitation)",
@@ -426,7 +428,7 @@
     "alreadyHaveAccount": "Already have a Klokka account?",
     "signInToAccept": "Sign in to accept",
     "openLinkFirst": "Got an invitation? Open the link in the email first, then sign in here.",
-    "employersCreateOnWeb": "Employers create their workspace on the web.",
+    "employersCreateOnWeb": "Employers create their business on the web.",
     "expired": "This invitation has expired. Ask {name} to send a new one.",
     "wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
     "accepted": "You joined {workspace}.",
@@ -443,6 +445,9 @@
     "reasonMore": "I worked more",
     "reasonLess": "I worked less",
     "reasonNotIn": "I was not in",
+    "reasonMoreShort": "Worked more than logged",
+    "reasonLessShort": "Worked less than logged",
+    "reasonNotInShort": "Was not in that day",
     "hoursYouWorked": "Hours you worked",
     "entrySays": "h, the entry says {hours}",
     "message": "Message",
@@ -456,6 +461,7 @@
     "setTo": "Set to {hours}",
     "changeTo": "Change to {hours}",
     "keepHours": "Keep {hours}",
+    "resolveFlag": "Resolve the flag",
     "toldEitherWay": "{name} is told either way.",
     "openInGrid": "Open in the grid",
     "fixTitle": "Set {date} to {hours}?",
@@ -475,55 +481,55 @@
     "subtitleEmployee": "Every time your hours are added, changed or removed, once per sitting. Plus flags, closed months and invitations.",
     "filter": "Filter",
     "markAllRead": "Mark all as read",
-    "channelsHintEmployer": "In-app and push carry the same items. Email is only used for invitations and the opt-in digest.",
-    "channelsHintEmployee": "The same items arrive as push on your phone. Email only for the weekly digest, if you turn it on.",
     "employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
     "empty": "Nothing yet. You will hear about it here the moment something changes.",
     "emptyUnread": "All caught up.",
-    "hoursAdded": {
-      "title_one": "{name} added {count} day, {hours} h",
-      "title_other": "{name} added {count} days, {hours} h",
-      "titleForYou_one": "{name} added {count} day for you.",
-      "titleForYou_other": "{name} added {count} days for you.",
-      "body": "{hours} in week {week}.",
-      "range": "{from} to {to}"
-    },
-    "hoursChanged": {
-      "title": "{name} changed {date}.",
-      "body": "{before} is now {after}.",
+    "hours": {
+      "addedOne": "{name} added {date}",
+      "changedOne": "{name} changed {date}",
+      "added_one": "{name} added {count} day",
+      "added_other": "{name} added {count} days",
+      "changed_one": "{name} changed {count} day",
+      "changed_other": "{name} changed {count} days",
+      "removed_one": "{name} removed {count} day",
+      "removed_other": "{name} removed {count} days",
+      "reverted": "{name} changed your hours and put them back",
+      "bodyOne": "{workspace}: {hours}",
+      "bodyChangedOne": "{workspace}: {hours}, was {before}",
+      "bodyWeek": "{workspace}, week {week}: {days}",
+      "bodyDays": "{workspace}: {days}",
+      "rangeWeek": "{workspace}, week {week}: {from} to {to}, {hours}",
+      "range": "{workspace}: {from} to {to}, {hours}",
+      "day": "{date} {hours}",
+      "dayRemoved": "{date} removed",
       "note": "Note: \"{note}\""
     },
-    "hoursRemoved": {
-      "title": "{name} removed {date}.",
-      "titleMany_one": "{name} removed {count} day",
-      "titleMany_other": "{name} removed {count} days",
-      "body": "{hours} was taken off your month."
-    },
     "inviteAccepted": {
-      "title": "{name} accepted your invitation.",
-      "body": "{name} is now an employee of {workspace}."
+      "title": "{name} accepted your invitation",
+      "body": "{workspace}: {name} is now an employee"
     },
     "entryFlagged": {
-      "title": "{name} flagged {date}.",
-      "body": "Logged {logged}, {name} says {suggested}"
+      "title": "{name} flagged {date}",
+      "body": "{workspace}: logged {logged}, says {suggested}",
+      "bodyMessage": "{workspace}: \"{message}\""
     },
     "flagFixed": {
-      "title": "{name} fixed your flag.",
-      "body": "{date} is now {hours}."
+      "title": "{name} fixed your flag",
+      "body": "{workspace}: {date} is now {hours}"
     },
     "flagDismissed": {
-      "title": "{name} kept {date} at {hours}.",
-      "body": "Your flag was reviewed and the entry stays as logged."
+      "title": "{name} reviewed your flag",
+      "body": "{workspace}: {date} stays at {hours}"
     },
     "monthClosed": {
-      "title": "{month} is closed.",
-      "body": "{hours}, {money}.",
-      "bodyHoursOnly": "{hours}.",
-      "hint": "{name} locked the month. Share your card from Profile."
+      "title": "{name} closed {month}",
+      "body": "{workspace}: {hours}, {money}",
+      "bodyHoursOnly": "{workspace}: {hours}",
+      "hint": "Nothing changes until it is reopened. Share your card from Profile."
     },
     "monthReopened": {
-      "title": "{month} was reopened.",
-      "body": "{name} unlocked the month. Entries can change again."
+      "title": "{name} reopened {month}",
+      "body": "{workspace}: entries can change again"
     }
   },
   "email": {
@@ -557,7 +563,7 @@
     "aDay": "a day",
     "bestWeek": "best week",
     "hoursOnlyNoPay": "Hours only, no pay",
-    "cardHint": "The card shows hours and the workspace, never pay. Share it from here or from the app on your phone.",
+    "cardHint": "The card shows hours and the business, never pay. Share it from here or from the app on your phone.",
     "includeBestWeek": "Include best week and average",
     "shared": "Shared.",
     "saved": "Saved to your photos."
@@ -574,9 +580,9 @@
     "forgotPassword": "Forgot password?",
     "continue": "Continue",
     "newHere": "New here?",
-    "createWorkspace": "Create a workspace",
+    "createWorkspace": "Create a business",
     "createAccount": "Create your account",
-    "createAccountHint": "This is your personal login. Your business gets its own workspace in the next step.",
+    "createAccountHint": "This is your personal login. You add your business in the next step.",
     "yourName": "Your name",
     "createAccountButton": "Create account",
     "terms": "terms",
@@ -584,7 +590,7 @@
     "byContinuing": "By continuing you accept the {terms} and the {privacy}.",
     "alreadyHaveAccount": "Already have an account?",
     "welcomeBody": "Your employer logs the hours. You see every one of them, the moment they change.",
-    "oneAccount": "One account for everyone. Whether you run the place or work there comes from the workspace, not from where you sign in.",
+    "oneAccount": "One account for everyone. Whether you run the place or work there comes from the business, not from where you sign in.",
     "freeAndOpenSource": "Free and open source. MIT licence.",
     "signedOut": "You are signed out."
   },
@@ -592,21 +598,21 @@
     "title": "Operator",
     "aggregatesOnly": "Aggregates only. The console never shows a person's hours, notes or rates.",
     "workspaces": {
-      "title": "Workspaces",
-      "subtitle": "{count} workspaces on the hosted instance, one per business. Counts and dates only.",
+      "title": "Businesses",
+      "subtitle": "{count} businesses on the hosted instance. Counts and dates only.",
       "newThisMonth": "{delta} in {month}",
       "members": "Members",
       "membersBreakdown": "{active} active, {invited} invited, {deactivated} deactivated",
       "hoursLoggedIn": "Hours logged in {month}",
-      "acrossAll": "Across all workspaces, aggregate only",
+      "acrossAll": "Across all businesses, aggregate only",
       "activeLast7": "Active in the last 7 days",
-      "activeLast7Hint": "Workspaces with at least one saved entry",
-      "search": "Search workspaces",
+      "activeLast7Hint": "Businesses with at least one saved entry",
+      "search": "Search businesses",
       "searchPlaceholder": "Search by name or slug",
       "pay": "Pay",
       "payOn": "Pay on",
       "payOff": "Pay off",
-      "workspace": "Workspace",
+      "workspace": "Business",
       "invited": "Invited",
       "active": "Active",
       "created": "Created",
@@ -621,7 +627,7 @@
       "employers": "Employers",
       "employees": "Employees",
       "person": "Person",
-      "workspaces": "Workspaces",
+      "workspaces": "Businesses",
       "language": "Language",
       "push": "Push",
       "pushHint": "Push shows whether a device token is registered, never the token.",
@@ -697,11 +703,11 @@
   "errors": {
     "VALIDATION": "Something in the form is not right. Check the highlighted fields.",
     "UNAUTHENTICATED": "Your session has ended. Sign in again.",
-    "FORBIDDEN": "You cannot do that in this workspace.",
+    "FORBIDDEN": "You cannot do that in this business.",
     "NOT_FOUND": "That no longer exists.",
     "CONFLICT": "Someone changed this at the same time. Reload and try again.",
     "MONTH_LOCKED": "This month is closed. Unlock it first.",
-    "MEMBER_NOT_ACTIVE": "This person is not active in the workspace.",
+    "MEMBER_NOT_ACTIVE": "This person is not active in the business.",
     "INVITATION_EXPIRED": "The invitation has expired.",
     "INVITATION_EMAIL_MISMATCH": "The invitation was sent to another email address.",
     "FLAG_ALREADY_OPEN": "This entry already has an open flag.",
@@ -718,13 +724,13 @@
       "signInFailed": "Sign-in did not go through. Try again."
     },
     "noWorkspaces": {
-      "title": "No workspace yet",
-      "body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create a workspace here."
+      "title": "No business yet",
+      "body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create it here."
     },
     "chooseWorkspace": {
-      "hint_one": "You belong to {count} workspace. Switch any time from Profile.",
-      "hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
-      "rolesHint": "Roles are per workspace. An employer who also works for someone sees both here."
+      "hint_one": "You belong to {count} business. Switch any time from Profile.",
+      "hint_other": "You belong to {count} businesses. Switch any time from Profile.",
+      "rolesHint": "Roles are per business. An employer who also works for someone sees both here."
     },
     "employees": {
       "joined": "Joined {when}"
@@ -753,7 +759,7 @@
     },
     "settings": {
       "account": "Account",
-      "editWorkspace": "Edit workspace",
+      "editWorkspace": "Edit business",
       "saved": "Saved."
     },
     "push": {
@@ -763,7 +769,7 @@
       "enable": "Turn on notifications",
       "channelHours": "Hours",
       "channelFlags": "Flags",
-      "channelWorkspace": "Workspace"
+      "channelWorkspace": "Business"
     },
     "flags": {
       "sent": "Flag sent. {name} is notified.",
@@ -780,7 +786,10 @@
     "workspace": {
       "timezoneDevice": "Your phone says {timezone}.",
       "emojiPick": "Pick an emoji",
-      "colourPick": "Pick a colour"
+      "colourPick": "Pick a colour",
+      "timezoneSearch": "Search, for example Stockholm",
+      "timezoneNoMatch": "No time zone matches that.",
+      "timezoneChange": "Change the time zone, now {timezone}"
     },
     "share": {
       "preparing": "Preparing the card"
@@ -798,6 +807,11 @@
     "invitation": {
       "loading": "Checking the invitation",
       "notFound": "This invitation link is not valid. Ask your employer to send a new one."
+    },
+    "crash": {
+      "title": "Klokka had to start again",
+      "body": "Something on this screen went wrong. The saved copy on this phone was cleared; your hours are safe on the server.",
+      "restart": "Start again"
     }
   },
   "api": {
@@ -817,9 +831,6 @@
       "note": "Note",
       "rate": "Hourly rate",
       "amount": "Amount"
-    },
-    "push": {
-      "workspacePrefix": "{workspace}: {title}"
     }
   },
   "web": {
@@ -831,7 +842,7 @@
       "headlineA": "One clock.",
       "headlineB": "Both sides.",
       "pointRoles": "Employers and employees sign in here",
-      "pointWorkspaces": "Several workspaces, one login",
+      "pointWorkspaces": "Several businesses, one login",
       "pointPasswords": "Passwords never touch Klokka's database",
       "hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
       "backToStart": "Back to klokka"
@@ -846,7 +857,7 @@
       "headlineA": "Make it",
       "headlineB": "your place.",
       "currencyNote": "(only shown if pay is on)",
-      "nameRequired": "Give the workspace a name."
+      "nameRequired": "Give the business a name."
     },
     "colour": {
       "PRIMARY": "Magenta",
@@ -930,7 +941,7 @@
     },
     "month": {
       "closedToast": "{month} is closed.",
-      "closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+      "closedToastBody": "Everyone in the business is told, and the CSV is ready.",
       "unlockedToast": "{month} is open again.",
       "unlockedToastBody": "Entries can change again. Close it once you are done.",
       "saveFirst": "Save or discard the changes before closing the month.",
@@ -966,7 +977,7 @@
       "users": {
         "employerOf": "Employer of {count}",
         "employeeAt": "Employee at {count}",
-        "noWorkspace": "No workspace",
+        "noWorkspace": "No business",
         "pushYes": "Registered",
         "pushNo": "None",
         "created": "Created",
@@ -1035,8 +1046,8 @@
       "payDemoLabel": "{name}, a full day"
     },
     "profile": {
-      "employerAt_one": "Employer at {count} workspace",
-      "employerAt_other": "Employer at {count} workspaces",
+      "employerAt_one": "Employer at {count} business",
+      "employerAt_other": "Employer at {count} businesses",
       "nameRequired": "Your name cannot be empty.",
       "appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put."
     },
@@ -1058,6 +1069,19 @@
       "bestWeekValue": "best week {hours}",
       "daysValue_one": "{count} day",
       "daysValue_other": "{count} days"
+    },
+    "employeeWeek": {
+      "subtitle": "{from} to {to}. The hours {name} logged for you, day by day.",
+      "subtitlePlain": "{from} to {to}. Your hours, day by day.",
+      "openDay": "{date}, {hours}. Open it in your month.",
+      "days": "Days"
+    },
+    "dayList": {
+      "loggedBy": "Logged by {name}, {time}",
+      "changedBy": "Changed by {name}, {time}",
+      "select": "{date}, {hours}. Show the day.",
+      "dayOf": "Week {week}, {name}",
+      "logInGrid": "Log it in the week grid"
     }
   }
 }

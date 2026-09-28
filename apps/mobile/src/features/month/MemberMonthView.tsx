@@ -20,7 +20,7 @@ import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Card, Icon, Numeral, Pill } from '@/ui';
-import { HeatMapCalendar } from './HeatMapCalendar';
+import { HeatMapCalendar, flagFill, heatFills } from './HeatMapCalendar';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -215,11 +215,17 @@ export function MemberMonthView({
           <AppText variant="caption" tone="muted">
             {t('month.less')}
           </AppText>
-          {[0.3, 0.5, 0.7, 0.85, 1].map((r) => (
-            <View key={r} style={[s.swatch, { backgroundColor: theme.color.primary, opacity: r }]} />
-          ))}
+          {heatFills(theme)
+            .slice(1)
+            .map((fill) => (
+              <View key={fill} style={[s.swatch, { backgroundColor: fill }]} />
+            ))}
           <AppText variant="caption" tone="muted">
             {t('month.more')}
+          </AppText>
+          <View style={[s.swatch, { backgroundColor: flagFill(theme), marginLeft: theme.space[2] }]} />
+          <AppText variant="caption" tone="muted">
+            {t('month.flag')}
           </AppText>
         </View>
       </Card>
@@ -254,7 +260,7 @@ export function MemberMonthView({
                       {formatHours(day.hours ?? 0, locale)}
                     </AppText>
                     {day.flag?.status === 'OPEN' ? (
-                      <Pill label={t('month.flag')} tone="warning" icon="flag" />
+                      <Pill label={t('month.flag')} tone="danger" icon="flag" />
                     ) : null}
                   </View>
                   <AppText variant="small" tone="muted" numberOfLines={1}>

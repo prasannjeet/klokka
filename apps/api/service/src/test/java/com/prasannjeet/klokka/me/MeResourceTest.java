@@ -207,6 +207,23 @@ class MeResourceTest {
     }
 
     @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void aRawDeviceTokenIsRefusedOnlyExpoTokensAreKept() {
+        // CHQ-145: the phone's rotation listener registered the raw FCM token, which Expo answers with
+        // DeviceNotRegistered on every push.
+        given().contentType("application/json")
+                .body("{\"token\":\"dyMO9oAbC1:APA91bHfake-raw-fcm-token\",\"platform\":\"ANDROID\"}")
+                .when().post("/v1/me/push-tokens")
+                .then().statusCode(400).body("code", is("VALIDATION")).body("errors.field", not(empty()));
+        given().contentType("application/json")
+                .body("{\"token\":\"ExpoPushToken[me-new-style]\",\"platform\":\"ANDROID\"}")
+                .when().post("/v1/me/push-tokens")
+                .then().statusCode(204);
+        given().pathParam("token", "ExpoPushToken[me-new-style]").when().delete("/v1/me/push-tokens/{token}").then().statusCode(204);
+    }
+
+    @Test
     @TestSecurity(user = OPS, roles = "platform-admin")
     @OidcSecurity(claims = {@Claim(key = "sub", value = OPS)})
     void operatorRouteAnswersForAPlatformAdmin() {

@@ -55,3 +55,8 @@ The v1 ones landed (`docs/CONTRACT_REQUESTS.md` says which, with the commit). St
 - CHQ-126: no way to dismiss a single day (a holiday, a closed day) from the "nothing logged" nudge; needs an endpoint and a control on both clients.
 - CHQ-137: the web app now has icon routes (copied from the landing); a social card for the app itself is still missing.
 - CHQ-140: the landing keeps its own sv/en dictionary instead of the shared catalogue (decide whether to unify).
+
+## From the CHQ-145 review (2026-09-28)
+- P2: the web calendar's day numbers on the strongest green and red tints (`.cal .d[data-l='4']`, `.cal .d.flag`) need a contrast check against AA in both modes; the phone's heat map already has one (8c48a15).
+- P3: unit tests for `apps/web/src/components/employee-week.tsx` (week navigation, totals, pay only with a rate) and for the `?day=` handling in `employee-month.tsx` (a day of another month is ignored).
+- P3: one shared `/me` poller instead of one 60 s `refetchInterval` per mounted `useMe` (web `lib/me.tsx`, phone `data/me.ts`); TanStack dedupes the requests, but the intervals multiply with the screens that mount the hook.

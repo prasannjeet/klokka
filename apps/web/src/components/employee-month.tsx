@@ -4,6 +4,7 @@
 // (CHQ-125): hours so far against last month, average per working day, best week, streak or earnings, the
 // week-by-week line, the heat-map calendar and the selected day with its note and history.
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { MemberMonthDay } from '@klokka/api-client';
 import {
   addMonths,
@@ -42,7 +43,11 @@ export function EmployeeMonth() {
   const [month, setMonth] = useMonthParam(current);
   const insights = useMemberInsights(ws.id, ws.membershipId, month);
   const memberMonth = useMemberMonth(ws.id, ws.membershipId, month);
-  const [picked, setPicked] = useState<IsoDate | null>(null);
+  // ?day=2026-09-29 (a line of the week view) opens that day, when it belongs to the month shown.
+  const dayParam = useSearchParams().get('day');
+  const [picked, setPicked] = useState<IsoDate | null>(
+    dayParam && dayParam.slice(0, 7) === month && /^\d{4}-\d{2}-\d{2}$/.test(dayParam) ? dayParam : null,
+  );
 
   const mi = insights.data;
   const mm = memberMonth.data;
@@ -54,7 +59,7 @@ export function EmployeeMonth() {
       .map((d) => isoOf(d.date))
       .sort()
       .at(-1) ?? null;
-  const selected = picked ?? lastDay;
+  const selected = picked && picked.slice(0, 7) === month ? picked : lastDay;
   const selectedDay = mm?.days.find((d) => isoOf(d.date) === selected) ?? null;
   const currentWeek = mi?.weekByWeek.at(-1);
 

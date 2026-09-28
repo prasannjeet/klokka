@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClient, focusManager, onlineManager } from '@tanstack/react-query';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import type { PersistedClient } from '@tanstack/react-query-persist-client';
 import Constants from 'expo-constants';
 import * as Network from 'expo-network';
 import { AppState, Platform, type AppStateStatus } from 'react-native';
@@ -38,13 +39,45 @@ export function cacheKeyFor(userId: string): string {
 }
 
 export function createPersister(userId: string) {
-  return createAsyncStoragePersister({ storage: AsyncStorage, key: cacheKeyFor(userId), throttleTime: 1000 });
+  return createAsyncStoragePersister({
+    storage: AsyncStorage,
+    key: cacheKeyFor(userId),
+    throttleTime: 1000,
+    serialize: serializeCache,
+    deserialize: deserializeCache,
+  });
 }
 
-// A cache written by another app version or another contract must not be read back.
+// The generated client hands the screens real Dates (work dates, timestamps). Plain JSON writes a Date
+// as a string and never turns it back, so a restored cache fed strings to code calling getFullYear()
+// and every cold start crashed until the app was reinstalled (CHQ-145). Dates are tagged on the way
+// out and revived on the way in, so a restored query is indistinguishable from a fetched one.
+const DATE_TAG = '$klokkaDate';
+
+export function serializeCache(client: PersistedClient): string {
+  return JSON.stringify(client, function (this: Record<string, unknown>, key: string, value: unknown) {
+    const raw = this[key];
+    return raw instanceof Date ? { [DATE_TAG]: raw.getTime() } : value;
+  });
+}
+
+export function deserializeCache(text: string): PersistedClient {
+  return JSON.parse(text, (_key: string, value: unknown) => {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+      const tagged = (value as Record<string, unknown>)[DATE_TAG];
+      if (typeof tagged === 'number' && Object.keys(value).length === 1) return new Date(tagged);
+    }
+    return value;
+  }) as PersistedClient;
+}
+
+// Bumped whenever the persisted shape changes; 2 = dates tagged. A cache written by another app
+// version, another contract or the untagged serializer is dropped instead of read back.
+const CACHE_SCHEMA = 2;
+
 export function cacheBuster(): string {
   const version = Constants.expoConfig?.version ?? '0';
-  return `${version}`;
+  return `${version}-${CACHE_SCHEMA}`;
 }
 
 export async function clearPersistedCache(userId: string): Promise<void> {

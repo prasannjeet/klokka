@@ -12,13 +12,12 @@ import {
   weekOf,
   type IsoDate,
 } from '@klokka/core';
-import { useWorkspaceOrThrow } from '@/data/me';
 import { sameDate, useEntries, useMembers, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, Header, Icon, Pill, Screen } from '@/ui';
-import { withWorkspace } from '@/features/shell/withWorkspace';
+import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
 
 const styles = (t: Theme) =>
@@ -83,14 +82,13 @@ function entryFor(entries: Entry[] | undefined, membershipId: string, date: IsoD
 
 // The week (CHQ-118): one person per page, swipe sideways for the next; tap a day to change it. The
 // employee sees only their own page. Totals here are sums of the visible entries (presentation).
-function WeekScreenInner() {
+function WeekScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const { width } = useWindowDimensions();
-  const workspace = useWorkspaceOrThrow();
   const employer = workspace.role === 'EMPLOYER';
   const today = todayIn(workspace.timezone);
   const [anchor, setAnchor] = useState<IsoDate>(today);

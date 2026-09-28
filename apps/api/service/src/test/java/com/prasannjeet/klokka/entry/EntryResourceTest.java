@@ -83,7 +83,7 @@ class EntryResourceTest {
         // One sitting, one HOURS_CHANGED row for Maria carrying both days, due after the quiet window.
         List<List<Object>> rows = data.query("select kind, payload->'changes'->'2026-09-21'->>'after', payload->'changes'->'2026-09-22'->>'after', "
                 + "payload->>'changeCount', push_due_at, pushed_at from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws);
-        assertThat(rows).containsExactly(java.util.Arrays.asList("HOURS_CHANGED", "6.0", "4.00", "3", MutableClock.DEFAULT.plusSeconds(600), null));
+        assertThat(rows).containsExactly(java.util.Arrays.asList("HOURS_CHANGED", "6.0", "4.00", "3", MutableClock.DEFAULT.plusSeconds(120), null));
         given().when().get("/v1/notifications").then().statusCode(200).body("items", hasSize(0));
     }
 

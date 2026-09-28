@@ -4,19 +4,26 @@ package com.prasannjeet.klokka.i18n;
 // Plural keys are listed by their base name (the `_one` / `_other` pair is checked for both).
 public enum Text {
 
-    HOURS_ADDED_TITLE("notifications.hoursAdded.title", true),
-    HOURS_ADDED_BODY("notifications.hoursAdded.body"),
-    HOURS_ADDED_RANGE("notifications.hoursAdded.range"),
-    HOURS_CHANGED_TITLE("notifications.hoursChanged.title"),
-    HOURS_CHANGED_BODY("notifications.hoursChanged.body"),
-    HOURS_CHANGED_NOTE("notifications.hoursChanged.note"),
-    HOURS_REMOVED_TITLE("notifications.hoursRemoved.title"),
-    HOURS_REMOVED_BODY("notifications.hoursRemoved.body"),
-    HOURS_REMOVED_MANY_TITLE("notifications.hoursRemoved.titleMany", true),
+    HOURS_ADDED_ONE("notifications.hours.addedOne"),
+    HOURS_CHANGED_ONE("notifications.hours.changedOne"),
+    HOURS_ADDED("notifications.hours.added", true),
+    HOURS_CHANGED("notifications.hours.changed", true),
+    HOURS_REMOVED("notifications.hours.removed", true),
+    HOURS_REVERTED("notifications.hours.reverted"),
+    HOURS_BODY_ONE("notifications.hours.bodyOne"),
+    HOURS_BODY_CHANGED_ONE("notifications.hours.bodyChangedOne"),
+    HOURS_BODY_WEEK("notifications.hours.bodyWeek"),
+    HOURS_BODY_DAYS("notifications.hours.bodyDays"),
+    HOURS_RANGE_WEEK("notifications.hours.rangeWeek"),
+    HOURS_RANGE("notifications.hours.range"),
+    HOURS_DAY("notifications.hours.day"),
+    HOURS_DAY_REMOVED("notifications.hours.dayRemoved"),
+    HOURS_NOTE("notifications.hours.note"),
     INVITE_ACCEPTED_TITLE("notifications.inviteAccepted.title"),
     INVITE_ACCEPTED_BODY("notifications.inviteAccepted.body"),
     ENTRY_FLAGGED_TITLE("notifications.entryFlagged.title"),
     ENTRY_FLAGGED_BODY("notifications.entryFlagged.body"),
+    ENTRY_FLAGGED_BODY_MESSAGE("notifications.entryFlagged.bodyMessage"),
     FLAG_FIXED_TITLE("notifications.flagFixed.title"),
     FLAG_FIXED_BODY("notifications.flagFixed.body"),
     FLAG_DISMISSED_TITLE("notifications.flagDismissed.title"),
@@ -48,8 +55,7 @@ public enum Text {
     CSV_HOURS("api.csv.hours"),
     CSV_NOTE("api.csv.note"),
     CSV_RATE("api.csv.rate"),
-    CSV_AMOUNT("api.csv.amount"),
-    PUSH_WORKSPACE_PREFIX("api.push.workspacePrefix");
+    CSV_AMOUNT("api.csv.amount");
 
     private final String key;
     private final boolean plural;

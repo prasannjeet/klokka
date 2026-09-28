@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
+import { isIanaTimeZone } from '@klokka/core';
 import { useMe, useUpdateMe } from '@/data/me';
 import { useCreateWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { useAppStore } from '@/store/appStore';
+import { enterApp } from '@/features/shell/enterApp';
+import { TimeZoneField } from './TimeZoneField';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import {
   AppPressable,
@@ -27,9 +29,12 @@ export const WORKSPACE_EMOJIS = ['☕', '🥐', '✂️', '🧹', '🌸', '🍕'
 export const WORKSPACE_COLOURS: WorkspaceColour[] = ['PRIMARY', 'BLUE', 'GREEN', 'PURPLE', 'YELLOW', 'INK'];
 export const CURRENCIES = ['SEK', 'NOK', 'DKK', 'EUR', 'GBP', 'USD'];
 
+// The phone's zone when it is an IANA id (Android can report an offset such as "GMT+01:00", which the API
+// refuses), else Stockholm; the picker changes it either way.
 export function deviceTimezone(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Stockholm';
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return isIanaTimeZone(zone) ? zone : 'Europe/Stockholm';
   } catch {
     return 'Europe/Stockholm';
   }
@@ -69,7 +74,6 @@ export function CreateWorkspaceScreen() {
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
-  const router = useRouter();
   const toast = useToast();
   const create = useCreateWorkspace();
   const { data: me } = useMe();
@@ -111,7 +115,7 @@ export function CreateWorkspaceScreen() {
       });
       setActive(workspace.id);
       toast.show(t('workspace.created'));
-      router.replace('/');
+      enterApp();
     } catch (e) {
       setError(await problemMessage(e, t));
     }
@@ -191,14 +195,10 @@ export function CreateWorkspaceScreen() {
           ))}
         </View>
       </Field>
-      <TextField
-        label={t('workspace.timezone')}
-        hint={t('mobile.workspace.timezoneDevice', { timezone: deviceTimezone() })}
+      <TimeZoneField
         value={timezone}
-        onChangeText={setTimezone}
-        autoCapitalize="none"
-        autoCorrect={false}
-        testID="workspace-timezone"
+        onChange={setTimezone}
+        hint={t('mobile.workspace.timezoneDevice', { timezone: deviceTimezone() })}
       />
       <Field label={t('workspace.currency')} hint={t('workspace.currencyHint')}>
         <View style={s.wrap}>

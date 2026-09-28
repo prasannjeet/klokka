@@ -140,6 +140,7 @@ export function useNotifications(workspaceId: string | null, unreadOnly: boolean
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
+    refetchInterval: 60_000,
   });
 }
 

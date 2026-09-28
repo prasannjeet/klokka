@@ -216,7 +216,8 @@ public class MeService {
                 .emoji(workspace.emoji)
                 .role(membership.role)
                 .memberStatus(membership.status)
-                .showPay(workspace.showPay)
+                // An employee sees pay only with a rate of their own (CHQ-145); the employer sees the switch.
+                .showPay(workspace.showPay && (employer || membership.hourlyRate != null))
                 .currency(workspace.currency)
                 .timezone(workspace.timezone)
                 .weekStart(workspace.weekStart)

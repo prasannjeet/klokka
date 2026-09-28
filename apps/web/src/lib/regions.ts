@@ -1,7 +1,7 @@
 // Countries, currencies and time zones for workspace settings. Names come from Intl.DisplayNames in the
 // user's language, so nothing here is a user-facing string. Picking a country proposes its zone and
 // currency; both stay editable.
-import { intlLocale, type Locale } from '@klokka/core';
+import { intlLocale, isIanaTimeZone, type Locale } from '@klokka/core';
 
 interface CountryDefaults {
   timezone: string;
@@ -47,7 +47,13 @@ export function sortedCountries(locale: Locale): { code: string; name: string }[
     .sort((a, b) => a.name.localeCompare(b.name, intlLocale(locale)));
 }
 
-export function timeZones(current: string): string[] {
-  const all = typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : [];
-  return all.includes(current) ? all : [current, ...all];
+// The browser's own zone, when it knows one: the default for a new workspace (CHQ-145).
+// Only an IANA id counts: a browser reporting an offset leaves the country's zone in place.
+export function browserTimeZone(): string | null {
+  try {
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return isIanaTimeZone(zone) ? zone : null;
+  } catch {
+    return null;
+  }
 }

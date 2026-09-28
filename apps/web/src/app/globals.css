@@ -714,6 +714,11 @@
     gap: 8px;
     align-items: center;
   }
+  .vh .actions .person-select {
+    width: auto;
+    min-width: 12rem;
+    max-width: 100%;
+  }
   .mnav {
     display: inline-flex;
     align-items: center;
@@ -1910,24 +1915,30 @@
     font-size: clamp(12px, 1.3vw, 16px);
     line-height: 1;
   }
+  /* Days with hours are tinted green by how full they are, a flagged day red (CHQ-145): the success and
+     danger tokens at low alpha over the cell, so the text keeps its own colour and its contrast. */
   .cal .d[data-l='1'] {
-    background: color-mix(in srgb, var(--primary) 28%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 16%, var(--surface-2));
   }
   .cal .d[data-l='2'] {
-    background: color-mix(in srgb, var(--primary) 52%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 24%, var(--surface-2));
   }
   .cal .d[data-l='3'] {
-    background: color-mix(in srgb, var(--primary) 78%, var(--surface-2));
-    color: var(--on-primary);
+    background: color-mix(in srgb, var(--success) 32%, var(--surface-2));
   }
   .cal .d[data-l='4'] {
-    background: var(--primary);
-    color: var(--on-primary);
+    background: color-mix(in srgb, var(--success) 40%, var(--surface-2));
   }
+  .cal .d[data-l='1'] .n,
+  .cal .d[data-l='2'] .n,
   .cal .d[data-l='3'] .n,
   .cal .d[data-l='4'] .n {
     color: inherit;
     opacity: 0.75;
+  }
+  .cal .d.flag,
+  .cal .d.flag.future {
+    background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
   }
   .cal .d.today {
     box-shadow: inset 0 0 0 2px var(--rule);
@@ -1950,7 +1961,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
     box-shadow: 0 0 0 2px var(--surface);
   }
   .cal .d.note::before {
@@ -1985,16 +1996,16 @@
     background: var(--surface-2);
   }
   .cal-legend i[data-l='1'] {
-    background: color-mix(in srgb, var(--primary) 28%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 16%, var(--surface-2));
   }
   .cal-legend i[data-l='2'] {
-    background: color-mix(in srgb, var(--primary) 52%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 24%, var(--surface-2));
   }
   .cal-legend i[data-l='3'] {
-    background: color-mix(in srgb, var(--primary) 78%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 32%, var(--surface-2));
   }
   .cal-legend i[data-l='4'] {
-    background: var(--primary);
+    background: color-mix(in srgb, var(--success) 40%, var(--surface-2));
   }
   .cal-legend .flagdot {
     margin-left: auto;
@@ -2003,102 +2014,144 @@
     align-items: center;
   }
   .cal-legend .flagdot i {
-    width: 8px;
-    height: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
+    position: relative;
+  }
+  .cal-legend .flagdot i::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
   }
 
-  /* ---- day list with notes and history ---- */
-  .dlist {
-    display: grid;
+  /* ---- a clean list of days (CHQ-145): the employee's week, the employer's day list ---- */
+  .readable {
+    max-width: 52rem;
   }
-  .drow {
+  .daylist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .daylist > li + li {
+    border-top: 1px solid var(--border);
+  }
+  .daylist .row {
     display: grid;
-    grid-template-columns: 52px minmax(0, 1fr) auto;
-    gap: 6px 14px;
-    padding: 12px 16px;
+    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    gap: 2px 16px;
     align-items: center;
-    background: var(--bg);
-    text-align: left;
-    border: 0;
     width: 100%;
+    padding: 12px clamp(16px, 2.5vw, 24px);
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    transition: background var(--dur-fast);
   }
-  .drow .dn {
+  .daylist a.row,
+  .daylist button.row {
+    cursor: pointer;
+  }
+  .daylist a.row:hover,
+  .daylist button.row:hover {
+    background: color-mix(in srgb, var(--text) 4%, transparent);
+  }
+  .daylist a.row:focus-visible,
+  .daylist button.row:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+  .daylist .when {
+    line-height: 1.1;
     font-size: 11.5px;
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    line-height: 1.1;
   }
-  .drow .dn b {
+  .daylist .when b {
     display: block;
+    margin-top: 2px;
     font-size: 20px;
     color: var(--text);
     letter-spacing: 0;
     text-transform: none;
     font-variant-numeric: tabular-nums;
-    margin-bottom: 2px;
   }
-  .drow .h {
+  .daylist .today .when,
+  .daylist .today .when b {
+    color: var(--primary);
+  }
+  .daylist .what {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+  }
+  .daylist .what .note {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+  .daylist .what .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .daylist .what .meta .pill {
+    font-size: 11.5px;
+    padding: 1px 8px;
+  }
+  .daylist .h {
+    text-align: right;
     font-family: var(--font-display);
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(22px * var(--font-display-scale));
+    font-size: calc(20px * var(--font-display-scale));
     letter-spacing: -0.02em;
-    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
-  .drow .h small {
+  .daylist .h small {
     font-size: 0.6em;
     font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0;
   }
-  .drow .meta {
+  .daylist .h.none {
+    font-family: var(--font-body);
     font-size: 13px;
+    font-weight: 500;
     color: var(--text-muted);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
-    align-items: center;
+    letter-spacing: 0;
   }
-  .drow .meta .icon {
-    width: 14px;
-    height: 14px;
+  .daylist .flagged {
+    box-shadow: inset 3px 0 0 var(--danger);
   }
-  .drow .note {
-    font-size: 13.5px;
+  .daylist .row[aria-current='true'] {
+    background: color-mix(in srgb, var(--focus) 10%, transparent);
+    box-shadow: inset 3px 0 0 var(--focus);
   }
-  .drow details {
-    grid-column: 2 / -1;
-    font-size: 13px;
+  .daylist .total {
+    border-top: 2px solid var(--border);
   }
-  .drow summary {
-    list-style: none;
-    cursor: pointer;
-    color: var(--accent);
+  .daylist .total .what {
     font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 32px;
   }
-  .drow summary::-webkit-details-marker {
-    display: none;
-  }
-  .drow summary .icon {
-    width: 14px;
-    height: 14px;
-    transition: transform var(--dur-base) var(--ease-out);
-  }
-  .drow details[open] summary .icon {
-    transform: rotate(180deg);
-  }
-  .drow.flagged {
-    box-shadow: inset 3px 0 0 var(--warning);
-  }
+
+  /* ---- change history ---- */
   .hist {
     display: grid;
     gap: 8px;
@@ -2506,6 +2559,9 @@
     box-shadow: inset 0 0 0 2px var(--focus);
     background: var(--bg);
   }
+  .wg .cell.has {
+    background: color-mix(in srgb, var(--success) 20%, var(--surface));
+  }
   .wg .cell.dirty {
     background: color-mix(in srgb, var(--primary) 16%, var(--surface));
   }
@@ -2532,7 +2588,8 @@
     pointer-events: none;
   }
   .wg .cell.flagged {
-    box-shadow: inset 0 0 0 2px var(--warning);
+    background: color-mix(in srgb, var(--danger) 22%, var(--surface));
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 70%, transparent);
   }
   .wg .cell.flagged::after {
     content: '';
@@ -2542,7 +2599,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
     pointer-events: none;
   }
   .wg .cell.error {
@@ -2997,14 +3054,22 @@
     gap: 6px;
     padding: 12px 14px;
     border-radius: var(--radius-md);
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: var(--danger-soft);
+    color: var(--text);
     font-size: 13.5px;
   }
   .dd .flag-open b {
     display: flex;
     align-items: center;
     gap: 6px;
+    color: var(--danger);
+  }
+  .dd .flag-open .when {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+  .dd .flag-open .acts {
+    padding-top: 2px;
   }
   .dd .flag-open .icon {
     width: 16px;
@@ -3932,7 +3997,6 @@
     }
     .tbl th button,
     .tbl-foot .pages button,
-    .drow summary,
     .toast .x,
     .switch {
       min-height: var(--tap-min);
