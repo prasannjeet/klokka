@@ -1,0 +1,49 @@
+{
+  "name": "@klokka/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Klokka's product web app (employer, employee and the operator console): Next.js App Router behind a same-origin BFF that adds the Logto token.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev --turbopack -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "e2e:layout": "playwright test --project=layout",
+    "e2e:lan": "playwright test --project=lan",
+    "e2e:visual": "playwright test --project=visual"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.8.0",
+    "@klokka/api-client": "0.1.0",
+    "@klokka/core": "0.1.0",
+    "@klokka/tokens": "0.1.0",
+    "@logto/next": "^4.2.11",
+    "@number-flow/react": "^0.6.2",
+    "@tanstack/react-query": "^5.104.0",
+    "@tanstack/react-table": "^9.2.4",
+    "html-to-image": "^1.11.13",
+    "motion": "^13.4.4",
+    "next": "^16.3.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/react": "~19.2.18",
+    "@types/react-dom": "~19.2.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint-config-next": "^16.3.6",
+    "jsdom": "^30.1.1",
+    "tailwindcss": "^4.3.3"
+  }
+}

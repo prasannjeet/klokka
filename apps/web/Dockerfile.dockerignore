@@ -1,0 +1,19 @@
+# Build context trimming for apps/web/Dockerfile (context = repo root).
+.git
+**/node_modules
+**/.next
+**/.expo
+**/target
+**/.env
+**/.env.*
+!**/.env.example
+.agents
+.claude
+docs
+apps/api
+apps/web/.shots
+apps/web/e2e
+apps/mobile/**
+!apps/mobile/package.json
+apps/landing/**
+!apps/landing/package.json
