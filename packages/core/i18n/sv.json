@@ -703,5 +703,26 @@
     "NOT_IMPLEMENTED": "Inte tillgängligt än.",
     "INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
     "NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen."
+  },
+  "web": {
+    "shell": {
+      "clockLabel": "En järnvägsklocka som visar tiden just nu",
+      "operatorConsole": "Operatörskonsol"
+    },
+    "signIn": {
+      "headlineA": "En klocka.",
+      "headlineB": "Båda sidor.",
+      "pointRoles": "Arbetsgivare och anställda loggar in här",
+      "pointWorkspaces": "Flera arbetsplatser, en inloggning",
+      "pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
+      "hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
+      "backToStart": "Tillbaka till klokka"
+    },
+    "errorPage": {
+      "title": "Något gick fel"
+    },
+    "notFound": {
+      "title": "Här finns inget"
+    }
   }
 }

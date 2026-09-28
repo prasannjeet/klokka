@@ -10,6 +10,11 @@ const config = [
   ...nextVitals,
   ...nextTs,
   ...repo,
+  {
+    // The 401 handler reloads into /sign-in on purpose: the server must re-read the session cookie.
+    files: ['src/app/providers.tsx'],
+    rules: { '@next/next/no-location-assign-relative-destination': 'off' },
+  },
 ];
 
 export default config;

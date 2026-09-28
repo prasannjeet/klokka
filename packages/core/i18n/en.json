@@ -703,5 +703,26 @@
     "NOT_IMPLEMENTED": "Not available yet.",
     "INTERNAL": "Something went wrong on our side. Try again in a moment.",
     "NETWORK": "No connection. Check your network and try again."
+  },
+  "web": {
+    "shell": {
+      "clockLabel": "A railway clock showing the current time",
+      "operatorConsole": "Operator console"
+    },
+    "signIn": {
+      "headlineA": "One clock.",
+      "headlineB": "Both sides.",
+      "pointRoles": "Employers and employees sign in here",
+      "pointWorkspaces": "Several workspaces, one login",
+      "pointPasswords": "Passwords never touch Klokka's database",
+      "hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
+      "backToStart": "Back to klokka"
+    },
+    "errorPage": {
+      "title": "Something went wrong"
+    },
+    "notFound": {
+      "title": "Nothing here"
+    }
   }
 }

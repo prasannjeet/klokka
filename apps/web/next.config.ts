@@ -14,6 +14,9 @@ const config: NextConfig = {
   // http://192.168.x.y:3000 and the page renders with dead client JS.
   allowedDevOrigins: ['192.168.*.*'],
   poweredByHeader: false,
+  // The repo's AGENTS.md is the single source for agent instructions; `next dev` must not write its own.
+  agentRules: false,
+  devIndicators: false,
   reactStrictMode: true,
 };
 

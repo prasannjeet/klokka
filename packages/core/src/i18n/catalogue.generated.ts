@@ -567,6 +567,17 @@ export const sv = {
   "status.openForEdits": "Öppen för ändringar",
   "status.pending": "Väntar",
   "status.revoked": "Återkallad",
+  "web.errorPage.title": "Något gick fel",
+  "web.notFound.title": "Här finns inget",
+  "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
+  "web.shell.operatorConsole": "Operatörskonsol",
+  "web.signIn.backToStart": "Tillbaka till klokka",
+  "web.signIn.headlineA": "En klocka.",
+  "web.signIn.headlineB": "Båda sidor.",
+  "web.signIn.hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
+  "web.signIn.pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
+  "web.signIn.pointRoles": "Arbetsgivare och anställda loggar in här",
+  "web.signIn.pointWorkspaces": "Flera arbetsplatser, en inloggning",
   "week.addHoursFor": "Lägg till timmar för {name}",
   "week.addHoursForDay": "Lägg till timmar för {day}",
   "week.closeMonth": "Stäng {month}",
@@ -1199,6 +1210,17 @@ export const en = {
   "status.openForEdits": "Open for edits",
   "status.pending": "Pending",
   "status.revoked": "Revoked",
+  "web.errorPage.title": "Something went wrong",
+  "web.notFound.title": "Nothing here",
+  "web.shell.clockLabel": "A railway clock showing the current time",
+  "web.shell.operatorConsole": "Operator console",
+  "web.signIn.backToStart": "Back to klokka",
+  "web.signIn.headlineA": "One clock.",
+  "web.signIn.headlineB": "Both sides.",
+  "web.signIn.hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
+  "web.signIn.pointPasswords": "Passwords never touch Klokka's database",
+  "web.signIn.pointRoles": "Employers and employees sign in here",
+  "web.signIn.pointWorkspaces": "Several workspaces, one login",
   "week.addHoursFor": "Add hours for {name}",
   "week.addHoursForDay": "Add hours for {day}",
   "week.closeMonth": "Close {month}",
@@ -1816,6 +1838,17 @@ export type MessageParams = {
   "status.openForEdits": Record<never, never>;
   "status.pending": Record<never, never>;
   "status.revoked": Record<never, never>;
+  "web.errorPage.title": Record<never, never>;
+  "web.notFound.title": Record<never, never>;
+  "web.shell.clockLabel": Record<never, never>;
+  "web.shell.operatorConsole": Record<never, never>;
+  "web.signIn.backToStart": Record<never, never>;
+  "web.signIn.headlineA": Record<never, never>;
+  "web.signIn.headlineB": Record<never, never>;
+  "web.signIn.hosted": Record<never, never>;
+  "web.signIn.pointPasswords": Record<never, never>;
+  "web.signIn.pointRoles": Record<never, never>;
+  "web.signIn.pointWorkspaces": Record<never, never>;
   "week.addHoursFor": { name: string | number };
   "week.addHoursForDay": { day: string | number };
   "week.closeMonth": { month: string | number };
