@@ -12,7 +12,7 @@ import {
 } from '@klokka/core';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { toIsoDate } from '@/lib/dates';
-import { useTheme, useThemedStyles, type Theme } from '@/theme';
+import { useTheme, useThemedStyles, withAlpha, type Theme } from '@/theme';
 import { AppPressable, AppText } from '@/ui';
 
 const styles = (t: Theme) =>
@@ -28,7 +28,8 @@ const styles = (t: Theme) =>
       justifyContent: 'center',
       overflow: 'hidden',
     },
-    empty: { backgroundColor: t.color.surface },
+    // Faint grid lines around every day of the month (CHQ-145), so an empty day still reads as a cell.
+    line: { borderWidth: StyleSheet.hairlineWidth, borderColor: withAlpha(t.color.text, 0.16) },
     out: { opacity: 0 },
     today: { borderWidth: 2, borderColor: t.color.text },
     dayNumber: { position: 'absolute', top: 2, left: 4 },
@@ -119,7 +120,8 @@ export function HeatMapCalendar({
                 pressScale={0.94}
                 style={[
                   s.cell,
-                  { backgroundColor: hours > 0 ? fill : theme.color.surface },
+                  s.line,
+                  { backgroundColor: hours > 0 ? fill : 'transparent' },
                   isToday ? s.today : null,
                 ]}
                 testID={`cell-${cell.date}`}

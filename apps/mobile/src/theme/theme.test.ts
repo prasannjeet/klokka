@@ -1,5 +1,5 @@
 import { tokens } from '@klokka/tokens';
-import { createTheme, luminance } from './theme';
+import { createTheme, luminance, withAlpha } from './theme';
 import { resolveMode } from './ThemeProvider';
 
 describe('theme', () => {
@@ -34,5 +34,14 @@ describe('resolveMode', () => {
     expect(resolveMode(undefined, null)).toBe('dark');
     expect(resolveMode('LIGHT', 'dark')).toBe('light');
     expect(resolveMode('DARK', 'light')).toBe('dark');
+  });
+});
+
+describe('withAlpha', () => {
+  it('appends the alpha as two hex digits and rejects anything but #RRGGBB', () => {
+    expect(withAlpha('#0F7A55', 0.16)).toBe('#0F7A5529');
+    expect(withAlpha('#FF6B8A', 1)).toBe('#FF6B8Aff');
+    expect(withAlpha('#FF6B8A', 0)).toBe('#FF6B8A00');
+    expect(() => withAlpha('red', 0.5)).toThrow(RangeError);
   });
 });
