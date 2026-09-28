@@ -21,7 +21,9 @@ import {
   weekOf,
   type IsoDate,
 } from '@klokka/core';
+import { CsvButton } from '@/components/csv-button';
 import { Icon } from '@/components/icons';
+import { MonthLockButton, UnlockButton } from '@/components/month-lock';
 import { Money } from '@/components/money';
 import { BodyPortal } from '@/components/portal';
 import { useToast } from '@/components/toast';
@@ -277,7 +279,8 @@ export function WeekView() {
   const selectedInfo = selected ? splitKey(selected) : null;
   const selectedNote = selected ? effective(state, selected).note : null;
   const lockedMonth = months.find((m) => lockedMonths.has(m));
-  const chipsDisabled = selected !== null && isLocked(selected);
+  const allLocked = dates.every((d) => lockedMonths.has(monthOf(d)));
+  const chipsDisabled = allLocked || (selected !== null && isLocked(selected));
   const invalid = hasInvalid(state);
   const week = isoWeek(dates[weekStart === 'MONDAY' ? 0 : 1] as IsoDate).week;
   const dirtyPeople = [...new Set(dirty.map((k) => splitKey(k).membershipId))];
@@ -330,6 +333,7 @@ export function WeekView() {
           <div className="lockbar" role="status">
             <Icon name="lock" />
             <span>{t('week.monthClosedHint', { month: formatMonthName(lockedMonth, locale) })}</span>
+            <UnlockButton ws={ws} month={lockedMonth} />
           </div>
         ) : null}
         <div className="wg-bar">
@@ -478,7 +482,10 @@ export function WeekView() {
               {t('week.weekTotalPeople', { people: t('common.people', { count: rows.length }) })}
             </div>
           </div>
-          <div className="acts" />
+          <div className="acts">
+            <MonthLockButton ws={ws} month={monthOf(anchor)} blocked={dirty.length > 0} />
+            <CsvButton workspaceId={ws.id} slug={ws.slug} month={monthOf(anchor)} />
+          </div>
         </div>
       </div>
 
