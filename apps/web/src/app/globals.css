@@ -3916,3 +3916,30 @@
     }
   }
 }
+
+@layer components {
+  /* 44 px touch targets on touch screens (--tap-min), for the controls that are smaller on a mouse. */
+  @media (pointer: coarse) {
+    .mnav button {
+      width: var(--tap-min);
+      height: var(--tap-min);
+    }
+    .mnav .today {
+      width: auto;
+    }
+    .topbar .ws-btn {
+      min-height: var(--tap-min);
+    }
+    .tbl th button,
+    .tbl-foot .pages button,
+    .drow summary,
+    .toast .x,
+    .switch {
+      min-height: var(--tap-min);
+      min-width: var(--tap-min);
+    }
+    .cal .d {
+      min-height: var(--tap-min);
+    }
+  }
+}
