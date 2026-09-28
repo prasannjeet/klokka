@@ -41,6 +41,11 @@ class LogtoStagingTest {
     public static class StagingLogto implements QuarkusTestProfile {
         @Override
         public Map<String, String> getConfigOverrides() {
+            // Quarkus instantiates every test profile during discovery, on CI runners too, where the
+            // gitignored credentials file does not exist: stay inert unless the test is opted in.
+            if (!Boolean.getBoolean("klokka.it.logto")) {
+                return Map.of();
+            }
             Path file = credentials();
             try {
                 JsonNode json = new ObjectMapper().readTree(Files.readString(file));

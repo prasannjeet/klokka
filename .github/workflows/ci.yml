@@ -172,6 +172,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
           package-manager-cache: false
 
       - name: Install the client's workspace
@@ -204,6 +206,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
           package-manager-cache: false
 
       # openapi-generator-cli (the api-client drift guard) wraps a JAR, so it needs a JVM.
@@ -246,6 +250,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
           package-manager-cache: false
 
       # Scoped: the web app and the packages it links, never the Expo dependency tree.
@@ -305,6 +311,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
           package-manager-cache: false
 
       - name: Install the landing workspace
@@ -372,6 +380,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
           package-manager-cache: false
 
       # JDK 21 for Gradle: JDK 25 breaks the React Native native CMake step (docs/DECISIONS.md D7).
