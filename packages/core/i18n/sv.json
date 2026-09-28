@@ -114,6 +114,8 @@
     "switcherPreview": "Så här ser det ut i väljaren",
     "country": "Land",
     "timezone": "Tidszon",
+    "timezoneEurope": "Europa",
+    "timezoneWorld": "Resten av världen",
     "timezoneAndWeek": "Tidszon och vecka",
     "timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
     "weekStartsOn": "Veckan börjar på",
@@ -778,7 +780,10 @@
     "workspace": {
       "timezoneDevice": "Din telefon säger {timezone}.",
       "emojiPick": "Välj en emoji",
-      "colourPick": "Välj en färg"
+      "colourPick": "Välj en färg",
+      "timezoneSearch": "Sök, till exempel Stockholm",
+      "timezoneNoMatch": "Ingen tidszon matchar det.",
+      "timezoneChange": "Byt tidszon, nu {timezone}"
     },
     "share": {
       "preparing": "Förbereder kortet"

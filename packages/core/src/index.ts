@@ -3,4 +3,5 @@
 export * from './hours.ts';
 export * from './month.ts';
 export * from './format.ts';
+export * from './timezones.ts';
 export * from './i18n/index.ts';

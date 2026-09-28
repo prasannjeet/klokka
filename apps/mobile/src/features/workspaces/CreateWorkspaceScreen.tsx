@@ -7,6 +7,7 @@ import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { useAppStore } from '@/store/appStore';
 import { enterApp } from '@/features/shell/enterApp';
+import { TimeZoneField } from './TimeZoneField';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import {
   AppPressable,
@@ -190,14 +191,10 @@ export function CreateWorkspaceScreen() {
           ))}
         </View>
       </Field>
-      <TextField
-        label={t('workspace.timezone')}
-        hint={t('mobile.workspace.timezoneDevice', { timezone: deviceTimezone() })}
+      <TimeZoneField
         value={timezone}
-        onChangeText={setTimezone}
-        autoCapitalize="none"
-        autoCorrect={false}
-        testID="workspace-timezone"
+        onChange={setTimezone}
+        hint={t('mobile.workspace.timezoneDevice', { timezone: deviceTimezone() })}
       />
       <Field label={t('workspace.currency')} hint={t('workspace.currencyHint')}>
         <View style={s.wrap}>

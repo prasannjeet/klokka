@@ -47,7 +47,11 @@ export function sortedCountries(locale: Locale): { code: string; name: string }[
     .sort((a, b) => a.name.localeCompare(b.name, intlLocale(locale)));
 }
 
-export function timeZones(current: string): string[] {
-  const all = typeof Intl.supportedValuesOf === 'function' ? Intl.supportedValuesOf('timeZone') : [];
-  return all.includes(current) ? all : [current, ...all];
+// The browser's own zone, when it knows one: the default for a new workspace (CHQ-145).
+export function browserTimeZone(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
 }

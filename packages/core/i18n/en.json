@@ -114,6 +114,8 @@
     "switcherPreview": "How it looks in the switcher",
     "country": "Country",
     "timezone": "Time zone",
+    "timezoneEurope": "Europe",
+    "timezoneWorld": "Rest of the world",
     "timezoneAndWeek": "Time zone and week",
     "timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
     "weekStartsOn": "Week starts on",
@@ -778,7 +780,10 @@
     "workspace": {
       "timezoneDevice": "Your phone says {timezone}.",
       "emojiPick": "Pick an emoji",
-      "colourPick": "Pick a colour"
+      "colourPick": "Pick a colour",
+      "timezoneSearch": "Search, for example Stockholm",
+      "timezoneNoMatch": "No time zone matches that.",
+      "timezoneChange": "Change the time zone, now {timezone}"
     },
     "share": {
       "preparing": "Preparing the card"

@@ -3,9 +3,9 @@
 // The workspace identity pickers shared by "Create workspace" (CHQ-112) and Settings (CHQ-127).
 import type { CSSProperties } from 'react';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
-import { formatWeekday } from '@klokka/core';
+import { formatWeekday, isEuropeanTimeZone, timeZoneLabel, timeZoneOptions } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
-import { CURRENCIES, currencyName, sortedCountries, timeZones } from '@/lib/regions';
+import { CURRENCIES, currencyName, sortedCountries } from '@/lib/regions';
 import { WORKSPACE_COLOURS, WORKSPACE_EMOJIS, colourVar } from '@/lib/visual';
 import { ChoiceGroup } from './choice-group';
 
@@ -118,12 +118,23 @@ export function TimezoneSelect({
   value: string;
   onChange: (tz: string) => void;
 }) {
+  const t = useT();
+  // Europe first, then the rest of the world (CHQ-145); the ids are data, shown as people read them.
+  const zones = timeZoneOptions(value);
+  const groups = [
+    { label: t('workspace.timezoneEurope'), zones: zones.filter(isEuropeanTimeZone) },
+    { label: t('workspace.timezoneWorld'), zones: zones.filter((z) => !isEuropeanTimeZone(z)) },
+  ];
   return (
     <select className="input" id={id} value={value} onChange={(e) => onChange(e.target.value)}>
-      {timeZones(value).map((tz) => (
-        <option key={tz} value={tz}>
-          {tz}
-        </option>
+      {groups.map((g) => (
+        <optgroup key={g.label} label={g.label}>
+          {g.zones.map((tz) => (
+            <option key={tz} value={tz}>
+              {timeZoneLabel(tz)}
+            </option>
+          ))}
+        </optgroup>
       ))}
     </select>
   );

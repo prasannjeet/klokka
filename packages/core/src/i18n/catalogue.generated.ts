@@ -298,7 +298,10 @@ export const sv = {
   "mobile.welcome.taglineB": "Båda sidor.",
   "mobile.workspace.colourPick": "Välj en färg",
   "mobile.workspace.emojiPick": "Välj en emoji",
+  "mobile.workspace.timezoneChange": "Byt tidszon, nu {timezone}",
   "mobile.workspace.timezoneDevice": "Din telefon säger {timezone}.",
+  "mobile.workspace.timezoneNoMatch": "Ingen tidszon matchar det.",
+  "mobile.workspace.timezoneSearch": "Sök, till exempel Stockholm",
   "month.avgPerWorkingDay": "Snitt per arbetsdag",
   "month.avgPerWorkingDayShort": "{hours} per arbetsdag",
   "month.bestWeek": "Bästa veckan",
@@ -881,7 +884,9 @@ export const sv = {
   "workspace.switcherPreview": "Så här ser det ut i väljaren",
   "workspace.timezone": "Tidszon",
   "workspace.timezoneAndWeek": "Tidszon och vecka",
+  "workspace.timezoneEurope": "Europa",
   "workspace.timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
+  "workspace.timezoneWorld": "Resten av världen",
   "workspace.weekStart": "Veckan börjar",
   "workspace.weekStartsOn": "Veckan börjar på",
   "workspace.yourName": "Ditt namn",
@@ -1185,7 +1190,10 @@ export const en = {
   "mobile.welcome.taglineB": "Both sides.",
   "mobile.workspace.colourPick": "Pick a colour",
   "mobile.workspace.emojiPick": "Pick an emoji",
+  "mobile.workspace.timezoneChange": "Change the time zone, now {timezone}",
   "mobile.workspace.timezoneDevice": "Your phone says {timezone}.",
+  "mobile.workspace.timezoneNoMatch": "No time zone matches that.",
+  "mobile.workspace.timezoneSearch": "Search, for example Stockholm",
   "month.avgPerWorkingDay": "Average per working day",
   "month.avgPerWorkingDayShort": "{hours} per working day",
   "month.bestWeek": "Best week",
@@ -1768,7 +1776,9 @@ export const en = {
   "workspace.switcherPreview": "How it looks in the switcher",
   "workspace.timezone": "Time zone",
   "workspace.timezoneAndWeek": "Time zone and week",
+  "workspace.timezoneEurope": "Europe",
   "workspace.timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
+  "workspace.timezoneWorld": "Rest of the world",
   "workspace.weekStart": "Week starts",
   "workspace.weekStartsOn": "Week starts on",
   "workspace.yourName": "Your name",
@@ -2067,7 +2077,10 @@ export type MessageParams = {
   "mobile.welcome.taglineB": Record<never, never>;
   "mobile.workspace.colourPick": Record<never, never>;
   "mobile.workspace.emojiPick": Record<never, never>;
+  "mobile.workspace.timezoneChange": { timezone: string | number };
   "mobile.workspace.timezoneDevice": { timezone: string | number };
+  "mobile.workspace.timezoneNoMatch": Record<never, never>;
+  "mobile.workspace.timezoneSearch": Record<never, never>;
   "month.avgPerWorkingDay": Record<never, never>;
   "month.avgPerWorkingDayShort": { hours: string | number };
   "month.bestWeek": Record<never, never>;
@@ -2630,7 +2643,9 @@ export type MessageParams = {
   "workspace.switcherPreview": Record<never, never>;
   "workspace.timezone": Record<never, never>;
   "workspace.timezoneAndWeek": Record<never, never>;
+  "workspace.timezoneEurope": Record<never, never>;
   "workspace.timezoneHint": Record<never, never>;
+  "workspace.timezoneWorld": Record<never, never>;
   "workspace.weekStart": Record<never, never>;
   "workspace.weekStartsOn": Record<never, never>;
   "workspace.yourName": Record<never, never>;
