@@ -35,4 +35,6 @@ public final class LogtoModels {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record User(String id, String primaryEmail, String name, String username) {}
+
+    public record UserUpdate(String name) {}
 }

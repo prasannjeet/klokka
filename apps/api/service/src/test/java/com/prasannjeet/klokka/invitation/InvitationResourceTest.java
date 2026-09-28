@@ -2,6 +2,7 @@ package com.prasannjeet.klokka.invitation;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.is;
 
 import com.prasannjeet.klokka.support.Fake;
@@ -103,6 +104,35 @@ class InvitationResourceTest {
         given().when().get("/v1/me").then().statusCode(200)
                 .body("workspaces.find { it.workspaceId == '" + ws + "' }.role", is("EMPLOYEE"))
                 .body("workspaces.find { it.workspaceId == '" + ws + "' }.employerName", is("Nora Lind"));
+    }
+
+    @Test
+    @TestSecurity(user = LINA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = LINA)})
+    void acceptingKeepsTheInvitedNameAdoptsItAsTheProfileNameAndTakesTheDeviceLanguage() {
+        // Mirrored by the webhook before the first sign-in: email known, name only derived from it, nothing chosen.
+        // Staging: the employer's "Test Testsson" became "test" and the notification said "test accepted".
+        data.user(LINA, "lina@example.com", "lina");
+        data.run("delete from user_preference where logto_user_id = ?", LINA);
+        given().header("Accept-Language", "en-GB,en;q=0.9").when().post("/v1/invitations/" + token + "/accept").then().statusCode(200);
+        assertThat(data.scalar("select display_name from membership where id = ?", invited)).isEqualTo("Lina Ahmed");
+        assertThat(data.scalar("select display_name from app_user where logto_user_id = ?", LINA)).isEqualTo("Lina Ahmed");
+        assertThat(data.scalar("select language from user_preference where logto_user_id = ?", LINA)).isEqualTo("en");
+        assertThat((String) data.scalar("select payload::text from notification where logto_user_id = ? and workspace_id = ?", NORA, ws))
+                .contains("Lina Ahmed");
+        List<Map<String, Object>> updated = Fake.list("updatedUsers");
+        assertThat(updated).extracting(u -> u.get("id"), u -> u.get("name")).containsExactly(tuple(LINA, "Lina Ahmed"));
+    }
+
+    @Test
+    @TestSecurity(user = LINA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = LINA)})
+    void acceptingUsesTheNameThePersonChose() {
+        data.user(LINA, "lina@example.com", "Lina A. Ahmed");
+        given().when().post("/v1/invitations/" + token + "/accept").then().statusCode(200);
+        assertThat(data.scalar("select display_name from membership where id = ?", invited)).isEqualTo("Lina A. Ahmed");
+        assertThat(data.scalar("select display_name from app_user where logto_user_id = ?", LINA)).isEqualTo("Lina A. Ahmed");
+        assertThat(Fake.<Object>list("updatedUsers")).isEmpty();
     }
 
     @Test

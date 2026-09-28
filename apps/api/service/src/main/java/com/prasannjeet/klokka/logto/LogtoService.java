@@ -83,6 +83,16 @@ public class LogtoService {
         }
     }
 
+    // Best effort: Logto's copy of the name feeds {{inviter.name}} in its invitation email, so a chosen name is
+    // mirrored there; a failure must never fail the profile update or the accept that carried it.
+    public void updateUserNameQuietly(String userId, String name) {
+        try {
+            api.updateUser(userId, new LogtoModels.UserUpdate(name));
+        } catch (WebApplicationException | ProcessingException e) {
+            LOG.warnf("Logto user %s name could not be updated: %s", userId, e.getMessage());
+        }
+    }
+
     public Optional<LogtoModels.User> findUser(String userId) {
         try {
             return Optional.ofNullable(api.getUser(userId));

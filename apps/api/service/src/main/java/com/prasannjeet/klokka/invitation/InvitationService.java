@@ -90,8 +90,8 @@ public class InvitationService {
     }
 
     @Transactional
-    public InvitationAccepted accept(String token) {
-        AppUserEntity user = me.ensureCurrentUser();
+    public InvitationAccepted accept(String token, Optional<String> acceptLanguage) {
+        AppUserEntity user = me.ensureCurrentUser(acceptLanguage);
         MembershipEntity m = repository.findByToken(token).orElseThrow(() -> notFound("Invitation"));
         WorkspaceEntity w = repository.workspaceOf(m);
         if (m.status == ACTIVE || m.status == DEACTIVATED) {
@@ -117,7 +117,14 @@ public class InvitationService {
         m.userId = user.id;
         m.status = ACTIVE;
         m.joinedAt = now;
-        if (!user.displayName.isBlank()) m.displayName = user.displayName;
+        // The name the employer typed stays unless the person chose one; the email's local part never replaces it.
+        // Without a chosen name the invitation's name becomes the profile name too (and Logto's, for its emails).
+        if (me.hasChosenName(user)) {
+            m.displayName = user.displayName;
+        } else {
+            user.displayName = m.displayName;
+            logto.updateUserNameQuietly(user.id, m.displayName);
+        }
         m.avatarEmoji = user.avatarEmoji;
         mail.recordExternal(EmailSendRepository.KIND_VERIFICATION, m.email, m.workspaceId, m.id, user.id);
         repository.employerOf(m).filter(e -> e.userId != null)

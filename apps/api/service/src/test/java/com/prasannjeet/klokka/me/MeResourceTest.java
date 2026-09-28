@@ -1,6 +1,8 @@
 package com.prasannjeet.klokka.me;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -8,6 +10,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+import com.prasannjeet.klokka.support.Fake;
 import com.prasannjeet.klokka.support.MutableClock;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -19,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -106,6 +110,20 @@ class MeResourceTest {
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.memberCount", is(2))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.employerName", nullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.hoursThisMonth", is(4.5f));
+    }
+
+    @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void renamingYourselfMirrorsTheNameToLogto() {
+        Fake.reset();
+        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\"}").when().patch("/v1/me").then().statusCode(200)
+                .body("user.name", is("Maria Lindqvist"));
+        assertThat(Fake.<Map<String, Object>>list("updatedUsers")).extracting(u -> u.get("id"), u -> u.get("name"))
+                .containsExactly(tuple(MARIA, "Maria Lindqvist"));
+        // The same name again changes nothing, so Logto is not asked again.
+        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\"}").when().patch("/v1/me").then().statusCode(200);
+        assertThat(Fake.<Object>list("updatedUsers")).hasSize(1);
     }
 
     @Test

@@ -4,6 +4,7 @@ import static com.prasannjeet.klokka.contract.model.Role.EMPLOYER;
 
 import com.prasannjeet.klokka.auth.CurrentUser;
 import com.prasannjeet.klokka.config.KlokkaConfig;
+import com.prasannjeet.klokka.logto.LogtoService;
 import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.contract.model.Me;
 import com.prasannjeet.klokka.contract.model.MyWorkspace;
@@ -48,6 +49,9 @@ public class MeService {
     @Inject
     KlokkaConfig config;
 
+    @Inject
+    LogtoService logto;
+
     @Transactional
     public Me me(Optional<String> acceptLanguage) {
         AppUserEntity user = ensureUser(acceptLanguage);
@@ -57,7 +61,12 @@ public class MeService {
     @Transactional
     public Me updateProfile(UserProfileUpdate update) {
         AppUserEntity user = ensureUser(Optional.empty());
-        if (update.getName() != null) user.displayName = update.getName().trim();
+        if (update.getName() != null) {
+            String name = update.getName().trim();
+            boolean changed = !name.equals(user.displayName);
+            user.displayName = name;
+            if (changed && !name.isBlank()) logto.updateUserNameQuietly(user.id, name);
+        }
         // Jackson gives an explicit null the same as an absent field here; both clear the emoji only when the
         // property was sent. The contract says null clears, so treat a present-null as clear.
         if (update.getAvatarEmoji() != null) user.avatarEmoji = update.getAvatarEmoji().isBlank() ? null : update.getAvatarEmoji();
@@ -91,9 +100,20 @@ public class MeService {
     // The signed-in user's row for other services (workspace creation, invitation accept), created on first sight.
     @Transactional
     public AppUserEntity ensureCurrentUser() {
-        AppUserEntity user = ensureUser(Optional.empty());
-        ensurePreferences(user.id, Optional.empty());
+        return ensureCurrentUser(Optional.empty());
+    }
+
+    // First sight through an accept carries the device language too (D16), like the first /me does.
+    @Transactional
+    public AppUserEntity ensureCurrentUser(Optional<String> acceptLanguage) {
+        AppUserEntity user = ensureUser(acceptLanguage);
+        ensurePreferences(user.id, acceptLanguage);
         return user;
+    }
+
+    // A name the person chose (or Logto knew), as opposed to the local part of the email that stands in until then.
+    public boolean hasChosenName(AppUserEntity user) {
+        return !user.displayName.isBlank() && (user.email == null || !user.displayName.equalsIgnoreCase(localPart(user.email)));
     }
 
     // The language a user's notifications are rendered in.
