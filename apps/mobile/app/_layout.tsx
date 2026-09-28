@@ -6,6 +6,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth';
 import { AuthGate } from '@/features/shell/AuthGate';
+import { useSystemUi } from '@/features/shell/useSystemUi';
 import { LocaleProvider } from '@/i18n/LocaleProvider';
 import { useAppStore } from '@/store/appStore';
 import { ThemeProvider, useTheme } from '@/theme';
@@ -18,6 +19,7 @@ void SplashScreen.preventAutoHideAsync();
 function Navigator() {
   const theme = useTheme();
   const userId = useAppStore((s) => s.userId);
+  useSystemUi();
   return (
     <>
       <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
