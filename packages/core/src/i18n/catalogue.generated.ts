@@ -573,6 +573,9 @@ export const sv = {
   "web.colour.PRIMARY": "Magenta",
   "web.colour.PURPLE": "Bärnsten",
   "web.colour.YELLOW": "Gul",
+  "web.csv.downloaded": "{file} har laddats ner.",
+  "web.csv.monthBody": "Hela månaden, en rad per person och dag, med anteckningar.",
+  "web.csv.personBody": "En rad per dag för {name}, med anteckningar.",
   "web.emoji.bag": "Shoppingkasse",
   "web.emoji.bee": "Bi",
   "web.emoji.bicycle": "Cykel",
@@ -617,11 +620,73 @@ export const sv = {
   "web.join.revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
   "web.join.signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
   "web.join.toSignIn": "Till inloggningen",
+  "web.month.closedBy": "Stängd {date} av {name}",
+  "web.month.closedToast": "{month} är stängd.",
+  "web.month.closedToastBody": "Alla på arbetsplatsen får veta det, och CSV-filen är klar.",
+  "web.month.daysWithHours_one": "{count} dag med timmar",
+  "web.month.daysWithHours_other": "{count} dagar med timmar",
+  "web.month.editedTimes_one": "ändrad {count} gång",
+  "web.month.editedTimes_other": "ändrad {count} gånger",
+  "web.month.flagRaised": "{name} flaggade den här dagen",
+  "web.month.lastMonthHours": "({hours})",
+  "web.month.noDays": "Inget loggat i {month} än.",
+  "web.month.noPeople": "Inga anställda än. Lägg till en så syns hens månad här.",
+  "web.month.person": "Anställd",
+  "web.month.pickDay": "Välj en dag i kalendern för att se timmar, anteckning och historik.",
+  "web.month.rateBeforeTax": "{rate} per timme, före skatt",
+  "web.month.saveFirst": "Spara eller släng ändringarna innan du stänger månaden.",
+  "web.month.suggests": "{name} föreslår {hours}",
+  "web.month.unlockedToast": "{month} är öppen igen.",
+  "web.month.unlockedToastBody": "Poster kan ändras igen. Stäng den när du är klar.",
   "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
   "web.newWorkspace.headlineA": "Gör det till",
   "web.newWorkspace.headlineB": "ditt ställe.",
   "web.newWorkspace.nameRequired": "Ge arbetsplatsen ett namn.",
   "web.notFound.title": "Här finns inget",
+  "web.operator.account": "Konto",
+  "web.operator.empty": "Inget matchar.",
+  "web.operator.health.DEGRADED": "Försämrad",
+  "web.operator.health.DOWN": "Nere",
+  "web.operator.health.UP": "Uppe",
+  "web.operator.health.api": "API",
+  "web.operator.health.checked": "Kontrollerad",
+  "web.operator.health.down": "Något är nere",
+  "web.operator.health.ms": "{value} ms",
+  "web.operator.health.noDeploys": "Inga driftsättningar registrerade än.",
+  "web.operator.health.uptime": "Drifttid",
+  "web.operator.health.uptimeDays": "{days} d {hours} h",
+  "web.operator.health.uptimeHours": "{hours} h {minutes} min",
+  "web.operator.health.version": "Version",
+  "web.operator.invitations.acceptedOn": "Accepterad {date}",
+  "web.operator.invitations.expiredOn": "Gick ut {date}",
+  "web.operator.invitations.resendFor": "Skicka inbjudan till {email} igen",
+  "web.operator.invitations.resent": "Inbjudan till {email} skickad igen.",
+  "web.operator.kind.ENTRY_FLAGGED": "Post flaggad",
+  "web.operator.kind.FLAG_RESOLVED": "Flagga löst",
+  "web.operator.kind.HOURS_CHANGED": "Timmar tillagda eller ändrade",
+  "web.operator.kind.INVITE_ACCEPTED": "Inbjudan accepterad",
+  "web.operator.kind.MONTH_CLOSED": "Månad stängd",
+  "web.operator.kind.MONTH_REOPENED": "Månad öppnad igen",
+  "web.operator.navigation": "Operatörsnavigering",
+  "web.operator.none": "Inga än",
+  "web.operator.serverSide": "Sortering, filtrering och sidindelning sker i API:et.",
+  "web.operator.tab.invitations": "Inbjudna",
+  "web.operator.tab.workspaces": "Platser",
+  "web.operator.users.created": "Skapad",
+  "web.operator.users.employeeAt": "Anställd på {count}",
+  "web.operator.users.employerOf": "Arbetsgivare för {count}",
+  "web.operator.users.never": "Aldrig",
+  "web.operator.users.noWorkspace": "Ingen arbetsplats",
+  "web.operator.users.pushNo": "Ingen",
+  "web.operator.users.pushYes": "Registrerad",
+  "web.operator.volume.count": "Antal",
+  "web.operator.volume.day": "Dag",
+  "web.operator.volume.inDays_one": "om {count} dag",
+  "web.operator.volume.inDays_other": "om {count} dagar",
+  "web.operator.volume.kind": "Typ",
+  "web.operator.volume.noDays": "Inga notiser den här månaden än.",
+  "web.operator.volume.perDayLabel": "Notiser per dag, push och i appen",
+  "web.operator.volume.push": "Push",
   "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
   "web.shell.operatorConsole": "Operatörskonsol",
   "web.signIn.backToStart": "Tillbaka till klokka",
@@ -1290,6 +1355,9 @@ export const en = {
   "web.colour.PRIMARY": "Magenta",
   "web.colour.PURPLE": "Amber",
   "web.colour.YELLOW": "Yellow",
+  "web.csv.downloaded": "{file} downloaded.",
+  "web.csv.monthBody": "The whole month, one row per person and day, with notes.",
+  "web.csv.personBody": "One row per day for {name}, with notes.",
   "web.emoji.bag": "Shopping bag",
   "web.emoji.bee": "Bee",
   "web.emoji.bicycle": "Bicycle",
@@ -1334,11 +1402,73 @@ export const en = {
   "web.join.revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
   "web.join.signedIn": "You are signed in. Joining takes one click.",
   "web.join.toSignIn": "Go to sign in",
+  "web.month.closedBy": "Closed {date} by {name}",
+  "web.month.closedToast": "{month} is closed.",
+  "web.month.closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+  "web.month.daysWithHours_one": "{count} day with hours",
+  "web.month.daysWithHours_other": "{count} days with hours",
+  "web.month.editedTimes_one": "edited {count} time",
+  "web.month.editedTimes_other": "edited {count} times",
+  "web.month.flagRaised": "{name} flagged this day",
+  "web.month.lastMonthHours": "({hours})",
+  "web.month.noDays": "Nothing logged in {month} yet.",
+  "web.month.noPeople": "No employees yet. Add one and their month shows up here.",
+  "web.month.person": "Employee",
+  "web.month.pickDay": "Pick a day in the calendar to see its hours, note and history.",
+  "web.month.rateBeforeTax": "{rate} per hour, before tax",
+  "web.month.saveFirst": "Save or discard the changes before closing the month.",
+  "web.month.suggests": "{name} suggests {hours}",
+  "web.month.unlockedToast": "{month} is open again.",
+  "web.month.unlockedToastBody": "Entries can change again. Close it once you are done.",
   "web.newWorkspace.currencyNote": "(only shown if pay is on)",
   "web.newWorkspace.headlineA": "Make it",
   "web.newWorkspace.headlineB": "your place.",
   "web.newWorkspace.nameRequired": "Give the workspace a name.",
   "web.notFound.title": "Nothing here",
+  "web.operator.account": "Account",
+  "web.operator.empty": "Nothing matches.",
+  "web.operator.health.DEGRADED": "Degraded",
+  "web.operator.health.DOWN": "Down",
+  "web.operator.health.UP": "Up",
+  "web.operator.health.api": "API",
+  "web.operator.health.checked": "Checked",
+  "web.operator.health.down": "Something is down",
+  "web.operator.health.ms": "{value} ms",
+  "web.operator.health.noDeploys": "No deploys recorded yet.",
+  "web.operator.health.uptime": "Uptime",
+  "web.operator.health.uptimeDays": "{days} d {hours} h",
+  "web.operator.health.uptimeHours": "{hours} h {minutes} min",
+  "web.operator.health.version": "Version",
+  "web.operator.invitations.acceptedOn": "Accepted {date}",
+  "web.operator.invitations.expiredOn": "Expired {date}",
+  "web.operator.invitations.resendFor": "Resend the invitation to {email}",
+  "web.operator.invitations.resent": "Invitation to {email} sent again.",
+  "web.operator.kind.ENTRY_FLAGGED": "Entry flagged",
+  "web.operator.kind.FLAG_RESOLVED": "Flag resolved",
+  "web.operator.kind.HOURS_CHANGED": "Hours added or changed",
+  "web.operator.kind.INVITE_ACCEPTED": "Invitation accepted",
+  "web.operator.kind.MONTH_CLOSED": "Month closed",
+  "web.operator.kind.MONTH_REOPENED": "Month reopened",
+  "web.operator.navigation": "Operator navigation",
+  "web.operator.none": "None yet",
+  "web.operator.serverSide": "Sorting, filtering and paging happen in the API.",
+  "web.operator.tab.invitations": "Invites",
+  "web.operator.tab.workspaces": "Places",
+  "web.operator.users.created": "Created",
+  "web.operator.users.employeeAt": "Employee at {count}",
+  "web.operator.users.employerOf": "Employer of {count}",
+  "web.operator.users.never": "Never",
+  "web.operator.users.noWorkspace": "No workspace",
+  "web.operator.users.pushNo": "None",
+  "web.operator.users.pushYes": "Registered",
+  "web.operator.volume.count": "Count",
+  "web.operator.volume.day": "Day",
+  "web.operator.volume.inDays_one": "in {count} day",
+  "web.operator.volume.inDays_other": "in {count} days",
+  "web.operator.volume.kind": "Kind",
+  "web.operator.volume.noDays": "No notifications this month yet.",
+  "web.operator.volume.perDayLabel": "Notifications per day, push and in-app",
+  "web.operator.volume.push": "Push",
   "web.shell.clockLabel": "A railway clock showing the current time",
   "web.shell.operatorConsole": "Operator console",
   "web.signIn.backToStart": "Back to klokka",
@@ -1992,6 +2122,9 @@ export type MessageParams = {
   "web.colour.PRIMARY": Record<never, never>;
   "web.colour.PURPLE": Record<never, never>;
   "web.colour.YELLOW": Record<never, never>;
+  "web.csv.downloaded": { file: string | number };
+  "web.csv.monthBody": Record<never, never>;
+  "web.csv.personBody": { name: string | number };
   "web.emoji.bag": Record<never, never>;
   "web.emoji.bee": Record<never, never>;
   "web.emoji.bicycle": Record<never, never>;
@@ -2036,11 +2169,70 @@ export type MessageParams = {
   "web.join.revoked": { name: string | number };
   "web.join.signedIn": Record<never, never>;
   "web.join.toSignIn": Record<never, never>;
+  "web.month.closedBy": { date: string | number; name: string | number };
+  "web.month.closedToast": { month: string | number };
+  "web.month.closedToastBody": Record<never, never>;
+  "web.month.daysWithHours": { count: string | number };
+  "web.month.editedTimes": { count: string | number };
+  "web.month.flagRaised": { name: string | number };
+  "web.month.lastMonthHours": { hours: string | number };
+  "web.month.noDays": { month: string | number };
+  "web.month.noPeople": Record<never, never>;
+  "web.month.person": Record<never, never>;
+  "web.month.pickDay": Record<never, never>;
+  "web.month.rateBeforeTax": { rate: string | number };
+  "web.month.saveFirst": Record<never, never>;
+  "web.month.suggests": { hours: string | number; name: string | number };
+  "web.month.unlockedToast": { month: string | number };
+  "web.month.unlockedToastBody": Record<never, never>;
   "web.newWorkspace.currencyNote": Record<never, never>;
   "web.newWorkspace.headlineA": Record<never, never>;
   "web.newWorkspace.headlineB": Record<never, never>;
   "web.newWorkspace.nameRequired": Record<never, never>;
   "web.notFound.title": Record<never, never>;
+  "web.operator.account": Record<never, never>;
+  "web.operator.empty": Record<never, never>;
+  "web.operator.health.DEGRADED": Record<never, never>;
+  "web.operator.health.DOWN": Record<never, never>;
+  "web.operator.health.UP": Record<never, never>;
+  "web.operator.health.api": Record<never, never>;
+  "web.operator.health.checked": Record<never, never>;
+  "web.operator.health.down": Record<never, never>;
+  "web.operator.health.ms": { value: string | number };
+  "web.operator.health.noDeploys": Record<never, never>;
+  "web.operator.health.uptime": Record<never, never>;
+  "web.operator.health.uptimeDays": { days: string | number; hours: string | number };
+  "web.operator.health.uptimeHours": { hours: string | number; minutes: string | number };
+  "web.operator.health.version": Record<never, never>;
+  "web.operator.invitations.acceptedOn": { date: string | number };
+  "web.operator.invitations.expiredOn": { date: string | number };
+  "web.operator.invitations.resendFor": { email: string | number };
+  "web.operator.invitations.resent": { email: string | number };
+  "web.operator.kind.ENTRY_FLAGGED": Record<never, never>;
+  "web.operator.kind.FLAG_RESOLVED": Record<never, never>;
+  "web.operator.kind.HOURS_CHANGED": Record<never, never>;
+  "web.operator.kind.INVITE_ACCEPTED": Record<never, never>;
+  "web.operator.kind.MONTH_CLOSED": Record<never, never>;
+  "web.operator.kind.MONTH_REOPENED": Record<never, never>;
+  "web.operator.navigation": Record<never, never>;
+  "web.operator.none": Record<never, never>;
+  "web.operator.serverSide": Record<never, never>;
+  "web.operator.tab.invitations": Record<never, never>;
+  "web.operator.tab.workspaces": Record<never, never>;
+  "web.operator.users.created": Record<never, never>;
+  "web.operator.users.employeeAt": { count: string | number };
+  "web.operator.users.employerOf": { count: string | number };
+  "web.operator.users.never": Record<never, never>;
+  "web.operator.users.noWorkspace": Record<never, never>;
+  "web.operator.users.pushNo": Record<never, never>;
+  "web.operator.users.pushYes": Record<never, never>;
+  "web.operator.volume.count": Record<never, never>;
+  "web.operator.volume.day": Record<never, never>;
+  "web.operator.volume.inDays": { count: string | number };
+  "web.operator.volume.kind": Record<never, never>;
+  "web.operator.volume.noDays": Record<never, never>;
+  "web.operator.volume.perDayLabel": Record<never, never>;
+  "web.operator.volume.push": Record<never, never>;
   "web.shell.clockLabel": Record<never, never>;
   "web.shell.operatorConsole": Record<never, never>;
   "web.signIn.backToStart": Record<never, never>;
@@ -2155,6 +2347,9 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "overview.weekdaysLeft",
   "role.employeeAtWorkspaces",
   "role.employerPeople",
+  "web.month.daysWithHours",
+  "web.month.editedTimes",
+  "web.operator.volume.inDays",
   "web.week.notify",
   "web.week.savedBody",
   "web.week.unsaved",

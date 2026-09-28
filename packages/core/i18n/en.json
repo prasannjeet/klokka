@@ -809,6 +809,89 @@
       "emptyBody": "Add an employee first. Invited people can be logged right away.",
       "failed": "Nothing was saved. The cells with a red ring need another look.",
       "flagged": "open flag"
+    },
+    "month": {
+      "closedToast": "{month} is closed.",
+      "closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+      "unlockedToast": "{month} is open again.",
+      "unlockedToastBody": "Entries can change again. Close it once you are done.",
+      "saveFirst": "Save or discard the changes before closing the month.",
+      "closedBy": "Closed {date} by {name}",
+      "lastMonthHours": "({hours})",
+      "noDays": "Nothing logged in {month} yet.",
+      "pickDay": "Pick a day in the calendar to see its hours, note and history.",
+      "daysWithHours_one": "{count} day with hours",
+      "daysWithHours_other": "{count} days with hours",
+      "rateBeforeTax": "{rate} per hour, before tax",
+      "person": "Employee",
+      "noPeople": "No employees yet. Add one and their month shows up here.",
+      "flagRaised": "{name} flagged this day",
+      "suggests": "{name} suggests {hours}",
+      "editedTimes_one": "edited {count} time",
+      "editedTimes_other": "edited {count} times"
+    },
+    "csv": {
+      "downloaded": "{file} downloaded.",
+      "monthBody": "The whole month, one row per person and day, with notes.",
+      "personBody": "One row per day for {name}, with notes."
+    },
+    "operator": {
+      "navigation": "Operator navigation",
+      "account": "Account",
+      "empty": "Nothing matches.",
+      "none": "None yet",
+      "serverSide": "Sorting, filtering and paging happen in the API.",
+      "tab": {
+        "workspaces": "Places",
+        "invitations": "Invites"
+      },
+      "users": {
+        "employerOf": "Employer of {count}",
+        "employeeAt": "Employee at {count}",
+        "noWorkspace": "No workspace",
+        "pushYes": "Registered",
+        "pushNo": "None",
+        "created": "Created",
+        "never": "Never"
+      },
+      "invitations": {
+        "acceptedOn": "Accepted {date}",
+        "expiredOn": "Expired {date}",
+        "resent": "Invitation to {email} sent again.",
+        "resendFor": "Resend the invitation to {email}"
+      },
+      "volume": {
+        "inDays_one": "in {count} day",
+        "inDays_other": "in {count} days",
+        "push": "Push",
+        "kind": "Kind",
+        "count": "Count",
+        "day": "Day",
+        "perDayLabel": "Notifications per day, push and in-app",
+        "noDays": "No notifications this month yet."
+      },
+      "kind": {
+        "HOURS_CHANGED": "Hours added or changed",
+        "INVITE_ACCEPTED": "Invitation accepted",
+        "ENTRY_FLAGGED": "Entry flagged",
+        "FLAG_RESOLVED": "Flag resolved",
+        "MONTH_CLOSED": "Month closed",
+        "MONTH_REOPENED": "Month reopened"
+      },
+      "health": {
+        "UP": "Up",
+        "DEGRADED": "Degraded",
+        "DOWN": "Down",
+        "down": "Something is down",
+        "api": "API",
+        "version": "Version",
+        "uptime": "Uptime",
+        "uptimeDays": "{days} d {hours} h",
+        "uptimeHours": "{hours} h {minutes} min",
+        "checked": "Checked",
+        "ms": "{value} ms",
+        "noDeploys": "No deploys recorded yet."
+      }
     }
   }
 }

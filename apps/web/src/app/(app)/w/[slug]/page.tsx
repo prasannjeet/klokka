@@ -1,5 +1,10 @@
+import { Suspense } from 'react';
 import { WorkspaceHome } from './workspace-home';
 
 export default function WorkspaceHomePage() {
-  return <WorkspaceHome />;
+  return (
+    <Suspense>
+      <WorkspaceHome />
+    </Suspense>
+  );
 }

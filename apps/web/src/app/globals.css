@@ -2839,7 +2839,7 @@
     height: 26px;
     font-size: 11px;
   }
-  .people .chip[aria-selected='true'] .av {
+  .people .chip[aria-pressed='true'] .av {
     box-shadow: 0 0 0 2px var(--on-primary);
   }
   .em-stats {
@@ -3892,5 +3892,12 @@
   /* Room under the last row for the save bar, so nothing hides behind it. */
   body:has(.savebar) .content {
     padding-bottom: calc(var(--space-9) + 200px);
+  }
+}
+
+@layer components {
+  .hist .hist-note {
+    display: block;
+    font-size: 12.5px;
   }
 }
