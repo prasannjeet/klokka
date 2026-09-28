@@ -29,6 +29,10 @@ direct sign-up; it never mentions pricing, tiers or seats.
 A workspace is one business. A user can belong to several workspaces (an employee with two employers,
 an employer who also works for someone). Roles are per workspace.
 
+Wording (CHQ-145): users read "business" (sv "företag") wherever the code says workspace: "Create a business",
+"Choose a business", "Your businesses" / "Skapa ett företag", "Välj företag". Code identifiers, routes (`/w/`),
+API fields and the contract keep `workspace`.
+
 ## The core loop (v1)
 
 1. **Sign up as employer** (email + password through Logto; social logins later). Create a workspace:
