@@ -160,6 +160,20 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                    <!-- The packaged jar runs with the prod profile, whose secrets have no defaults on purpose. The
+                         database values match the Dev Services container the test framework starts for the jar. -->
+                    <environmentVariables>
+                        <KLOKKA_DB_URL>jdbc:postgresql://localhost:5432/klokka</KLOKKA_DB_URL>
+                        <KLOKKA_DB_USER>quarkus</KLOKKA_DB_USER>
+                        <KLOKKA_DB_PASSWORD>quarkus</KLOKKA_DB_PASSWORD>
+                        <KLOKKA_DB_MIGRATE_USER>quarkus</KLOKKA_DB_MIGRATE_USER>
+                        <KLOKKA_DB_MIGRATE_PASSWORD>quarkus</KLOKKA_DB_MIGRATE_PASSWORD>
+                        <KLOKKA_LOGTO_M2M_CLIENT_ID>integration-test</KLOKKA_LOGTO_M2M_CLIENT_ID>
+                        <KLOKKA_LOGTO_M2M_CLIENT_SECRET>integration-test</KLOKKA_LOGTO_M2M_CLIENT_SECRET>
+                        <KLOKKA_MAIL_USERNAME>integration-test</KLOKKA_MAIL_USERNAME>
+                        <KLOKKA_MAIL_PASSWORD>integration-test</KLOKKA_MAIL_PASSWORD>
+                        <KLOKKA_MAIL_START_TLS>DISABLED</KLOKKA_MAIL_START_TLS>
+                    </environmentVariables>
                 </configuration>
             </plugin>
         </plugins>

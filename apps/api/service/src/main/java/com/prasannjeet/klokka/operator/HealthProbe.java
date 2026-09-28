@@ -23,7 +23,6 @@ import java.time.Duration;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 // Live probes for the operator health page: Postgres (one query), Logto (Management API self-check), SMTP (a TCP
@@ -111,9 +110,5 @@ public class HealthProbe {
 
     private static long ms(long startedNanos) {
         return (System.nanoTime() - startedNanos) / 1_000_000;
-    }
-
-    static Optional<String> none() {
-        return Optional.empty();
     }
 }

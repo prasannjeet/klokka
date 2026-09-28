@@ -182,7 +182,7 @@ public class EntryService {
             MembershipEntity member = members.computeIfAbsent(row.membershipId,
                     mid -> memberships.findMember(id, mid).orElseThrow(() -> notFound("Member " + mid)));
             boolean locked = lockedMonths.contains(row.workDate.withDayOfMonth(1));
-            out.add(EntryViews.toEntry(a, row, member, names, counts.getOrDefault(row.id, 0L), flagged.get(row.id), Set.of(), locked));
+            out.add(EntryViews.toEntry(a, row, member, names, counts.getOrDefault(row.id, 0L), flagged.get(row.id), locked));
         }
         return out;
     }

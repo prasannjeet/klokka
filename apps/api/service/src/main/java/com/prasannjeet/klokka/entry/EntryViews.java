@@ -14,7 +14,6 @@ import com.prasannjeet.klokka.persistence.MembershipRepository;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -47,7 +46,7 @@ public final class EntryViews {
     }
 
     public static Entry toEntry(Access access, HourEntryEntity e, MembershipEntity member, Names names, long changeCount,
-            EntryFlagEntity flag, Set<UUID> lockedMonthsIds, boolean locked) {
+            EntryFlagEntity flag, boolean locked) {
         boolean rate = MemberViews.maySeeRate(access, member);
         Entry entry = new Entry()
                 .id(e.id)

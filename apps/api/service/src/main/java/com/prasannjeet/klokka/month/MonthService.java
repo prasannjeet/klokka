@@ -28,7 +28,6 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
@@ -196,9 +195,5 @@ public class MonthService {
         lock.ifPresent(l -> status.lockedBy(new Actor().userId(l.lockedBy)
                 .name(memberships.findByUser(a.workspaceId(), l.lockedBy).map(m -> m.displayName).orElse(l.lockedBy))));
         return status;
-    }
-
-    static Instant now(Clock clock) {
-        return clock.instant();
     }
 }

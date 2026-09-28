@@ -9,7 +9,6 @@ import com.prasannjeet.klokka.support.TestData;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -92,9 +91,5 @@ class WebhookResourceTest {
                 + (email == null ? "" : ",\"primaryEmail\":\"" + email + "\"")
                 + (name == null ? "" : ",\"name\":\"" + name + "\"")
                 + ",\"customData\":{},\"avatar\":null}}";
-    }
-
-    static BigDecimal bd(String s) {
-        return new BigDecimal(s);
     }
 }

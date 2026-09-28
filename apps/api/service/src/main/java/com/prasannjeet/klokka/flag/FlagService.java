@@ -8,7 +8,6 @@ import static com.prasannjeet.klokka.error.ProblemCode.FLAG_ALREADY_OPEN;
 
 import com.prasannjeet.klokka.auth.Access;
 import com.prasannjeet.klokka.auth.WorkspaceAccess;
-import com.prasannjeet.klokka.contract.model.Actor;
 import com.prasannjeet.klokka.contract.model.EntryChangeKind;
 import com.prasannjeet.klokka.contract.model.Flag;
 import com.prasannjeet.klokka.contract.model.FlagCreate;
@@ -161,9 +160,5 @@ public class FlagService {
                     .note(f.resolutionNote));
         }
         return flag;
-    }
-
-    static Actor actor(String id, String name) {
-        return new Actor().userId(id).name(name);
     }
 }

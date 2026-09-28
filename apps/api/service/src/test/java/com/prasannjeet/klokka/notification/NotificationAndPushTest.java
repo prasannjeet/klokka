@@ -19,8 +19,6 @@ import io.quarkus.test.security.oidc.Claim;
 import io.quarkus.test.security.oidc.OidcSecurity;
 import jakarta.inject.Inject;
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -188,13 +186,5 @@ class NotificationAndPushTest {
             for (Map<String, Object> m : batch) if (token.equals(m.get("to"))) out.add(m);
         }
         return out;
-    }
-
-    static Instant at(String iso) {
-        return Instant.parse(iso);
-    }
-
-    static LocalDate date(String iso) {
-        return LocalDate.parse(iso);
     }
 }

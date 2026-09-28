@@ -4,7 +4,6 @@ import static com.prasannjeet.klokka.contract.model.MemberStatus.ACTIVE;
 
 import com.prasannjeet.klokka.auth.Access;
 import com.prasannjeet.klokka.auth.WorkspaceAccess;
-import com.prasannjeet.klokka.contract.model.Actor;
 import com.prasannjeet.klokka.contract.model.BusiestDay;
 import com.prasannjeet.klokka.contract.model.CurrentWeek;
 import com.prasannjeet.klokka.contract.model.CurrentWeekDay;
@@ -355,9 +354,5 @@ public class InsightService {
 
     static BigDecimal percent(BigDecimal delta, BigDecimal base) {
         return base.signum() == 0 ? BigDecimal.ZERO : delta.multiply(HUNDRED).divide(base, 1, RoundingMode.HALF_UP);
-    }
-
-    static Actor actor(String userId, String name) {
-        return new Actor().userId(userId).name(name);
     }
 }

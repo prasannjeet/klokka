@@ -9,8 +9,9 @@ import io.smallrye.health.api.Wellness;
 import org.eclipse.microprofile.health.HealthCheckResponse;
 import org.jboss.logging.Logger;
 
-// Logto reachability as a wellness check (/q/health/well) and a log line at startup. Deliberately not readiness:
-// the API serves hours without Logto, so an outage there must never take the pod out of rotation or fail the boot.
+// Logto reachability as a wellness check (/q/health/well) and a log line shortly after startup. Deliberately not
+// readiness, and off the boot thread: the API serves hours without Logto, so an outage there must never take the
+// pod out of rotation, fail the boot, or even delay it.
 @Wellness
 @ApplicationScoped
 public class LogtoHealth implements HealthCheck {
@@ -21,9 +22,11 @@ public class LogtoHealth implements HealthCheck {
     LogtoService logto;
 
     void onStart(@Observes StartupEvent event) {
-        LogtoService.SelfCheck check = logto.selfCheck();
-        if (check.reachable()) LOG.infof("Logto Management API reachable (%d ms)", check.latencyMs());
-        else LOG.warnf("Logto Management API NOT reachable at startup: %s (workspace creation and invitations will fail until it is)", check.detail());
+        Thread.ofVirtual().name("logto-self-check").start(() -> {
+            LogtoService.SelfCheck check = logto.selfCheck();
+            if (check.reachable()) LOG.infof("Logto Management API reachable (%d ms)", check.latencyMs());
+            else LOG.warnf("Logto Management API NOT reachable at startup: %s (workspace creation and invitations will fail until it is)", check.detail());
+        });
     }
 
     @Override
