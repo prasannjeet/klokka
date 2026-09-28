@@ -12,6 +12,9 @@
   "files": [
     "src"
   ],
+  "publishConfig": {
+    "registry": "https://nexus.coolify.ooguy.com/repository/npm-hosted/"
+  },
   "scripts": {
     "generate": "node scripts/generate.mjs",
     "check": "node scripts/generate.mjs --check",

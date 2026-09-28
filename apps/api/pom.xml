@@ -22,6 +22,19 @@
         <module>service</module>
     </modules>
 
+    <!-- CI publishes the parent and the contract here (docs/DECISIONS.md D13): `mvn -pl contract -am deploy` with a
+         settings.xml whose server ids match these. The service is never deployed as a Maven artifact (it ships as an image). -->
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>https://nexus.coolify.ooguy.com/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>https://nexus.coolify.ooguy.com/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <properties>
         <!-- JDK 25 everywhere (docs/DECISIONS.md D7). ~/.sdkman/candidates/java/25.0.2-amzn on this host. -->
         <maven.compiler.release>25</maven.compiler.release>
@@ -40,6 +53,7 @@
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
         <jar-plugin.version>3.4.2</jar-plugin.version>
+        <deploy-plugin.version>3.1.4</deploy-plugin.version>
         <skipITs>true</skipITs>
     </properties>
 
@@ -91,6 +105,13 @@
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${jar-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${deploy-plugin.version}</version>
+                    <configuration>
+                        <retryFailedDeploymentCount>3</retryFailedDeploymentCount>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.openapitools</groupId>
