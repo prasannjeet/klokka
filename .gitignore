@@ -5,6 +5,7 @@
 .agents/local.json
 .agents/local-credentials.json
 .agents/local-credentials/
+.agents/local-credentials
 apps/mobile/google-services.json
 *.keystore
 *.jks

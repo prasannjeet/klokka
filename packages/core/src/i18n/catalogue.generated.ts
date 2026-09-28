@@ -630,6 +630,192 @@ export const sv = {
   "status.openForEdits": "Öppen för ändringar",
   "status.pending": "Väntar",
   "status.revoked": "Återkallad",
+  "web.colour.BLUE": "Hallon",
+  "web.colour.GREEN": "Blågrön",
+  "web.colour.INK": "Violett",
+  "web.colour.PRIMARY": "Magenta",
+  "web.colour.PURPLE": "Bärnsten",
+  "web.colour.YELLOW": "Gul",
+  "web.csv.downloaded": "{file} har laddats ner.",
+  "web.csv.monthBody": "Hela månaden, en rad per person och dag, med anteckningar.",
+  "web.csv.personBody": "En rad per dag för {name}, med anteckningar.",
+  "web.emoji.bag": "Shoppingkasse",
+  "web.emoji.bee": "Bi",
+  "web.emoji.bicycle": "Cykel",
+  "web.emoji.bread": "Bröd",
+  "web.emoji.cat": "Katt",
+  "web.emoji.coffee": "Kaffe",
+  "web.emoji.flower": "Blomma",
+  "web.emoji.leaf": "Löv",
+  "web.emoji.music": "Musik",
+  "web.emoji.palette": "Färgpalett",
+  "web.emoji.rocket": "Raket",
+  "web.emoji.scissors": "Sax",
+  "web.emoji.sparkles": "Gnistor",
+  "web.emoji.star": "Stjärna",
+  "web.emoji.sun": "Sol",
+  "web.emoji.wave": "Våg",
+  "web.employees.deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
+  "web.employees.emptyTitle": "Ingen här än",
+  "web.employees.invitationExpired": "Inbjudan gick ut {date}",
+  "web.employees.invited": "Inbjudan skickad till {email}.",
+  "web.employees.invitedOn": "Inbjuden {sent}, går ut {expires}",
+  "web.employees.moreFor": "Mer för {name}",
+  "web.employees.noRate": "Ingen timlön",
+  "web.employees.perHourSuffix": "{currency} per timme",
+  "web.employees.rateSaved": "Timlönen för {name} är sparad.",
+  "web.employees.rateTitle": "Timlön för {name}",
+  "web.employees.reactivatedToast": "{name} är aktiv igen.",
+  "web.employees.withdraw": "Dra tillbaka inbjudan",
+  "web.employees.withdrawHint": "Länken i mejlet slutar fungera och {name} försvinner från listan.",
+  "web.employees.withdrawTitle": "Dra tillbaka inbjudan till {name}?",
+  "web.employees.withdrawn": "Inbjudan till {name} är tillbakadragen.",
+  "web.errorPage.title": "Något gick fel",
+  "web.flags.hoursField": "Timmar",
+  "web.flags.hoursLabel": "Timmar du jobbade (valfritt)",
+  "web.flags.messageRequired": "Skriv ett kort meddelande så att {name} vet vad som ska rättas.",
+  "web.flags.onDay": "h den {date}",
+  "web.flags.reason": "Vad är fel",
+  "web.flags.sent": "Flaggan skickad till {name}.",
+  "web.flags.who": "{name}, {date}",
+  "web.flags.youFlagged": "Du har flaggat den här posten. Arbetsgivaren tittar på det.",
+  "web.flags.youSuggested": "Du har flaggat den: {suggested} i stället för {logged}. Arbetsgivaren tittar på det.",
+  "web.join.acceptedBody": "Varje timme {employer} loggar för dig syns i Klokka i samma stund som den ändras. Hämta appen för notiser i mobilen, eller fortsätt här.",
+  "web.join.alreadyAccepted": "Den här inbjudan är redan accepterad.",
+  "web.join.appHint": "En direkt nedladdning för Android så länge Klokka inte finns i Google Play.",
+  "web.join.headlineA": "{name} bjöd in dig till",
+  "web.join.headlineB": "{workspace}.",
+  "web.join.hosted": "Gå med öppnar Klokkas registreringssida med din e-post ifylld. Välj ett lösenord där så kommer du direkt tillbaka.",
+  "web.join.inviterLine": "{name}, arbetsgivare",
+  "web.join.notFound": "Den här inbjudningslänken fungerar inte. Kontrollera att du öppnade hela länken från mejlet.",
+  "web.join.otherAccount": "Logga in med {email}",
+  "web.join.revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
+  "web.join.signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
+  "web.join.toSignIn": "Till inloggningen",
+  "web.month.closedBy": "Stängd {date} av {name}",
+  "web.month.closedToast": "{month} är stängd.",
+  "web.month.closedToastBody": "Alla på arbetsplatsen får veta det, och CSV-filen är klar.",
+  "web.month.daysWithHours_one": "{count} dag med timmar",
+  "web.month.daysWithHours_other": "{count} dagar med timmar",
+  "web.month.editedTimes_one": "ändrad {count} gång",
+  "web.month.editedTimes_other": "ändrad {count} gånger",
+  "web.month.flagRaised": "{name} flaggade den här dagen",
+  "web.month.lastMonthHours": "({hours})",
+  "web.month.noDays": "Inget loggat i {month} än.",
+  "web.month.noPeople": "Inga anställda än. Lägg till en så syns hens månad här.",
+  "web.month.person": "Anställd",
+  "web.month.pickDay": "Välj en dag i kalendern för att se timmar, anteckning och historik.",
+  "web.month.rateBeforeTax": "{rate} per timme, före skatt",
+  "web.month.saveFirst": "Spara eller släng ändringarna innan du stänger månaden.",
+  "web.month.suggests": "{name} föreslår {hours}",
+  "web.month.unlockedToast": "{month} är öppen igen.",
+  "web.month.unlockedToastBody": "Poster kan ändras igen. Stäng den när du är klar.",
+  "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
+  "web.newWorkspace.headlineA": "Gör det till",
+  "web.newWorkspace.headlineB": "ditt ställe.",
+  "web.newWorkspace.nameRequired": "Ge arbetsplatsen ett namn.",
+  "web.notFound.title": "Här finns inget",
+  "web.notifications.loadMore": "Visa äldre",
+  "web.notifications.seeDay": "Se dagen",
+  "web.notifications.seeEmployees": "Se anställda",
+  "web.notifications.seeMonth": "Se månaden",
+  "web.notifications.unreadDot": "Oläst",
+  "web.operator.account": "Konto",
+  "web.operator.empty": "Inget matchar.",
+  "web.operator.health.DEGRADED": "Försämrad",
+  "web.operator.health.DOWN": "Nere",
+  "web.operator.health.UP": "Uppe",
+  "web.operator.health.api": "API",
+  "web.operator.health.checked": "Kontrollerad",
+  "web.operator.health.down": "Något är nere",
+  "web.operator.health.ms": "{value} ms",
+  "web.operator.health.noDeploys": "Inga driftsättningar registrerade än.",
+  "web.operator.health.uptime": "Drifttid",
+  "web.operator.health.uptimeDays": "{days} d {hours} h",
+  "web.operator.health.uptimeHours": "{hours} h {minutes} min",
+  "web.operator.health.version": "Version",
+  "web.operator.invitations.acceptedOn": "Accepterad {date}",
+  "web.operator.invitations.expiredOn": "Gick ut {date}",
+  "web.operator.invitations.resendFor": "Skicka inbjudan till {email} igen",
+  "web.operator.invitations.resent": "Inbjudan till {email} skickad igen.",
+  "web.operator.kind.ENTRY_FLAGGED": "Post flaggad",
+  "web.operator.kind.FLAG_RESOLVED": "Flagga löst",
+  "web.operator.kind.HOURS_CHANGED": "Timmar tillagda eller ändrade",
+  "web.operator.kind.INVITE_ACCEPTED": "Inbjudan accepterad",
+  "web.operator.kind.MONTH_CLOSED": "Månad stängd",
+  "web.operator.kind.MONTH_REOPENED": "Månad öppnad igen",
+  "web.operator.navigation": "Operatörsnavigering",
+  "web.operator.none": "Inga än",
+  "web.operator.serverSide": "Sortering, filtrering och sidindelning sker i API:et.",
+  "web.operator.tab.invitations": "Inbjudna",
+  "web.operator.tab.workspaces": "Platser",
+  "web.operator.users.created": "Skapad",
+  "web.operator.users.employeeAt": "Anställd på {count}",
+  "web.operator.users.employerOf": "Arbetsgivare för {count}",
+  "web.operator.users.never": "Aldrig",
+  "web.operator.users.noWorkspace": "Ingen arbetsplats",
+  "web.operator.users.pushNo": "Ingen",
+  "web.operator.users.pushYes": "Registrerad",
+  "web.operator.volume.count": "Antal",
+  "web.operator.volume.day": "Dag",
+  "web.operator.volume.inDays_one": "om {count} dag",
+  "web.operator.volume.inDays_other": "om {count} dagar",
+  "web.operator.volume.kind": "Typ",
+  "web.operator.volume.noDays": "Inga notiser den här månaden än.",
+  "web.operator.volume.perDayLabel": "Notiser per dag, push och i appen",
+  "web.operator.volume.push": "Push",
+  "web.overview.lastMonthOver": "{month} är slut; det här är de slutliga siffrorna.",
+  "web.overview.noRecent": "Inget nytt än.",
+  "web.overview.nothingLoggedAll": "Varje arbetsdag hittills har timmar.",
+  "web.overview.projectedLine": "Beräknat månadsslut {projected}, {lastMonth}",
+  "web.profile.appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast.",
+  "web.profile.employerAt_one": "Arbetsgivare på {count} arbetsplats",
+  "web.profile.employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+  "web.profile.nameRequired": "Namnet kan inte vara tomt.",
+  "web.settings.dayLengthInvalid": "Ange en daglängd mellan 0,25 och 24 timmar.",
+  "web.settings.noDevice": "Ingen telefon är inloggad på det här kontot än.",
+  "web.settings.payDemoLabel": "{name}, en hel dag",
+  "web.settings.payHiddenBody": "Klokka visar bara timmar, för dig och för varje anställd.",
+  "web.settings.payHiddenTitle": "Lön är dold",
+  "web.settings.payShownBody": "Varje anställd ser sin timlön och intjäning från och med nu.",
+  "web.settings.payShownTitle": "Lön visas nu",
+  "web.settings.saved": "Sparat",
+  "web.share.bestWeekValue": "bästa veckan {hours}",
+  "web.share.dayAverage": "{hours} om dagen",
+  "web.share.daysValue_one": "{count} dag",
+  "web.share.daysValue_other": "{count} dagar",
+  "web.share.downloaded": "Bilden är sparad.",
+  "web.share.failed": "Bilden kunde inte skapas. Försök igen.",
+  "web.shell.clockLabel": "En järnvägsklocka som visar tiden just nu",
+  "web.shell.operatorConsole": "Operatörskonsol",
+  "web.signIn.backToStart": "Tillbaka till klokka",
+  "web.signIn.headlineA": "En klocka.",
+  "web.signIn.headlineB": "Båda sidor.",
+  "web.signIn.hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
+  "web.signIn.pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
+  "web.signIn.pointRoles": "Arbetsgivare och anställda loggar in här",
+  "web.signIn.pointWorkspaces": "Flera arbetsplatser, en inloggning",
+  "web.week.cellLabel": "{name}, {date}",
+  "web.week.discard": "Släng",
+  "web.week.emptyBody": "Lägg till en anställd först. Inbjudna kan loggas direkt.",
+  "web.week.emptyTitle": "Ingen att logga timmar för än",
+  "web.week.failed": "Inget sparades. Rutorna med röd ring behöver ses över.",
+  "web.week.flagged": "öppen flagga",
+  "web.week.locked": "stängd",
+  "web.week.noteLabel": "Anteckning: {note}",
+  "web.week.nothingToFill": "Varje vardag har redan timmar.",
+  "web.week.nothingYesterday": "Inget loggat dagen innan, så det finns inget att kopiera.",
+  "web.week.notify_one": "{names} får en notis när du sparar.",
+  "web.week.notify_other": "{names} får en notis var när du sparar.",
+  "web.week.saved": "Sparat i en omgång",
+  "web.week.savedBody_one": "{names} får en notis för det här tillfället.",
+  "web.week.savedBody_other": "{names} får en notis var för det här tillfället.",
+  "web.week.selectFirst": "Välj en ruta först",
+  "web.week.selectFirstBody": "Klicka på en dag för en person och välj sedan en knapp.",
+  "web.week.unsavedBody": "Spara eller släng dem innan du byter vecka.",
+  "web.week.unsavedTitle": "Osparade ändringar",
+  "web.week.unsaved_one": "{count} osparad ändring",
+  "web.week.unsaved_other": "{count} osparade ändringar",
   "week.addHoursFor": "Lägg till timmar för {name}",
   "week.addHoursForDay": "Lägg till timmar för {day}",
   "week.closeMonth": "Stäng {month}",
@@ -1325,6 +1511,192 @@ export const en = {
   "status.openForEdits": "Open for edits",
   "status.pending": "Pending",
   "status.revoked": "Revoked",
+  "web.colour.BLUE": "Raspberry",
+  "web.colour.GREEN": "Teal",
+  "web.colour.INK": "Violet",
+  "web.colour.PRIMARY": "Magenta",
+  "web.colour.PURPLE": "Amber",
+  "web.colour.YELLOW": "Yellow",
+  "web.csv.downloaded": "{file} downloaded.",
+  "web.csv.monthBody": "The whole month, one row per person and day, with notes.",
+  "web.csv.personBody": "One row per day for {name}, with notes.",
+  "web.emoji.bag": "Shopping bag",
+  "web.emoji.bee": "Bee",
+  "web.emoji.bicycle": "Bicycle",
+  "web.emoji.bread": "Bread",
+  "web.emoji.cat": "Cat",
+  "web.emoji.coffee": "Coffee",
+  "web.emoji.flower": "Flower",
+  "web.emoji.leaf": "Leaf",
+  "web.emoji.music": "Music",
+  "web.emoji.palette": "Paint palette",
+  "web.emoji.rocket": "Rocket",
+  "web.emoji.scissors": "Scissors",
+  "web.emoji.sparkles": "Sparkles",
+  "web.emoji.star": "Star",
+  "web.emoji.sun": "Sun",
+  "web.emoji.wave": "Wave",
+  "web.employees.deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
+  "web.employees.emptyTitle": "No one here yet",
+  "web.employees.invitationExpired": "Invitation expired {date}",
+  "web.employees.invited": "Invitation sent to {email}.",
+  "web.employees.invitedOn": "Invited {sent}, expires {expires}",
+  "web.employees.moreFor": "More for {name}",
+  "web.employees.noRate": "No rate",
+  "web.employees.perHourSuffix": "{currency} per hour",
+  "web.employees.rateSaved": "Rate saved for {name}.",
+  "web.employees.rateTitle": "Hourly rate for {name}",
+  "web.employees.reactivatedToast": "{name} is active again.",
+  "web.employees.withdraw": "Withdraw invitation",
+  "web.employees.withdrawHint": "The link in the email stops working and {name} disappears from the list.",
+  "web.employees.withdrawTitle": "Withdraw the invitation to {name}?",
+  "web.employees.withdrawn": "Invitation to {name} withdrawn.",
+  "web.errorPage.title": "Something went wrong",
+  "web.flags.hoursField": "Hours",
+  "web.flags.hoursLabel": "Hours you worked (optional)",
+  "web.flags.messageRequired": "Write a short message so {name} knows what to fix.",
+  "web.flags.onDay": "h on {date}",
+  "web.flags.reason": "What is wrong",
+  "web.flags.sent": "Flag sent to {name}.",
+  "web.flags.who": "{name}, {date}",
+  "web.flags.youFlagged": "You flagged this entry. The employer is looking at it.",
+  "web.flags.youSuggested": "You flagged it: {suggested} instead of {logged}. The employer is looking at it.",
+  "web.join.acceptedBody": "Every hour {employer} logs for you shows up in Klokka the moment it changes. Get the app for notifications on your phone, or carry on here.",
+  "web.join.alreadyAccepted": "This invitation has already been accepted.",
+  "web.join.appHint": "A direct download for Android while Klokka is not in Google Play yet.",
+  "web.join.headlineA": "{name} invited you to",
+  "web.join.headlineB": "{workspace}.",
+  "web.join.hosted": "Joining opens Klokka's sign-up page with your email filled in. Choose a password there and you come straight back.",
+  "web.join.inviterLine": "{name}, employer",
+  "web.join.notFound": "This invitation link does not work. Check that you opened the whole link from the email.",
+  "web.join.otherAccount": "Sign in with {email}",
+  "web.join.revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
+  "web.join.signedIn": "You are signed in. Joining takes one click.",
+  "web.join.toSignIn": "Go to sign in",
+  "web.month.closedBy": "Closed {date} by {name}",
+  "web.month.closedToast": "{month} is closed.",
+  "web.month.closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+  "web.month.daysWithHours_one": "{count} day with hours",
+  "web.month.daysWithHours_other": "{count} days with hours",
+  "web.month.editedTimes_one": "edited {count} time",
+  "web.month.editedTimes_other": "edited {count} times",
+  "web.month.flagRaised": "{name} flagged this day",
+  "web.month.lastMonthHours": "({hours})",
+  "web.month.noDays": "Nothing logged in {month} yet.",
+  "web.month.noPeople": "No employees yet. Add one and their month shows up here.",
+  "web.month.person": "Employee",
+  "web.month.pickDay": "Pick a day in the calendar to see its hours, note and history.",
+  "web.month.rateBeforeTax": "{rate} per hour, before tax",
+  "web.month.saveFirst": "Save or discard the changes before closing the month.",
+  "web.month.suggests": "{name} suggests {hours}",
+  "web.month.unlockedToast": "{month} is open again.",
+  "web.month.unlockedToastBody": "Entries can change again. Close it once you are done.",
+  "web.newWorkspace.currencyNote": "(only shown if pay is on)",
+  "web.newWorkspace.headlineA": "Make it",
+  "web.newWorkspace.headlineB": "your place.",
+  "web.newWorkspace.nameRequired": "Give the workspace a name.",
+  "web.notFound.title": "Nothing here",
+  "web.notifications.loadMore": "Show older",
+  "web.notifications.seeDay": "See the day",
+  "web.notifications.seeEmployees": "See employees",
+  "web.notifications.seeMonth": "See the month",
+  "web.notifications.unreadDot": "Unread",
+  "web.operator.account": "Account",
+  "web.operator.empty": "Nothing matches.",
+  "web.operator.health.DEGRADED": "Degraded",
+  "web.operator.health.DOWN": "Down",
+  "web.operator.health.UP": "Up",
+  "web.operator.health.api": "API",
+  "web.operator.health.checked": "Checked",
+  "web.operator.health.down": "Something is down",
+  "web.operator.health.ms": "{value} ms",
+  "web.operator.health.noDeploys": "No deploys recorded yet.",
+  "web.operator.health.uptime": "Uptime",
+  "web.operator.health.uptimeDays": "{days} d {hours} h",
+  "web.operator.health.uptimeHours": "{hours} h {minutes} min",
+  "web.operator.health.version": "Version",
+  "web.operator.invitations.acceptedOn": "Accepted {date}",
+  "web.operator.invitations.expiredOn": "Expired {date}",
+  "web.operator.invitations.resendFor": "Resend the invitation to {email}",
+  "web.operator.invitations.resent": "Invitation to {email} sent again.",
+  "web.operator.kind.ENTRY_FLAGGED": "Entry flagged",
+  "web.operator.kind.FLAG_RESOLVED": "Flag resolved",
+  "web.operator.kind.HOURS_CHANGED": "Hours added or changed",
+  "web.operator.kind.INVITE_ACCEPTED": "Invitation accepted",
+  "web.operator.kind.MONTH_CLOSED": "Month closed",
+  "web.operator.kind.MONTH_REOPENED": "Month reopened",
+  "web.operator.navigation": "Operator navigation",
+  "web.operator.none": "None yet",
+  "web.operator.serverSide": "Sorting, filtering and paging happen in the API.",
+  "web.operator.tab.invitations": "Invites",
+  "web.operator.tab.workspaces": "Places",
+  "web.operator.users.created": "Created",
+  "web.operator.users.employeeAt": "Employee at {count}",
+  "web.operator.users.employerOf": "Employer of {count}",
+  "web.operator.users.never": "Never",
+  "web.operator.users.noWorkspace": "No workspace",
+  "web.operator.users.pushNo": "None",
+  "web.operator.users.pushYes": "Registered",
+  "web.operator.volume.count": "Count",
+  "web.operator.volume.day": "Day",
+  "web.operator.volume.inDays_one": "in {count} day",
+  "web.operator.volume.inDays_other": "in {count} days",
+  "web.operator.volume.kind": "Kind",
+  "web.operator.volume.noDays": "No notifications this month yet.",
+  "web.operator.volume.perDayLabel": "Notifications per day, push and in-app",
+  "web.operator.volume.push": "Push",
+  "web.overview.lastMonthOver": "{month} is over; these are its final figures.",
+  "web.overview.noRecent": "Nothing new yet.",
+  "web.overview.nothingLoggedAll": "Every working day so far has hours.",
+  "web.overview.projectedLine": "Projected month end {projected}, {lastMonth}",
+  "web.profile.appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put.",
+  "web.profile.employerAt_one": "Employer at {count} workspace",
+  "web.profile.employerAt_other": "Employer at {count} workspaces",
+  "web.profile.nameRequired": "Your name cannot be empty.",
+  "web.settings.dayLengthInvalid": "Enter a day length between 0.25 and 24 hours.",
+  "web.settings.noDevice": "No phone is signed in on this account yet.",
+  "web.settings.payDemoLabel": "{name}, a full day",
+  "web.settings.payHiddenBody": "Klokka shows hours only, for you and for every employee.",
+  "web.settings.payHiddenTitle": "Pay is hidden",
+  "web.settings.payShownBody": "Every employee sees their rate and earnings from now on.",
+  "web.settings.payShownTitle": "Pay is now shown",
+  "web.settings.saved": "Saved",
+  "web.share.bestWeekValue": "best week {hours}",
+  "web.share.dayAverage": "{hours} a day",
+  "web.share.daysValue_one": "{count} day",
+  "web.share.daysValue_other": "{count} days",
+  "web.share.downloaded": "Image saved.",
+  "web.share.failed": "The image could not be made. Try again.",
+  "web.shell.clockLabel": "A railway clock showing the current time",
+  "web.shell.operatorConsole": "Operator console",
+  "web.signIn.backToStart": "Back to klokka",
+  "web.signIn.headlineA": "One clock.",
+  "web.signIn.headlineB": "Both sides.",
+  "web.signIn.hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
+  "web.signIn.pointPasswords": "Passwords never touch Klokka's database",
+  "web.signIn.pointRoles": "Employers and employees sign in here",
+  "web.signIn.pointWorkspaces": "Several workspaces, one login",
+  "web.week.cellLabel": "{name}, {date}",
+  "web.week.discard": "Discard",
+  "web.week.emptyBody": "Add an employee first. Invited people can be logged right away.",
+  "web.week.emptyTitle": "No one to log hours for yet",
+  "web.week.failed": "Nothing was saved. The cells with a red ring need another look.",
+  "web.week.flagged": "open flag",
+  "web.week.locked": "closed",
+  "web.week.noteLabel": "Note: {note}",
+  "web.week.nothingToFill": "Every weekday already has hours.",
+  "web.week.nothingYesterday": "Nothing logged the day before, so there is nothing to copy.",
+  "web.week.notify_one": "{names} gets one notification when you save.",
+  "web.week.notify_other": "{names} each get one notification when you save.",
+  "web.week.saved": "Saved as one batch",
+  "web.week.savedBody_one": "{names} gets one notification for this sitting.",
+  "web.week.savedBody_other": "{names} each get one notification for this sitting.",
+  "web.week.selectFirst": "Select a cell first",
+  "web.week.selectFirstBody": "Click a day for a person, then pick a chip.",
+  "web.week.unsavedBody": "Save or discard them before changing week.",
+  "web.week.unsavedTitle": "Unsaved changes",
+  "web.week.unsaved_one": "{count} unsaved change",
+  "web.week.unsaved_other": "{count} unsaved changes",
   "week.addHoursFor": "Add hours for {name}",
   "week.addHoursForDay": "Add hours for {day}",
   "week.closeMonth": "Close {month}",
@@ -2004,6 +2376,184 @@ export type MessageParams = {
   "status.openForEdits": Record<never, never>;
   "status.pending": Record<never, never>;
   "status.revoked": Record<never, never>;
+  "web.colour.BLUE": Record<never, never>;
+  "web.colour.GREEN": Record<never, never>;
+  "web.colour.INK": Record<never, never>;
+  "web.colour.PRIMARY": Record<never, never>;
+  "web.colour.PURPLE": Record<never, never>;
+  "web.colour.YELLOW": Record<never, never>;
+  "web.csv.downloaded": { file: string | number };
+  "web.csv.monthBody": Record<never, never>;
+  "web.csv.personBody": { name: string | number };
+  "web.emoji.bag": Record<never, never>;
+  "web.emoji.bee": Record<never, never>;
+  "web.emoji.bicycle": Record<never, never>;
+  "web.emoji.bread": Record<never, never>;
+  "web.emoji.cat": Record<never, never>;
+  "web.emoji.coffee": Record<never, never>;
+  "web.emoji.flower": Record<never, never>;
+  "web.emoji.leaf": Record<never, never>;
+  "web.emoji.music": Record<never, never>;
+  "web.emoji.palette": Record<never, never>;
+  "web.emoji.rocket": Record<never, never>;
+  "web.emoji.scissors": Record<never, never>;
+  "web.emoji.sparkles": Record<never, never>;
+  "web.emoji.star": Record<never, never>;
+  "web.emoji.sun": Record<never, never>;
+  "web.emoji.wave": Record<never, never>;
+  "web.employees.deactivatedToast": { name: string | number };
+  "web.employees.emptyTitle": Record<never, never>;
+  "web.employees.invitationExpired": { date: string | number };
+  "web.employees.invited": { email: string | number };
+  "web.employees.invitedOn": { expires: string | number; sent: string | number };
+  "web.employees.moreFor": { name: string | number };
+  "web.employees.noRate": Record<never, never>;
+  "web.employees.perHourSuffix": { currency: string | number };
+  "web.employees.rateSaved": { name: string | number };
+  "web.employees.rateTitle": { name: string | number };
+  "web.employees.reactivatedToast": { name: string | number };
+  "web.employees.withdraw": Record<never, never>;
+  "web.employees.withdrawHint": { name: string | number };
+  "web.employees.withdrawTitle": { name: string | number };
+  "web.employees.withdrawn": { name: string | number };
+  "web.errorPage.title": Record<never, never>;
+  "web.flags.hoursField": Record<never, never>;
+  "web.flags.hoursLabel": Record<never, never>;
+  "web.flags.messageRequired": { name: string | number };
+  "web.flags.onDay": { date: string | number };
+  "web.flags.reason": Record<never, never>;
+  "web.flags.sent": { name: string | number };
+  "web.flags.who": { date: string | number; name: string | number };
+  "web.flags.youFlagged": Record<never, never>;
+  "web.flags.youSuggested": { logged: string | number; suggested: string | number };
+  "web.join.acceptedBody": { employer: string | number };
+  "web.join.alreadyAccepted": Record<never, never>;
+  "web.join.appHint": Record<never, never>;
+  "web.join.headlineA": { name: string | number };
+  "web.join.headlineB": { workspace: string | number };
+  "web.join.hosted": Record<never, never>;
+  "web.join.inviterLine": { name: string | number };
+  "web.join.notFound": Record<never, never>;
+  "web.join.otherAccount": { email: string | number };
+  "web.join.revoked": { name: string | number };
+  "web.join.signedIn": Record<never, never>;
+  "web.join.toSignIn": Record<never, never>;
+  "web.month.closedBy": { date: string | number; name: string | number };
+  "web.month.closedToast": { month: string | number };
+  "web.month.closedToastBody": Record<never, never>;
+  "web.month.daysWithHours": { count: string | number };
+  "web.month.editedTimes": { count: string | number };
+  "web.month.flagRaised": { name: string | number };
+  "web.month.lastMonthHours": { hours: string | number };
+  "web.month.noDays": { month: string | number };
+  "web.month.noPeople": Record<never, never>;
+  "web.month.person": Record<never, never>;
+  "web.month.pickDay": Record<never, never>;
+  "web.month.rateBeforeTax": { rate: string | number };
+  "web.month.saveFirst": Record<never, never>;
+  "web.month.suggests": { hours: string | number; name: string | number };
+  "web.month.unlockedToast": { month: string | number };
+  "web.month.unlockedToastBody": Record<never, never>;
+  "web.newWorkspace.currencyNote": Record<never, never>;
+  "web.newWorkspace.headlineA": Record<never, never>;
+  "web.newWorkspace.headlineB": Record<never, never>;
+  "web.newWorkspace.nameRequired": Record<never, never>;
+  "web.notFound.title": Record<never, never>;
+  "web.notifications.loadMore": Record<never, never>;
+  "web.notifications.seeDay": Record<never, never>;
+  "web.notifications.seeEmployees": Record<never, never>;
+  "web.notifications.seeMonth": Record<never, never>;
+  "web.notifications.unreadDot": Record<never, never>;
+  "web.operator.account": Record<never, never>;
+  "web.operator.empty": Record<never, never>;
+  "web.operator.health.DEGRADED": Record<never, never>;
+  "web.operator.health.DOWN": Record<never, never>;
+  "web.operator.health.UP": Record<never, never>;
+  "web.operator.health.api": Record<never, never>;
+  "web.operator.health.checked": Record<never, never>;
+  "web.operator.health.down": Record<never, never>;
+  "web.operator.health.ms": { value: string | number };
+  "web.operator.health.noDeploys": Record<never, never>;
+  "web.operator.health.uptime": Record<never, never>;
+  "web.operator.health.uptimeDays": { days: string | number; hours: string | number };
+  "web.operator.health.uptimeHours": { hours: string | number; minutes: string | number };
+  "web.operator.health.version": Record<never, never>;
+  "web.operator.invitations.acceptedOn": { date: string | number };
+  "web.operator.invitations.expiredOn": { date: string | number };
+  "web.operator.invitations.resendFor": { email: string | number };
+  "web.operator.invitations.resent": { email: string | number };
+  "web.operator.kind.ENTRY_FLAGGED": Record<never, never>;
+  "web.operator.kind.FLAG_RESOLVED": Record<never, never>;
+  "web.operator.kind.HOURS_CHANGED": Record<never, never>;
+  "web.operator.kind.INVITE_ACCEPTED": Record<never, never>;
+  "web.operator.kind.MONTH_CLOSED": Record<never, never>;
+  "web.operator.kind.MONTH_REOPENED": Record<never, never>;
+  "web.operator.navigation": Record<never, never>;
+  "web.operator.none": Record<never, never>;
+  "web.operator.serverSide": Record<never, never>;
+  "web.operator.tab.invitations": Record<never, never>;
+  "web.operator.tab.workspaces": Record<never, never>;
+  "web.operator.users.created": Record<never, never>;
+  "web.operator.users.employeeAt": { count: string | number };
+  "web.operator.users.employerOf": { count: string | number };
+  "web.operator.users.never": Record<never, never>;
+  "web.operator.users.noWorkspace": Record<never, never>;
+  "web.operator.users.pushNo": Record<never, never>;
+  "web.operator.users.pushYes": Record<never, never>;
+  "web.operator.volume.count": Record<never, never>;
+  "web.operator.volume.day": Record<never, never>;
+  "web.operator.volume.inDays": { count: string | number };
+  "web.operator.volume.kind": Record<never, never>;
+  "web.operator.volume.noDays": Record<never, never>;
+  "web.operator.volume.perDayLabel": Record<never, never>;
+  "web.operator.volume.push": Record<never, never>;
+  "web.overview.lastMonthOver": { month: string | number };
+  "web.overview.noRecent": Record<never, never>;
+  "web.overview.nothingLoggedAll": Record<never, never>;
+  "web.overview.projectedLine": { lastMonth: string | number; projected: string | number };
+  "web.profile.appearanceHint": Record<never, never>;
+  "web.profile.employerAt": { count: string | number };
+  "web.profile.nameRequired": Record<never, never>;
+  "web.settings.dayLengthInvalid": Record<never, never>;
+  "web.settings.noDevice": Record<never, never>;
+  "web.settings.payDemoLabel": { name: string | number };
+  "web.settings.payHiddenBody": Record<never, never>;
+  "web.settings.payHiddenTitle": Record<never, never>;
+  "web.settings.payShownBody": Record<never, never>;
+  "web.settings.payShownTitle": Record<never, never>;
+  "web.settings.saved": Record<never, never>;
+  "web.share.bestWeekValue": { hours: string | number };
+  "web.share.dayAverage": { hours: string | number };
+  "web.share.daysValue": { count: string | number };
+  "web.share.downloaded": Record<never, never>;
+  "web.share.failed": Record<never, never>;
+  "web.shell.clockLabel": Record<never, never>;
+  "web.shell.operatorConsole": Record<never, never>;
+  "web.signIn.backToStart": Record<never, never>;
+  "web.signIn.headlineA": Record<never, never>;
+  "web.signIn.headlineB": Record<never, never>;
+  "web.signIn.hosted": Record<never, never>;
+  "web.signIn.pointPasswords": Record<never, never>;
+  "web.signIn.pointRoles": Record<never, never>;
+  "web.signIn.pointWorkspaces": Record<never, never>;
+  "web.week.cellLabel": { date: string | number; name: string | number };
+  "web.week.discard": Record<never, never>;
+  "web.week.emptyBody": Record<never, never>;
+  "web.week.emptyTitle": Record<never, never>;
+  "web.week.failed": Record<never, never>;
+  "web.week.flagged": Record<never, never>;
+  "web.week.locked": Record<never, never>;
+  "web.week.noteLabel": { note: string | number };
+  "web.week.nothingToFill": Record<never, never>;
+  "web.week.nothingYesterday": Record<never, never>;
+  "web.week.notify": { count: string | number; names: string | number };
+  "web.week.saved": Record<never, never>;
+  "web.week.savedBody": { count: string | number; names: string | number };
+  "web.week.selectFirst": Record<never, never>;
+  "web.week.selectFirstBody": Record<never, never>;
+  "web.week.unsavedBody": Record<never, never>;
+  "web.week.unsavedTitle": Record<never, never>;
+  "web.week.unsaved": { count: string | number };
   "week.addHoursFor": { name: string | number };
   "week.addHoursForDay": { day: string | number };
   "week.closeMonth": { month: string | number };
@@ -2092,4 +2642,12 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "overview.weekdaysLeft",
   "role.employeeAtWorkspaces",
   "role.employerPeople",
+  "web.month.daysWithHours",
+  "web.month.editedTimes",
+  "web.operator.volume.inDays",
+  "web.profile.employerAt",
+  "web.share.daysValue",
+  "web.week.notify",
+  "web.week.savedBody",
+  "web.week.unsaved",
 ]);

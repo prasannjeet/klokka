@@ -1,0 +1,40 @@
+/* Operator console additions to the shared vocabulary in globals.css. Tokens only. */
+.op .op-note {
+  padding: 14px 12px 0;
+  text-wrap: pretty;
+}
+.op .topbar .op-tag {
+  margin-left: 8px;
+}
+.op .op-spacer {
+  flex: 1;
+}
+.op .stat-strip {
+  margin-bottom: 20px;
+}
+.op .tbl .num-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.op .tbl-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+.op .kinds .row.head {
+  background: var(--surface);
+}
+.op .svc .top .pill {
+  flex: none;
+}
+.op .chart-wrap {
+  width: 100%;
+  min-width: 0;
+  height: 180px;
+}
+.op .health-status {
+  display: flex;
+  justify-content: flex-end;
+}

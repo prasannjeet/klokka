@@ -816,5 +816,243 @@
     "push": {
       "workspacePrefix": "{workspace}: {title}"
     }
+  },
+  "web": {
+    "shell": {
+      "clockLabel": "En järnvägsklocka som visar tiden just nu",
+      "operatorConsole": "Operatörskonsol"
+    },
+    "signIn": {
+      "headlineA": "En klocka.",
+      "headlineB": "Båda sidor.",
+      "pointRoles": "Arbetsgivare och anställda loggar in här",
+      "pointWorkspaces": "Flera arbetsplatser, en inloggning",
+      "pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
+      "hosted": "Du loggar in på Klokkas säkra inloggningssida och kommer direkt tillbaka hit.",
+      "backToStart": "Tillbaka till klokka"
+    },
+    "errorPage": {
+      "title": "Något gick fel"
+    },
+    "notFound": {
+      "title": "Här finns inget"
+    },
+    "newWorkspace": {
+      "headlineA": "Gör det till",
+      "headlineB": "ditt ställe.",
+      "currencyNote": "(visas bara om lön är på)",
+      "nameRequired": "Ge arbetsplatsen ett namn."
+    },
+    "colour": {
+      "PRIMARY": "Magenta",
+      "BLUE": "Hallon",
+      "GREEN": "Blågrön",
+      "PURPLE": "Bärnsten",
+      "YELLOW": "Gul",
+      "INK": "Violett"
+    },
+    "emoji": {
+      "coffee": "Kaffe",
+      "scissors": "Sax",
+      "sparkles": "Gnistor",
+      "bread": "Bröd",
+      "flower": "Blomma",
+      "bicycle": "Cykel",
+      "bag": "Shoppingkasse",
+      "palette": "Färgpalett",
+      "sun": "Sol",
+      "star": "Stjärna",
+      "cat": "Katt",
+      "rocket": "Raket",
+      "leaf": "Löv",
+      "wave": "Våg",
+      "music": "Musik",
+      "bee": "Bi"
+    },
+    "employees": {
+      "invited": "Inbjudan skickad till {email}.",
+      "invitedOn": "Inbjuden {sent}, går ut {expires}",
+      "invitationExpired": "Inbjudan gick ut {date}",
+      "perHourSuffix": "{currency} per timme",
+      "emptyTitle": "Ingen här än",
+      "moreFor": "Mer för {name}",
+      "deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
+      "reactivatedToast": "{name} är aktiv igen.",
+      "withdraw": "Dra tillbaka inbjudan",
+      "withdrawTitle": "Dra tillbaka inbjudan till {name}?",
+      "withdrawHint": "Länken i mejlet slutar fungera och {name} försvinner från listan.",
+      "withdrawn": "Inbjudan till {name} är tillbakadragen.",
+      "rateTitle": "Timlön för {name}",
+      "rateSaved": "Timlönen för {name} är sparad.",
+      "noRate": "Ingen timlön"
+    },
+    "join": {
+      "inviterLine": "{name}, arbetsgivare",
+      "headlineA": "{name} bjöd in dig till",
+      "headlineB": "{workspace}.",
+      "hosted": "Gå med öppnar Klokkas registreringssida med din e-post ifylld. Välj ett lösenord där så kommer du direkt tillbaka.",
+      "signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
+      "acceptedBody": "Varje timme {employer} loggar för dig syns i Klokka i samma stund som den ändras. Hämta appen för notiser i mobilen, eller fortsätt här.",
+      "appHint": "En direkt nedladdning för Android så länge Klokka inte finns i Google Play.",
+      "alreadyAccepted": "Den här inbjudan är redan accepterad.",
+      "revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
+      "notFound": "Den här inbjudningslänken fungerar inte. Kontrollera att du öppnade hela länken från mejlet.",
+      "otherAccount": "Logga in med {email}",
+      "toSignIn": "Till inloggningen"
+    },
+    "week": {
+      "unsaved_one": "{count} osparad ändring",
+      "unsaved_other": "{count} osparade ändringar",
+      "notify_one": "{names} får en notis när du sparar.",
+      "notify_other": "{names} får en notis var när du sparar.",
+      "discard": "Släng",
+      "saved": "Sparat i en omgång",
+      "savedBody_one": "{names} får en notis för det här tillfället.",
+      "savedBody_other": "{names} får en notis var för det här tillfället.",
+      "unsavedTitle": "Osparade ändringar",
+      "unsavedBody": "Spara eller släng dem innan du byter vecka.",
+      "selectFirst": "Välj en ruta först",
+      "selectFirstBody": "Klicka på en dag för en person och välj sedan en knapp.",
+      "nothingYesterday": "Inget loggat dagen innan, så det finns inget att kopiera.",
+      "nothingToFill": "Varje vardag har redan timmar.",
+      "noteLabel": "Anteckning: {note}",
+      "cellLabel": "{name}, {date}",
+      "locked": "stängd",
+      "emptyTitle": "Ingen att logga timmar för än",
+      "emptyBody": "Lägg till en anställd först. Inbjudna kan loggas direkt.",
+      "failed": "Inget sparades. Rutorna med röd ring behöver ses över.",
+      "flagged": "öppen flagga"
+    },
+    "month": {
+      "closedToast": "{month} är stängd.",
+      "closedToastBody": "Alla på arbetsplatsen får veta det, och CSV-filen är klar.",
+      "unlockedToast": "{month} är öppen igen.",
+      "unlockedToastBody": "Poster kan ändras igen. Stäng den när du är klar.",
+      "saveFirst": "Spara eller släng ändringarna innan du stänger månaden.",
+      "closedBy": "Stängd {date} av {name}",
+      "lastMonthHours": "({hours})",
+      "noDays": "Inget loggat i {month} än.",
+      "pickDay": "Välj en dag i kalendern för att se timmar, anteckning och historik.",
+      "daysWithHours_one": "{count} dag med timmar",
+      "daysWithHours_other": "{count} dagar med timmar",
+      "rateBeforeTax": "{rate} per timme, före skatt",
+      "person": "Anställd",
+      "noPeople": "Inga anställda än. Lägg till en så syns hens månad här.",
+      "flagRaised": "{name} flaggade den här dagen",
+      "suggests": "{name} föreslår {hours}",
+      "editedTimes_one": "ändrad {count} gång",
+      "editedTimes_other": "ändrad {count} gånger"
+    },
+    "csv": {
+      "downloaded": "{file} har laddats ner.",
+      "monthBody": "Hela månaden, en rad per person och dag, med anteckningar.",
+      "personBody": "En rad per dag för {name}, med anteckningar."
+    },
+    "operator": {
+      "navigation": "Operatörsnavigering",
+      "account": "Konto",
+      "empty": "Inget matchar.",
+      "none": "Inga än",
+      "serverSide": "Sortering, filtrering och sidindelning sker i API:et.",
+      "tab": {
+        "workspaces": "Platser",
+        "invitations": "Inbjudna"
+      },
+      "users": {
+        "employerOf": "Arbetsgivare för {count}",
+        "employeeAt": "Anställd på {count}",
+        "noWorkspace": "Ingen arbetsplats",
+        "pushYes": "Registrerad",
+        "pushNo": "Ingen",
+        "created": "Skapad",
+        "never": "Aldrig"
+      },
+      "invitations": {
+        "acceptedOn": "Accepterad {date}",
+        "expiredOn": "Gick ut {date}",
+        "resent": "Inbjudan till {email} skickad igen.",
+        "resendFor": "Skicka inbjudan till {email} igen"
+      },
+      "volume": {
+        "inDays_one": "om {count} dag",
+        "inDays_other": "om {count} dagar",
+        "push": "Push",
+        "kind": "Typ",
+        "count": "Antal",
+        "day": "Dag",
+        "perDayLabel": "Notiser per dag, push och i appen",
+        "noDays": "Inga notiser den här månaden än."
+      },
+      "kind": {
+        "HOURS_CHANGED": "Timmar tillagda eller ändrade",
+        "INVITE_ACCEPTED": "Inbjudan accepterad",
+        "ENTRY_FLAGGED": "Post flaggad",
+        "FLAG_RESOLVED": "Flagga löst",
+        "MONTH_CLOSED": "Månad stängd",
+        "MONTH_REOPENED": "Månad öppnad igen"
+      },
+      "health": {
+        "UP": "Uppe",
+        "DEGRADED": "Försämrad",
+        "DOWN": "Nere",
+        "down": "Något är nere",
+        "api": "API",
+        "version": "Version",
+        "uptime": "Drifttid",
+        "uptimeDays": "{days} d {hours} h",
+        "uptimeHours": "{hours} h {minutes} min",
+        "checked": "Kontrollerad",
+        "ms": "{value} ms",
+        "noDeploys": "Inga driftsättningar registrerade än."
+      }
+    },
+    "notifications": {
+      "loadMore": "Visa äldre",
+      "seeDay": "Se dagen",
+      "seeMonth": "Se månaden",
+      "seeEmployees": "Se anställda",
+      "unreadDot": "Oläst"
+    },
+    "overview": {
+      "projectedLine": "Beräknat månadsslut {projected}, {lastMonth}",
+      "lastMonthOver": "{month} är slut; det här är de slutliga siffrorna.",
+      "noRecent": "Inget nytt än.",
+      "nothingLoggedAll": "Varje arbetsdag hittills har timmar."
+    },
+    "settings": {
+      "saved": "Sparat",
+      "payShownTitle": "Lön visas nu",
+      "payShownBody": "Varje anställd ser sin timlön och intjäning från och med nu.",
+      "payHiddenTitle": "Lön är dold",
+      "payHiddenBody": "Klokka visar bara timmar, för dig och för varje anställd.",
+      "dayLengthInvalid": "Ange en daglängd mellan 0,25 och 24 timmar.",
+      "noDevice": "Ingen telefon är inloggad på det här kontot än.",
+      "payDemoLabel": "{name}, en hel dag"
+    },
+    "profile": {
+      "employerAt_one": "Arbetsgivare på {count} arbetsplats",
+      "employerAt_other": "Arbetsgivare på {count} arbetsplatser",
+      "nameRequired": "Namnet kan inte vara tomt.",
+      "appearanceHint": "Följ enheten växlar med din telefon eller dator; Ljust och Mörkt ligger fast."
+    },
+    "flags": {
+      "sent": "Flaggan skickad till {name}.",
+      "messageRequired": "Skriv ett kort meddelande så att {name} vet vad som ska rättas.",
+      "reason": "Vad är fel",
+      "hoursLabel": "Timmar du jobbade (valfritt)",
+      "hoursField": "Timmar",
+      "onDay": "h den {date}",
+      "who": "{name}, {date}",
+      "youSuggested": "Du har flaggat den: {suggested} i stället för {logged}. Arbetsgivaren tittar på det.",
+      "youFlagged": "Du har flaggat den här posten. Arbetsgivaren tittar på det."
+    },
+    "share": {
+      "failed": "Bilden kunde inte skapas. Försök igen.",
+      "downloaded": "Bilden är sparad.",
+      "dayAverage": "{hours} om dagen",
+      "bestWeekValue": "bästa veckan {hours}",
+      "daysValue_one": "{count} dag",
+      "daysValue_other": "{count} dagar"
+    }
   }
 }

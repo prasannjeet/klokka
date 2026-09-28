@@ -816,5 +816,243 @@
     "push": {
       "workspacePrefix": "{workspace}: {title}"
     }
+  },
+  "web": {
+    "shell": {
+      "clockLabel": "A railway clock showing the current time",
+      "operatorConsole": "Operator console"
+    },
+    "signIn": {
+      "headlineA": "One clock.",
+      "headlineB": "Both sides.",
+      "pointRoles": "Employers and employees sign in here",
+      "pointWorkspaces": "Several workspaces, one login",
+      "pointPasswords": "Passwords never touch Klokka's database",
+      "hosted": "You sign in on Klokka's secure sign-in page and come straight back here.",
+      "backToStart": "Back to klokka"
+    },
+    "errorPage": {
+      "title": "Something went wrong"
+    },
+    "notFound": {
+      "title": "Nothing here"
+    },
+    "newWorkspace": {
+      "headlineA": "Make it",
+      "headlineB": "your place.",
+      "currencyNote": "(only shown if pay is on)",
+      "nameRequired": "Give the workspace a name."
+    },
+    "colour": {
+      "PRIMARY": "Magenta",
+      "BLUE": "Raspberry",
+      "GREEN": "Teal",
+      "PURPLE": "Amber",
+      "YELLOW": "Yellow",
+      "INK": "Violet"
+    },
+    "emoji": {
+      "coffee": "Coffee",
+      "scissors": "Scissors",
+      "sparkles": "Sparkles",
+      "bread": "Bread",
+      "flower": "Flower",
+      "bicycle": "Bicycle",
+      "bag": "Shopping bag",
+      "palette": "Paint palette",
+      "sun": "Sun",
+      "star": "Star",
+      "cat": "Cat",
+      "rocket": "Rocket",
+      "leaf": "Leaf",
+      "wave": "Wave",
+      "music": "Music",
+      "bee": "Bee"
+    },
+    "employees": {
+      "invited": "Invitation sent to {email}.",
+      "invitedOn": "Invited {sent}, expires {expires}",
+      "invitationExpired": "Invitation expired {date}",
+      "perHourSuffix": "{currency} per hour",
+      "emptyTitle": "No one here yet",
+      "moreFor": "More for {name}",
+      "deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
+      "reactivatedToast": "{name} is active again.",
+      "withdraw": "Withdraw invitation",
+      "withdrawTitle": "Withdraw the invitation to {name}?",
+      "withdrawHint": "The link in the email stops working and {name} disappears from the list.",
+      "withdrawn": "Invitation to {name} withdrawn.",
+      "rateTitle": "Hourly rate for {name}",
+      "rateSaved": "Rate saved for {name}.",
+      "noRate": "No rate"
+    },
+    "join": {
+      "inviterLine": "{name}, employer",
+      "headlineA": "{name} invited you to",
+      "headlineB": "{workspace}.",
+      "hosted": "Joining opens Klokka's sign-up page with your email filled in. Choose a password there and you come straight back.",
+      "signedIn": "You are signed in. Joining takes one click.",
+      "acceptedBody": "Every hour {employer} logs for you shows up in Klokka the moment it changes. Get the app for notifications on your phone, or carry on here.",
+      "appHint": "A direct download for Android while Klokka is not in Google Play yet.",
+      "alreadyAccepted": "This invitation has already been accepted.",
+      "revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
+      "notFound": "This invitation link does not work. Check that you opened the whole link from the email.",
+      "otherAccount": "Sign in with {email}",
+      "toSignIn": "Go to sign in"
+    },
+    "week": {
+      "unsaved_one": "{count} unsaved change",
+      "unsaved_other": "{count} unsaved changes",
+      "notify_one": "{names} gets one notification when you save.",
+      "notify_other": "{names} each get one notification when you save.",
+      "discard": "Discard",
+      "saved": "Saved as one batch",
+      "savedBody_one": "{names} gets one notification for this sitting.",
+      "savedBody_other": "{names} each get one notification for this sitting.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedBody": "Save or discard them before changing week.",
+      "selectFirst": "Select a cell first",
+      "selectFirstBody": "Click a day for a person, then pick a chip.",
+      "nothingYesterday": "Nothing logged the day before, so there is nothing to copy.",
+      "nothingToFill": "Every weekday already has hours.",
+      "noteLabel": "Note: {note}",
+      "cellLabel": "{name}, {date}",
+      "locked": "closed",
+      "emptyTitle": "No one to log hours for yet",
+      "emptyBody": "Add an employee first. Invited people can be logged right away.",
+      "failed": "Nothing was saved. The cells with a red ring need another look.",
+      "flagged": "open flag"
+    },
+    "month": {
+      "closedToast": "{month} is closed.",
+      "closedToastBody": "Everyone in the workspace is told, and the CSV is ready.",
+      "unlockedToast": "{month} is open again.",
+      "unlockedToastBody": "Entries can change again. Close it once you are done.",
+      "saveFirst": "Save or discard the changes before closing the month.",
+      "closedBy": "Closed {date} by {name}",
+      "lastMonthHours": "({hours})",
+      "noDays": "Nothing logged in {month} yet.",
+      "pickDay": "Pick a day in the calendar to see its hours, note and history.",
+      "daysWithHours_one": "{count} day with hours",
+      "daysWithHours_other": "{count} days with hours",
+      "rateBeforeTax": "{rate} per hour, before tax",
+      "person": "Employee",
+      "noPeople": "No employees yet. Add one and their month shows up here.",
+      "flagRaised": "{name} flagged this day",
+      "suggests": "{name} suggests {hours}",
+      "editedTimes_one": "edited {count} time",
+      "editedTimes_other": "edited {count} times"
+    },
+    "csv": {
+      "downloaded": "{file} downloaded.",
+      "monthBody": "The whole month, one row per person and day, with notes.",
+      "personBody": "One row per day for {name}, with notes."
+    },
+    "operator": {
+      "navigation": "Operator navigation",
+      "account": "Account",
+      "empty": "Nothing matches.",
+      "none": "None yet",
+      "serverSide": "Sorting, filtering and paging happen in the API.",
+      "tab": {
+        "workspaces": "Places",
+        "invitations": "Invites"
+      },
+      "users": {
+        "employerOf": "Employer of {count}",
+        "employeeAt": "Employee at {count}",
+        "noWorkspace": "No workspace",
+        "pushYes": "Registered",
+        "pushNo": "None",
+        "created": "Created",
+        "never": "Never"
+      },
+      "invitations": {
+        "acceptedOn": "Accepted {date}",
+        "expiredOn": "Expired {date}",
+        "resent": "Invitation to {email} sent again.",
+        "resendFor": "Resend the invitation to {email}"
+      },
+      "volume": {
+        "inDays_one": "in {count} day",
+        "inDays_other": "in {count} days",
+        "push": "Push",
+        "kind": "Kind",
+        "count": "Count",
+        "day": "Day",
+        "perDayLabel": "Notifications per day, push and in-app",
+        "noDays": "No notifications this month yet."
+      },
+      "kind": {
+        "HOURS_CHANGED": "Hours added or changed",
+        "INVITE_ACCEPTED": "Invitation accepted",
+        "ENTRY_FLAGGED": "Entry flagged",
+        "FLAG_RESOLVED": "Flag resolved",
+        "MONTH_CLOSED": "Month closed",
+        "MONTH_REOPENED": "Month reopened"
+      },
+      "health": {
+        "UP": "Up",
+        "DEGRADED": "Degraded",
+        "DOWN": "Down",
+        "down": "Something is down",
+        "api": "API",
+        "version": "Version",
+        "uptime": "Uptime",
+        "uptimeDays": "{days} d {hours} h",
+        "uptimeHours": "{hours} h {minutes} min",
+        "checked": "Checked",
+        "ms": "{value} ms",
+        "noDeploys": "No deploys recorded yet."
+      }
+    },
+    "notifications": {
+      "loadMore": "Show older",
+      "seeDay": "See the day",
+      "seeMonth": "See the month",
+      "seeEmployees": "See employees",
+      "unreadDot": "Unread"
+    },
+    "overview": {
+      "projectedLine": "Projected month end {projected}, {lastMonth}",
+      "lastMonthOver": "{month} is over; these are its final figures.",
+      "noRecent": "Nothing new yet.",
+      "nothingLoggedAll": "Every working day so far has hours."
+    },
+    "settings": {
+      "saved": "Saved",
+      "payShownTitle": "Pay is now shown",
+      "payShownBody": "Every employee sees their rate and earnings from now on.",
+      "payHiddenTitle": "Pay is hidden",
+      "payHiddenBody": "Klokka shows hours only, for you and for every employee.",
+      "dayLengthInvalid": "Enter a day length between 0.25 and 24 hours.",
+      "noDevice": "No phone is signed in on this account yet.",
+      "payDemoLabel": "{name}, a full day"
+    },
+    "profile": {
+      "employerAt_one": "Employer at {count} workspace",
+      "employerAt_other": "Employer at {count} workspaces",
+      "nameRequired": "Your name cannot be empty.",
+      "appearanceHint": "Follow device switches with your phone or computer; Light and Dark stay put."
+    },
+    "flags": {
+      "sent": "Flag sent to {name}.",
+      "messageRequired": "Write a short message so {name} knows what to fix.",
+      "reason": "What is wrong",
+      "hoursLabel": "Hours you worked (optional)",
+      "hoursField": "Hours",
+      "onDay": "h on {date}",
+      "who": "{name}, {date}",
+      "youSuggested": "You flagged it: {suggested} instead of {logged}. The employer is looking at it.",
+      "youFlagged": "You flagged this entry. The employer is looking at it."
+    },
+    "share": {
+      "failed": "The image could not be made. Try again.",
+      "downloaded": "Image saved.",
+      "dayAverage": "{hours} a day",
+      "bestWeekValue": "best week {hours}",
+      "daysValue_one": "{count} day",
+      "daysValue_other": "{count} days"
+    }
   }
 }
