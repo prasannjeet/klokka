@@ -1,7 +1,5 @@
 package com.prasannjeet.klokka.entry;
 
-import static com.prasannjeet.klokka.error.KlokkaException.notImplemented;
-
 import com.prasannjeet.klokka.contract.api.EntriesApi;
 import com.prasannjeet.klokka.contract.model.Entry;
 import com.prasannjeet.klokka.contract.model.EntryBatchRequest;
@@ -9,36 +7,40 @@ import com.prasannjeet.klokka.contract.model.EntryBatchResult;
 import com.prasannjeet.klokka.contract.model.EntryChange;
 import com.prasannjeet.klokka.contract.model.EntryUpsert;
 import io.quarkus.security.Authenticated;
+import jakarta.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-// E2 (CHQ-117, CHQ-118, CHQ-119): 501 NOT_IMPLEMENTED until then.
+// /workspaces/{id}/entries and /members/{id}/entries/{date} (CHQ-117, CHQ-118, CHQ-119, CHQ-123).
 @Authenticated
 public class EntryResource implements EntriesApi {
 
+    @Inject
+    EntryService service;
+
     @Override
     public EntryBatchResult batchUpsertEntries(UUID workspaceId, EntryBatchRequest entryBatchRequest) {
-        throw notImplemented("batchUpsertEntries");
+        return service.batch(workspaceId, entryBatchRequest);
     }
 
     @Override
     public void deleteEntry(UUID workspaceId, UUID membershipId, LocalDate date) {
-        throw notImplemented("deleteEntry");
+        service.delete(workspaceId, membershipId, date);
     }
 
     @Override
     public List<EntryChange> getEntryHistory(UUID workspaceId, UUID entryId) {
-        throw notImplemented("getEntryHistory");
+        return service.history(workspaceId, entryId);
     }
 
     @Override
     public List<Entry> listEntries(LocalDate from, LocalDate to, UUID workspaceId, UUID membershipId) {
-        throw notImplemented("listEntries");
+        return service.list(workspaceId, from, to, membershipId);
     }
 
     @Override
     public Entry upsertEntry(UUID workspaceId, UUID membershipId, LocalDate date, EntryUpsert entryUpsert) {
-        throw notImplemented("upsertEntry");
+        return service.upsert(workspaceId, membershipId, date, entryUpsert);
     }
 }

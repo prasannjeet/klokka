@@ -32,7 +32,7 @@ export interface MemberUpdate {
      */
     displayName?: string;
     /**
-     * Null clears the rate.
+     * Absent leaves the rate unchanged; an explicit null clears it.
      */
     hourlyRate?: number | null;
     /**

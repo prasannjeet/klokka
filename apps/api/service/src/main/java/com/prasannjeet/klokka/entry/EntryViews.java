@@ -1,0 +1,87 @@
+package com.prasannjeet.klokka.entry;
+
+import com.prasannjeet.klokka.auth.Access;
+import com.prasannjeet.klokka.contract.model.Actor;
+import com.prasannjeet.klokka.contract.model.Entry;
+import com.prasannjeet.klokka.contract.model.EntryChange;
+import com.prasannjeet.klokka.contract.model.EntryFlagSummary;
+import com.prasannjeet.klokka.member.MemberViews;
+import com.prasannjeet.klokka.persistence.EntryFlagEntity;
+import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
+import com.prasannjeet.klokka.persistence.HourEntryEntity;
+import com.prasannjeet.klokka.persistence.MembershipEntity;
+import com.prasannjeet.klokka.persistence.MembershipRepository;
+import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+
+// Entities to contract shapes, with names looked up once per request through a small cache.
+public final class EntryViews {
+
+    private EntryViews() {}
+
+    // Actor names come from the workspace's memberships (the person who logged is always a member).
+    public static final class Names {
+        private final MembershipRepository memberships;
+        private final Access access;
+        private final Map<String, String> byUser = new HashMap<>();
+        private final Map<UUID, MembershipEntity> byMembership = new HashMap<>();
+
+        public Names(MembershipRepository memberships, Access access) {
+            this.memberships = memberships;
+            this.access = access;
+        }
+
+        public Actor actor(String userId) {
+            String name = byUser.computeIfAbsent(userId, id -> memberships.findByUser(access.workspaceId(), id)
+                    .map(m -> m.displayName).orElse(id));
+            return new Actor().userId(userId).name(name);
+        }
+
+        public MembershipEntity membership(UUID membershipId, Function<UUID, MembershipEntity> loader) {
+            return byMembership.computeIfAbsent(membershipId, loader);
+        }
+    }
+
+    public static Entry toEntry(Access access, HourEntryEntity e, MembershipEntity member, Names names, long changeCount,
+            EntryFlagEntity flag, boolean locked) {
+        boolean rate = MemberViews.maySeeRate(access, member);
+        Entry entry = new Entry()
+                .id(e.id)
+                .workspaceId(e.workspaceId)
+                .membershipId(e.membershipId)
+                .memberName(member.displayName)
+                .workDate(e.workDate)
+                .hours(e.hours)
+                .note(e.note)
+                .earnings(rate ? MemberViews.earnings(e.hours, member.hourlyRate) : null)
+                .locked(locked)
+                .createdAt(e.createdAt.atOffset(ZoneOffset.UTC))
+                .createdBy(names.actor(e.createdBy))
+                .updatedAt(e.updatedAt.atOffset(ZoneOffset.UTC))
+                .updatedBy(names.actor(e.updatedBy))
+                .changeCount((int) changeCount);
+        if (flag != null) entry.flag(flagSummary(flag));
+        return entry;
+    }
+
+    public static EntryFlagSummary flagSummary(EntryFlagEntity flag) {
+        return new EntryFlagSummary().id(flag.id).status(flag.status).reason(flag.reason).suggestedHours(flag.suggestedHours);
+    }
+
+    public static EntryChange toChange(HourEntryChangeEntity c, Names names) {
+        return new EntryChange()
+                .id(c.id)
+                .entryId(c.entryId)
+                .kind(c.kind)
+                .hoursBefore(c.hoursBefore)
+                .hoursAfter(c.hoursAfter)
+                .noteBefore(c.noteBefore)
+                .noteAfter(c.noteAfter)
+                .flagId(c.flagId)
+                .changedBy(names.actor(c.changedBy))
+                .changedAt(c.changedAt.atOffset(ZoneOffset.UTC));
+    }
+}

@@ -28,9 +28,9 @@ export interface EntryBatchItem {
      */
     workDate: Date;
     /**
-     * Null removes the entry for that day.
+     * Null or absent removes the entry for that day (a required nullable field would be rejected by the generated server validation).
      */
-    hours: number | null;
+    hours?: number | null;
     /**
      * 
      */
@@ -43,7 +43,6 @@ export interface EntryBatchItem {
 export function instanceOfEntryBatchItem(value: object): value is EntryBatchItem {
     if (!('membershipId' in value) || value['membershipId'] === undefined) return false;
     if (!('workDate' in value) || value['workDate'] === undefined) return false;
-    if (!('hours' in value) || value['hours'] === undefined) return false;
     return true;
 }
 
@@ -59,7 +58,7 @@ export function EntryBatchItemFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'membershipId': json['membershipId'],
         'workDate': (json['workDate'] == null ? json['workDate'] : parseDate(json['workDate'])),
-        'hours': json['hours'],
+        'hours': json['hours'] === undefined ? undefined : json['hours'] === null ? null : json['hours'],
         'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
     };
 }

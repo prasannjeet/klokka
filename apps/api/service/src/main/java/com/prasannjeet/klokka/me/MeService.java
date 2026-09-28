@@ -88,6 +88,19 @@ public class MeService {
         repository.disablePushToken(currentUser.id(), token, clock.instant());
     }
 
+    // The signed-in user's row for other services (workspace creation, invitation accept), created on first sight.
+    @Transactional
+    public AppUserEntity ensureCurrentUser() {
+        AppUserEntity user = ensureUser(Optional.empty());
+        ensurePreferences(user.id, Optional.empty());
+        return user;
+    }
+
+    // The language a user's notifications are rendered in.
+    public Language languageOf(String userId) {
+        return repository.findPreferences(userId).map(p -> p.language).orElse(Language.fromValue(config.defaultLanguage()));
+    }
+
     // Create on first sight (a complete row, persisted once), then refresh what the token knows on every call.
     private AppUserEntity ensureUser(Optional<String> acceptLanguage) {
         String id = currentUser.id();

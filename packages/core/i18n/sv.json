@@ -704,95 +704,26 @@
     "INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
     "NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen."
   },
-  "mobile": {
-    "welcome": {
-      "taglineA": "En klocka.",
-      "taglineB": "Båda sidor."
+  "api": {
+    "email": {
+      "greeting": "Hej {name},",
+      "digest": {
+        "workspace": "{emoji} {workspace}",
+        "nothing": "Inga timmar loggades förra veckan."
+      },
+      "footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar."
     },
-    "auth": {
-      "signInFailed": "Inloggningen gick inte igenom. Försök igen."
-    },
-    "noWorkspaces": {
-      "title": "Ingen arbetsplats än",
-      "body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här."
-    },
-    "chooseWorkspace": {
-      "hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
-      "hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
-      "rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här."
-    },
-    "employees": {
-      "joined": "Började {when}"
-    },
-    "members": {
-      "removeConfirm": "Ta bort {name} från {workspace}? Timmarna finns kvar i historiken.",
-      "deactivated": "{name} är inaktiverad.",
-      "reactivated": "{name} är aktiv igen.",
-      "removed": "{name} togs bort.",
-      "rateSaved": "Timlön sparad.",
-      "rateLabel": "Timlön för {name}"
-    },
-    "entry": {
-      "sheetTitleDate": "{name}, {date}",
-      "remove": "Ta bort registrering",
-      "saved": "Sparade {hours} för {name}.",
-      "removed": "Registreringen togs bort."
-    },
-    "day": {
-      "editHours": "Ändra timmar",
-      "noEntry": "Inget registrerat den här dagen."
-    },
-    "month": {
-      "unlocked": "{month} är öppen för ändringar igen.",
-      "exported": "CSV klar att dela."
-    },
-    "settings": {
-      "account": "Konto",
-      "editWorkspace": "Ändra arbetsplats",
-      "saved": "Sparat."
+    "csv": {
+      "date": "Datum",
+      "weekday": "Veckodag",
+      "member": "Person",
+      "hours": "Timmar",
+      "note": "Anteckning",
+      "rate": "Timlön",
+      "amount": "Belopp"
     },
     "push": {
-      "title": "Få veta direkt när dina timmar ändras",
-      "body": "Klokka skickar en push när timmar läggs till eller ändras, en flagga besvaras eller en månad stängs. Inget annat.",
-      "bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
-      "enable": "Slå på notiser",
-      "channelHours": "Timmar",
-      "channelFlags": "Flaggor",
-      "channelWorkspace": "Arbetsplats"
-    },
-    "flags": {
-      "sent": "Flaggan är skickad. {name} har fått en notis.",
-      "messageRequired": "Skriv ett kort meddelande."
-    },
-    "home": {
-      "yesterdayHours": "I går {hours}",
-      "employerLine": "{name}, arbetsgivare",
-      "tapPlus": "Tryck på ett plus"
-    },
-    "week": {
-      "personPager": "Personer, en per sida"
-    },
-    "workspace": {
-      "timezoneDevice": "Din telefon säger {timezone}.",
-      "emojiPick": "Välj en emoji",
-      "colourPick": "Välj en färg"
-    },
-    "share": {
-      "preparing": "Förbereder kortet"
-    },
-    "common": {
-      "confirm": "Bekräfta",
-      "edit": "Ändra",
-      "done": "Klar",
-      "thisWeek": "Den här veckan",
-      "hoursShort": "{hours} h"
-    },
-    "notifications": {
-      "openRow": "Öppna notis"
-    },
-    "invitation": {
-      "loading": "Kontrollerar inbjudan",
-      "notFound": "Länken till inbjudan är inte giltig. Be din arbetsgivare skicka en ny."
+      "workspacePrefix": "{workspace}: {title}"
     }
   }
 }

@@ -16,7 +16,10 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 @RequestScoped
 public class CurrentUser {
 
+    // The global Logto role (in the `roles` claim) and the API-resource scope it carries (in `scope`); Logto puts
+    // the scope in every access token, the role name only when the token is configured to carry it, so both count.
     public static final String PLATFORM_ADMIN = "platform-admin";
+    public static final String OPERATOR_SCOPE = "operator";
 
     @Inject
     SecurityIdentity identity;
@@ -39,7 +42,7 @@ public class CurrentUser {
     }
 
     public boolean platformAdmin() {
-        return identity.hasRole(PLATFORM_ADMIN);
+        return identity.hasRole(PLATFORM_ADMIN) || identity.hasRole(OPERATOR_SCOPE);
     }
 
     private Optional<String> claim(String name) {

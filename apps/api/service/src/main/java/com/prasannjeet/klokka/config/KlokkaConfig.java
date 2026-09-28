@@ -22,6 +22,10 @@ public interface KlokkaConfig {
     @Pattern(regexp = "sv|en")
     String defaultLanguage();
 
+    // The API's own version label for the operator health page (CI sets the commit part).
+    @WithDefault("dev")
+    String buildVersion();
+
     Invitation invitation();
 
     Entries entries();
@@ -34,10 +38,21 @@ public interface KlokkaConfig {
 
     Logto logto();
 
+    Operator operator();
+
+    // Opt-in test switches; mapped here because every klokka.* key must be known (unknown keys fail the boot).
+    It it();
+
     interface Invitation {
         // How long an invitation link works (D3: 7 days).
         @WithDefault("P7D")
         Duration lifetime();
+
+        // Emails one invitee costs: the invitation itself plus Logto's sign-up verification code (D3).
+        @WithDefault("2")
+        @Min(1)
+        @Max(10)
+        int emailBudget();
     }
 
     interface Entries {
@@ -68,11 +83,15 @@ public interface KlokkaConfig {
         @Max(100)
         int batchSize();
 
+        // How long after sending a ticket its receipt is fetched.
+        @WithDefault("PT15M")
+        Duration receiptDelay();
+
         Optional<String> expoAccessToken();
     }
 
     interface Mail {
-        // The SMTP account's monthly allowance, shown on the operator's volume page.
+        // The SMTP account's monthly allowance, shown on the operator's volume page and enforced before an invite.
         @WithDefault("100")
         @Min(1)
         int monthlyQuota();
@@ -84,11 +103,38 @@ public interface KlokkaConfig {
         @Min(0)
         @Max(23)
         int localHour();
+
+        // Users considered per sweep.
+        @WithDefault("200")
+        @Min(1)
+        @Max(5000)
+        int batchSize();
     }
 
     interface Logto {
         URI endpoint();
 
         Optional<String> webhookSigningKey();
+
+        // Organization role ids in the Klokka Logto (docs/INFRA.md section 4); assigned on create and invite.
+        String employerRoleId();
+
+        String employeeRoleId();
+    }
+
+    interface It {
+        // -Dklokka.it.logto=true runs LogtoStagingTest against the real staging Logto with the M2M credentials.
+        @WithDefault("false")
+        boolean logto();
+    }
+
+    interface Operator {
+        // The three deployments probed by GET /operator/health; absent means "not probed".
+        Optional<URI> apiUrl();
+
+        Optional<URI> landingUrl();
+
+        @WithDefault("PT3S")
+        Duration probeTimeout();
     }
 }

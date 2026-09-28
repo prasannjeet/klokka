@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+import com.prasannjeet.klokka.support.MutableClock;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.security.TestSecurity;
@@ -35,6 +36,9 @@ class MeResourceTest {
 
     @Inject
     AgroalDataSource dataSource;
+
+    @Inject
+    MutableClock clock;
 
     @Test
     void withoutABearerTokenMeIs401() {
@@ -147,13 +151,18 @@ class MeResourceTest {
     @Test
     @TestSecurity(user = OPS, roles = "platform-admin")
     @OidcSecurity(claims = {@Claim(key = "sub", value = OPS)})
-    void operatorRouteIsNotImplementedYetForAPlatformAdmin() {
+    void operatorRouteAnswersForAPlatformAdmin() {
         given().when().get("/v1/operator/health")
-                .then().statusCode(501)
-                .contentType(PROBLEM_JSON)
-                .body("code", is("NOT_IMPLEMENTED"))
-                .body("title", is("Not Implemented"))
-                .body("detail", is("operatorHealth is not implemented yet."));
+                .then().statusCode(200)
+                .body("dependencies.find { it.name == 'postgres' }.status", is("UP"));
+    }
+
+    @Test
+    @TestSecurity(user = OPS, roles = "operator")
+    @OidcSecurity(claims = {@Claim(key = "sub", value = OPS)})
+    void theOperatorScopeOpensTheOperatorRoutesToo() {
+        given().when().get("/v1/operator/health").then().statusCode(200);
+        given().when().get("/v1/me").then().statusCode(200).body("platformAdmin", is(true));
     }
 
     @Test
@@ -169,28 +178,28 @@ class MeResourceTest {
     @Test
     @TestSecurity(user = PLAIN)
     @OidcSecurity(claims = {@Claim(key = "sub", value = PLAIN)})
-    void workspaceRoutesAnswer501UntilTheirTicketLands() {
+    void aWorkspaceTheCallerIsNotInIs404() {
         given().when().get("/v1/workspaces/" + UUID.randomUUID())
-                .then().statusCode(501)
+                .then().statusCode(404)
                 .contentType(PROBLEM_JSON)
-                .body("code", is("NOT_IMPLEMENTED"));
+                .body("code", is("NOT_FOUND"));
     }
 
     @Test
-    void publicInvitationLookupNeedsNoTokenAndIs501() {
+    void publicInvitationLookupNeedsNoTokenAndAnUnknownTokenIs404() {
         given().when().get("/v1/invitations/inv_0123456789abcdef0123456789abcdef?lang=en")
-                .then().statusCode(501)
-                .body("code", is("NOT_IMPLEMENTED"));
+                .then().statusCode(404)
+                .body("code", is("NOT_FOUND"));
     }
 
     @Test
-    void logtoWebhookNeedsNoTokenAndIs501() {
+    void logtoWebhookNeedsNoTokenButAValidSignature() {
         given().contentType("application/json")
                 .header("logto-signature-sha-256", "00")
                 .body("{\"hookId\":\"hook_test\",\"event\":\"User.Deleted\",\"createdAt\":\"2026-09-27T14:07:00Z\"}")
                 .when().post("/v1/webhooks/logto")
-                .then().statusCode(501)
-                .body("code", is("NOT_IMPLEMENTED"));
+                .then().statusCode(401)
+                .body("code", is("INVALID_SIGNATURE"));
     }
 
     @Test
@@ -204,23 +213,23 @@ class MeResourceTest {
     @Test
     @TestSecurity(user = PLAIN)
     @OidcSecurity(claims = {@Claim(key = "sub", value = PLAIN)})
-    void everyContractGroupIsMountedUnderV1() {
+    void everyWorkspaceGroupIsMountedUnderV1AndHiddenFromNonMembers() {
         UUID id = UUID.randomUUID();
         for (String path : new String[] {
                 "/v1/workspaces/" + id + "/members",
                 "/v1/workspaces/" + id + "/entries?from=2026-09-21&to=2026-09-27",
                 "/v1/workspaces/" + id + "/months/2026-09",
                 "/v1/workspaces/" + id + "/insights",
-                "/v1/workspaces/" + id + "/flags",
-                "/v1/notifications"}) {
-            given().when().get(path).then().statusCode(501).body("code", is("NOT_IMPLEMENTED"));
+                "/v1/workspaces/" + id + "/flags"}) {
+            given().when().get(path).then().statusCode(404).body("code", is("NOT_FOUND"));
         }
         given().header("Accept", "text/csv").when().get("/v1/workspaces/" + id + "/months/2026-09/export.csv")
-                .then().statusCode(501);
+                .then().statusCode(404);
         given().contentType("application/json").body("{\"items\":[{\"membershipId\":\"" + id
                         + "\",\"workDate\":\"2026-09-22\",\"hours\":4}]}")
                 .when().post("/v1/workspaces/" + id + "/entries/batch")
-                .then().statusCode(501).body("code", is("NOT_IMPLEMENTED"));
+                .then().statusCode(404).body("code", is("NOT_FOUND"));
+        given().when().get("/v1/notifications").then().statusCode(200).body("items", empty()).body("unreadCount", is(0));
     }
 
     // A workspace with Nora as employer (usr_me_nora) and one employee membership for usr_me_maria, plus one
@@ -247,7 +256,7 @@ class MeResourceTest {
                 ps.setObject(1, UUID.randomUUID());
                 ps.setObject(2, workspaceId);
                 ps.setObject(3, employeeMembership);
-                ps.setObject(4, LocalDate.now());
+                ps.setObject(4, LocalDate.now(clock));
                 ps.setString(5, NORA);
                 ps.setString(6, NORA);
                 ps.executeUpdate();
