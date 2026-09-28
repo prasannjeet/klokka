@@ -93,6 +93,16 @@ public class LogtoService {
         }
     }
 
+    // A profile read that never throws: first sight of a user must not fail because Logto is unreachable.
+    public Optional<LogtoModels.User> findUserQuietly(String userId) {
+        try {
+            return findUser(userId);
+        } catch (KlokkaException e) {
+            LOG.warnf("Logto profile of %s not read: %s", userId, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
     public Optional<LogtoModels.User> findUser(String userId) {
         try {
             return Optional.ofNullable(api.getUser(userId));

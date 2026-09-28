@@ -4,6 +4,7 @@ import static com.prasannjeet.klokka.contract.model.Role.EMPLOYER;
 
 import com.prasannjeet.klokka.auth.CurrentUser;
 import com.prasannjeet.klokka.config.KlokkaConfig;
+import com.prasannjeet.klokka.logto.LogtoModels;
 import com.prasannjeet.klokka.logto.LogtoService;
 import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.contract.model.Me;
@@ -133,12 +134,18 @@ public class MeService {
         Optional<String> email = currentUser.email();
         Optional<String> name = currentUser.name();
         AppUserEntity user = repository.findUser(id).orElseGet(() -> {
+            // The access token carries no email or name; the webhook mirror usually has them by now, but not for
+            // a user created before the hook existed (the owner) or when a delivery was missed: ask Logto once.
+            Optional<LogtoModels.User> profile = email.isPresent() ? Optional.empty() : logto.findUserQuietly(id);
             AppUserEntity created = new AppUserEntity();
             created.id = id;
             created.createdAt = now;
             created.lastSeenAt = now;
-            created.email = email.orElse(null);
-            created.displayName = name.orElseGet(() -> email.map(MeService::localPart).orElse(""));
+            created.email = email.or(() -> profile.map(LogtoModels.User::primaryEmail).filter(e -> e != null && !e.isBlank())
+                    .map(e -> e.toLowerCase(Locale.ROOT))).orElse(null);
+            String profileName = profile.map(LogtoModels.User::name).filter(n -> n != null && !n.isBlank()).orElse(null);
+            created.displayName = name.or(() -> Optional.ofNullable(profileName))
+                    .orElseGet(() -> Optional.ofNullable(created.email).map(MeService::localPart).orElse(""));
             repository.persistUser(created);
             return created;
         });

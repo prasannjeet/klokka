@@ -51,9 +51,21 @@ class MeResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "usr_me_fresh_logto")
+    @OidcSecurity(claims = {@Claim(key = "sub", value = "usr_me_fresh_logto")})
+    void firstCallFillsEmailAndNameFromLogtoWhenTheWebhookHasNotRun() {
+        Fake.reset();
+        Fake.user("usr_me_fresh_logto", "Owner@Example.com", "Owner Person");
+        given().when().get("/v1/me").then().statusCode(200)
+                .body("user.email", is("owner@example.com"))
+                .body("user.name", is("Owner Person"));
+    }
+
+    @Test
     @TestSecurity(user = FRESH)
     @OidcSecurity(claims = {@Claim(key = "sub", value = FRESH)})
     void firstCallCreatesTheUserFromTheTokenAlone() {
+        Fake.reset();
         given().header("Accept-Language", "en-GB,en;q=0.9")
                 .when().get("/v1/me")
                 .then().statusCode(200)
