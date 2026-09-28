@@ -1,0 +1,38 @@
+{
+  "name": "@klokka/landing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Klokka's public marketing site (Next.js, static): Swedish at /, English at /en.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev -p 3001 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 3001 -H 0.0.0.0",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:layout": "playwright test --project=layout",
+    "test:lan": "playwright test --project=lan",
+    "shots": "playwright test --project=shots",
+    "docker:build": "docker build -f Dockerfile --build-arg NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://klokka.coolify.ooguy.com} --build-arg NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://klokka-app.coolify.ooguy.com} --build-arg NEXT_PUBLIC_APK_URL=${NEXT_PUBLIC_APK_URL:-https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk} -t klokka-landing:latest ../..",
+    "docker:run": "docker run --rm --init -p 3001:3000 --name klokka-landing klokka-landing:latest"
+  },
+  "dependencies": {
+    "@klokka/core": "0.1.0",
+    "@klokka/tokens": "0.1.0",
+    "next": "^16.3.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/unbounded": "^5.3.0",
+    "@playwright/test": "1.63.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4.3.3"
+  }
+}

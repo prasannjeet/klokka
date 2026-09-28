@@ -1,0 +1,20 @@
+# BuildKit reads this file for apps/landing/Dockerfile (context: the repository root).
+**/node_modules
+**/.next
+**/test-results
+**/playwright-report
+apps/landing/shots
+.git
+.agents
+.claude
+.codex
+.idea
+.vscode
+docs
+apps/api
+apps/mobile/android
+apps/mobile/ios
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
