@@ -134,23 +134,28 @@ public class MeService {
         Optional<String> email = currentUser.email();
         Optional<String> name = currentUser.name();
         AppUserEntity user = repository.findUser(id).orElseGet(() -> {
-            // The access token carries no email or name; the webhook mirror usually has them by now, but not for
-            // a user created before the hook existed (the owner) or when a delivery was missed: ask Logto once.
-            Optional<LogtoModels.User> profile = email.isPresent() ? Optional.empty() : logto.findUserQuietly(id);
             AppUserEntity created = new AppUserEntity();
             created.id = id;
             created.createdAt = now;
             created.lastSeenAt = now;
-            created.email = email.or(() -> profile.map(LogtoModels.User::primaryEmail).filter(e -> e != null && !e.isBlank())
-                    .map(e -> e.toLowerCase(Locale.ROOT))).orElse(null);
-            String profileName = profile.map(LogtoModels.User::name).filter(n -> n != null && !n.isBlank()).orElse(null);
-            created.displayName = name.or(() -> Optional.ofNullable(profileName))
-                    .orElseGet(() -> Optional.ofNullable(created.email).map(MeService::localPart).orElse(""));
+            created.email = email.orElse(null);
+            created.displayName = name.orElseGet(() -> email.map(MeService::localPart).orElse(""));
             repository.persistUser(created);
             return created;
         });
         if (email.isPresent()) user.email = email.get();
         if (name.isPresent()) user.displayName = name.get();
+        // The access token carries no email or name; the webhook mirror usually has them by now, but not for a
+        // user created before the hook existed (the owner) or when a delivery was missed: ask Logto once, until
+        // an email is known.
+        if (user.email == null) {
+            Optional<LogtoModels.User> profile = logto.findUserQuietly(id);
+            profile.map(LogtoModels.User::primaryEmail).filter(e -> e != null && !e.isBlank())
+                    .ifPresent(e -> user.email = e.toLowerCase(Locale.ROOT));
+            if (!hasChosenName(user)) {
+                profile.map(LogtoModels.User::name).filter(n -> n != null && !n.isBlank()).ifPresent(n -> user.displayName = n);
+            }
+        }
         if (user.displayName.isBlank() && user.email != null) user.displayName = localPart(user.email);
         user.lastSeenAt = now;
         return user;

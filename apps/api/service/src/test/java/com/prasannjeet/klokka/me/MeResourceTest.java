@@ -62,6 +62,21 @@ class MeResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "usr_me_old_row")
+    @OidcSecurity(claims = {@Claim(key = "sub", value = "usr_me_old_row")})
+    void anExistingRowWithoutAnEmailIsFilledFromLogtoToo() throws SQLException {
+        // The owner's row on staging: created before the hook existed, so the mirror never wrote it.
+        Fake.reset();
+        try (Connection c = dataSource.getConnection()) {
+            upsertUser(c, "usr_me_old_row", null, "");
+        }
+        Fake.user("usr_me_old_row", "old@example.com", "Old Owner");
+        given().when().get("/v1/me").then().statusCode(200)
+                .body("user.email", is("old@example.com"))
+                .body("user.name", is("Old Owner"));
+    }
+
+    @Test
     @TestSecurity(user = FRESH)
     @OidcSecurity(claims = {@Claim(key = "sub", value = FRESH)})
     void firstCallCreatesTheUserFromTheTokenAlone() {
