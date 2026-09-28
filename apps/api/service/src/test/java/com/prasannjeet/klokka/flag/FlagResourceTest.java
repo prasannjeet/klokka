@@ -126,6 +126,9 @@ class FlagResourceTest {
         assertThat(data.scalar("select hours from hour_entry where id = ?", entry)).isEqualTo(new BigDecimal("6.00"));
         assertThat(data.query("select kind from hour_entry_change where entry_id = ? order by seq", entry))
                 .containsExactly(List.of("CREATED"), List.of("UPDATED"), List.of("FLAG_FIXED"));
+        // The resolution row carries the hours it settled on (the web renders "fixed the flag: 6 h", never "0 h").
+        given().when().get("/v1/workspaces/" + ws + "/entries/" + entry + "/history").then().statusCode(200)
+                .body("find { it.kind == 'FLAG_FIXED' }.hoursBefore", is(4.0f)).body("find { it.kind == 'FLAG_FIXED' }.hoursAfter", is(6.0f));
         assertThat(data.query("select kind, payload->>'action', payload->>'hours' from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws))
                 .containsExactly(List.of("FLAG_RESOLVED", "FIX", "6.00"));
         given().contentType("application/json").body("{\"action\":\"DISMISS\"}")
@@ -139,6 +142,8 @@ class FlagResourceTest {
                 .when().post("/v1/workspaces/" + ws + "/flags/" + flag2 + "/resolve").then().statusCode(200)
                 .body("status", is("DISMISSED")).body("resolution.action", is("DISMISS")).body("resolution.hours", nullValue());
         assertThat(data.scalar("select hours from hour_entry where id = ?", second)).isEqualTo(new BigDecimal("3.00"));
+        given().when().get("/v1/workspaces/" + ws + "/entries/" + second + "/history").then().statusCode(200)
+                .body("find { it.kind == 'FLAG_DISMISSED' }.hoursAfter", is(3.0f));
         given().when().get("/v1/workspaces/" + ws + "/flags?status=DISMISSED").then().statusCode(200).body("", hasSize(1)).body("[0].id", is(flag2.toString()));
         given().when().get("/v1/workspaces/" + ws + "/flags").then().statusCode(200).body("", hasSize(2));
     }
