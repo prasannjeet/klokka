@@ -881,6 +881,9 @@ export const sv = {
   "workspace.timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
   "workspace.weekStart": "Veckan börjar",
   "workspace.weekStartsOn": "Veckan börjar på",
+  "workspace.yourName": "Ditt namn",
+  "workspace.yourNameHint": "Anställda ser det här namnet i inbjudan och i varje notis.",
+  "workspace.yourNameRequired": "Ange ditt namn.",
 } as const;
 
 export const en = {
@@ -1762,6 +1765,9 @@ export const en = {
   "workspace.timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
   "workspace.weekStart": "Week starts",
   "workspace.weekStartsOn": "Week starts on",
+  "workspace.yourName": "Your name",
+  "workspace.yourNameHint": "Employees see this name on the invitation and on every notification.",
+  "workspace.yourNameRequired": "Enter your name.",
 } as const satisfies Record<keyof typeof sv, string>;
 
 export type CatalogueKey = keyof typeof sv;
@@ -2619,6 +2625,9 @@ export type MessageParams = {
   "workspace.timezoneHint": Record<never, never>;
   "workspace.weekStart": Record<never, never>;
   "workspace.weekStartsOn": Record<never, never>;
+  "workspace.yourName": Record<never, never>;
+  "workspace.yourNameHint": Record<never, never>;
+  "workspace.yourNameRequired": Record<never, never>;
 };
 
 export type MessageKey = keyof MessageParams;

@@ -1,7 +1,9 @@
 'use client';
 
 // Create a workspace (CHQ-112, mockup login.html "Create your workspace"): Klokka's own screen after the
-// Logto sign-up, or "Create workspace" from the switcher. The creator becomes its employer.
+// Logto sign-up, or "Create workspace" from the switcher. The creator becomes its employer. The first
+// workspace also asks for the employer's own name: sign-up never does, and until then the profile name is
+// the email's local part, which is what invitations and notifications would show (staging: "admin invited you").
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type CSSProperties, type FormEvent } from 'react';
@@ -40,6 +42,8 @@ export function NewWorkspace() {
   const first = me.workspaces.length === 0;
 
   const [name, setName] = useState('');
+  const [yourName, setYourName] = useState(me.user.name);
+  const [yourNameMissing, setYourNameMissing] = useState(false);
   const [country, setCountry] = useState(START_COUNTRY);
   const [timezone, setTimezone] = useState(COUNTRIES[START_COUNTRY]?.timezone ?? 'Europe/Stockholm');
   const [currency, setCurrency] = useState(COUNTRIES[START_COUNTRY]?.currency ?? 'SEK');
@@ -50,10 +54,14 @@ export function NewWorkspace() {
   const [nameMissing, setNameMissing] = useState(false);
 
   const create = useMutation({
-    mutationFn: () =>
-      api.workspaces.createWorkspace({
+    mutationFn: async () => {
+      if (first && yourName.trim() !== me.user.name) {
+        await api.me.updateMe({ userProfileUpdate: { name: yourName.trim() } });
+      }
+      return api.workspaces.createWorkspace({
         workspaceCreate: { name: name.trim(), country, timezone, currency, weekStart, colour, emoji },
-      }),
+      });
+    },
     onSuccess: async (workspace) => {
       await queryClient.invalidateQueries({ queryKey: meKey });
       toast({ title: t('workspace.created'), body: workspace.name });
@@ -77,8 +85,10 @@ export function NewWorkspace() {
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!name.trim()) {
-      setNameMissing(true);
+    const missingYourName = first && !yourName.trim();
+    setYourNameMissing(missingYourName);
+    if (!name.trim() || missingYourName) {
+      setNameMissing(!name.trim());
       return;
     }
     setProblem(null);
@@ -87,6 +97,7 @@ export function NewWorkspace() {
 
   const nameError =
     nameMissing && !name.trim() ? t('web.newWorkspace.nameRequired') : fieldError(problem, 'name');
+  const yourNameError = yourNameMissing && !yourName.trim() ? t('workspace.yourNameRequired') : null;
   const preview = { '--ws-color': colourVar(colour) } as CSSProperties;
 
   return (
@@ -127,7 +138,29 @@ export function NewWorkspace() {
             ) : null}
             <h2 id="new-ws-title">{t('workspace.createTitle')}</h2>
             <p className="sub">{t('workspace.createHint')}</p>
-            <div className="field">
+            {first ? (
+              <div className="field">
+                <label htmlFor="ws-you">
+                  {t('workspace.yourName')} <span>{t('workspace.yourNameHint')}</span>
+                </label>
+                <input
+                  className="input"
+                  id="ws-you"
+                  value={yourName}
+                  maxLength={80}
+                  autoComplete="name"
+                  aria-invalid={yourNameError ? true : undefined}
+                  aria-describedby={yourNameError ? 'ws-you-err' : undefined}
+                  onChange={(e) => setYourName(e.target.value)}
+                />
+                {yourNameError ? (
+                  <span className="err" id="ws-you-err">
+                    {yourNameError}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+            <div className="field" style={first ? { marginTop: 12 } : undefined}>
               <label htmlFor="ws-name">{t('workspace.name')}</label>
               <input
                 className="input"

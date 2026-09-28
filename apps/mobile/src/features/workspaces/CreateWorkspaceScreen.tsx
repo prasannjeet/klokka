@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
+import { useMe, useUpdateMe } from '@/data/me';
 import { useCreateWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
@@ -60,7 +61,9 @@ const styles = (t: Theme) =>
     row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: t.space[3] },
   });
 
-// "Create your workspace" (CHQ-112): name, emoji and colour, time zone, currency, week start, pay.
+// "Create your workspace" (CHQ-112): name, emoji and colour, time zone, currency, week start, pay. The first
+// workspace also asks for the employer's own name (sign-up never does; until then the profile name is the
+// email's local part, which invitations and notifications would show).
 export function CreateWorkspaceScreen() {
   const t = useT();
   const locale = useLocale();
@@ -69,8 +72,13 @@ export function CreateWorkspaceScreen() {
   const router = useRouter();
   const toast = useToast();
   const create = useCreateWorkspace();
+  const { data: me } = useMe();
+  const updateMe = useUpdateMe();
+  const first = (me?.workspaces.length ?? 0) === 0;
   const setActive = useAppStore((st) => st.setActiveWorkspace);
   const [name, setName] = useState('');
+  const [yourName, setYourName] = useState(me?.user.name ?? '');
+  const [yourNameTouched, setYourNameTouched] = useState(false);
   const [emoji, setEmoji] = useState(WORKSPACE_EMOJIS[0] as string);
   const [colour, setColour] = useState<WorkspaceColour>('PRIMARY');
   const [timezone, setTimezone] = useState(deviceTimezone());
@@ -79,11 +87,19 @@ export function CreateWorkspaceScreen() {
   const [showPay, setShowPay] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const valid = name.trim().length >= 2 && timezone.trim().length > 0;
+  useEffect(() => {
+    if (!yourNameTouched && me?.user.name) setYourName(me.user.name);
+  }, [me?.user.name, yourNameTouched]);
+
+  const valid =
+    name.trim().length >= 2 && timezone.trim().length > 0 && (!first || yourName.trim().length > 0);
 
   const submit = async () => {
     setError(null);
     try {
+      if (first && yourName.trim() !== me?.user.name) {
+        await updateMe.mutateAsync({ name: yourName.trim() });
+      }
       const workspace = await create.mutateAsync({
         name: name.trim(),
         timezone: timezone.trim(),
@@ -117,6 +133,19 @@ export function CreateWorkspaceScreen() {
           </View>
         </View>
       </Card>
+      {first ? (
+        <TextField
+          label={t('workspace.yourName')}
+          hint={t('workspace.yourNameHint')}
+          value={yourName}
+          onChangeText={(v) => {
+            setYourNameTouched(true);
+            setYourName(v);
+          }}
+          autoCapitalize="words"
+          testID="your-name"
+        />
+      ) : null}
       <TextField
         label={t('workspace.name')}
         placeholder={t('workspace.namePlaceholder')}
