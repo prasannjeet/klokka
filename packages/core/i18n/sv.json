@@ -1072,6 +1072,13 @@
       "subtitlePlain": "{from} till {to}. Dina timmar, dag för dag.",
       "openDay": "{date}, {hours}. Öppna den i din månad.",
       "days": "Dagar"
+    },
+    "dayList": {
+      "loggedBy": "Loggad av {name}, {time}",
+      "changedBy": "Ändrad av {name}, {time}",
+      "select": "{date}, {hours}. Visa dagen.",
+      "dayOf": "Vecka {week}, {name}",
+      "logInGrid": "Logga i veckorutnätet"
     }
   }
 }

@@ -2134,96 +2134,7 @@
     font-weight: 600;
   }
 
-  /* ---- day list with notes and history ---- */
-  .dlist {
-    display: grid;
-  }
-  .drow {
-    display: grid;
-    grid-template-columns: 52px minmax(0, 1fr) auto;
-    gap: 6px 14px;
-    padding: 12px 16px;
-    align-items: center;
-    background: var(--bg);
-    text-align: left;
-    border: 0;
-    width: 100%;
-  }
-  .drow .dn {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1.1;
-  }
-  .drow .dn b {
-    display: block;
-    font-size: 20px;
-    color: var(--text);
-    letter-spacing: 0;
-    text-transform: none;
-    font-variant-numeric: tabular-nums;
-    margin-bottom: 2px;
-  }
-  .drow .h {
-    font-family: var(--font-display);
-    font-weight: var(--font-display-weight);
-    font-stretch: var(--font-display-stretch);
-    font-variation-settings: var(--font-display-variation);
-    font-size: calc(22px * var(--font-display-scale));
-    letter-spacing: -0.02em;
-    text-align: right;
-  }
-  .drow .h small {
-    font-size: 0.6em;
-    font-weight: 600;
-    color: var(--text-muted);
-    letter-spacing: 0;
-  }
-  .drow .meta {
-    font-size: 13px;
-    color: var(--text-muted);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 10px;
-    align-items: center;
-  }
-  .drow .meta .icon {
-    width: 14px;
-    height: 14px;
-  }
-  .drow .note {
-    font-size: 13.5px;
-  }
-  .drow details {
-    grid-column: 2 / -1;
-    font-size: 13px;
-  }
-  .drow summary {
-    list-style: none;
-    cursor: pointer;
-    color: var(--accent);
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 32px;
-  }
-  .drow summary::-webkit-details-marker {
-    display: none;
-  }
-  .drow summary .icon {
-    width: 14px;
-    height: 14px;
-    transition: transform var(--dur-base) var(--ease-out);
-  }
-  .drow details[open] summary .icon {
-    transform: rotate(180deg);
-  }
-  .drow.flagged {
-    box-shadow: inset 3px 0 0 var(--warning);
-  }
+  /* ---- change history ---- */
   .hist {
     display: grid;
     gap: 8px;
@@ -4057,7 +3968,6 @@
     }
     .tbl th button,
     .tbl-foot .pages button,
-    .drow summary,
     .toast .x,
     .switch {
       min-height: var(--tap-min);

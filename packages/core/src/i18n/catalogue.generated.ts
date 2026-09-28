@@ -645,6 +645,11 @@ export const sv = {
   "web.csv.downloaded": "{file} har laddats ner.",
   "web.csv.monthBody": "Hela månaden, en rad per person och dag, med anteckningar.",
   "web.csv.personBody": "En rad per dag för {name}, med anteckningar.",
+  "web.dayList.changedBy": "Ändrad av {name}, {time}",
+  "web.dayList.dayOf": "Vecka {week}, {name}",
+  "web.dayList.logInGrid": "Logga i veckorutnätet",
+  "web.dayList.loggedBy": "Loggad av {name}, {time}",
+  "web.dayList.select": "{date}, {hours}. Visa dagen.",
   "web.emoji.bag": "Shoppingkasse",
   "web.emoji.bee": "Bi",
   "web.emoji.bicycle": "Cykel",
@@ -1541,6 +1546,11 @@ export const en = {
   "web.csv.downloaded": "{file} downloaded.",
   "web.csv.monthBody": "The whole month, one row per person and day, with notes.",
   "web.csv.personBody": "One row per day for {name}, with notes.",
+  "web.dayList.changedBy": "Changed by {name}, {time}",
+  "web.dayList.dayOf": "Week {week}, {name}",
+  "web.dayList.logInGrid": "Log it in the week grid",
+  "web.dayList.loggedBy": "Logged by {name}, {time}",
+  "web.dayList.select": "{date}, {hours}. Show the day.",
   "web.emoji.bag": "Shopping bag",
   "web.emoji.bee": "Bee",
   "web.emoji.bicycle": "Bicycle",
@@ -2420,6 +2430,11 @@ export type MessageParams = {
   "web.csv.downloaded": { file: string | number };
   "web.csv.monthBody": Record<never, never>;
   "web.csv.personBody": { name: string | number };
+  "web.dayList.changedBy": { name: string | number; time: string | number };
+  "web.dayList.dayOf": { name: string | number; week: string | number };
+  "web.dayList.logInGrid": Record<never, never>;
+  "web.dayList.loggedBy": { name: string | number; time: string | number };
+  "web.dayList.select": { date: string | number; hours: string | number };
   "web.emoji.bag": Record<never, never>;
   "web.emoji.bee": Record<never, never>;
   "web.emoji.bicycle": Record<never, never>;

@@ -1072,6 +1072,13 @@
       "subtitlePlain": "{from} to {to}. Your hours, day by day.",
       "openDay": "{date}, {hours}. Open it in your month.",
       "days": "Days"
+    },
+    "dayList": {
+      "loggedBy": "Logged by {name}, {time}",
+      "changedBy": "Changed by {name}, {time}",
+      "select": "{date}, {hours}. Show the day.",
+      "dayOf": "Week {week}, {name}",
+      "logInGrid": "Log it in the week grid"
     }
   }
 }
