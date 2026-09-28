@@ -34,7 +34,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+config.resolver.disableHierarchicalLookup = false;
 
 // The shared packages publish TypeScript SOURCE through their package.json "exports" maps (no build
 // step), so package-exports resolution must be on, with react-native winning the condition order.
