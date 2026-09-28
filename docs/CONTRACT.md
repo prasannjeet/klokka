@@ -74,8 +74,15 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
 - Web app: through the BFF at `/api/k/...` (the route handler adds the bearer, the browser never holds a token).
 - Prism mock (`npm run mock:api`): `http://localhost:4010/me` and friends, WITHOUT the `/v1` prefix (Prism
   ignores the `servers` entry). Every schema carries an example, so every route answers with realistic data.
-- Every operation not yet implemented answers `501 NOT_IMPLEMENTED` on the real API. As of Phase 0 that is
-  everything except the `me` group.
+- Every operation not yet implemented answers `501 NOT_IMPLEMENTED` on the real API. As of the E1 to E10 API
+  train (CHQ-109 to CHQ-141) every operation is implemented.
+- PATCH bodies (`*Update` schemas): a property left out is unchanged; an explicit `null` clears it where the
+  schema allows null (`MemberUpdate.hourlyRate`). The server reads the raw body to tell the two apart.
+- `EntryBatchItem.hours` is optional as well as nullable: absent or `null` removes that day (a required
+  nullable property would be rejected by the generated server validation).
+- Money fields (`earnings`, `hourlyRate`, `labourCost`, `money` in payloads) are `null` unless the workspace has
+  `showPay` on and the caller is the employer or the member themselves.
+- Operator routes accept the `platform-admin` role from the `roles` claim or the `operator` scope from `scope`.
 
 ## Regenerating
 
