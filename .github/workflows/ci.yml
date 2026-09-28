@@ -424,9 +424,12 @@ jobs:
       # Signing is injected with the standard android.injected.signing.* properties (what Android Studio's
       # "Generate signed APK" passes), so the generated build.gradle is never edited. Both ARM ABIs: every real
       # phone; x86 is emulator-only and there is no emulator on this host.
+      # TMPDIR: Metro's transform cache lives in os.tmpdir() and does not key on EXPO_PUBLIC_* values, so a cache
+      # shared across jobs on this host baked staging URLs into the v1.0.1 production APK. A job-local cache cannot.
       - name: Assemble the signed release APK
         working-directory: apps/mobile/android
         env:
+          TMPDIR: ${{ runner.temp }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -439,6 +442,16 @@ jobs:
             -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
 
       # Fail loudly if the APK is not signed by the project key (a debug-signed APK would install as another app).
+      # The bundle must carry the values this job set, or the phone would talk to the wrong environment.
+      - name: Verify the baked environment
+        run: |
+          set -euo pipefail
+          unzip -p "$APK" assets/index.android.bundle > "$RUNNER_TEMP/bundle"
+          for want in "$EXPO_PUBLIC_API_BASE_URL" "$EXPO_PUBLIC_LOGTO_ENDPOINT" "$EXPO_PUBLIC_LOGTO_APP_ID" "$EXPO_PUBLIC_LOGTO_API_RESOURCE"; do
+            grep -aqF "$want" "$RUNNER_TEMP/bundle" || { echo "::error::the APK bundle does not contain $want"; exit 1; }
+          done
+          rm -f "$RUNNER_TEMP/bundle"
+
       - name: Verify the signing certificate
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
