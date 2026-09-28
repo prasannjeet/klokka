@@ -24,6 +24,10 @@ public class NotificationRepository implements PanacheRepositoryBase<Notificatio
         return find("coalesceKey = ?1 and pushedAt is null", coalesceKey).firstResultOptional();
     }
 
+    public void deleteNotification(NotificationEntity notification) {
+        delete(notification);
+    }
+
     public void persistNotification(NotificationEntity notification) {
         persist(notification);
     }

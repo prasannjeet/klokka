@@ -4,6 +4,8 @@ import static com.prasannjeet.klokka.contract.model.Role.EMPLOYER;
 
 import com.prasannjeet.klokka.auth.CurrentUser;
 import com.prasannjeet.klokka.config.KlokkaConfig;
+import com.prasannjeet.klokka.logto.LogtoModels;
+import com.prasannjeet.klokka.logto.LogtoService;
 import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.contract.model.Me;
 import com.prasannjeet.klokka.contract.model.MyWorkspace;
@@ -48,6 +50,9 @@ public class MeService {
     @Inject
     KlokkaConfig config;
 
+    @Inject
+    LogtoService logto;
+
     @Transactional
     public Me me(Optional<String> acceptLanguage) {
         AppUserEntity user = ensureUser(acceptLanguage);
@@ -57,10 +62,20 @@ public class MeService {
     @Transactional
     public Me updateProfile(UserProfileUpdate update) {
         AppUserEntity user = ensureUser(Optional.empty());
-        if (update.getName() != null) user.displayName = update.getName().trim();
+        if (update.getName() != null) {
+            String name = update.getName().trim();
+            boolean changed = !name.equals(user.displayName);
+            user.displayName = name;
+            if (changed && !name.isBlank()) logto.updateUserNameQuietly(user.id, name);
+        }
         // Jackson gives an explicit null the same as an absent field here; both clear the emoji only when the
         // property was sent. The contract says null clears, so treat a present-null as clear.
         if (update.getAvatarEmoji() != null) user.avatarEmoji = update.getAvatarEmoji().isBlank() ? null : update.getAvatarEmoji();
+        // One person, one name: every membership shows what the profile says (employers see the rename too).
+        for (MeRepository.Membership row : repository.listMemberships(user.id)) {
+            if (!user.displayName.isBlank()) row.membership().displayName = user.displayName;
+            row.membership().avatarEmoji = user.avatarEmoji;
+        }
         return assemble(user, ensurePreferences(user.id, Optional.empty()));
     }
 
@@ -91,9 +106,20 @@ public class MeService {
     // The signed-in user's row for other services (workspace creation, invitation accept), created on first sight.
     @Transactional
     public AppUserEntity ensureCurrentUser() {
-        AppUserEntity user = ensureUser(Optional.empty());
-        ensurePreferences(user.id, Optional.empty());
+        return ensureCurrentUser(Optional.empty());
+    }
+
+    // First sight through an accept carries the device language too (D16), like the first /me does.
+    @Transactional
+    public AppUserEntity ensureCurrentUser(Optional<String> acceptLanguage) {
+        AppUserEntity user = ensureUser(acceptLanguage);
+        ensurePreferences(user.id, acceptLanguage);
         return user;
+    }
+
+    // A name the person chose (or Logto knew), as opposed to the local part of the email that stands in until then.
+    public boolean hasChosenName(AppUserEntity user) {
+        return !user.displayName.isBlank() && (user.email == null || !user.displayName.equalsIgnoreCase(localPart(user.email)));
     }
 
     // The language a user's notifications are rendered in.
@@ -119,6 +145,17 @@ public class MeService {
         });
         if (email.isPresent()) user.email = email.get();
         if (name.isPresent()) user.displayName = name.get();
+        // The access token carries no email or name; the webhook mirror usually has them by now, but not for a
+        // user created before the hook existed (the owner) or when a delivery was missed: ask Logto once, until
+        // an email is known.
+        if (user.email == null) {
+            Optional<LogtoModels.User> profile = logto.findUserQuietly(id);
+            profile.map(LogtoModels.User::primaryEmail).filter(e -> e != null && !e.isBlank())
+                    .ifPresent(e -> user.email = e.toLowerCase(Locale.ROOT));
+            if (!hasChosenName(user)) {
+                profile.map(LogtoModels.User::name).filter(n -> n != null && !n.isBlank()).ifPresent(n -> user.displayName = n);
+            }
+        }
         if (user.displayName.isBlank() && user.email != null) user.displayName = localPart(user.email);
         user.lastSeenAt = now;
         return user;
@@ -183,6 +220,8 @@ public class MeService {
                 .currency(workspace.currency)
                 .timezone(workspace.timezone)
                 .weekStart(workspace.weekStart)
+                .rounding(workspace.rounding)
+                .defaultDayHours(workspace.defaultDayHours)
                 .memberCount(employer ? (int) repository.memberCount(workspace.id) : null)
                 .employerName(employer ? null : repository.employerName(workspace.id).orElse(null))
                 .hoursThisMonth(repository.hoursBetween(workspace.id, employer ? null : membership.id, from, to))

@@ -25,6 +25,7 @@ import com.prasannjeet.klokka.contract.model.OperatorVolume;
 import com.prasannjeet.klokka.contract.model.OperatorVolumeDay;
 import com.prasannjeet.klokka.contract.model.OperatorVolumeKind;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspace;
+import com.prasannjeet.klokka.contract.model.WorkspaceColour;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspacePage;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspaceSummary;
 import com.prasannjeet.klokka.contract.model.Role;
@@ -98,7 +99,7 @@ public class OperatorService {
         LocalDate from = ym.atDay(1);
         LocalDate to = ym.atEndOfMonth();
         List<OperatorWorkspace> items = repository.workspaces(q, pay, from, to, sort, (p - 1) * size, size).stream()
-                .map(r -> new OperatorWorkspace().id(r.id()).name(r.name()).slug(r.slug()).emoji(r.emoji())
+                .map(r -> new OperatorWorkspace().id(r.id()).name(r.name()).slug(r.slug()).emoji(r.emoji()).colour(WorkspaceColour.fromValue(r.colour()))
                         .memberCount((int) (r.active() + r.invited())).activeCount((int) r.active()).invitedCount((int) r.invited())
                         .deactivatedCount((int) r.deactivated()).monthHours(BigDecimal.valueOf(r.monthHours())).showPay(r.showPay())
                         .createdAt(r.createdAt().atOffset(ZoneOffset.UTC))

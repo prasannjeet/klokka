@@ -76,6 +76,9 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         state.put("pushSends", new ArrayList<List<Map<String, Object>>>());
         state.put("receiptRequests", new ArrayList<List<String>>());
         state.put("listOrganizationsCalls", 0);
+        state.put("updatedUsers", new ArrayList<Map<String, Object>>());
+        state.put("managementAuthorizations", new ArrayList<String>());
+        state.put("expoAuthorizations", new ArrayList<String>());
         users.clear();
     }
 
@@ -102,8 +105,10 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
                 state.put("tokenRequests", (int) state.get("tokenRequests") + 1);
                 respond(exchange, 200, "{\"access_token\":\"fake-m2m-token\",\"token_type\":\"Bearer\",\"expires_in\":3600}");
             } else if (path.startsWith("/api/")) {
+                this.<String>list("managementAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 management(exchange, method, path.substring(4), body);
             } else if (path.startsWith("/expo/")) {
+                this.<String>list("expoAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 expo(exchange, path.substring(5), body);
             } else {
                 respond(exchange, 404, "{\"message\":\"no route " + path + "\"}");
@@ -171,6 +176,14 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         } else if (path.matches("/organization-invitations/[^/]+") && method.equals("DELETE")) {
             this.<String>list("deletedInvitations").add(path.split("/")[2]);
             respond(exchange, 204, null);
+        } else if (path.matches("/users/[^/]+") && method.equals("PATCH")) {
+            Map<String, Object> request = JSON.readValue(body, Map.class);
+            String id = path.split("/")[2];
+            request.put("id", id);
+            this.<Map<String, Object>>list("updatedUsers").add(request);
+            Map<String, String> user = users.get(id);
+            if (user != null && request.get("name") != null) user.put("name", String.valueOf(request.get("name")));
+            respond(exchange, 200, JSON.writeValueAsString(Map.of("id", id, "name", String.valueOf(request.get("name")))));
         } else if (path.matches("/users/[^/]+") && method.equals("GET")) {
             Map<String, String> user = users.get(path.split("/")[2]);
             if (user == null) respond(exchange, 404, "{\"message\":\"user not found\"}");

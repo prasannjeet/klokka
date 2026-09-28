@@ -106,7 +106,7 @@ class InsightResourceTest {
                 .body("weekdayDistribution[5].totalHours", is(8.0f)).body("weekdayDistribution[5].avgHours", is(2.67f))
                 .body("busiestDay.weekday", is("TUESDAY")).body("busiestDay.avgHours", is(9.0f))
                 // Weekdays ever used: Mon-Fri and Saturday. Elapsed days before the 23rd with nothing logged on those weekdays.
-                .body("nothingLoggedDays", contains("2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05", "2026-09-19"))
+                .body("nothingLoggedDays.date", contains("2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04", "2026-09-05", "2026-09-19"))
                 .body("currentWeek.isoWeek", is(39)).body("currentWeek.from", is("2026-09-21")).body("currentWeek.to", is("2026-09-27"))
                 .body("currentWeek.hours", is(20.0f)).body("currentWeek.days", hasSize(7)).body("currentWeek.days[1].hours", is(12.0f))
                 .body("currentWeek.membersLoggedToday", is(1)).body("currentWeek.membersActive", is(2))

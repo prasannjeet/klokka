@@ -12,6 +12,7 @@ public enum Text {
     HOURS_CHANGED_NOTE("notifications.hoursChanged.note"),
     HOURS_REMOVED_TITLE("notifications.hoursRemoved.title"),
     HOURS_REMOVED_BODY("notifications.hoursRemoved.body"),
+    HOURS_REMOVED_MANY_TITLE("notifications.hoursRemoved.titleMany", true),
     INVITE_ACCEPTED_TITLE("notifications.inviteAccepted.title"),
     INVITE_ACCEPTED_BODY("notifications.inviteAccepted.body"),
     ENTRY_FLAGGED_TITLE("notifications.entryFlagged.title"),

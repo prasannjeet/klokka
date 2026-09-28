@@ -125,6 +125,9 @@
     "summary": "{city}, {currency}, veckan börjar {weekStart}",
     "createTitle": "Skapa din arbetsplats",
     "createHint": "En arbetsplats är ett företag. Du kan öppna fler senare.",
+    "yourName": "Ditt namn",
+    "yourNameHint": "Anställda ser det här namnet i inbjudan och i varje notis.",
+    "yourNameRequired": "Ange ditt namn.",
     "createStep": "Steg {step} av {total}",
     "makeItYourPlace": "Gör det till ditt ställe.",
     "created": "Arbetsplatsen är skapad."
@@ -492,6 +495,8 @@
     },
     "hoursRemoved": {
       "title": "{name} tog bort {date}.",
+      "titleMany_one": "{name} tog bort {count} dag",
+      "titleMany_other": "{name} tog bort {count} dagar",
       "body": "{hours} togs bort från din månad."
     },
     "inviteAccepted": {

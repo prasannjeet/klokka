@@ -24,7 +24,9 @@ APK_URL=${NEXT_PUBLIC_APK_URL:-https://nexus.coolify.ooguy.com/repository/klokka
 case "$app" in
   api)
     context=apps/api
-    build_args=()
+    # /operator/health shows this as the running version.
+    pom_version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' apps/api/pom.xml | head -1)
+    build_args=(--build-arg "KLOKKA_BUILD_VERSION=${pom_version%-SNAPSHOT}-$(git rev-parse --short=7 HEAD)")
     [ -d apps/api/service/target/quarkus-app ] ||
       { echo "apps/api/service/target/quarkus-app is missing: run mvn -f apps/api/pom.xml install first" >&2; exit 1; }
     ;;

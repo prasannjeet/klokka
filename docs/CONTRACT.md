@@ -50,6 +50,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `getMemberInsights` | `GET /workspaces/{workspaceId}/members/{membershipId}/insights?month=` | employer or self | employee dashboard figures, shareable card |
 | `raiseFlag` | `POST /workspaces/{workspaceId}/entries/{entryId}/flags` | self | "Flag this entry" sheet |
 | `listFlags` | `GET /workspaces/{workspaceId}/flags?status=` | employer (employees: own) | overview open-flag card, mobile flag rows |
+| `getFlag` | `GET /workspaces/{workspaceId}/flags/{flagId}` | employer or the flag's member (others: 404) | mobile resolve screen opened from a push or a notification row |
 | `resolveFlag` | `POST /workspaces/{workspaceId}/flags/{flagId}/resolve` | employer | "Set to 6 h" / "Dismiss", mobile resolve screen |
 | `listNotifications` | `GET /notifications?workspaceId&unreadOnly&cursor&limit` | user | notification centre, badge |
 | `markNotificationRead` | `POST /notifications/{notificationId}/read` | user | opening a row |
@@ -83,6 +84,12 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
 - Money fields (`earnings`, `hourlyRate`, `labourCost`, `money` in payloads) are `null` unless the workspace has
   `showPay` on and the caller is the employer or the member themselves.
 - Operator routes accept the `platform-admin` role from the `roles` claim or the `operator` scope from `scope`.
+- Batch problems name the cells: `errors[].field` is `items[<index>].<field>` for `400 VALIDATION`, and a
+  `409 MONTH_LOCKED` on `POST entries/batch` lists every item in a closed month as `items[<index>].workDate`.
+- Push: every notification also goes out as an Expo message with `channelId` `hours`, `flags` or `workspace` and
+  `data.url` set to one of the app paths listed on `registerPushToken`; the phone follows only those shapes.
+- `WorkspaceInsights.nothingLoggedDays` is a list of `{ date }` objects (bare `format: date` strings in an array are
+  left unconverted by the typescript-fetch runtime).
 
 ## Regenerating
 

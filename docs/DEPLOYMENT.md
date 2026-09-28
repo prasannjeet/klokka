@@ -114,12 +114,15 @@ deleted from Coolify.
   `KLOKKA_LOGTO_M2M_CLIENT_ID`, `KLOKKA_LOGTO_M2M_CLIENT_SECRET*`, `KLOKKA_LOGTO_WEBHOOK_SIGNING_KEY*`,
   `KLOKKA_MAIL_HOST`, `KLOKKA_MAIL_PORT`, `KLOKKA_MAIL_USERNAME`, `KLOKKA_MAIL_PASSWORD*`, `KLOKKA_MAIL_FROM`,
   `KLOKKA_MAIL_START_TLS` (`REQUIRED`), `KLOKKA_MAIL_MONTHLY_QUOTA` (100), `KLOKKA_WEB_BASE_URL`,
-  `KLOKKA_EXPO_ACCESS_TOKEN*`, `JAVA_OPTS` (`-XX:MaxRAMPercentage=70` plus the JBoss log manager flag the
-  Dockerfile's default carries).
+  `KLOKKA_EXPO_ACCESS_TOKEN*`, `KLOKKA_OPERATOR_API_URL` and `KLOKKA_OPERATOR_LANDING_URL` (the Health page's
+  probes), `JAVA_OPTS` (`-XX:MaxRAMPercentage=70` plus the JBoss log manager flag the Dockerfile's default
+  carries). `KLOKKA_BUILD_VERSION` is baked into the image by `image.sh` (build argument), not set here.
 - `klokka-web` (`armlujpn5wkqd1d2nq0wkiiz`): `LOGTO_ENDPOINT`, `LOGTO_APP_ID`, `LOGTO_APP_SECRET*`,
   `LOGTO_COOKIE_SECRET*` (generated, kept in `logto.json` as `applications.klokka-web.cookie_secret`),
-  `LOGTO_BASE_URL`, `LOGTO_API_RESOURCE`, `KLOKKA_API_BASE_URL` (`http://klokka-api:8080/v1`, see below),
-  `NEXT_PUBLIC_APP_URL`.
+  `LOGTO_BASE_URL`, `KLOKKA_API_RESOURCE` (the names are the ones `apps/web/src/lib/env.ts` reads; the
+  provisional `LOGTO_API_RESOURCE` made every page answer 500 and was replaced during CHQ-143),
+  `KLOKKA_API_BASE_URL` (`http://klokka-api:8080/v1`, see below), `KLOKKA_ANDROID_APK_URL` (the join page's
+  "Get the Android app" link), `NEXT_PUBLIC_APP_URL`.
 - `klokka-landing` (`0sbvfkrt1vvbofzkk5q8ndv6`): `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`,
   `NEXT_PUBLIC_APK_URL` (also passed as build arguments, since Next.js inlines `NEXT_PUBLIC_*` at build time).
 

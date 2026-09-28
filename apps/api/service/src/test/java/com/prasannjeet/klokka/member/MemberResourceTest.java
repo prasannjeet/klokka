@@ -1,6 +1,7 @@
 package com.prasannjeet.klokka.member;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -198,11 +199,11 @@ class MemberResourceTest {
     void deactivateAndReactivateKeepTheHistoryAndTheEmployerCannotBeTouched() {
         given().contentType("application/json").body("{\"status\":\"DEACTIVATED\"}")
                 .when().patch("/v1/workspaces/" + ws + "/members/" + maria)
-                .then().statusCode(200).body("status", is("DEACTIVATED")).body("month.hours", is(10.5f));
+                .then().statusCode(200).body("status", is("DEACTIVATED")).body("month.hours", is(10.5f)).body("deactivatedAt", notNullValue());
         assertThat(data.scalar("select deactivated_at from membership where id = ?", maria)).isNotNull();
         given().contentType("application/json").body("{\"status\":\"ACTIVE\"}")
                 .when().patch("/v1/workspaces/" + ws + "/members/" + maria)
-                .then().statusCode(200).body("status", is("ACTIVE"));
+                .then().statusCode(200).body("status", is("ACTIVE")).body("deactivatedAt", nullValue());
         given().contentType("application/json").body("{\"status\":\"DEACTIVATED\"}")
                 .when().patch("/v1/workspaces/" + ws + "/members/" + employer)
                 .then().statusCode(409).body("code", is("CONFLICT"));

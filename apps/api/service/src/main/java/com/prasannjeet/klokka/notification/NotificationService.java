@@ -71,6 +71,14 @@ public class NotificationService {
         merged.put("before", change == null ? before : change.get("before"));
         merged.put("after", after);
         changes.put(date.toString(), merged);
+        // A sitting that nets to nothing (days added and cleared again before the push went out) is no news:
+        // the pending row goes, and nothing is created for it.
+        boolean netNothing = changes.values().stream()
+                .allMatch(c -> c instanceof Map<?, ?> m && m.get("before") == null && m.get("after") == null);
+        if (netNothing) {
+            if (row != null) repository.deleteNotification(row);
+            return;
+        }
         payload.put("actorId", actorId);
         payload.put("actorName", actorName);
         payload.put("membershipId", membershipId.toString());
@@ -193,13 +201,7 @@ public class NotificationService {
         WorkspaceEntity workspace = repository.workspaceOf(row).orElse(null);
         Map<String, Object> payload = NotificationPayload.read(mapper, row.payload);
         NotificationTexts.Rendered rendered = texts.render(row.kind, payload, language, workspace == null ? "SEK" : workspace.currency);
-        NotificationLink link = new NotificationLink()
-                .workspaceId(row.workspaceId)
-                .membershipId(uuidOrNull(payload.get("membershipId")))
-                .entryId(uuidOrNull(payload.get("entryId")))
-                .flagId(uuidOrNull(payload.get("flagId")))
-                .month(payload.get("month") == null ? monthOf(row.kind, payload) : payload.get("month").toString())
-                .date(payload.get("date") == null ? null : LocalDate.parse(payload.get("date").toString()));
+        NotificationLink link = link(row, payload);
         return new Notification()
                 .id(row.id)
                 .workspaceId(row.workspaceId)
@@ -213,6 +215,24 @@ public class NotificationService {
                 .link(link)
                 .readAt(row.readAt == null ? null : row.readAt.atOffset(ZoneOffset.UTC))
                 .createdAt(row.createdAt.atOffset(ZoneOffset.UTC));
+    }
+
+    // Where the notification leads, for the row's `link` and for the push message's `data.url` (NotificationLinks).
+    // A sitting that touched one day links to that day; several days link to the month of the first.
+    public NotificationLink link(NotificationEntity row, Map<String, Object> payload) {
+        return new NotificationLink()
+                .workspaceId(row.workspaceId)
+                .membershipId(uuidOrNull(payload.get("membershipId")))
+                .entryId(uuidOrNull(payload.get("entryId")))
+                .flagId(uuidOrNull(payload.get("flagId")))
+                .month(payload.get("month") == null ? monthOf(row.kind, payload) : payload.get("month").toString())
+                .date(payload.get("date") == null ? singleDayOf(row.kind, payload) : LocalDate.parse(payload.get("date").toString()));
+    }
+
+    private static LocalDate singleDayOf(NotificationKind kind, Map<String, Object> payload) {
+        if (kind != NotificationKind.HOURS_CHANGED) return null;
+        var changes = NotificationTexts.changes(payload);
+        return changes.size() == 1 ? changes.firstKey() : null;
     }
 
     private static String monthOf(NotificationKind kind, Map<String, Object> payload) {

@@ -103,6 +103,15 @@ public class FlagService {
                 .toList();
     }
 
+    // The employer sees every flag; a member only their own, and someone else's is a 404 rather than a hint.
+    @Transactional
+    public Flag get(UUID workspaceId, UUID flagId) {
+        Access a = access.member(workspaceId);
+        EntryFlagEntity flag = flags.findFlag(a.workspaceId(), flagId).orElseThrow(() -> notFound("Flag " + flagId));
+        if (!a.employer() && !flag.membershipId.equals(a.membership().id)) throw notFound("Flag " + flagId);
+        return view(a, flag, entries.findEntry(a.workspaceId(), flag.entryId).orElseThrow(() -> notFound("Entry " + flag.entryId)));
+    }
+
     @Transactional
     public Flag resolve(UUID workspaceId, UUID flagId, FlagResolve body) {
         Access a = access.employer(workspaceId);
@@ -112,6 +121,7 @@ public class FlagService {
         MembershipEntity member = access.target(a, flag.membershipId);
         Instant now = clock.instant();
         String note = body.getNote() == null || body.getNote().isBlank() ? null : body.getNote().trim();
+        BigDecimal before = entry.hours;
         if (body.getAction() == FlagResolutionAction.FIX) {
             if (body.getHours() == null) throw validation("hours", "is required for FIX");
             BigDecimal hours = HoursRounding.apply(body.getHours(), a.workspace().rounding, "hours");
@@ -126,9 +136,11 @@ public class FlagService {
         flag.resolutionNote = note;
         flag.resolvedBy = a.userId();
         flag.resolvedAt = now;
+        // The resolution row says what the day settled on ("fixed the flag: 6 h", "kept 4 h"); the value change
+        // itself is the UPDATED row the funnel wrote just before.
         HourEntryChangeEntity change = writer.history(a, entry,
                 flag.status == FlagStatus.FIXED ? EntryChangeKind.FLAG_FIXED : EntryChangeKind.FLAG_DISMISSED,
-                null, null, null, null, a.userId(), now);
+                before, entry.hours, null, null, a.userId(), now);
         change.flagId = flag.id;
         notifications.flagResolved(a.workspace(), member.userId, member.id, entry.id, flag.id, a.membership().displayName,
                 entry.workDate, flag.status == FlagStatus.FIXED ? "FIX" : "DISMISS", entry.hours, note);

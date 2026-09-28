@@ -17,7 +17,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class OperatorRepository implements PanacheRepositoryBase<WorkspaceEntity, UUID> {
 
-    public record WorkspaceRow(UUID id, String name, String slug, String emoji, boolean showPay, Instant createdAt,
+    public record WorkspaceRow(UUID id, String name, String slug, String emoji, String colour, boolean showPay, Instant createdAt,
             long active, long invited, long deactivated, double monthHours, Instant lastActivity) {}
 
     public record UserRow(String id, String name, String email, String language, boolean pushRegistered, long employerOf,
@@ -27,7 +27,7 @@ public class OperatorRepository implements PanacheRepositoryBase<WorkspaceEntity
             Instant sentAt, Instant expiresAt, String status, int resendCount, Instant joinedAt) {}
 
     private static final String WORKSPACE_SELECT = """
-            select w.id, w.name, w.slug, w.emoji, w.show_pay, w.created_at,
+            select w.id, w.name, w.slug, w.emoji, w.colour, w.show_pay, w.created_at,
                    (select count(*) from membership m where m.workspace_id = w.id and m.status = 'ACTIVE') as active,
                    (select count(*) from membership m where m.workspace_id = w.id and m.status = 'INVITED') as invited,
                    (select count(*) from membership m where m.workspace_id = w.id and m.status = 'DEACTIVATED') as deactivated,
@@ -57,8 +57,8 @@ public class OperatorRepository implements PanacheRepositoryBase<WorkspaceEntity
                 .setParameter("q", like(q)).setParameter("pay", pay).setParameter("from", from).setParameter("to", to)
                 .setParameter("o", offset).setParameter("l", limit);
         List<Object[]> rows = query.getResultList();
-        return rows.stream().map(r -> new WorkspaceRow((UUID) r[0], (String) r[1], (String) r[2], (String) r[3], (Boolean) r[4],
-                instant(r[5]), n(r[6]), n(r[7]), n(r[8]), ((Number) r[9]).doubleValue(), instant(r[10]))).toList();
+        return rows.stream().map(r -> new WorkspaceRow((UUID) r[0], (String) r[1], (String) r[2], (String) r[3], (String) r[4], (Boolean) r[5],
+                instant(r[6]), n(r[7]), n(r[8]), n(r[9]), ((Number) r[10]).doubleValue(), instant(r[11]))).toList();
     }
 
     public long countWorkspaces(String q, Boolean pay) {

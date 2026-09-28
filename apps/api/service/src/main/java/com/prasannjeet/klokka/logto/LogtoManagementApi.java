@@ -4,6 +4,7 @@ import io.quarkus.oidc.client.filter.OidcClientFilter;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -61,4 +62,8 @@ public interface LogtoManagementApi {
     @GET
     @Path("/users/{id}")
     LogtoModels.User getUser(@PathParam("id") String id);
+
+    @PATCH
+    @Path("/users/{id}")
+    LogtoModels.User updateUser(@PathParam("id") String id, LogtoModels.UserUpdate body);
 }

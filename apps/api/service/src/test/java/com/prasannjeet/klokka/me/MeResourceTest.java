@@ -1,6 +1,9 @@
 package com.prasannjeet.klokka.me;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -8,6 +11,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
+import com.prasannjeet.klokka.support.Fake;
 import com.prasannjeet.klokka.support.MutableClock;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -19,6 +23,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -46,9 +51,36 @@ class MeResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "usr_me_fresh_logto")
+    @OidcSecurity(claims = {@Claim(key = "sub", value = "usr_me_fresh_logto")})
+    void firstCallFillsEmailAndNameFromLogtoWhenTheWebhookHasNotRun() {
+        Fake.reset();
+        Fake.user("usr_me_fresh_logto", "Owner@Example.com", "Owner Person");
+        given().when().get("/v1/me").then().statusCode(200)
+                .body("user.email", is("owner@example.com"))
+                .body("user.name", is("Owner Person"));
+    }
+
+    @Test
+    @TestSecurity(user = "usr_me_old_row")
+    @OidcSecurity(claims = {@Claim(key = "sub", value = "usr_me_old_row")})
+    void anExistingRowWithoutAnEmailIsFilledFromLogtoToo() throws SQLException {
+        // The owner's row on staging: created before the hook existed, so the mirror never wrote it.
+        Fake.reset();
+        try (Connection c = dataSource.getConnection()) {
+            upsertUser(c, "usr_me_old_row", null, "");
+        }
+        Fake.user("usr_me_old_row", "old@example.com", "Old Owner");
+        given().when().get("/v1/me").then().statusCode(200)
+                .body("user.email", is("old@example.com"))
+                .body("user.name", is("Old Owner"));
+    }
+
+    @Test
     @TestSecurity(user = FRESH)
     @OidcSecurity(claims = {@Claim(key = "sub", value = FRESH)})
     void firstCallCreatesTheUserFromTheTokenAlone() {
+        Fake.reset();
         given().header("Accept-Language", "en-GB,en;q=0.9")
                 .when().get("/v1/me")
                 .then().statusCode(200)
@@ -89,6 +121,8 @@ class MeResourceTest {
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.memberCount", nullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.hoursThisMonth", is(4.5f))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.showPay", is(true))
+                .body("workspaces.find { it.workspaceId == '" + workspace + "' }.rounding", notNullValue())
+                .body("workspaces.find { it.workspaceId == '" + workspace + "' }.defaultDayHours", notNullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.currency", is("SEK"))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.unreadNotifications", is(0));
     }
@@ -106,6 +140,30 @@ class MeResourceTest {
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.memberCount", is(2))
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.employerName", nullValue())
                 .body("workspaces.find { it.workspaceId == '" + workspace + "' }.hoursThisMonth", is(4.5f));
+    }
+
+    @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void renamingYourselfMirrorsTheNameToLogtoAndToEveryMembership() throws SQLException {
+        Fake.reset();
+        UUID workspace = UUID.randomUUID();
+        UUID employee = UUID.randomUUID();
+        seedWorkspace(workspace, "rename-" + workspace.toString().substring(0, 8), employee);
+        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\",\"avatarEmoji\":\"🐝\"}").when().patch("/v1/me").then().statusCode(200)
+                .body("user.name", is("Maria Lindqvist"));
+        try (Connection c = dataSource.getConnection(); PreparedStatement ps = c.prepareStatement("select display_name, avatar_emoji from membership where id = ?")) {
+            ps.setObject(1, employee);
+            var rs = ps.executeQuery();
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString(1)).isEqualTo("Maria Lindqvist");
+            assertThat(rs.getString(2)).isEqualTo("🐝");
+        }
+        assertThat(Fake.<Map<String, Object>>list("updatedUsers")).extracting(u -> u.get("id"), u -> u.get("name"))
+                .containsExactly(tuple(MARIA, "Maria Lindqvist"));
+        // The same name again changes nothing, so Logto is not asked again.
+        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\"}").when().patch("/v1/me").then().statusCode(200);
+        assertThat(Fake.<Object>list("updatedUsers")).hasSize(1);
     }
 
     @Test

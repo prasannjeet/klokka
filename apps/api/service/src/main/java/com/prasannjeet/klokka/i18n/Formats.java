@@ -50,8 +50,11 @@ public final class Formats {
     }
 
     // "ons 23 sep." (sv) / "Wed 23 Sept" (en).
+    // Swedish abbreviates months with a period ("24 sep."); dropped, since these dates end sentences in the
+    // notifications ("flaggade tors 24 sep.." on staging) and "24 sep" reads fine anywhere.
     public static String shortDate(LocalDate date, Language language) {
-        return date.format(DateTimeFormatter.ofPattern("EEE d MMM", locale(language)));
+        String text = date.format(DateTimeFormatter.ofPattern("EEE d MMM", locale(language)));
+        return text.endsWith(".") ? text.substring(0, text.length() - 1) : text;
     }
 
     public static String longDate(LocalDate date, Language language) {

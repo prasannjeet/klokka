@@ -67,6 +67,38 @@ class NotificationAndPushTest {
         clock.reset();
     }
 
+    @Inject
+    NotificationTexts texts;
+
+    @Test
+    void aSittingThatOnlyClearedDaysReadsAsARemoval() {
+        Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("actorName", "Nora Lind");
+        payload.put("changes", Map.of(
+                "2026-09-29", Map.of("before", new BigDecimal("2.00")),
+                "2026-10-01", Map.of("before", new BigDecimal("3.00"))));
+        NotificationTexts.Rendered sv = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
+                com.prasannjeet.klokka.contract.model.Language.SV, "SEK");
+        assertThat(sv.title()).isEqualTo("Nora Lind tog bort 2 dagar");
+        assertThat(sv.body()).isEqualTo("5 h togs bort från din månad.");
+        assertThat(sv.detail()).isEqualTo("tis 29 sep till tors 1 okt");
+        NotificationTexts.Rendered en = texts.render(com.prasannjeet.klokka.contract.model.NotificationKind.HOURS_CHANGED, payload,
+                com.prasannjeet.klokka.contract.model.Language.EN, "SEK");
+        assertThat(en.title()).isEqualTo("Nora Lind removed 2 days");
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aSittingThatAddsAndClearsTheSameDaysIsNoNews() {
+        String base = "/v1/workspaces/" + ws + "/members/" + maria + "/entries/";
+        given().contentType("application/json").body("{\"hours\":4}").when().put(base + "2026-09-21").then().statusCode(200);
+        assertThat(data.count("select count(*) from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws)).isEqualTo(1);
+        given().when().delete(base + "2026-09-21").then().statusCode(204);
+        assertThat(data.count("select count(*) from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws))
+                .as("added and cleared within the quiet window: nothing to tell").isZero();
+    }
+
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
@@ -97,6 +129,9 @@ class NotificationAndPushTest {
         assertThat(message.get("title")).isEqualTo("Notify Corp: Nora Lind lade till 3 dagar, 12,5 h");
         assertThat(message.get("body")).isEqualTo("12,5 h i vecka 39.");
         assertThat(((Map<String, Object>) message.get("data")).get("notificationId")).isEqualTo(id.toString());
+        // The phone's allowlisted deep link and Android channel (registerPushToken in the contract).
+        assertThat(((Map<String, Object>) message.get("data")).get("url")).isEqualTo("/w/" + ws + "/members/" + maria + "/month/2026-09");
+        assertThat(message.get("channelId")).isEqualTo("hours");
         assertThat(data.scalar("select pushed_at from notification where id = ?", id)).isNotNull();
         assertThat(data.count("select count(*) from push_delivery where notification_id = ? and status = 'SENT'", id)).isEqualTo(1);
         sweeper.sweep();

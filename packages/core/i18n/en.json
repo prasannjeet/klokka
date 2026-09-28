@@ -125,6 +125,9 @@
     "summary": "{city}, {currency}, week starts {weekStart}",
     "createTitle": "Create your workspace",
     "createHint": "One workspace is one business. You can open more later.",
+    "yourName": "Your name",
+    "yourNameHint": "Employees see this name on the invitation and on every notification.",
+    "yourNameRequired": "Enter your name.",
     "createStep": "Step {step} of {total}",
     "makeItYourPlace": "Make it your place.",
     "created": "Workspace created."
@@ -492,6 +495,8 @@
     },
     "hoursRemoved": {
       "title": "{name} removed {date}.",
+      "titleMany_one": "{name} removed {count} day",
+      "titleMany_other": "{name} removed {count} days",
       "body": "{hours} was taken off your month."
     },
     "inviteAccepted": {

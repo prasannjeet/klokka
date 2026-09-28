@@ -104,13 +104,26 @@ public class NotificationTexts {
                     longDate(date, lang));
         }
         BigDecimal total = BigDecimal.ZERO;
-        for (BigDecimal[] change : changes.values()) if (change[1] != null) total = total.add(change[1]);
+        BigDecimal takenOff = BigDecimal.ZERO;
+        int removed = 0;
+        for (BigDecimal[] change : changes.values()) {
+            if (change[1] != null) total = total.add(change[1]);
+            else {
+                removed++;
+                if (change[0] != null) takenOff = takenOff.add(change[0]);
+            }
+        }
         LocalDate from = changes.firstKey();
         LocalDate to = changes.lastKey();
+        String range = t(lang, Text.HOURS_ADDED_RANGE, Map.of("from", shortDate(from, lang), "to", shortDate(to, lang)));
+        // A sitting that only cleared days is a removal, not "added N days, 0 h" (staging, after two deletes).
+        if (removed == changes.size()) {
+            return new Rendered(catalogue.plural(lang, Text.HOURS_REMOVED_MANY_TITLE.key(), removed, Map.of("name", name)),
+                    t(lang, Text.HOURS_REMOVED_BODY, Map.of("hours", hours(takenOff, lang, catalogue))), range);
+        }
         int weekFrom = from.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         int weekTo = to.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
         String title = catalogue.plural(lang, Text.HOURS_ADDED_TITLE.key(), changes.size(), Map.of("name", name, "hours", number(total, lang)));
-        String range = t(lang, Text.HOURS_ADDED_RANGE, Map.of("from", shortDate(from, lang), "to", shortDate(to, lang)));
         String body = weekFrom == weekTo && from.getYear() == to.getYear()
                 ? t(lang, Text.HOURS_ADDED_BODY, Map.of("hours", hours(total, lang, catalogue), "week", Integer.toString(weekFrom)))
                 : range;

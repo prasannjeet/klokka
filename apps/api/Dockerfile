@@ -4,6 +4,10 @@
 #   docker build -t klokka-api apps/api
 FROM eclipse-temurin:25-jre
 
+# What /operator/health reports as the running version (image.sh passes <pom version>-<short sha>).
+ARG KLOKKA_BUILD_VERSION=dev
+ENV KLOKKA_BUILD_VERSION=$KLOKKA_BUILD_VERSION
+
 RUN useradd --system --uid 1001 --user-group klokka
 WORKDIR /app
 

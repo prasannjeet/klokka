@@ -3,6 +3,7 @@ package com.prasannjeet.klokka.entry;
 import static com.prasannjeet.klokka.error.KlokkaException.forbidden;
 import static com.prasannjeet.klokka.error.KlokkaException.notFound;
 import static com.prasannjeet.klokka.error.KlokkaException.validation;
+import static com.prasannjeet.klokka.error.ProblemCode.MONTH_LOCKED;
 import static com.prasannjeet.klokka.error.ProblemCode.VALIDATION;
 
 import com.prasannjeet.klokka.auth.Access;
@@ -16,8 +17,10 @@ import com.prasannjeet.klokka.contract.model.EntryChange;
 import com.prasannjeet.klokka.contract.model.EntryKey;
 import com.prasannjeet.klokka.contract.model.EntryUpsert;
 import com.prasannjeet.klokka.contract.model.FieldError;
+import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import com.prasannjeet.klokka.error.KlokkaException;
+import com.prasannjeet.klokka.i18n.Formats;
 import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.FlagRepository;
@@ -122,7 +125,19 @@ public class EntryService {
         if (!errors.isEmpty()) {
             throw new KlokkaException(VALIDATION, "The batch has " + errors.size() + " invalid item(s).", errors, null);
         }
-        for (YearMonth month : months) writer.requireUnlocked(a, month);
+        // A closed month refuses the whole batch, and the problem names every cell in it (a week that spans a
+        // closed and an open month rings only the closed cells on the grid).
+        Map<YearMonth, Boolean> locked = new HashMap<>();
+        List<FieldError> closed = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            YearMonth month = YearMonth.from(items.get(i).getWorkDate());
+            if (locked.computeIfAbsent(month, m -> writer.isLocked(a, m))) {
+                closed.add(new FieldError().field("items[" + i + "].workDate").message(Formats.month(month, Language.EN) + " is closed"));
+            }
+        }
+        if (!closed.isEmpty()) {
+            throw new KlokkaException(MONTH_LOCKED, "The batch touches a closed month. Unlock it to change entries.", closed, null);
+        }
 
         List<Entry> saved = new ArrayList<>();
         List<EntryKey> removed = new ArrayList<>();

@@ -24,5 +24,12 @@ Items the trains deferred deliberately. Each becomes a `KLOKKA:` ticket in CHQ w
 - The `recentDeploys` operator figure only knows about the API itself.
 - Maestro on-device flows for the phone (v1 relies on RNTL tests plus manual checks on the owner's phone).
 
-## Contract requests not yet folded in
-See `docs/CONTRACT_REQUESTS.md`; the integration pass decides which land in v1.
+## Contract requests deferred by the integration pass (CHQ-143)
+The v1 ones landed (`docs/CONTRACT_REQUESTS.md` says which, with the commit). Still open:
+- A week read model (`GET /workspaces/{id}/weeks/{date}` with per-member totals and the previous week): the phone
+  sums the two weeks of `listEntries` on the client, which is presentation arithmetic under D9.
+- Typed notification subjects (`Notification.subjectName`) so a row can say "See Jonas's month".
+- Named Prism examples per role (`Prefer: example=employer`); the web bridges it with the development persona rewrite.
+- Operator console: sorting and search on every list, previous-month counts by kind, per-deployment health (already
+  listed above under Product).
+- Avatar upload and an account-management link (already listed above under Product).

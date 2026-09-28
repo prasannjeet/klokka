@@ -76,14 +76,39 @@ class FlagResourceTest {
     }
 
     @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void oneFlagIsReadableByItsMember() {
+        String flagId = given().contentType("application/json").body("{\"reason\":\"MORE\",\"suggestedHours\":6,\"message\":\"I worked 6 h\"}")
+                .when().post("/v1/workspaces/" + ws + "/entries/" + entry + "/flags").then().statusCode(201).extract().path("id");
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(200)
+                .body("id", is(flagId)).body("status", is("OPEN")).body("memberName", is("Maria Lind")).body("suggestedHours", is(6.0f));
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + UUID.randomUUID()).then().statusCode(404).body("code", is("NOT_FOUND"));
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void theEmployerReadsAnyFlagOfTheWorkspace() {
+        UUID flagId = UUID.randomUUID();
+        data.run("insert into entry_flag (id, workspace_id, entry_id, membership_id, raised_by, reason, message, logged_hours, status) values (?, ?, ?, ?, ?, 'MORE', 'x', 4, 'OPEN')",
+                flagId, ws, entry, maria, MARIA);
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(200)
+                .body("id", is(flagId.toString())).body("membershipId", is(maria.toString())).body("entryId", is(entry.toString()));
+    }
+
+    @Test
     @TestSecurity(user = JONAS)
     @OidcSecurity(claims = {@Claim(key = "sub", value = JONAS)})
     void anotherMemberCannotFlagOrSeeIt() {
         given().contentType("application/json").body("{\"reason\":\"MORE\",\"message\":\"not mine\"}")
                 .when().post("/v1/workspaces/" + ws + "/entries/" + entry + "/flags").then().statusCode(403);
+        UUID flagId = UUID.randomUUID();
         data.run("insert into entry_flag (id, workspace_id, entry_id, membership_id, raised_by, reason, message, logged_hours, status) values (?, ?, ?, ?, ?, 'MORE', 'x', 4, 'OPEN')",
-                UUID.randomUUID(), ws, entry, maria, MARIA);
+                flagId, ws, entry, maria, MARIA);
         given().when().get("/v1/workspaces/" + ws + "/flags").then().statusCode(200).body("", hasSize(0));
+        // Someone else's flag is a 404, not a hint that it exists.
+        given().when().get("/v1/workspaces/" + ws + "/flags/" + flagId).then().statusCode(404).body("code", is("NOT_FOUND"));
     }
 
     @Test
@@ -101,6 +126,9 @@ class FlagResourceTest {
         assertThat(data.scalar("select hours from hour_entry where id = ?", entry)).isEqualTo(new BigDecimal("6.00"));
         assertThat(data.query("select kind from hour_entry_change where entry_id = ? order by seq", entry))
                 .containsExactly(List.of("CREATED"), List.of("UPDATED"), List.of("FLAG_FIXED"));
+        // The resolution row carries the hours it settled on (the web renders "fixed the flag: 6 h", never "0 h").
+        given().when().get("/v1/workspaces/" + ws + "/entries/" + entry + "/history").then().statusCode(200)
+                .body("find { it.kind == 'FLAG_FIXED' }.hoursBefore", is(4.0f)).body("find { it.kind == 'FLAG_FIXED' }.hoursAfter", is(6.0f));
         assertThat(data.query("select kind, payload->>'action', payload->>'hours' from notification where logto_user_id = ? and workspace_id = ?", MARIA, ws))
                 .containsExactly(List.of("FLAG_RESOLVED", "FIX", "6.00"));
         given().contentType("application/json").body("{\"action\":\"DISMISS\"}")
@@ -114,6 +142,8 @@ class FlagResourceTest {
                 .when().post("/v1/workspaces/" + ws + "/flags/" + flag2 + "/resolve").then().statusCode(200)
                 .body("status", is("DISMISSED")).body("resolution.action", is("DISMISS")).body("resolution.hours", nullValue());
         assertThat(data.scalar("select hours from hour_entry where id = ?", second)).isEqualTo(new BigDecimal("3.00"));
+        given().when().get("/v1/workspaces/" + ws + "/entries/" + second + "/history").then().statusCode(200)
+                .body("find { it.kind == 'FLAG_DISMISSED' }.hoursAfter", is(3.0f));
         given().when().get("/v1/workspaces/" + ws + "/flags?status=DISMISSED").then().statusCode(200).body("", hasSize(1)).body("[0].id", is(flag2.toString()));
         given().when().get("/v1/workspaces/" + ws + "/flags").then().statusCode(200).body("", hasSize(2));
     }

@@ -22,6 +22,8 @@ info:
     - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every
       operation may also answer `401`, `403` and `500` in that shape.
     - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is.
+    - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and
+      whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`).
   license:
     name: MIT
     url: https://github.com/prasannjeet/klokka/blob/main/LICENSE
@@ -136,7 +138,19 @@ paths:
       tags: [me]
       operationId: registerPushToken
       summary: Register this device's Expo push token
-      description: Idempotent per token. A token that moves to another user is re-assigned (tokens are per device install).
+      description: |
+        Idempotent per token. A token that moves to another user is re-assigned (tokens are per device install).
+
+        What the API sends to that token (Expo push message): `title` and `body` in the user's stored language,
+        `channelId` (Android) one of `hours` (hours added, changed, removed), `flags` (entry flagged, flag
+        resolved) or `workspace` (invitation accepted, month closed, month reopened), and `data` with
+        `notificationId`, `kind` (NotificationKind), `workspaceId` and `url`. `url` is an app path the client
+        follows only when it matches one of `/w/{workspaceId}/month/{yyyy-MM}`,
+        `/w/{workspaceId}/members/{membershipId}/month/{yyyy-MM}`,
+        `/w/{workspaceId}/members/{membershipId}/day/{yyyy-MM-dd}`, `/w/{workspaceId}/flags/{flagId}`,
+        `/w/{workspaceId}/notifications`, `/w/{workspaceId}/employees`, `/w/{workspaceId}` and `/notifications`.
+        Per kind: HOURS_CHANGED the member's day (a single day) or month, ENTRY_FLAGGED the flag, FLAG_RESOLVED
+        the member's day, INVITE_ACCEPTED the employees list, MONTH_CLOSED and MONTH_REOPENED the member's month.
       requestBody:
         required: true
         content:
@@ -617,6 +631,10 @@ paths:
         Applies every item atomically: `hours` set means upsert, `hours` null means remove. One sitting, so each
         affected member gets one coalesced notification. The whole batch is refused with `409 MONTH_LOCKED` if
         any item falls in a closed month, and with `400` if any item is invalid (the problem lists them).
+
+        Problems name the cells: `errors[].field` is `items[<index>].<field>` for `400 VALIDATION`, and the
+        `409 MONTH_LOCKED` problem lists every item in a closed month as `items[<index>].workDate`, so a week
+        that spans a closed and an open month can mark only the closed cells.
       requestBody:
         required: true
         content:
@@ -940,6 +958,31 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Flag'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/flags/{flagId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/FlagId'
+    get:
+      tags: [flags]
+      operationId: getFlag
+      summary: One flag (employer, or the member it is about)
+      description: The resolve screen opened from a push, a notification row or the Home card has only the flag id. A flag about someone else is a 404, not a hint that it exists.
+      responses:
+        '200':
+          description: The flag.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Flag'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1512,7 +1555,7 @@ components:
           $ref: '#/components/schemas/ProblemCode'
         errors:
           type: array
-          description: Field-level problems for `VALIDATION`.
+          description: Field-level problems for `VALIDATION`, and the closed items of a `MONTH_LOCKED` batch.
           items:
             $ref: '#/components/schemas/FieldError'
       example:
@@ -1783,7 +1826,7 @@ components:
     MyWorkspace:
       type: object
       description: A membership as the workspace switcher shows it.
-      required: [workspaceId, membershipId, name, slug, colour, emoji, role, memberStatus, showPay, currency, timezone, weekStart, hoursThisMonth, unreadNotifications]
+      required: [workspaceId, membershipId, name, slug, colour, emoji, role, memberStatus, showPay, currency, timezone, weekStart, rounding, defaultDayHours, hoursThisMonth, unreadNotifications]
       properties:
         workspaceId:
           type: string
@@ -1819,6 +1862,12 @@ components:
           example: Europe/Stockholm
         weekStart:
           $ref: '#/components/schemas/WeekStart'
+        rounding:
+          $ref: '#/components/schemas/Rounding'
+        defaultDayHours:
+          type: number
+          description: The "Full day" chip and the preview of what the rounding rule makes of a typed value.
+          example: 8
         memberCount:
           type: [integer, 'null']
           description: Active plus invited members; for employers ("Employer, 4 people").
@@ -1847,6 +1896,8 @@ components:
         currency: SEK
         timezone: Europe/Stockholm
         weekStart: MONDAY
+        rounding: HALF
+        defaultDayHours: 8
         memberCount: null
         employerName: Nora Lind
         hoursThisMonth: 92.5
@@ -2179,6 +2230,11 @@ components:
           type: [string, 'null']
           format: date-time
           example: '2026-05-12T09:30:00Z'
+        deactivatedAt:
+          type: [string, 'null']
+          format: date-time
+          description: When the employer deactivated the member ("Left 30 Jun 2026"); null while active or invited.
+          example: null
         invitation:
           $ref: '#/components/schemas/MemberInvitationState'
         month:
@@ -2199,6 +2255,7 @@ components:
         hourlyRate: 170
         invitedAt: '2026-05-10T12:00:00Z'
         joinedAt: '2026-05-12T09:30:00Z'
+        deactivatedAt: null
         month:
           month: '2026-09'
           hours: 118
@@ -2306,7 +2363,7 @@ components:
           body: Café Nord logs your hours in Klokka. Set a password and every one of them is yours to see, day by day, month by month.
     InvitationAccepted:
       type: object
-      required: [workspaceId, membershipId, workspaceName, role]
+      required: [workspaceId, membershipId, workspaceName, workspaceSlug, role]
       properties:
         workspaceId:
           type: string
@@ -2319,12 +2376,17 @@ components:
         workspaceName:
           type: string
           example: Café Nord
+        workspaceSlug:
+          type: string
+          description: For "Continue on the web" (`/w/{slug}`) without a second read of `/me`.
+          example: cafe-nord
         role:
           $ref: '#/components/schemas/Role'
       example:
         workspaceId: 2b1f7e0a-4c8d-4d5e-9a6b-3c2d1e0f9a8b
         membershipId: 5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21
         workspaceName: Café Nord
+        workspaceSlug: cafe-nord
         role: EMPLOYEE
 
     # ------------------------------------------------------------ entries
@@ -2364,6 +2426,10 @@ components:
         earnings:
           type: [number, 'null']
           example: 1073
+        hourlyRate:
+          type: [number, 'null']
+          description: The rate `earnings` was computed with; null under the same rules as `earnings`.
+          example: 165
         locked:
           type: boolean
           description: True when the entry's month is closed.
@@ -2384,7 +2450,7 @@ components:
           $ref: '#/components/schemas/Actor'
         changeCount:
           type: integer
-          description: Number of history rows (1 for a fresh entry).
+          description: Number of history rows, the creation included, so a fresh entry has 1 and "edited N times" is changeCount minus 1.
           example: 2
       example:
         id: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
@@ -2395,6 +2461,7 @@ components:
         hours: 6.5
         note: Delivery day, stayed to unload.
         earnings: 1073
+        hourlyRate: 165
         locked: false
         createdAt: '2026-09-23T16:40:00Z'
         createdBy:
@@ -2981,6 +3048,16 @@ components:
       example:
         weekday: FRIDAY
         avgHours: 26
+    NothingLoggedDay:
+      type: object
+      required: [date]
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-05'
+      example:
+        date: '2026-09-05'
     CurrentWeekDay:
       type: object
       required: [date, hours]
@@ -3123,11 +3200,9 @@ components:
           $ref: '#/components/schemas/BusiestDay'
         nothingLoggedDays:
           type: array
-          description: Elapsed days with no entry for any active member, skipping weekdays on which the workspace has never logged anything.
+          description: Elapsed days with no entry for any active member, skipping weekdays on which the workspace has never logged anything. Objects, not bare dates, so the generated clients convert them.
           items:
-            type: string
-            format: date
-          example: ['2026-09-05', '2026-09-19']
+            $ref: '#/components/schemas/NothingLoggedDay'
         currentWeek:
           $ref: '#/components/schemas/CurrentWeek'
         openFlags:
@@ -3214,7 +3289,9 @@ components:
         busiestDay:
           weekday: FRIDAY
           avgHours: 26
-        nothingLoggedDays: ['2026-09-05', '2026-09-19']
+        nothingLoggedDays:
+          - date: '2026-09-05'
+          - date: '2026-09-19'
         currentWeek:
           isoWeek: 39
           from: '2026-09-21'
@@ -3690,7 +3767,7 @@ components:
         activeLast7Days: 31
     OperatorWorkspace:
       type: object
-      required: [id, name, slug, emoji, memberCount, activeCount, invitedCount, deactivatedCount, monthHours, showPay, createdAt]
+      required: [id, name, slug, emoji, colour, memberCount, activeCount, invitedCount, deactivatedCount, monthHours, showPay, createdAt]
       properties:
         id:
           type: string
@@ -3705,6 +3782,8 @@ components:
         emoji:
           type: string
           example: "☕"
+        colour:
+          $ref: '#/components/schemas/WorkspaceColour'
         memberCount:
           type: integer
           example: 5
@@ -3736,6 +3815,7 @@ components:
         name: Café Nord
         slug: cafe-nord
         emoji: "☕"
+        colour: PRIMARY
         memberCount: 5
         activeCount: 4
         invitedCount: 1

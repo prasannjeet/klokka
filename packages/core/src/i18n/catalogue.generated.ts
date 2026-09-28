@@ -391,6 +391,8 @@ export const sv = {
   "notifications.hoursChanged.title": "{name} ändrade {date}.",
   "notifications.hoursRemoved.body": "{hours} togs bort från din månad.",
   "notifications.hoursRemoved.title": "{name} tog bort {date}.",
+  "notifications.hoursRemoved.titleMany_one": "{name} tog bort {count} dag",
+  "notifications.hoursRemoved.titleMany_other": "{name} tog bort {count} dagar",
   "notifications.inviteAccepted.body": "{name} är nu anställd på {workspace}.",
   "notifications.inviteAccepted.title": "{name} accepterade din inbjudan.",
   "notifications.markAllRead": "Markera alla som lästa",
@@ -881,6 +883,9 @@ export const sv = {
   "workspace.timezoneHint": "Dagar och veckor delas efter den här tidszonen. Veckostart ändrar ordningen i veckorutnätet.",
   "workspace.weekStart": "Veckan börjar",
   "workspace.weekStartsOn": "Veckan börjar på",
+  "workspace.yourName": "Ditt namn",
+  "workspace.yourNameHint": "Anställda ser det här namnet i inbjudan och i varje notis.",
+  "workspace.yourNameRequired": "Ange ditt namn.",
 } as const;
 
 export const en = {
@@ -1272,6 +1277,8 @@ export const en = {
   "notifications.hoursChanged.title": "{name} changed {date}.",
   "notifications.hoursRemoved.body": "{hours} was taken off your month.",
   "notifications.hoursRemoved.title": "{name} removed {date}.",
+  "notifications.hoursRemoved.titleMany_one": "{name} removed {count} day",
+  "notifications.hoursRemoved.titleMany_other": "{name} removed {count} days",
   "notifications.inviteAccepted.body": "{name} is now an employee of {workspace}.",
   "notifications.inviteAccepted.title": "{name} accepted your invitation.",
   "notifications.markAllRead": "Mark all as read",
@@ -1762,6 +1769,9 @@ export const en = {
   "workspace.timezoneHint": "Days and weeks are cut by this time zone. Week start changes the order of the week grid.",
   "workspace.weekStart": "Week starts",
   "workspace.weekStartsOn": "Week starts on",
+  "workspace.yourName": "Your name",
+  "workspace.yourNameHint": "Employees see this name on the invitation and on every notification.",
+  "workspace.yourNameRequired": "Enter your name.",
 } as const satisfies Record<keyof typeof sv, string>;
 
 export type CatalogueKey = keyof typeof sv;
@@ -2143,6 +2153,7 @@ export type MessageParams = {
   "notifications.hoursChanged.title": { date: string | number; name: string | number };
   "notifications.hoursRemoved.body": { hours: string | number };
   "notifications.hoursRemoved.title": { date: string | number; name: string | number };
+  "notifications.hoursRemoved.titleMany": { count: string | number; name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
   "notifications.markAllRead": Record<never, never>;
@@ -2619,6 +2630,9 @@ export type MessageParams = {
   "workspace.timezoneHint": Record<never, never>;
   "workspace.weekStart": Record<never, never>;
   "workspace.weekStartsOn": Record<never, never>;
+  "workspace.yourName": Record<never, never>;
+  "workspace.yourNameHint": Record<never, never>;
+  "workspace.yourNameRequired": Record<never, never>;
 };
 
 export type MessageKey = keyof MessageParams;
@@ -2636,6 +2650,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "nav.notificationsUnread",
   "notifications.hoursAdded.titleForYou",
   "notifications.hoursAdded.title",
+  "notifications.hoursRemoved.titleMany",
   "operator.invitations.expireTomorrow",
   "operator.invitations.resent",
   "overview.nothingLoggedDays",

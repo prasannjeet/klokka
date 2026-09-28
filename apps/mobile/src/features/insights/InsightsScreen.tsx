@@ -229,7 +229,7 @@ function InsightsScreenInner() {
                 <AppText variant="caption" tone="muted" numberOfLines={2}>
                   {data.nothingLoggedDays
                     .slice(0, 3)
-                    .map((d) => formatDate(toIsoDate(d), locale, 'weekdayDay'))
+                    .map((d) => formatDate(toIsoDate(d.date), locale, 'weekdayDay'))
                     .join(', ')}
                 </AppText>
               </Card>
