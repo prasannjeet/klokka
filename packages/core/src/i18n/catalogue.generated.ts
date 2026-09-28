@@ -661,6 +661,10 @@ export const sv = {
   "web.emoji.star": "Stjärna",
   "web.emoji.sun": "Sol",
   "web.emoji.wave": "Våg",
+  "web.employeeWeek.days": "Dagar",
+  "web.employeeWeek.openDay": "{date}, {hours}. Öppna den i din månad.",
+  "web.employeeWeek.subtitle": "{from} till {to}. Timmarna {name} har loggat åt dig, dag för dag.",
+  "web.employeeWeek.subtitlePlain": "{from} till {to}. Dina timmar, dag för dag.",
   "web.employees.deactivatedToast": "{name} är avaktiverad. Tidigare timmar syns fortfarande för er båda.",
   "web.employees.emptyTitle": "Ingen här än",
   "web.employees.invitationExpired": "Inbjudan gick ut {date}",
@@ -1553,6 +1557,10 @@ export const en = {
   "web.emoji.star": "Star",
   "web.emoji.sun": "Sun",
   "web.emoji.wave": "Wave",
+  "web.employeeWeek.days": "Days",
+  "web.employeeWeek.openDay": "{date}, {hours}. Open it in your month.",
+  "web.employeeWeek.subtitle": "{from} to {to}. The hours {name} logged for you, day by day.",
+  "web.employeeWeek.subtitlePlain": "{from} to {to}. Your hours, day by day.",
   "web.employees.deactivatedToast": "{name} is deactivated. Past hours stay visible to both of you.",
   "web.employees.emptyTitle": "No one here yet",
   "web.employees.invitationExpired": "Invitation expired {date}",
@@ -2428,6 +2436,10 @@ export type MessageParams = {
   "web.emoji.star": Record<never, never>;
   "web.emoji.sun": Record<never, never>;
   "web.emoji.wave": Record<never, never>;
+  "web.employeeWeek.days": Record<never, never>;
+  "web.employeeWeek.openDay": { date: string | number; hours: string | number };
+  "web.employeeWeek.subtitle": { from: string | number; name: string | number; to: string | number };
+  "web.employeeWeek.subtitlePlain": { from: string | number; to: string | number };
   "web.employees.deactivatedToast": { name: string | number };
   "web.employees.emptyTitle": Record<never, never>;
   "web.employees.invitationExpired": { date: string | number };

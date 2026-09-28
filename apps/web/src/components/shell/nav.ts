@@ -31,6 +31,7 @@ export function workspaceNav(slug: string, employer: boolean): NavItem[] {
   }
   return [
     { href: base, label: 'nav.myMonth', tab: 'nav.myMonth', icon: 'calendar', exact: true },
+    { href: `${base}/week`, label: 'nav.week', tab: 'nav.week', icon: 'clock' },
     notifications,
     { href: `${base}/profile`, label: 'nav.profile', tab: 'nav.profile', icon: 'user' },
   ];

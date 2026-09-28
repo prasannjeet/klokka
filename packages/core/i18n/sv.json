@@ -1066,6 +1066,12 @@
       "bestWeekValue": "bästa veckan {hours}",
       "daysValue_one": "{count} dag",
       "daysValue_other": "{count} dagar"
+    },
+    "employeeWeek": {
+      "subtitle": "{from} till {to}. Timmarna {name} har loggat åt dig, dag för dag.",
+      "subtitlePlain": "{from} till {to}. Dina timmar, dag för dag.",
+      "openDay": "{date}, {hours}. Öppna den i din månad.",
+      "days": "Dagar"
     }
   }
 }

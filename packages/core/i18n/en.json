@@ -1066,6 +1066,12 @@
       "bestWeekValue": "best week {hours}",
       "daysValue_one": "{count} day",
       "daysValue_other": "{count} days"
+    },
+    "employeeWeek": {
+      "subtitle": "{from} to {to}. The hours {name} logged for you, day by day.",
+      "subtitlePlain": "{from} to {to}. Your hours, day by day.",
+      "openDay": "{date}, {hours}. Open it in your month.",
+      "days": "Days"
     }
   }
 }
