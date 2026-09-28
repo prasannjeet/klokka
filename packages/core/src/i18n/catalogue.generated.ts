@@ -371,8 +371,6 @@ export const sv = {
   "nav.workspaceNavigation": "Navigering för arbetsplatsen",
   "nav.workspaces": "Arbetsplatser",
   "nav.yourOwnWorkspaces": "Dina egna arbetsplatser",
-  "notifications.channelsHintEmployee": "Samma saker kommer som push i din telefon. E-post bara för veckosammanfattningen, om du slår på den.",
-  "notifications.channelsHintEmployer": "I appen och som push kommer samma saker. E-post används bara för inbjudningar och den valfria sammanfattningen.",
   "notifications.employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
   "notifications.empty": "Inget än. Du får veta det här i samma stund som något ändras.",
   "notifications.emptyUnread": "Allt är läst.",
@@ -1260,8 +1258,6 @@ export const en = {
   "nav.workspaceNavigation": "Workspace navigation",
   "nav.workspaces": "Workspaces",
   "nav.yourOwnWorkspaces": "Your own workspaces",
-  "notifications.channelsHintEmployee": "The same items arrive as push on your phone. Email only for the weekly digest, if you turn it on.",
-  "notifications.channelsHintEmployer": "In-app and push carry the same items. Email is only used for invitations and the opt-in digest.",
   "notifications.employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
   "notifications.empty": "Nothing yet. You will hear about it here the moment something changes.",
   "notifications.emptyUnread": "All caught up.",
@@ -2141,8 +2137,6 @@ export type MessageParams = {
   "nav.workspaceNavigation": Record<never, never>;
   "nav.workspaces": Record<never, never>;
   "nav.yourOwnWorkspaces": Record<never, never>;
-  "notifications.channelsHintEmployee": Record<never, never>;
-  "notifications.channelsHintEmployer": Record<never, never>;
   "notifications.employerKindsHint": Record<never, never>;
   "notifications.empty": Record<never, never>;
   "notifications.emptyUnread": Record<never, never>;

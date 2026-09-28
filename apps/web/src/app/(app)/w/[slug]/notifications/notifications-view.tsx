@@ -96,10 +96,6 @@ export function NotificationsView() {
           {t('web.notifications.loadMore')}
         </button>
       ) : null}
-      <p className="illustrative">
-        <Icon name="info" />
-        {ws.isEmployer ? t('notifications.channelsHintEmployer') : t('notifications.channelsHintEmployee')}
-      </p>
     </section>
   );
 }

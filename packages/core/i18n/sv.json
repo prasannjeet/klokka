@@ -475,8 +475,6 @@
     "subtitleEmployee": "Varje gång dina timmar läggs till, ändras eller tas bort, en gång per tillfälle. Plus flaggor, stängda månader och inbjudningar.",
     "filter": "Filter",
     "markAllRead": "Markera alla som lästa",
-    "channelsHintEmployer": "I appen och som push kommer samma saker. E-post används bara för inbjudningar och den valfria sammanfattningen.",
-    "channelsHintEmployee": "Samma saker kommer som push i din telefon. E-post bara för veckosammanfattningen, om du slår på den.",
     "employerKindsHint": "Arbetsgivare får veta om accepterade inbjudningar och flaggor. Inget annat pushas.",
     "empty": "Inget än. Du får veta det här i samma stund som något ändras.",
     "emptyUnread": "Allt är läst.",

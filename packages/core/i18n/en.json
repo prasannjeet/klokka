@@ -475,8 +475,6 @@
     "subtitleEmployee": "Every time your hours are added, changed or removed, once per sitting. Plus flags, closed months and invitations.",
     "filter": "Filter",
     "markAllRead": "Mark all as read",
-    "channelsHintEmployer": "In-app and push carry the same items. Email is only used for invitations and the opt-in digest.",
-    "channelsHintEmployee": "The same items arrive as push on your phone. Email only for the weekly digest, if you turn it on.",
     "employerKindsHint": "Employers are told about accepted invitations and flags. Nothing else pushes.",
     "empty": "Nothing yet. You will hear about it here the moment something changes.",
     "emptyUnread": "All caught up.",
