@@ -755,6 +755,13 @@
       "wave": "Wave",
       "music": "Music",
       "bee": "Bee"
+    },
+    "employees": {
+      "invited": "Invitation sent to {email}.",
+      "invitedOn": "Invited {sent}, expires {expires}",
+      "invitationExpired": "Invitation expired {date}",
+      "perHourSuffix": "{currency} per hour",
+      "emptyTitle": "No one here yet"
     }
   }
 }

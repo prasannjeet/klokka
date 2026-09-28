@@ -755,6 +755,13 @@
       "wave": "Våg",
       "music": "Musik",
       "bee": "Bi"
+    },
+    "employees": {
+      "invited": "Inbjudan skickad till {email}.",
+      "invitedOn": "Inbjuden {sent}, går ut {expires}",
+      "invitationExpired": "Inbjudan gick ut {date}",
+      "perHourSuffix": "{currency} per timme",
+      "emptyTitle": "Ingen här än"
     }
   }
 }

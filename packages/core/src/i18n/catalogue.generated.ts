@@ -589,6 +589,11 @@ export const sv = {
   "web.emoji.star": "Stjärna",
   "web.emoji.sun": "Sol",
   "web.emoji.wave": "Våg",
+  "web.employees.emptyTitle": "Ingen här än",
+  "web.employees.invitationExpired": "Inbjudan gick ut {date}",
+  "web.employees.invited": "Inbjudan skickad till {email}.",
+  "web.employees.invitedOn": "Inbjuden {sent}, går ut {expires}",
+  "web.employees.perHourSuffix": "{currency} per timme",
   "web.errorPage.title": "Något gick fel",
   "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
   "web.newWorkspace.headlineA": "Gör det till",
@@ -1258,6 +1263,11 @@ export const en = {
   "web.emoji.star": "Star",
   "web.emoji.sun": "Sun",
   "web.emoji.wave": "Wave",
+  "web.employees.emptyTitle": "No one here yet",
+  "web.employees.invitationExpired": "Invitation expired {date}",
+  "web.employees.invited": "Invitation sent to {email}.",
+  "web.employees.invitedOn": "Invited {sent}, expires {expires}",
+  "web.employees.perHourSuffix": "{currency} per hour",
   "web.errorPage.title": "Something went wrong",
   "web.newWorkspace.currencyNote": "(only shown if pay is on)",
   "web.newWorkspace.headlineA": "Make it",
@@ -1912,6 +1922,11 @@ export type MessageParams = {
   "web.emoji.star": Record<never, never>;
   "web.emoji.sun": Record<never, never>;
   "web.emoji.wave": Record<never, never>;
+  "web.employees.emptyTitle": Record<never, never>;
+  "web.employees.invitationExpired": { date: string | number };
+  "web.employees.invited": { email: string | number };
+  "web.employees.invitedOn": { expires: string | number; sent: string | number };
+  "web.employees.perHourSuffix": { currency: string | number };
   "web.errorPage.title": Record<never, never>;
   "web.newWorkspace.currencyNote": Record<never, never>;
   "web.newWorkspace.headlineA": Record<never, never>;

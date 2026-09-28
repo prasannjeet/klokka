@@ -1,6 +1,6 @@
 import { cache } from 'react';
-import { redirect } from 'next/navigation';
-import { ResponseError, type Me } from '@klokka/api-client';
+import { notFound, redirect } from 'next/navigation';
+import { ResponseError, type Me, type MyWorkspace } from '@klokka/api-client';
 import { serverApi } from './session';
 
 function isLogtoError(error: unknown): boolean {
@@ -18,3 +18,10 @@ export const loadMe = cache(async (): Promise<Me> => {
     throw error;
   }
 });
+
+// Employer-only pages answer 404 to employees (the API refuses them too; this keeps the UI honest).
+export async function requireEmployer(slug: string): Promise<MyWorkspace> {
+  const ws = (await loadMe()).workspaces.find((w) => w.slug === slug);
+  if (!ws || ws.role !== 'EMPLOYER') notFound();
+  return ws;
+}
