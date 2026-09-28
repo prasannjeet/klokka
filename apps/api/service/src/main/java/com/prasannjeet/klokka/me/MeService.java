@@ -70,6 +70,11 @@ public class MeService {
         // Jackson gives an explicit null the same as an absent field here; both clear the emoji only when the
         // property was sent. The contract says null clears, so treat a present-null as clear.
         if (update.getAvatarEmoji() != null) user.avatarEmoji = update.getAvatarEmoji().isBlank() ? null : update.getAvatarEmoji();
+        // One person, one name: every membership shows what the profile says (employers see the rename too).
+        for (MeRepository.Membership row : repository.listMemberships(user.id)) {
+            if (!user.displayName.isBlank()) row.membership().displayName = user.displayName;
+            row.membership().avatarEmoji = user.avatarEmoji;
+        }
         return assemble(user, ensurePreferences(user.id, Optional.empty()));
     }
 

@@ -118,10 +118,20 @@ class MeResourceTest {
     @Test
     @TestSecurity(user = MARIA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
-    void renamingYourselfMirrorsTheNameToLogto() {
+    void renamingYourselfMirrorsTheNameToLogtoAndToEveryMembership() throws SQLException {
         Fake.reset();
-        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\"}").when().patch("/v1/me").then().statusCode(200)
+        UUID workspace = UUID.randomUUID();
+        UUID employee = UUID.randomUUID();
+        seedWorkspace(workspace, "rename-" + workspace.toString().substring(0, 8), employee);
+        given().contentType("application/json").body("{\"name\":\"Maria Lindqvist\",\"avatarEmoji\":\"🐝\"}").when().patch("/v1/me").then().statusCode(200)
                 .body("user.name", is("Maria Lindqvist"));
+        try (Connection c = dataSource.getConnection(); PreparedStatement ps = c.prepareStatement("select display_name, avatar_emoji from membership where id = ?")) {
+            ps.setObject(1, employee);
+            var rs = ps.executeQuery();
+            assertThat(rs.next()).isTrue();
+            assertThat(rs.getString(1)).isEqualTo("Maria Lindqvist");
+            assertThat(rs.getString(2)).isEqualTo("🐝");
+        }
         assertThat(Fake.<Map<String, Object>>list("updatedUsers")).extracting(u -> u.get("id"), u -> u.get("name"))
                 .containsExactly(tuple(MARIA, "Maria Lindqvist"));
         // The same name again changes nothing, so Logto is not asked again.
