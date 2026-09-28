@@ -76,7 +76,7 @@ public class NotificationService {
         boolean netNothing = changes.values().stream()
                 .allMatch(c -> c instanceof Map<?, ?> m && m.get("before") == null && m.get("after") == null);
         if (netNothing) {
-            if (row != null) repository.delete(row);
+            if (row != null) repository.deleteNotification(row);
             return;
         }
         payload.put("actorId", actorId);
