@@ -40,7 +40,8 @@
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
         <jar-plugin.version>3.4.2</jar-plugin.version>
-        <skipITs>true</skipITs>
+        <!-- The fast-jar integration test (HealthIT) runs on every install; -DskipITs skips it. -->
+        <skipITs>false</skipITs>
     </properties>
 
     <dependencyManagement>

@@ -3,6 +3,18 @@
 /* eslint-disable */
 
 export const sv = {
+  "api.csv.amount": "Belopp",
+  "api.csv.date": "Datum",
+  "api.csv.hours": "Timmar",
+  "api.csv.member": "Person",
+  "api.csv.note": "Anteckning",
+  "api.csv.rate": "Timlön",
+  "api.csv.weekday": "Veckodag",
+  "api.email.digest.nothing": "Inga timmar loggades förra veckan.",
+  "api.email.digest.workspace": "{emoji} {workspace}",
+  "api.email.footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar.",
+  "api.email.greeting": "Hej {name},",
+  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Har du redan ett konto?",
   "auth.byContinuing": "Genom att fortsätta godkänner du {terms} och {privacy}.",
   "auth.continue": "Fortsätt",
@@ -635,6 +647,18 @@ export const sv = {
 } as const;
 
 export const en = {
+  "api.csv.amount": "Amount",
+  "api.csv.date": "Date",
+  "api.csv.hours": "Hours",
+  "api.csv.member": "Person",
+  "api.csv.note": "Note",
+  "api.csv.rate": "Hourly rate",
+  "api.csv.weekday": "Weekday",
+  "api.email.digest.nothing": "No hours were logged last week.",
+  "api.email.digest.workspace": "{emoji} {workspace}",
+  "api.email.footer": "Klokka is free and open source. You get this email because you turned it on in Settings.",
+  "api.email.greeting": "Hi {name},",
+  "api.push.workspacePrefix": "{workspace}: {title}",
   "auth.alreadyHaveAccount": "Already have an account?",
   "auth.byContinuing": "By continuing you accept the {terms} and the {privacy}.",
   "auth.continue": "Continue",
@@ -1269,6 +1293,18 @@ export const en = {
 export type CatalogueKey = keyof typeof sv;
 
 export type MessageParams = {
+  "api.csv.amount": Record<never, never>;
+  "api.csv.date": Record<never, never>;
+  "api.csv.hours": Record<never, never>;
+  "api.csv.member": Record<never, never>;
+  "api.csv.note": Record<never, never>;
+  "api.csv.rate": Record<never, never>;
+  "api.csv.weekday": Record<never, never>;
+  "api.email.digest.nothing": Record<never, never>;
+  "api.email.digest.workspace": { emoji: string | number; workspace: string | number };
+  "api.email.footer": Record<never, never>;
+  "api.email.greeting": { name: string | number };
+  "api.push.workspacePrefix": { title: string | number; workspace: string | number };
   "auth.alreadyHaveAccount": Record<never, never>;
   "auth.byContinuing": { privacy: string | number; terms: string | number };
   "auth.continue": Record<never, never>;

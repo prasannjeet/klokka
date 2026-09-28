@@ -29,9 +29,12 @@ import org.junit.jupiter.api.Test;
 // carries a security annotation.
 class ArchitectureTest {
 
-    // Repositories that are user-, operator- or webhook-scoped by design; everything else works inside a workspace.
+    // Repositories that are user-, operator-, webhook-, token- or job-scoped by design (a person's notifications
+    // span workspaces, the invite token is the scope before a workspace is known, the mail ledger and push queue
+    // are per user); everything else works inside a workspace.
     private static final String[] WORKSPACE_EXEMPT_PACKAGES = {
-            "com.prasannjeet.klokka.me..", "com.prasannjeet.klokka.operator..", "com.prasannjeet.klokka.webhook.."
+            "com.prasannjeet.klokka.me..", "com.prasannjeet.klokka.operator..", "com.prasannjeet.klokka.webhook..",
+            "com.prasannjeet.klokka.notification..", "com.prasannjeet.klokka.mail..", "com.prasannjeet.klokka.invitation.."
     };
     private static final String PANACHE = "io.quarkus.hibernate.orm.panache..";
 

@@ -28,7 +28,7 @@ class SchemaMigrationTest {
 
     @Test
     void theBaselineIsAppliedAndNothingIsPending() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("1");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("2");
         assertThat(flyway.info().pending()).isEmpty();
     }
 
@@ -38,7 +38,7 @@ class SchemaMigrationTest {
                 + "where table_schema = 'public' and table_type = 'BASE TABLE' order by table_name");
         assertThat(tables).contains("app_user", "user_preference", "workspace", "membership", "hour_entry",
                 "hour_entry_change", "entry_flag", "month_lock", "notification", "push_token", "push_delivery",
-                "digest_run", "email_log");
+                "digest_run", "email_send", "webhook_event");
     }
 
     @Test

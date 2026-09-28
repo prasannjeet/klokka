@@ -64,6 +64,14 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-client-oidc-filter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-mailer</artifactId>
         </dependency>
         <dependency>
@@ -107,6 +115,21 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The ONE string catalogue (docs/DECISIONS.md D2): packages/core/i18n/{sv,en}.json is copied into the jar
+                 at build time as i18n/*.json, so notification and email text comes from the same file the clients use. -->
+            <resource>
+                <directory>${project.basedir}/../../../packages/core/i18n</directory>
+                <targetPath>i18n</targetPath>
+                <includes>
+                    <include>sv.json</include>
+                    <include>en.json</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>${quarkus.platform.group-id}</groupId>

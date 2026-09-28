@@ -703,5 +703,27 @@
     "NOT_IMPLEMENTED": "Not available yet.",
     "INTERNAL": "Something went wrong on our side. Try again in a moment.",
     "NETWORK": "No connection. Check your network and try again."
+  },
+  "api": {
+    "email": {
+      "greeting": "Hi {name},",
+      "digest": {
+        "workspace": "{emoji} {workspace}",
+        "nothing": "No hours were logged last week."
+      },
+      "footer": "Klokka is free and open source. You get this email because you turned it on in Settings."
+    },
+    "csv": {
+      "date": "Date",
+      "weekday": "Weekday",
+      "member": "Person",
+      "hours": "Hours",
+      "note": "Note",
+      "rate": "Hourly rate",
+      "amount": "Amount"
+    },
+    "push": {
+      "workspacePrefix": "{workspace}: {title}"
+    }
   }
 }

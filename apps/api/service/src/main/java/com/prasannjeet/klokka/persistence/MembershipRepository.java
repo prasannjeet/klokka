@@ -1,6 +1,7 @@
 package com.prasannjeet.klokka.persistence;
 
 import com.prasannjeet.klokka.contract.model.MemberStatus;
+import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,6 +26,18 @@ public class MembershipRepository implements PanacheRepositoryBase<MembershipEnt
         return find("workspaceId = ?1 and userId = ?2", workspaceId.value(), userId).firstResultOptional();
     }
 
+    public Optional<MembershipEntity> findByEmail(WorkspaceId workspaceId, String email) {
+        return find("workspaceId = ?1 and email = ?2", workspaceId.value(), email).firstResultOptional();
+    }
+
+    public Optional<MembershipEntity> findEmployer(WorkspaceId workspaceId) {
+        return find("workspaceId = ?1 and role = ?2", workspaceId.value(), Role.EMPLOYER).firstResultOptional();
+    }
+
+    public List<MembershipEntity> listByStatus(WorkspaceId workspaceId, List<MemberStatus> statuses) {
+        return list("workspaceId = ?1 and status in ?2 order by role, displayName", workspaceId.value(), statuses);
+    }
+
     public long countByStatus(WorkspaceId workspaceId, List<MemberStatus> statuses) {
         return count("workspaceId = ?1 and status in ?2", workspaceId.value(), statuses);
     }
@@ -34,5 +47,12 @@ public class MembershipRepository implements PanacheRepositoryBase<MembershipEnt
             throw new IllegalArgumentException("membership " + member.id + " is not in workspace " + workspaceId);
         }
         persist(member);
+    }
+
+    public void deleteMember(WorkspaceId workspaceId, MembershipEntity member) {
+        if (!workspaceId.value().equals(member.workspaceId)) {
+            throw new IllegalArgumentException("membership " + member.id + " is not in workspace " + workspaceId);
+        }
+        delete(member);
     }
 }

@@ -47,6 +47,9 @@ public class MembershipEntity {
     @Column(nullable = false, length = 11)
     public MemberStatus status;
 
+    @Column(name = "logto_invitation_id", length = 64)
+    public String logtoInvitationId;
+
     @Column(name = "invitation_token", length = 128)
     public String invitationToken;
 

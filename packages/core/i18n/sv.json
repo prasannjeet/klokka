@@ -703,5 +703,27 @@
     "NOT_IMPLEMENTED": "Inte tillgängligt än.",
     "INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
     "NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen."
+  },
+  "api": {
+    "email": {
+      "greeting": "Hej {name},",
+      "digest": {
+        "workspace": "{emoji} {workspace}",
+        "nothing": "Inga timmar loggades förra veckan."
+      },
+      "footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar."
+    },
+    "csv": {
+      "date": "Datum",
+      "weekday": "Veckodag",
+      "member": "Person",
+      "hours": "Timmar",
+      "note": "Anteckning",
+      "rate": "Timlön",
+      "amount": "Belopp"
+    },
+    "push": {
+      "workspacePrefix": "{workspace}: {title}"
+    }
   }
 }
