@@ -8,8 +8,9 @@ hours are added or changed, can flag an entry they think is wrong, and can share
 One API, two clients with full feature parity: an Android app (iOS-ready, Expo) and a web app, plus a
 marketing site.
 
-**Status: design phase.** Nothing is implemented yet. The product brief, the research and the mockups
-are in `docs/`; implementation starts after the owner approves the preliminary report.
+**Status: v1 candidate.** The API, the web app, the landing site and the Android app are implemented and
+were exercised end to end on staging (`docs/STAGING_SMOKE.md`); the pre-tag review is in `docs/REVIEW.md`.
+The product brief, the research and the mockups are in `docs/`.
 
 ## Stack (locked, see `docs/DECISIONS.md`)
 
@@ -55,7 +56,7 @@ Prerequisites: JDK 25 (`sdk env` reads `.sdkmanrc`; on this host `~/.sdkman/cand
 Maven 3.9, Node 24 (`nvm use` reads `.nvmrc`), npm 11, Docker.
 
 ```sh
-# JavaScript workspaces: tokens, core, api-client (web, landing and mobile arrive with their tickets)
+# JavaScript workspaces: tokens, core, api-client, web, landing, mobile
 npm install
 npm run build          # tokens -> dist/theme.css, core -> typed catalogue, api-client -> typecheck
 npm test               # Vitest in every workspace

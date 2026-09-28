@@ -77,7 +77,10 @@ ANDROID_HOME=/home/dev/Android/Sdk JAVA_HOME=~/.sdkman/candidates/java/21.0.5-am
 
 `plugins/withReleaseSigning.js` switches the release signing config to the project keystore when the
 four `KLOKKA_RELEASE_STORE_FILE` / `_STORE_PASSWORD` / `_KEY_ALIAS` / `_KEY_PASSWORD` values are present,
-as environment variables (the runners) or as Gradle properties in `~/.gradle/gradle.properties`.
+as environment variables or as Gradle properties in `~/.gradle/gradle.properties` (a local signed build).
+CI does not use them: the `mobile` job passes the standard `android.injected.signing.*` Gradle properties to
+`assembleRelease` and then compares the APK's signer certificate with the keystore's, so a debug-signed
+APK can never be published (`.github/workflows/ci.yml`).
 Without them the template's debug key is used, which installs fine for a smoke test but is not the
 app's identity: never distribute a debug-signed release APK. The keystore is
 `.agents/local-credentials/klokka-release.keystore` (`docs/INFRA.md` section 6).

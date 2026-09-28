@@ -23,9 +23,9 @@ Deliver correct, maintainable changes with minimal risk.
 - Languages: Swedish and English everywhere. Public site: switcher, `sv` at `/`, `en` at `/en`. Signed-in web app and
   phone app: a user setting stored server-side, defaulting to the device language on first sign-in.
 - Theme: Nightshift (owner's choice), light and dark. Signal and Clay remain in `docs/design/tokens.css` as history.
-- **Status: implementation, E0 Foundations landed (CHQ-105/106/107).** Root tooling, `packages/tokens`,
-  `packages/core`, the contract, `packages/api-client` and the API skeleton (`GET /me` real, everything else 501)
-  exist and build green; `apps/web`, `apps/landing` and `apps/mobile` arrive with their tickets.
+- **Status: v1 candidate (CHQ-143 staging pass, CHQ-144 review).** Every operation of the contract is implemented
+  on the API and both clients; `docs/STAGING_SMOKE.md` is what was exercised on staging and `docs/REVIEW.md` the
+  pre-tag review with its open findings.
 - Documentation map: `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
   docs when they differ), `docs/research/*.md` (evidence per area), `docs/design/DIRECTION.md` + `docs/design/mockups/`
   (visual direction, tokens, mockups), `docs/brand/` (logo), `docs/JIRA_PLAN.md` (epics and stories).
