@@ -1,0 +1,29 @@
+# Changelog
+
+All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
+
+## 1.0.0, 2026-09-28
+
+First version, running on staging.
+
+### Added
+- API (Quarkus, Java 25, PostgreSQL 18): workspaces, memberships and invitations backed by Logto
+  organizations; hours per employee per day with quick entry, a batch week save, change history and
+  month locks; read models for the employee month, the workspace month and both insights dashboards;
+  optional pay with rates, earnings and labour cost; CSV export; flags raised by employees and resolved
+  by employers; notifications with per-sitting coalescing, Expo push, an in-app center, invitation and
+  opt-in weekly digest email; per-user preferences (language, push, digest); operator endpoints; a
+  Logto webhook. One OpenAPI contract published to Nexus as a Maven artifact and an npm client.
+- Web app (Next.js 16): employer (overview, week grid, employees, employee month, settings,
+  notifications), employee (my month, day detail, flags, notifications, profile, shareable card) and
+  the operator console; sign-in through Klokka's own Logto with a server-side session and a BFF.
+- Android app (Expo SDK 57): the same features for both roles, Logto PKCE sign-in, push
+  notifications, the shareable monthly card; iOS-ready, no store build yet.
+- Landing site (Next.js 16): Swedish default, English at /en, Nightshift theme, APK download.
+- Shared packages: design tokens (Nightshift, light and dark), a typed sv/en catalogue used by all three
+  runtimes, and the generated API client.
+- CI/CD on self-hosted runners: build, test, publish the contract, push images, deploy staging, build and
+  sign the Android APK and publish it to Nexus.
+
+### Known gaps
+See `docs/BACKLOG.md` and `docs/REVIEW.md`.
