@@ -772,6 +772,20 @@
       "rateTitle": "Timlön för {name}",
       "rateSaved": "Timlönen för {name} är sparad.",
       "noRate": "Ingen timlön"
+    },
+    "join": {
+      "inviterLine": "{name}, arbetsgivare",
+      "headlineA": "{name} bjöd in dig till",
+      "headlineB": "{workspace}.",
+      "hosted": "Gå med öppnar Klokkas registreringssida med din e-post ifylld. Välj ett lösenord där så kommer du direkt tillbaka.",
+      "signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
+      "acceptedBody": "Varje timme {employer} loggar för dig syns i Klokka i samma stund som den ändras. Hämta appen för notiser i mobilen, eller fortsätt här.",
+      "appHint": "En direkt nedladdning för Android så länge Klokka inte finns i Google Play.",
+      "alreadyAccepted": "Den här inbjudan är redan accepterad.",
+      "revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
+      "notFound": "Den här inbjudningslänken fungerar inte. Kontrollera att du öppnade hela länken från mejlet.",
+      "otherAccount": "Logga in med {email}",
+      "toSignIn": "Till inloggningen"
     }
   }
 }

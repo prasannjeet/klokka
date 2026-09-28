@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { Prompt } from '@logto/next';
 import { signIn, signOut } from '@logto/next/server-actions';
 import { fakeSessionEnabled } from './env';
 import { logtoConfig, safeNext } from './logto';
@@ -18,6 +19,8 @@ export async function signInAction(formData: FormData): Promise<void> {
     postRedirectUri: next,
     firstScreen: formData.get('screen') === 'register' ? 'register' : 'signIn',
     ...(typeof email === 'string' && email ? { loginHint: email } : {}),
+    // "Sign in with the invited address": ask Logto for a fresh login instead of the current session.
+    ...(formData.get('prompt') === 'login' ? { prompt: Prompt.Login } : {}),
     extraParams: { ui_locales: locale },
   });
 }

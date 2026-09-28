@@ -605,6 +605,18 @@ export const sv = {
   "web.employees.withdrawTitle": "Dra tillbaka inbjudan till {name}?",
   "web.employees.withdrawn": "Inbjudan till {name} är tillbakadragen.",
   "web.errorPage.title": "Något gick fel",
+  "web.join.acceptedBody": "Varje timme {employer} loggar för dig syns i Klokka i samma stund som den ändras. Hämta appen för notiser i mobilen, eller fortsätt här.",
+  "web.join.alreadyAccepted": "Den här inbjudan är redan accepterad.",
+  "web.join.appHint": "En direkt nedladdning för Android så länge Klokka inte finns i Google Play.",
+  "web.join.headlineA": "{name} bjöd in dig till",
+  "web.join.headlineB": "{workspace}.",
+  "web.join.hosted": "Gå med öppnar Klokkas registreringssida med din e-post ifylld. Välj ett lösenord där så kommer du direkt tillbaka.",
+  "web.join.inviterLine": "{name}, arbetsgivare",
+  "web.join.notFound": "Den här inbjudningslänken fungerar inte. Kontrollera att du öppnade hela länken från mejlet.",
+  "web.join.otherAccount": "Logga in med {email}",
+  "web.join.revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
+  "web.join.signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
+  "web.join.toSignIn": "Till inloggningen",
   "web.newWorkspace.currencyNote": "(visas bara om lön är på)",
   "web.newWorkspace.headlineA": "Gör det till",
   "web.newWorkspace.headlineB": "ditt ställe.",
@@ -1289,6 +1301,18 @@ export const en = {
   "web.employees.withdrawTitle": "Withdraw the invitation to {name}?",
   "web.employees.withdrawn": "Invitation to {name} withdrawn.",
   "web.errorPage.title": "Something went wrong",
+  "web.join.acceptedBody": "Every hour {employer} logs for you shows up in Klokka the moment it changes. Get the app for notifications on your phone, or carry on here.",
+  "web.join.alreadyAccepted": "This invitation has already been accepted.",
+  "web.join.appHint": "A direct download for Android while Klokka is not in Google Play yet.",
+  "web.join.headlineA": "{name} invited you to",
+  "web.join.headlineB": "{workspace}.",
+  "web.join.hosted": "Joining opens Klokka's sign-up page with your email filled in. Choose a password there and you come straight back.",
+  "web.join.inviterLine": "{name}, employer",
+  "web.join.notFound": "This invitation link does not work. Check that you opened the whole link from the email.",
+  "web.join.otherAccount": "Sign in with {email}",
+  "web.join.revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
+  "web.join.signedIn": "You are signed in. Joining takes one click.",
+  "web.join.toSignIn": "Go to sign in",
   "web.newWorkspace.currencyNote": "(only shown if pay is on)",
   "web.newWorkspace.headlineA": "Make it",
   "web.newWorkspace.headlineB": "your place.",
@@ -1958,6 +1982,18 @@ export type MessageParams = {
   "web.employees.withdrawTitle": { name: string | number };
   "web.employees.withdrawn": { name: string | number };
   "web.errorPage.title": Record<never, never>;
+  "web.join.acceptedBody": { employer: string | number };
+  "web.join.alreadyAccepted": Record<never, never>;
+  "web.join.appHint": Record<never, never>;
+  "web.join.headlineA": { name: string | number };
+  "web.join.headlineB": { workspace: string | number };
+  "web.join.hosted": Record<never, never>;
+  "web.join.inviterLine": { name: string | number };
+  "web.join.notFound": Record<never, never>;
+  "web.join.otherAccount": { email: string | number };
+  "web.join.revoked": { name: string | number };
+  "web.join.signedIn": Record<never, never>;
+  "web.join.toSignIn": Record<never, never>;
   "web.newWorkspace.currencyNote": Record<never, never>;
   "web.newWorkspace.headlineA": Record<never, never>;
   "web.newWorkspace.headlineB": Record<never, never>;

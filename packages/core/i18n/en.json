@@ -772,6 +772,20 @@
       "rateTitle": "Hourly rate for {name}",
       "rateSaved": "Rate saved for {name}.",
       "noRate": "No rate"
+    },
+    "join": {
+      "inviterLine": "{name}, employer",
+      "headlineA": "{name} invited you to",
+      "headlineB": "{workspace}.",
+      "hosted": "Joining opens Klokka's sign-up page with your email filled in. Choose a password there and you come straight back.",
+      "signedIn": "You are signed in. Joining takes one click.",
+      "acceptedBody": "Every hour {employer} logs for you shows up in Klokka the moment it changes. Get the app for notifications on your phone, or carry on here.",
+      "appHint": "A direct download for Android while Klokka is not in Google Play yet.",
+      "alreadyAccepted": "This invitation has already been accepted.",
+      "revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
+      "notFound": "This invitation link does not work. Check that you opened the whole link from the email.",
+      "otherAccount": "Sign in with {email}",
+      "toSignIn": "Go to sign in"
     }
   }
 }
