@@ -347,7 +347,7 @@ export const sv = {
   "nav.backToApp": "Tillbaka till appen",
   "nav.chooseWorkspace": "Välj företag",
   "nav.createWorkspace": "Skapa ett företag",
-  "nav.employeeMonth": "Anställds månad",
+  "nav.employeeView": "Anställd",
   "nav.employees": "Anställda",
   "nav.getAndroidApp": "Hämta Android-appen",
   "nav.health": "Status",
@@ -1243,7 +1243,7 @@ export const en = {
   "nav.backToApp": "Back to the app",
   "nav.chooseWorkspace": "Choose a business",
   "nav.createWorkspace": "Create a business",
-  "nav.employeeMonth": "Employee month",
+  "nav.employeeView": "Employee view",
   "nav.employees": "Employees",
   "nav.getAndroidApp": "Get the Android app",
   "nav.health": "Health",
@@ -2132,7 +2132,7 @@ export type MessageParams = {
   "nav.backToApp": Record<never, never>;
   "nav.chooseWorkspace": Record<never, never>;
   "nav.createWorkspace": Record<never, never>;
-  "nav.employeeMonth": Record<never, never>;
+  "nav.employeeView": Record<never, never>;
   "nav.employees": Record<never, never>;
   "nav.getAndroidApp": Record<never, never>;
   "nav.health": Record<never, never>;

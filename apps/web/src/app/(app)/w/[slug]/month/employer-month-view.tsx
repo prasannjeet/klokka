@@ -1,12 +1,11 @@
 'use client';
 
-// One employee's month for the employer (CHQ-122, mockup "Employee month"): pick a person, see the month's
-// figures from the API, the heat-map calendar and every day with who logged it and its history. Close the
-// month and export it from here too.
+// "Employee view" (CHQ-122, renamed in CHQ-145): pick a person from the dropdown, see the month's figures
+// from the API, the heat-map calendar and every day with who logged it and its history. Close the month and
+// export it from here too.
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { addMonths, formatHours, formatMoney, formatMonthName, type IsoDate } from '@klokka/core';
-import { Avatar } from '@/components/avatar';
 import { CalendarHeatmap } from '@/components/calendar-heatmap';
 import { CsvButton } from '@/components/csv-button';
 import { DayList } from '@/components/day-list';
@@ -66,10 +65,24 @@ export function EmployerMonthView() {
     <section className="view" aria-labelledby="h-month">
       <ViewHeader
         id="h-month"
-        title={person ? t('month.title', { name, month: monthName }) : t('nav.employeeMonth')}
+        title={t('nav.employeeView')}
         sub={person ? t('month.subtitle', { name }) : undefined}
         actions={
           <>
+            {people.length > 0 ? (
+              <select
+                className="input person-select"
+                aria-label={t('web.month.person')}
+                value={person?.id ?? ''}
+                onChange={(e) => choose(e.target.value)}
+              >
+                {people.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.displayName}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <MonthNav month={month} current={current} onChange={setMonth} />
             <MonthLockButton ws={ws} month={month} />
             {person ? (
@@ -91,21 +104,6 @@ export function EmployerMonthView() {
           <p>{t('web.month.noPeople')}</p>
         </div>
       ) : null}
-
-      <div className="people chips" role="group" aria-label={t('web.month.person')}>
-        {people.map((p, i) => (
-          <button
-            key={p.id}
-            type="button"
-            className="chip"
-            aria-pressed={p.id === person?.id}
-            onClick={() => choose(p.id)}
-          >
-            <Avatar name={p.displayName} emoji={p.avatarEmoji} index={i + 1} size="sm" />
-            {firstName(p.displayName)}
-          </button>
-        ))}
-      </div>
 
       {mm ? (
         <>

@@ -714,6 +714,11 @@
     gap: 8px;
     align-items: center;
   }
+  .vh .actions .person-select {
+    width: auto;
+    min-width: 12rem;
+    max-width: 100%;
+  }
   .mnav {
     display: inline-flex;
     align-items: center;
