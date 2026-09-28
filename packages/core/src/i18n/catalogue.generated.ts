@@ -631,6 +631,27 @@ export const sv = {
   "web.signIn.pointPasswords": "Lösenord hamnar aldrig i Klokkas databas",
   "web.signIn.pointRoles": "Arbetsgivare och anställda loggar in här",
   "web.signIn.pointWorkspaces": "Flera arbetsplatser, en inloggning",
+  "web.week.cellLabel": "{name}, {date}",
+  "web.week.discard": "Släng",
+  "web.week.emptyBody": "Lägg till en anställd först. Inbjudna kan loggas direkt.",
+  "web.week.emptyTitle": "Ingen att logga timmar för än",
+  "web.week.failed": "Inget sparades. Rutorna med röd ring behöver ses över.",
+  "web.week.flagged": "öppen flagga",
+  "web.week.locked": "stängd",
+  "web.week.noteLabel": "Anteckning: {note}",
+  "web.week.nothingToFill": "Varje vardag har redan timmar.",
+  "web.week.nothingYesterday": "Inget loggat dagen innan, så det finns inget att kopiera.",
+  "web.week.notify_one": "{names} får en notis när du sparar.",
+  "web.week.notify_other": "{names} får en notis var när du sparar.",
+  "web.week.saved": "Sparat i en omgång",
+  "web.week.savedBody_one": "{names} får en notis för det här tillfället.",
+  "web.week.savedBody_other": "{names} får en notis var för det här tillfället.",
+  "web.week.selectFirst": "Välj en ruta först",
+  "web.week.selectFirstBody": "Klicka på en dag för en person och välj sedan en knapp.",
+  "web.week.unsavedBody": "Spara eller släng dem innan du byter vecka.",
+  "web.week.unsavedTitle": "Osparade ändringar",
+  "web.week.unsaved_one": "{count} osparad ändring",
+  "web.week.unsaved_other": "{count} osparade ändringar",
   "week.addHoursFor": "Lägg till timmar för {name}",
   "week.addHoursForDay": "Lägg till timmar för {day}",
   "week.closeMonth": "Stäng {month}",
@@ -1327,6 +1348,27 @@ export const en = {
   "web.signIn.pointPasswords": "Passwords never touch Klokka's database",
   "web.signIn.pointRoles": "Employers and employees sign in here",
   "web.signIn.pointWorkspaces": "Several workspaces, one login",
+  "web.week.cellLabel": "{name}, {date}",
+  "web.week.discard": "Discard",
+  "web.week.emptyBody": "Add an employee first. Invited people can be logged right away.",
+  "web.week.emptyTitle": "No one to log hours for yet",
+  "web.week.failed": "Nothing was saved. The cells with a red ring need another look.",
+  "web.week.flagged": "open flag",
+  "web.week.locked": "closed",
+  "web.week.noteLabel": "Note: {note}",
+  "web.week.nothingToFill": "Every weekday already has hours.",
+  "web.week.nothingYesterday": "Nothing logged the day before, so there is nothing to copy.",
+  "web.week.notify_one": "{names} gets one notification when you save.",
+  "web.week.notify_other": "{names} each get one notification when you save.",
+  "web.week.saved": "Saved as one batch",
+  "web.week.savedBody_one": "{names} gets one notification for this sitting.",
+  "web.week.savedBody_other": "{names} each get one notification for this sitting.",
+  "web.week.selectFirst": "Select a cell first",
+  "web.week.selectFirstBody": "Click a day for a person, then pick a chip.",
+  "web.week.unsavedBody": "Save or discard them before changing week.",
+  "web.week.unsavedTitle": "Unsaved changes",
+  "web.week.unsaved_one": "{count} unsaved change",
+  "web.week.unsaved_other": "{count} unsaved changes",
   "week.addHoursFor": "Add hours for {name}",
   "week.addHoursForDay": "Add hours for {day}",
   "week.closeMonth": "Close {month}",
@@ -2008,6 +2050,24 @@ export type MessageParams = {
   "web.signIn.pointPasswords": Record<never, never>;
   "web.signIn.pointRoles": Record<never, never>;
   "web.signIn.pointWorkspaces": Record<never, never>;
+  "web.week.cellLabel": { date: string | number; name: string | number };
+  "web.week.discard": Record<never, never>;
+  "web.week.emptyBody": Record<never, never>;
+  "web.week.emptyTitle": Record<never, never>;
+  "web.week.failed": Record<never, never>;
+  "web.week.flagged": Record<never, never>;
+  "web.week.locked": Record<never, never>;
+  "web.week.noteLabel": { note: string | number };
+  "web.week.nothingToFill": Record<never, never>;
+  "web.week.nothingYesterday": Record<never, never>;
+  "web.week.notify": { count: string | number; names: string | number };
+  "web.week.saved": Record<never, never>;
+  "web.week.savedBody": { count: string | number; names: string | number };
+  "web.week.selectFirst": Record<never, never>;
+  "web.week.selectFirstBody": Record<never, never>;
+  "web.week.unsavedBody": Record<never, never>;
+  "web.week.unsavedTitle": Record<never, never>;
+  "web.week.unsaved": { count: string | number };
   "week.addHoursFor": { name: string | number };
   "week.addHoursForDay": { day: string | number };
   "week.closeMonth": { month: string | number };
@@ -2095,4 +2155,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "overview.weekdaysLeft",
   "role.employeeAtWorkspaces",
   "role.employerPeople",
+  "web.week.notify",
+  "web.week.savedBody",
+  "web.week.unsaved",
 ]);

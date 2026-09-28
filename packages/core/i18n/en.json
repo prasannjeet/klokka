@@ -786,6 +786,29 @@
       "notFound": "This invitation link does not work. Check that you opened the whole link from the email.",
       "otherAccount": "Sign in with {email}",
       "toSignIn": "Go to sign in"
+    },
+    "week": {
+      "unsaved_one": "{count} unsaved change",
+      "unsaved_other": "{count} unsaved changes",
+      "notify_one": "{names} gets one notification when you save.",
+      "notify_other": "{names} each get one notification when you save.",
+      "discard": "Discard",
+      "saved": "Saved as one batch",
+      "savedBody_one": "{names} gets one notification for this sitting.",
+      "savedBody_other": "{names} each get one notification for this sitting.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedBody": "Save or discard them before changing week.",
+      "selectFirst": "Select a cell first",
+      "selectFirstBody": "Click a day for a person, then pick a chip.",
+      "nothingYesterday": "Nothing logged the day before, so there is nothing to copy.",
+      "nothingToFill": "Every weekday already has hours.",
+      "noteLabel": "Note: {note}",
+      "cellLabel": "{name}, {date}",
+      "locked": "closed",
+      "emptyTitle": "No one to log hours for yet",
+      "emptyBody": "Add an employee first. Invited people can be logged right away.",
+      "failed": "Nothing was saved. The cells with a red ring need another look.",
+      "flagged": "open flag"
     }
   }
 }

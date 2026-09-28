@@ -38,3 +38,10 @@ export function formatWhen(
   if (day(date) === day(new Date(now.getTime() - 86_400_000))) return `${words.yesterday} ${time}`;
   return formatDay(date, locale, timeZone, date.getUTCFullYear() !== now.getUTCFullYear());
 }
+
+// "Oct" for a day header outside the shown month.
+export function monthShort(iso: string, locale: Locale): string {
+  return new Intl.DateTimeFormat(intlLocale(locale), { month: 'short', timeZone: 'UTC' }).format(
+    new Date(`${iso}T00:00:00Z`),
+  );
+}

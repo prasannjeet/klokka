@@ -786,6 +786,29 @@
       "notFound": "Den här inbjudningslänken fungerar inte. Kontrollera att du öppnade hela länken från mejlet.",
       "otherAccount": "Logga in med {email}",
       "toSignIn": "Till inloggningen"
+    },
+    "week": {
+      "unsaved_one": "{count} osparad ändring",
+      "unsaved_other": "{count} osparade ändringar",
+      "notify_one": "{names} får en notis när du sparar.",
+      "notify_other": "{names} får en notis var när du sparar.",
+      "discard": "Släng",
+      "saved": "Sparat i en omgång",
+      "savedBody_one": "{names} får en notis för det här tillfället.",
+      "savedBody_other": "{names} får en notis var för det här tillfället.",
+      "unsavedTitle": "Osparade ändringar",
+      "unsavedBody": "Spara eller släng dem innan du byter vecka.",
+      "selectFirst": "Välj en ruta först",
+      "selectFirstBody": "Klicka på en dag för en person och välj sedan en knapp.",
+      "nothingYesterday": "Inget loggat dagen innan, så det finns inget att kopiera.",
+      "nothingToFill": "Varje vardag har redan timmar.",
+      "noteLabel": "Anteckning: {note}",
+      "cellLabel": "{name}, {date}",
+      "locked": "stängd",
+      "emptyTitle": "Ingen att logga timmar för än",
+      "emptyBody": "Lägg till en anställd först. Inbjudna kan loggas direkt.",
+      "failed": "Inget sparades. Rutorna med röd ring behöver ses över.",
+      "flagged": "öppen flagga"
     }
   }
 }

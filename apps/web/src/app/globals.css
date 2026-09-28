@@ -3853,3 +3853,44 @@
     animation: none !important;
   }
 }
+
+@layer components {
+  .seg .seg-link {
+    display: grid;
+    place-items: center;
+    padding: 0 14px;
+    min-height: 38px;
+    border-radius: calc(var(--radius-control) - 2px);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .seg .seg-link:hover {
+    color: var(--text);
+  }
+  @media (pointer: coarse) {
+    .seg .seg-link {
+      min-height: 44px;
+    }
+  }
+}
+
+@layer components {
+  /* A toast never covers the save bar: it stacks above it. */
+  body:has(.savebar) .toasts {
+    bottom: calc(84px + 96px + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 1024px) {
+    body:has(.savebar) .toasts {
+      bottom: calc(24px + 88px);
+    }
+  }
+}
+
+@layer components {
+  /* Room under the last row for the save bar, so nothing hides behind it. */
+  body:has(.savebar) .content {
+    padding-bottom: calc(var(--space-9) + 200px);
+  }
+}
