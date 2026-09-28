@@ -4,6 +4,7 @@ import { ApiProvider } from '@/api/ApiProvider';
 import { useAuth } from '@/auth';
 import { DataProvider } from '@/data/DataProvider';
 import { SignInScreen } from '@/features/auth/SignInScreen';
+import { PushRuntime } from '@/features/push/PushRuntime';
 import { useAppStore } from '@/store/appStore';
 
 // Authentication is a RENDERING branch, not a route: a signed-out user has no app to navigate and
@@ -22,7 +23,10 @@ export function AuthGate({ children, userId }: { children: ReactNode; userId: st
   if (status === 'signedOut') return <SignInScreen />;
   return (
     <ApiProvider>
-      <DataProvider userId={userId}>{children}</DataProvider>
+      <DataProvider userId={userId}>
+        <PushRuntime />
+        {children}
+      </DataProvider>
     </ApiProvider>
   );
 }
