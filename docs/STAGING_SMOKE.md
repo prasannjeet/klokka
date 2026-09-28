@@ -213,7 +213,8 @@ Push `data.url` could not be observed end to end (no device token on staging); `
   `resource=https://api.klokka.app` on the authorize and token requests, scopes `openid profile email
   offline_access`, `first_screen`: exactly what the Logto native app registers (`docs/INFRA.md` section 4).
 - Screens use the same operations exercised on the web: `getMe`, `createWorkspace`, `inviteMember`,
-  `listEntries`, `upsertEntry` (the phone's quick add), `batchUpsertEntries` (Week), `getMemberMonth`,
+  `listEntries`, `upsertEntry` and `deleteEntry` (the phone's add-hours sheet, one day at a time; the phone has no
+  grid, so D8's batch endpoint is the web grid's), `getMemberMonth`,
   `getWorkspaceInsights`, `getMemberInsights`, `raiseFlag`, `getFlag` (new) and `resolveFlag`,
   `listNotifications`, `lockMonth`, `exportMonthCsv`, `updateMe` (the new first-workspace name field). Jest:
   20 suites, 64 tests green. Push `data.url` follows the allowlist the contract now documents.

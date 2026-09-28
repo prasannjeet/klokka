@@ -33,3 +33,20 @@ The v1 ones landed (`docs/CONTRACT_REQUESTS.md` says which, with the commit). St
 - Operator console: sorting and search on every list, previous-month counts by kind, per-deployment health (already
   listed above under Product).
 - Avatar upload and an account-management link (already listed above under Product).
+
+## Deferred by the v1 review (CHQ-144, `docs/REVIEW.md`)
+- R5 (P2): the `mobile` CI job only runs jest; add `npm run typecheck -w apps/mobile` so a wrong catalogue key cannot ship.
+- R6: lock the open coalescing row (`findOpenByKey` with `PESSIMISTIC_WRITE`, or `@Version`) so a merge cannot race the push sweeper.
+- R7: `ProblemMapper` should render a generic `detail` for `INTERNAL` (Logto's response body currently reaches direct callers).
+- R8: `%prod` must have no defaults for `KLOKKA_AUTH_ISSUER`, `KLOKKA_AUTH_JWKS`, `KLOKKA_AUTH_AUDIENCE`, `KLOKKA_LOGTO_ENDPOINT`, `KLOKKA_WEB_BASE_URL`.
+- R9: a deactivated member can still raise a flag the employer cannot fix; refuse `raiseFlag` with `MEMBER_NOT_ACTIVE`.
+- R10: `GET /workspaces/{id}/flags` without `status` is unbounded; add a limit or a default scope.
+- R11: week read models are ISO weeks while the grids follow `weekStart`; document or key them on `weekStart`.
+- R12: `DigestJob.run` is one transaction per batch and only fires on Mondays; per-user `REQUIRES_NEW` and a catch-up rule.
+- R13: pin the GitHub actions to commit SHAs; pass Nexus and Coolify credentials to curl via `--netrc-file` / `-K -`, not argv.
+- R14: escape `%` and `_` in the operator search (`OperatorRepository.like`).
+- R15: add `errors.INVALID_SIGNATURE` to the catalogues or exempt it in `docs/CONTRACT.md`.
+- R16: set `agentRules: false` in `apps/landing/next.config.ts`, delete the generated `apps/landing/AGENTS.md`; decide whether the landing's dictionaries move into `packages/core/i18n`.
+- R17: replace the provisional env names in `docs/INFRA.md` sections 2 and 8 with the `KLOKKA_*` ones.
+- R18: `GET /invitations/{token}` should answer 404 or 410 once the invitation is accepted.
+- R19: `MailService.send` logs the recipient address on failure; log an id instead.

@@ -141,4 +141,28 @@ class MonthResourceTest {
         given().header("Accept", "text/csv").when().get("/v1/workspaces/" + ws + "/months/2026-08/export.csv?membershipId=" + maria)
                 .then().statusCode(403);
     }
+
+    // A cell that starts with =, +, - or @ is evaluated as a formula when the CSV is opened in Excel, LibreOffice
+    // or Numbers. Names are typed by the person themselves (PATCH /me reaches every membership) and notes by
+    // the employer, so both are text and never a formula.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void theCsvNeutralisesSpreadsheetFormulasInNamesAndNotes() {
+        data.preferences(NORA, "en", true, false);
+        data.user("usr_mo_eve", "eve@example.com", "Eve");
+        UUID eve = data.member(ws, "usr_mo_eve", "EMPLOYEE", "=HYPERLINK(\"https://evil.example\";\"Eve\")", "eve@example.com", null, "ACTIVE");
+        data.entry(ws, eve, LocalDate.of(2026, 8, 5), new BigDecimal("2.00"), "+cmd|' /C calc'!A0", NORA);
+        data.entry(ws, jonas, LocalDate.of(2026, 8, 6), new BigDecimal("3.00"), "-2 h lunch", NORA);
+        data.entry(ws, maria, LocalDate.of(2026, 8, 7), new BigDecimal("1.00"), "@SUM(A1)", NORA);
+        String body = given().header("Accept", "text/csv").when().get("/v1/workspaces/" + ws + "/months/2026-08/export.csv")
+                .then().statusCode(200).extract().asString();
+        List<String> lines = List.of(body.substring(1).split("\r\n"));
+        assertThat(lines).contains(
+                "2026-08-05;Wednesday;\"'=HYPERLINK(\"\"https://evil.example\"\";\"\"Eve\"\")\";2;'+cmd|' /C calc'!A0;;",
+                "2026-08-06;Thursday;Jonas Berg;3;'-2 h lunch;;",
+                "2026-08-07;Friday;Maria Lind;1;'@SUM(A1);170;170");
+        // Ordinary names and notes stay exactly as typed.
+        assertThat(lines).contains("2026-08-04;Tuesday;Jonas Berg;8;;;");
+    }
 }

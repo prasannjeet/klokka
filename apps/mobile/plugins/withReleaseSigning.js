@@ -2,10 +2,13 @@
 /* global require, module */
 // Expo's template signs the `release` variant with the DEBUG keystore (docs/research/mobile.md, brief
 // correction 6). This config plugin points the release signing config at the project keystore when
-// the four values are present, either as environment variables (the runners:
-// KLOKKA_RELEASE_STORE_FILE / _STORE_PASSWORD / _KEY_ALIAS / _KEY_PASSWORD) or as the same-named
-// Gradle properties in ~/.gradle/gradle.properties (this host). When none is set the debug key stays,
-// so a local `assembleRelease` still produces an installable, throwaway-signed APK.
+// the four values are present, either as environment variables (KLOKKA_RELEASE_STORE_FILE /
+// _STORE_PASSWORD / _KEY_ALIAS / _KEY_PASSWORD) or as the same-named Gradle properties in
+// ~/.gradle/gradle.properties (a local signed build). When none is set the debug key stays, so a local
+// `assembleRelease` still produces an installable, throwaway-signed APK. CI takes the other road:
+// .github/workflows/ci.yml passes the standard android.injected.signing.* properties (which override any
+// signing config) and then verifies the APK's certificate against the keystore, so a debug-signed APK is
+// never published.
 const { withAppBuildGradle } = require('expo/config-plugins');
 
 const PROPS = [
