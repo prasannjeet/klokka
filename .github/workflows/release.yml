@@ -1,0 +1,213 @@
+name: Release
+
+# A pushed v<major>.<minor>.<patch> tag (cut by ./release.sh) builds the PRODUCTION artifacts of the tagged commit:
+# docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version> and the signed production APK. Nothing else
+# builds them; a push to main builds staging only (ci.yml). Production values come from the PROD_* repository
+# variables. No job deploys: the owner pins the new tag in production Coolify by hand (docs/RELEASING.md).
+#
+# Same self-hosted `build` runners as ci.yml, same reasons (no actions/cache, ask for the label).
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: docker.nexus.coolify.ooguy.com
+  DOWNLOADS_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads
+  DOWNLOADS_UPLOAD_URL: http://192.168.0.4:8081/repository/klokka-downloads
+  # image.sh passes these to the landing as build arguments (Next.js inlines NEXT_PUBLIC_* at build time).
+  NEXT_PUBLIC_APP_URL: ${{ vars.PROD_APP_URL }}
+  NEXT_PUBLIC_SITE_URL: ${{ vars.PROD_SITE_URL }}
+  NEXT_PUBLIC_APK_URL: ${{ vars.PROD_APK_URL }}
+
+jobs:
+  version:
+    name: Version
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: [self-hosted, build]
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.v.outputs.tag }}
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+      # The tag must be a plain SemVer and match what release.sh wrote into the manifests, or the artifacts would
+      # report a version they are not.
+      - id: v
+        run: |
+          set -euo pipefail
+          tag=$GITHUB_REF_NAME
+          [[ $tag =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::$tag is not v<major>.<minor>.<patch>"; exit 1; }
+          version=${tag#v}
+          pom=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' apps/api/pom.xml | head -1)
+          app=$(sed -n "s/^  version: '\(.*\)',$/\1/p" apps/mobile/app.config.ts)
+          [ "$pom" = "$version" ] || { echo "::error::apps/api/pom.xml is $pom, the tag is $tag"; exit 1; }
+          [ "$app" = "$version" ] || { echo "::error::apps/mobile/app.config.ts is $app, the tag is $tag"; exit 1; }
+          for v in PROD_SITE_URL PROD_APP_URL PROD_APK_URL; do
+            [ -n "${!v}" ] || { echo "::error::repository variable $v is not set"; exit 1; }
+          done
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+        env:
+          PROD_SITE_URL: ${{ vars.PROD_SITE_URL }}
+          PROD_APP_URL: ${{ vars.PROD_APP_URL }}
+          PROD_APK_URL: ${{ vars.PROD_APK_URL }}
+
+  images:
+    name: Image klokka-${{ matrix.app }}
+    needs: version
+    runs-on: [self-hosted, build]
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [api, web, landing]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        if: matrix.app == 'api'
+        with:
+          distribution: corretto
+          java-version: '25'
+          overwrite-settings: false
+
+      # The fast-jar the API image copies; the tests ran on this commit's push to main, so they are not repeated.
+      - name: Build the API
+        if: matrix.app == 'api'
+        run: mvn -B -ntp -f apps/api/pom.xml clean install -DskipTests
+
+      - name: Log in to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-config"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker-config" >> "$GITHUB_ENV"
+          printf '%s' "$NEXUS_PASSWORD" |
+            DOCKER_CONFIG="$RUNNER_TEMP/docker-config" docker login "$REGISTRY" -u "$NEXUS_USERNAME" --password-stdin
+
+      - name: Build and push klokka-${{ matrix.app }}:${{ needs.version.outputs.tag }}
+        env:
+          KLOKKA_BUILD_VERSION: ${{ needs.version.outputs.version }}
+        run: .github/scripts/image.sh "${{ matrix.app }}" "${{ needs.version.outputs.tag }}"
+
+  apk:
+    name: Production APK
+    needs: version
+    runs-on: [self-hosted, build]
+    timeout-minutes: 90
+    env:
+      ANDROID_HOME: /home/dev/Android/Sdk
+      ANDROID_SDK_ROOT: /home/dev/Android/Sdk
+      # Baked into the APK at bundle time: production values.
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.PROD_API_URL }}/v1
+      EXPO_PUBLIC_LOGTO_ENDPOINT: ${{ vars.PROD_LOGTO_ENDPOINT }}
+      EXPO_PUBLIC_LOGTO_APP_ID: ${{ vars.PROD_LOGTO_APP_ID }}
+      EXPO_PUBLIC_LOGTO_API_RESOURCE: ${{ vars.PROD_API_RESOURCE }}
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+    steps:
+      # A production APK with an empty issuer or client id could not sign anyone in: refuse to build it.
+      - name: Production app settings are set
+        env:
+          PROD_API_URL: ${{ vars.PROD_API_URL }}
+          PROD_LOGTO_ENDPOINT: ${{ vars.PROD_LOGTO_ENDPOINT }}
+          PROD_LOGTO_APP_ID: ${{ vars.PROD_LOGTO_APP_ID }}
+          PROD_API_RESOURCE: ${{ vars.PROD_API_RESOURCE }}
+        run: |
+          missing=0
+          for v in PROD_API_URL PROD_LOGTO_ENDPOINT PROD_LOGTO_APP_ID PROD_API_RESOURCE; do
+            [ -n "${!v}" ] || { echo "::error::repository variable $v is not set"; missing=1; }
+          done
+          exit $missing
+
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: Pin npm (workspace-scoped npm ci needs the same npm as the lock file)
+        run: npm install -g npm@11.9.0 --no-audit --no-fund
+
+      # JDK 21 for Gradle: JDK 25 breaks the React Native native CMake step (docs/DECISIONS.md D7).
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: '21'
+          overwrite-settings: false
+
+      - name: Install the mobile workspace
+        run: >-
+          npm ci -w apps/mobile -w packages/core -w packages/tokens -w packages/api-client
+          --include-workspace-root --no-audit --no-fund
+
+      - name: Write google-services.json and the release keystore
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          keystore="$RUNNER_TEMP/klokka-release.keystore"
+          echo "KEYSTORE=$keystore" >> "$GITHUB_ENV"
+          printf '%s' "$GOOGLE_SERVICES_JSON" | base64 -d > apps/mobile/google-services.json
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$keystore"
+          chmod 600 "$keystore"
+
+      - name: Prebuild the Android project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean
+
+      - name: Assemble the signed release APK
+        working-directory: apps/mobile/android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease --no-daemon --stacktrace \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.injected.signing.store.file="$KEYSTORE" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
+
+      - name: Verify the signing certificate
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          want=$(keytool -list -v -keystore "$KEYSTORE" -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" | awk '/SHA256:/ {print $2}' | tr -d ':' | tr 'A-F' 'a-f')
+          got=$("$build_tools/apksigner" verify --print-certs "$APK" |
+            awk -F': ' '/Signer #1 certificate SHA-256 digest/ {print $2}')
+          if [ -z "$want" ] || [ "$want" != "$got" ]; then
+            echo "::error::app-release.apk is not signed with the Klokka release key"
+            exit 1
+          fi
+
+      # prod/klokka-v<version>.apk is immutable; prod/klokka-latest.apk (PROD_APK_URL, the landing's link) follows.
+      - name: Publish the APK to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          for name in "prod/klokka-$TAG.apk" prod/klokka-latest.apk; do
+            curl -sSf --max-time 900 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$APK" "$DOWNLOADS_UPLOAD_URL/$name"
+            echo "published $DOWNLOADS_URL/$name"
+          done
+
+      - name: Remove the signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/klokka-release.keystore" apps/mobile/google-services.json

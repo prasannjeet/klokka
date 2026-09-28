@@ -104,7 +104,8 @@ guarded by a regenerate-and-diff check.
 - Secrets live in the GitHub repository (`NEXUS_USERNAME`, `NEXUS_PASSWORD`, `COOLIFY_TOKEN`, `EXPO_TOKEN`,
   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `GOOGLE_SERVICES_JSON`) and in `.agents/local-credentials/`
   locally. Never in the repo.
-- Production is a later `v*`-tag path per `~/.agents/production-deploys.md`; the staging pipeline is never touched for it.
+- Production: a `v*` tag runs `.github/workflows/release.yml` (build and push only, see `docs/RELEASING.md`); a push to
+  `main` never builds a production artifact.
 
 ## Authorization (`docs/DECISIONS.md` D1)
 - One Logto access token per user (audience = the Klokka API resource, no `organization_id`). The API decides what a user
@@ -168,8 +169,10 @@ guarded by a regenerate-and-diff check.
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
 - SMTP: Migadu `smtp.migadu.com:587` STARTTLS; ~100 emails/month on staging, so email is for invitations (2 per invitee)
   and opt-in digests only. Credentials live only in Coolify env vars and `.env` files that are gitignored.
-- No CI yet: `release.sh` builds each image, pushes an immutable tag, and PATCHes the Coolify app
-  (`docker_registry_image_tag` + `instant_deploy`). Production comes later by `v*` tag per `~/.agents/production-deploys.md`.
+- Staging deploys from CI on every push to `main`; `./deploy-staging.sh` is the manual fallback. Production is
+  `./release.sh patch|minor|major|x.y.z`: a `v*` tag builds `klokka-*:v<version>` and the production APK
+  (`docs/RELEASING.md`), and the owner pins the tag in production Coolify by hand. Environment URLs are the
+  `STAGING_*`/`PROD_*` GitHub repository variables.
 - Local dev: Quarkus Dev Services for the API alone; `docker compose` (Postgres 18 on 5434, Mailpit 8025/1025; 5433 is
   another project's Postgres on this host) for the whole stack; auth against the staging Logto with
   `http://localhost:3000/callback` registered. Ports: API 8080, web 3000, landing 3001, Prism mock 4010.

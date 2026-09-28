@@ -2,7 +2,7 @@
 
 ## CI/CD
 
-Staging only. Production is a later `v*`-tag path (`~/.agents/production-deploys.md`); nothing below can reach
+Staging only. Production is built by a `v*` tag (`docs/RELEASING.md`); nothing below can reach
 it, and `.github/scripts/coolify-deploy.sh` refuses any Coolify but `https://coolify.coolify.ooguy.com`.
 
 ### What a push to `main` does
@@ -81,9 +81,9 @@ packages), 45 (api, web, landing), 90 (mobile) minutes.
   `EXPO_PUBLIC_LOGTO_ENDPOINT`, `EXPO_PUBLIC_LOGTO_APP_ID`, `EXPO_PUBLIC_LOGTO_API_RESOURCE`, plus
   `EAS_PROJECT_ID` from the secret.
 
-### Manual builds: `./release.sh`
+### Manual staging builds: `./deploy-staging.sh`
 
-`./release.sh api|web|landing|all` does the delivery half of CI from this host with the same two scripts:
+`./deploy-staging.sh api|web|landing|all` does the delivery half of CI from this host with the same two scripts:
 Maven build and tests for the API (`SKIP_TESTS=1` skips the tests), image `sha-<short>` + `:latest`, deploy,
 health wait. It refuses a dirty tree (the tag must name the commit), reads the Coolify token, app uuids, URLs
 and health paths from `.agents/local-credentials/coolify-staging.json`, and uses this user's Nexus docker
@@ -153,7 +153,7 @@ deleted from Coolify.
 ### Validating a workflow change
 
 `actionlint` (with shellcheck) over `.github/` must be clean; `.github/actionlint.yaml` declares the `build`
-runner label. `shellcheck` covers `release.sh` and `.github/scripts/*.sh`.
+runner label. `shellcheck` covers `release.sh`, `deploy-staging.sh` and `.github/scripts/*.sh`.
 
 ## API runtime (`klokka-api`)
 

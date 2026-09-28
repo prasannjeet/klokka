@@ -1,67 +1,65 @@
 #!/usr/bin/env bash
-# Manual STAGING build and deploy from this host: the delivery half of .github/workflows/ci.yml, through the same
-# scripts (.github/scripts/image.sh, .github/scripts/coolify-deploy.sh).
+# Cut a PRODUCTION release: bump the version, commit, tag v<version> and push both. The pushed tag runs
+# .github/workflows/release.yml, which builds klokka-{api,web,landing}:v<version> and the production APK with the
+# PROD_* repository variables. Nothing is deployed: pin the tag in production Coolify by hand (docs/RELEASING.md).
 #
-#   ./release.sh api|web|landing|all
+#   ./release.sh 1.2.3     explicit version
+#   ./release.sh patch     1.2.3 -> 1.2.4, from the highest v* tag
+#   ./release.sh minor     1.2.3 -> 1.3.0
+#   ./release.sh major     1.2.3 -> 2.0.0
 #
-# For each app: build from the checked-out commit (the tree must be clean, so the tag names exactly what is in the
-# image), push docker.nexus.coolify.ooguy.com/klokka-<app>:sha-<short> and :latest, pin and deploy that tag on
-# staging Coolify, and wait for the app's health URL. The API is built and tested with Maven first (SKIP_TESTS=1
-# skips its tests); web and landing are built inside their Dockerfiles. `all` skips an app whose Dockerfile does not
-# exist yet.
-#
-# Credentials: .agents/local-credentials/coolify-staging.json (Coolify write token, app uuids, URLs, health paths)
-# and this user's Nexus docker login (~/.docker/config.json). Production is never reachable from here: it is
-# deployed by a v* tag (~/.agents/production-deploys.md), a separate path that does not exist yet.
+# The bump writes the version into apps/api (three poms) and apps/mobile/app.config.ts (version, and versionCode + 1
+# so a phone accepts the APK as an update), as one "Release v<version>" commit on main. Staging deploys that commit
+# like any other push. For a manual staging deploy, see ./deploy-staging.sh.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-usage() { echo "usage: $0 api|web|landing|all" >&2; exit 2; }
+usage() { echo "usage: $0 <major.minor.patch>|patch|minor|major" >&2; exit 2; }
 [ $# -eq 1 ] || usage
-case "$1" in
-  api | web | landing) targets=("$1") ;;
-  all) targets=(api web landing) ;;
-  *) usage ;;
-esac
 
-CRED=.agents/local-credentials/coolify-staging.json
-[ -f "$CRED" ] || { echo "$CRED is missing" >&2; exit 1; }
-for tool in docker git jq curl; do
-  command -v "$tool" >/dev/null || { echo "$tool is not on PATH" >&2; exit 1; }
-done
-if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
-  echo "the working tree has uncommitted changes; commit or stash them so the image tag names the commit" >&2
+branch=$(git rev-parse --abbrev-ref HEAD)
+[ "$branch" = main ] || { echo "releases are cut from main, not $branch" >&2; exit 1; }
+[ -z "$(git status --porcelain)" ] || { echo "the working tree is not clean" >&2; exit 1; }
+git fetch -q origin main --tags
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] ||
+  { echo "main is not in sync with origin/main (pull or push first)" >&2; exit 1; }
+
+latest=$(git tag --list 'v*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1 || true)
+latest=${latest#v}
+IFS=. read -r major minor patch <<<"${latest:-0.0.0}"
+case "$1" in
+  patch) version=$major.$minor.$((patch + 1)) ;;
+  minor) version=$major.$((minor + 1)).0 ;;
+  major) version=$((major + 1)).0.0 ;;
+  *)
+    [[ $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || usage
+    version=$1
+    ;;
+esac
+tag=v$version
+if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then echo "$tag already exists" >&2; exit 1; fi
+if [ -n "$latest" ] && [ "$(printf '%s\n%s\n' "$latest" "$version" | sort -V | tail -1)" != "$version" ]; then
+  echo "$tag is not above the latest release v$latest" >&2
   exit 1
 fi
-COOLIFY_URL=$(jq -r .base_url "$CRED")
-COOLIFY_TOKEN=$(jq -r .token "$CRED")
-export COOLIFY_URL COOLIFY_TOKEN
-tag=sha-$(git rev-parse --short=7 HEAD)
 
-deploy() {
-  local app=$1 uuid fqdn health
-  uuid=$(jq -r --arg a "klokka-$app" '.applications[$a].uuid' "$CRED")
-  fqdn=$(jq -r --arg a "klokka-$app" '.applications[$a].fqdn' "$CRED")
-  health=$(jq -r --arg a "klokka-$app" '.applications[$a].health' "$CRED")
-  .github/scripts/coolify-deploy.sh "$uuid" "$tag" "$fqdn$health"
-}
-
-echo "Releasing ${targets[*]} at $tag to STAGING"
-for app in "${targets[@]}"; do
-  if [ ! -f "apps/$app/Dockerfile" ]; then
-    if [ "${#targets[@]}" -gt 1 ]; then echo "== $app: no apps/$app/Dockerfile yet, skipped"; continue; fi
-    echo "apps/$app/Dockerfile does not exist in this checkout" >&2
-    exit 1
-  fi
-  echo "== $app"
-  if [ "$app" = api ]; then
-    JAVA_HOME=${KLOKKA_JAVA_HOME:-$HOME/.sdkman/candidates/java/25.0.2-amzn}
-    export JAVA_HOME
-    mvn_args=(-B -ntp -f apps/api/pom.xml clean install)
-    [ "${SKIP_TESTS:-}" = 1 ] && mvn_args+=(-DskipTests)
-    PATH="$JAVA_HOME/bin:$PATH" mvn "${mvn_args[@]}"
-  fi
-  .github/scripts/image.sh "$app" "$tag"
-  deploy "$app"
+current=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' apps/api/pom.xml | head -1)
+for pom in apps/api/pom.xml apps/api/contract/pom.xml apps/api/service/pom.xml; do
+  # The first <version> is the project's (parent pom) or its parent reference (modules).
+  sed -i "0,/<version>$current<\/version>/s//<version>$version<\/version>/" "$pom"
+  grep -q "<version>$version</version>" "$pom" || { echo "could not set the version in $pom" >&2; exit 1; }
 done
-echo "Done: ${targets[*]} at $tag"
+config=apps/mobile/app.config.ts
+code=$(sed -n 's/^    versionCode: \([0-9]\+\),$/\1/p' "$config")
+[ -n "$code" ] || { echo "no versionCode in $config" >&2; exit 1; }
+sed -i "s/^  version: '.*',$/  version: '$version',/; s/^    versionCode: $code,$/    versionCode: $((code + 1)),/" "$config"
+grep -q "^  version: '$version',$" "$config" || { echo "could not set the version in $config" >&2; exit 1; }
+
+echo "Releasing $tag (previous: ${latest:+v}${latest:-none}; API $current -> $version; APK versionCode $code -> $((code + 1)))"
+git add apps/api/pom.xml apps/api/contract/pom.xml apps/api/service/pom.xml "$config"
+git commit -q -m "Release $tag"
+git tag -a "$tag" -m "Klokka $tag"
+git push -q origin main
+git push -q origin "$tag"
+echo "Pushed $tag: .github/workflows/release.yml now builds the production images and APK."
+echo "Follow it with: gh run watch \$(gh run list --workflow release.yml --limit 1 --json databaseId -q '.[0].databaseId')"

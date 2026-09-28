@@ -2,6 +2,15 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.0.1, 2026-09-28
+
+First production release build.
+
+### Added
+- `./release.sh` cuts a versioned release; a `v*` tag builds production images (`klokka-*:v<version>`) and the
+  production APK. Environment URLs are `STAGING_*`/`PROD_*` repository variables. The manual staging script is now
+  `./deploy-staging.sh`.
+
 ## 1.0.0, 2026-09-28
 
 First version, running on staging.
