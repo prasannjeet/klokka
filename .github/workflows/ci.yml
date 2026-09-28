@@ -1,0 +1,459 @@
+name: CI
+
+# A push to main builds and tests what changed, publishes the API contract to Nexus, pushes immutable images and
+# deploys STAGING through the Coolify API, and builds, signs and publishes the Android release APK
+# (docs/DECISIONS.md D13, docs/DEPLOYMENT.md "CI/CD"). Nothing here can deploy production: that is a later v*-tag
+# path (~/.agents/production-deploys.md), and the deploy script refuses any Coolify but staging's.
+#
+# Runners: the two self-hosted `build` runners on the dev host (klokka-01, klokka-02). Always ask for the LABEL,
+# never bare `self-hosted`. The jobs are path-filtered and independent so both runners stay busy; each job group
+# has its own concurrency group, and a newer push to main cancels the older run of the same group.
+# No actions/cache and no setup-node `cache`: a persistent runner already has ~/.m2 and ~/.npm on disk, and the
+# upload would cost more than the build (measured on tax-agent, 2026-08-24).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_all:
+        description: Run every job, whatever changed (false = only what the last commit changed)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: docker.nexus.coolify.ooguy.com
+  COOLIFY_URL: https://coolify.coolify.ooguy.com
+  DOWNLOADS_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads
+  # Public staging URLs. The landing bakes them at build time; the web app reads its runtime env from Coolify.
+  NEXT_PUBLIC_APP_URL: https://klokka-app.coolify.ooguy.com
+  NEXT_PUBLIC_SITE_URL: https://klokka.coolify.ooguy.com
+  NEXT_PUBLIC_APK_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk
+
+jobs:
+  changes:
+    name: What changed
+    runs-on: [self-hosted, build]
+    timeout-minutes: 5
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      contract: ${{ steps.filter.outputs.contract }}
+      packages: ${{ steps.filter.outputs.packages }}
+      web: ${{ steps.filter.outputs.web }}
+      landing: ${{ steps.filter.outputs.landing }}
+      mobile: ${{ steps.filter.outputs.mobile }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # A job runs when a path it depends on changed, or on a dispatch with force_all. The workflow file itself
+      # counts for every job. web, landing and mobile are skipped (with a notice) until their app exists.
+      - name: Path filter
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          FORCE_ALL: ${{ inputs.force_all }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          all=false
+          base=""
+          if [ "$EVENT" = workflow_dispatch ]; then
+            if [ "$FORCE_ALL" = true ]; then all=true; else base=HEAD~1; fi
+          elif [[ $BEFORE =~ ^0+$ ]] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            all=true # first push of the branch or rewritten history: nothing reliable to diff against
+          else
+            base=$BEFORE
+          fi
+          files=""
+          if [ "$all" = false ]; then files=$(git diff --name-only "$base" HEAD); fi
+          echo "Changed files:"
+          echo "${files:-(none listed: every job runs)}"
+
+          root='package\.json|package-lock\.json|tsconfig\.base\.json|eslint\.config\.js|\.prettier[a-z.]*|\.nvmrc'
+          ci='\.github/workflows/ci\.yml'
+          deploy='\.github/scripts/(image|coolify-deploy)\.sh'
+          declare -A pattern=(
+            [api]="^(apps/api/|packages/core/i18n/|\.sdkmanrc$|$ci$|$deploy$)"
+            [contract]="^(apps/api/pom\.xml$|apps/api/contract/|packages/api-client/|$ci$|\.github/scripts/publish-contract\.sh$)"
+            [packages]="^(packages/|scripts/|($root)$|$ci$)"
+            [web]="^(apps/web/|packages/|($root)$|$ci$|$deploy$)"
+            [landing]="^(apps/landing/|packages/|($root)$|$ci$|$deploy$)"
+            [mobile]="^(apps/mobile/|packages/|($root)$|$ci$)"
+          )
+          declare -A requires=(
+            [web]=apps/web/Dockerfile
+            [landing]=apps/landing/Dockerfile
+            [mobile]=apps/mobile/app.config.ts
+          )
+          for job in api contract packages web landing mobile; do
+            run=$all
+            if [ "$run" = false ] && grep -qE "${pattern[$job]}" <<<"$files"; then run=true; fi
+            if [ "$run" = true ] && [ -n "${requires[$job]:-}" ] && [ ! -e "${requires[$job]}" ]; then
+              echo "::notice::$job skipped: ${requires[$job]} does not exist yet"
+              run=false
+            fi
+            echo "$job=$run" | tee -a "$GITHUB_OUTPUT"
+          done
+
+  api:
+    name: API (build, test, image, deploy)
+    needs: changes
+    if: needs.changes.outputs.api == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 45
+    concurrency:
+      group: ci-api-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      HEALTH_URL: https://klokka-api.coolify.ooguy.com/q/health/ready
+    steps:
+      - uses: actions/checkout@v6
+
+      # overwrite-settings: false, or setup-java rewrites the runner user's ~/.m2/settings.xml (shared host).
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: '25'
+          overwrite-settings: false
+
+      # Contract (generated server interfaces) + service, unit and @QuarkusTest suites against a Dev Services
+      # Postgres 18 container, then the fast-jar the image copies.
+      - name: Build and test
+        run: mvn -B -ntp -f apps/api/pom.xml clean install
+
+      # A job-local docker config: the runner user's own ~/.docker/config.json is never written or logged out.
+      - name: Log in to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-config"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker-config" >> "$GITHUB_ENV"
+          printf '%s' "$NEXUS_PASSWORD" |
+            DOCKER_CONFIG="$RUNNER_TEMP/docker-config" docker login "$REGISTRY" -u "$NEXUS_USERNAME" --password-stdin
+
+      - name: Build and push the image
+        id: image
+        run: |
+          tag="sha-${GITHUB_SHA::7}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          .github/scripts/image.sh api "$tag"
+
+      - name: Deploy to staging
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_APP_API_UUID }}
+          TAG: ${{ steps.image.outputs.tag }}
+        run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$TAG" "$HEALTH_URL"
+
+  contract:
+    name: Contract (publish to Nexus)
+    needs: changes
+    if: needs.changes.outputs.contract == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 20
+    concurrency:
+      group: ci-contract-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: '25'
+          overwrite-settings: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Install the client's workspace
+        run: npm ci -w packages/api-client --include-workspace-root --no-audit --no-fund
+
+      # The committed typescript-fetch client must match openapi.yaml before anything is published.
+      - name: Generated client matches the contract
+        run: npm run check -w packages/api-client
+
+      # Maven klokka-api-contract to maven-snapshots/-releases, npm @klokka/api-client to npm-hosted at the API
+      # version (or <version>-sha.<short> while the API is a SNAPSHOT); an existing version is skipped.
+      - name: Publish
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: .github/scripts/publish-contract.sh
+
+  packages:
+    name: Shared packages (lint, generated-output guards, tests)
+    needs: changes
+    if: needs.changes.outputs.packages == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 20
+    concurrency:
+      group: ci-packages-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      # openapi-generator-cli (the api-client drift guard) wraps a JAR, so it needs a JVM.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: '21'
+          overwrite-settings: false
+
+      - name: Install the shared packages
+        run: npm ci -w packages/core -w packages/tokens -w packages/api-client --include-workspace-root --no-audit --no-fund
+
+      # ESLint (incl. the em dash rule), Prettier and the repo-wide em dash grep, over the whole repository.
+      - name: Lint
+        run: npm run lint
+
+      - name: Generated outputs match their sources
+        run: npm run check -w packages/core -w packages/tokens -w packages/api-client
+
+      - name: Typecheck
+        run: npm run typecheck -w packages/core -w packages/tokens -w packages/api-client
+
+      - name: Tests
+        run: npm test -w packages/core -w packages/tokens -w packages/api-client
+
+  web:
+    name: Web app (lint, test, build, image, deploy)
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 45
+    concurrency:
+      group: ci-web-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      HEALTH_URL: https://klokka-app.coolify.ooguy.com/healthz
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      # Scoped: the web app and the packages it links, never the Expo dependency tree.
+      - name: Install the web workspace
+        run: >-
+          npm ci -w apps/web -w packages/core -w packages/tokens -w packages/api-client
+          --include-workspace-root --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint -w apps/web --if-present
+
+      - name: Test
+        run: npm test -w apps/web --if-present
+
+      - name: Next build
+        run: npm run build -w apps/web
+
+      - name: Log in to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-config"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker-config" >> "$GITHUB_ENV"
+          printf '%s' "$NEXUS_PASSWORD" |
+            DOCKER_CONFIG="$RUNNER_TEMP/docker-config" docker login "$REGISTRY" -u "$NEXUS_USERNAME" --password-stdin
+
+      # apps/web/Dockerfile is multi-stage with the repository root as context (npm workspaces).
+      - name: Build and push the image
+        id: image
+        run: |
+          tag="sha-${GITHUB_SHA::7}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          .github/scripts/image.sh web "$tag"
+
+      - name: Deploy to staging
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_APP_WEB_UUID }}
+          TAG: ${{ steps.image.outputs.tag }}
+        run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$TAG" "$HEALTH_URL"
+
+  landing:
+    name: Landing (lint, test, build, image, deploy)
+    needs: changes
+    if: needs.changes.outputs.landing == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 45
+    concurrency:
+      group: ci-landing-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      HEALTH_URL: https://klokka.coolify.ooguy.com/
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Install the landing workspace
+        run: >-
+          npm ci -w apps/landing -w packages/core -w packages/tokens -w packages/api-client
+          --include-workspace-root --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint -w apps/landing --if-present
+
+      - name: Test
+        run: npm test -w apps/landing --if-present
+
+      - name: Next build
+        run: npm run build -w apps/landing
+
+      - name: Log in to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/docker-config"
+          echo "DOCKER_CONFIG=$RUNNER_TEMP/docker-config" >> "$GITHUB_ENV"
+          printf '%s' "$NEXUS_PASSWORD" |
+            DOCKER_CONFIG="$RUNNER_TEMP/docker-config" docker login "$REGISTRY" -u "$NEXUS_USERNAME" --password-stdin
+
+      # The NEXT_PUBLIC_* URLs above go in as build arguments (the landing bakes them).
+      - name: Build and push the image
+        id: image
+        run: |
+          tag="sha-${GITHUB_SHA::7}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          .github/scripts/image.sh landing "$tag"
+
+      - name: Deploy to staging
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          APP_UUID: ${{ secrets.COOLIFY_APP_LANDING_UUID }}
+          TAG: ${{ steps.image.outputs.tag }}
+        run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$TAG" "$HEALTH_URL"
+
+  mobile:
+    name: Mobile (test, signed release APK, publish)
+    needs: changes
+    if: needs.changes.outputs.mobile == 'true'
+    runs-on: [self-hosted, build]
+    timeout-minutes: 90
+    concurrency:
+      group: ci-mobile-${{ github.ref }}
+      cancel-in-progress: true
+    env:
+      # The runners have no ANDROID_HOME (GitHub's images preset it; android/local.properties is generated).
+      ANDROID_HOME: /home/dev/Android/Sdk
+      ANDROID_SDK_ROOT: /home/dev/Android/Sdk
+      # Read at bundle time and baked into the release APK: staging values, all public identifiers.
+      EXPO_PUBLIC_API_BASE_URL: https://klokka-api.coolify.ooguy.com/v1
+      EXPO_PUBLIC_LOGTO_ENDPOINT: https://klokka-logto.coolify.ooguy.com
+      EXPO_PUBLIC_LOGTO_APP_ID: 1uhtt4uj8f0aevtgf6g3b
+      EXPO_PUBLIC_LOGTO_API_RESOURCE: https://api.klokka.app
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      # JDK 21 for Gradle: JDK 25 breaks the React Native native CMake step (docs/DECISIONS.md D7).
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: '21'
+          overwrite-settings: false
+
+      - name: Install the mobile workspace
+        run: >-
+          npm ci -w apps/mobile -w packages/core -w packages/tokens -w packages/api-client
+          --include-workspace-root --no-audit --no-fund
+
+      # jest's default of one worker per core starves the shared host (tax-agent's measured 5 s timeouts).
+      - name: Test
+        run: npm test -w apps/mobile -- --maxWorkers=4
+
+      - name: Write google-services.json and the release keystore
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          keystore="$RUNNER_TEMP/klokka-release.keystore"
+          echo "KEYSTORE=$keystore" >> "$GITHUB_ENV"
+          printf '%s' "$GOOGLE_SERVICES_JSON" | base64 -d > apps/mobile/google-services.json
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$keystore"
+          chmod 600 "$keystore"
+
+      # android/ is generated and gitignored: regenerate it from app.config.ts every time.
+      - name: Prebuild the Android project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --clean
+
+      # Signing is injected with the standard android.injected.signing.* properties (what Android Studio's
+      # "Generate signed APK" passes), so the generated build.gradle is never edited. Both ARM ABIs: every real
+      # phone; x86 is emulator-only and there is no emulator on this host.
+      - name: Assemble the signed release APK
+        working-directory: apps/mobile/android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease --no-daemon --stacktrace \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.injected.signing.store.file="$KEYSTORE" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
+
+      # Fail loudly if the APK is not signed by the project key (a debug-signed APK would install as another app).
+      - name: Verify the signing certificate
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          want=$(keytool -list -v -keystore "$KEYSTORE" -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" | awk '/SHA256:/ {print $2}' | tr -d ':' | tr 'A-F' 'a-f')
+          got=$("$build_tools/apksigner" verify --print-certs "$APK" |
+            awk -F': ' '/Signer #1 certificate SHA-256 digest/ {print $2}')
+          echo "keystore $want"
+          echo "apk      $got"
+          if [ -z "$want" ] || [ "$want" != "$got" ]; then
+            echo "::error::app-release.apk is not signed with the Klokka release key"
+            exit 1
+          fi
+
+      # klokka-<sha>.apk is immutable; klokka-latest.apk (the landing page's link) is overwritten afterwards.
+      - name: Publish the APK to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          for name in "klokka-${GITHUB_SHA::7}.apk" klokka-latest.apk; do
+            curl -sSf --max-time 300 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$APK" "$DOWNLOADS_URL/$name"
+            echo "published $DOWNLOADS_URL/$name"
+          done
+
+      - name: Remove the signing material
+        if: always()
+        run: rm -f "$RUNNER_TEMP/klokka-release.keystore" apps/mobile/google-services.json
