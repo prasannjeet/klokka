@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
+import { isIanaTimeZone } from '@klokka/core';
 import { useMe, useUpdateMe } from '@/data/me';
 import { useCreateWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
@@ -28,9 +29,12 @@ export const WORKSPACE_EMOJIS = ['☕', '🥐', '✂️', '🧹', '🌸', '🍕'
 export const WORKSPACE_COLOURS: WorkspaceColour[] = ['PRIMARY', 'BLUE', 'GREEN', 'PURPLE', 'YELLOW', 'INK'];
 export const CURRENCIES = ['SEK', 'NOK', 'DKK', 'EUR', 'GBP', 'USD'];
 
+// The phone's zone when it is an IANA id (Android can report an offset such as "GMT+01:00", which the API
+// refuses), else Stockholm; the picker changes it either way.
 export function deviceTimezone(): string {
   try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Stockholm';
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return isIanaTimeZone(zone) ? zone : 'Europe/Stockholm';
   } catch {
     return 'Europe/Stockholm';
   }

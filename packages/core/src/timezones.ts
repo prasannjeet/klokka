@@ -102,6 +102,14 @@ export function runtimeTimeZones(): string[] {
   }
 }
 
+// An IANA region id ("Europe/Stockholm", "America/Argentina/Buenos_Aires", "Etc/GMT-1") or UTC. Offsets such
+// as "UTC+1", "GMT+01:00" or "+01:00" are not: the API refuses them and Intl cannot format with them (CHQ-145).
+const IANA = /^(?:UTC|[A-Z][A-Za-z]+(?:\/[A-Za-z0-9_+-]+)+)$/;
+
+export function isIanaTimeZone(zone: string | null | undefined): zone is string {
+  return typeof zone === 'string' && IANA.test(zone);
+}
+
 // Europe for the pickers' first group includes the Atlantic islands (Iceland, the Faroes, the Canaries).
 export function isEuropeanTimeZone(zone: string): boolean {
   return zone.startsWith('Europe/') || zone.startsWith('Atlantic/');
@@ -114,14 +122,15 @@ function region(zone: string): number {
   return 2;
 }
 
-// Every option for a picker, Europe first. The current value is always an option, even when the
-// list does not know it (a zone stored by another client), so a picker never silently changes it.
+// Every option for a picker, Europe first, IANA ids only. The current value is an option too when the list
+// does not know it (a zone another runtime knows), so a picker never silently changes it; an offset is not.
 export function timeZoneOptions(
   current?: string,
   supported: readonly string[] = runtimeTimeZones(),
 ): string[] {
-  const zones = new Set(supported.length > 0 ? supported : CURATED_TIME_ZONES);
-  if (current) zones.add(current);
+  const known = supported.filter(isIanaTimeZone);
+  const zones = new Set(known.length > 0 ? known : CURATED_TIME_ZONES);
+  if (isIanaTimeZone(current)) zones.add(current);
   return [...zones].sort((a, b) => region(a) - region(b) || a.localeCompare(b));
 }
 

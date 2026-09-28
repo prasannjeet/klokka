@@ -114,6 +114,12 @@ class WorkspaceResourceTest {
                 .when().post("/v1/workspaces").then().statusCode(400).body("code", is("VALIDATION")).body("errors[0].field", is("timezone"));
         given().contentType("application/json").body("{\"name\":\"X\",\"timezone\":\"Europe/Oslo\",\"currency\":\"ZZZ\"}")
                 .when().post("/v1/workspaces").then().statusCode(400).body("errors[0].field", is("currency"));
+        // CHQ-145: ZoneId.of accepts offsets ("UTC+1" became "UTC+01:00", which Intl rejects); only IANA ids pass.
+        for (String offset : new String[] {"UTC+1", "+01:00", "GMT+2", "UTC+01:00"}) {
+            given().contentType("application/json").body("{\"name\":\"X\",\"timezone\":\"" + offset + "\",\"currency\":\"SEK\"}")
+                    .when().post("/v1/workspaces").then().statusCode(400).contentType("application/problem+json")
+                    .body("code", is("VALIDATION")).body("errors[0].field", is("timezone"));
+        }
         assertThat(Fake.<Object>list("createdOrganizations")).isEmpty();
     }
 
@@ -144,5 +150,9 @@ class WorkspaceResourceTest {
                 .body("showPay", is(true)).body("rounding", is("QUARTER")).body("name", is("Patch Corp 2")).body("timezone", is("Europe/Stockholm"));
         given().contentType("application/json").body("{\"timezone\":\"Nowhere/Land\"}")
                 .when().patch("/v1/workspaces/" + ws).then().statusCode(400).body("code", is("VALIDATION"));
+        given().contentType("application/json").body("{\"timezone\":\"UTC+1\"}")
+                .when().patch("/v1/workspaces/" + ws).then().statusCode(400).body("code", is("VALIDATION")).body("errors[0].field", is("timezone"));
+        given().contentType("application/json").body("{\"timezone\":\"America/New_York\"}")
+                .when().patch("/v1/workspaces/" + ws).then().statusCode(200).body("timezone", is("America/New_York"));
     }
 }

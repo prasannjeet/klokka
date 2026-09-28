@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { CURATED_TIME_ZONES, matchesTimeZone, timeZoneLabel, timeZoneOptions } from '../src/timezones.ts';
+import {
+  CURATED_TIME_ZONES,
+  isIanaTimeZone,
+  matchesTimeZone,
+  timeZoneLabel,
+  timeZoneOptions,
+} from '../src/timezones.ts';
 
 describe('timeZoneOptions (CHQ-145)', () => {
   it('puts Europe first, then the rest of the world, each alphabetical', () => {
@@ -31,5 +37,23 @@ describe('timeZoneOptions (CHQ-145)', () => {
     expect(matchesTimeZone('Europe/Zurich', 'zürich')).toBe(true);
     expect(matchesTimeZone('Europe/Stockholm', 'oslo')).toBe(false);
     expect(matchesTimeZone('Europe/Stockholm', '')).toBe(true);
+  });
+
+  it('offers IANA ids only, never an offset such as UTC+1 (the API refuses them)', () => {
+    for (const ok of [
+      'Europe/Stockholm',
+      'America/Argentina/Buenos_Aires',
+      'Etc/GMT-1',
+      'UTC',
+      'America/Port-au-Prince',
+    ]) {
+      expect(isIanaTimeZone(ok)).toBe(true);
+    }
+    for (const bad of ['UTC+1', 'UTC+01:00', 'GMT+2', '+01:00', 'CET', '', null, undefined]) {
+      expect(isIanaTimeZone(bad)).toBe(false);
+    }
+    expect(timeZoneOptions('UTC+01:00', ['Europe/Oslo', 'GMT+1'])).toEqual(['Europe/Oslo']);
+    for (const zone of timeZoneOptions()) expect(isIanaTimeZone(zone)).toBe(true);
+    for (const zone of CURATED_TIME_ZONES) expect(isIanaTimeZone(zone)).toBe(true);
   });
 });
