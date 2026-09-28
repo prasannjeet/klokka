@@ -1,6 +1,6 @@
 {
   "name": "klokka",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Klokka monorepo: the Quarkus API (Maven, not a workspace), the Next.js web app and landing site, the Expo app, and the shared packages.",

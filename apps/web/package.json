@@ -1,6 +1,6 @@
 {
   "name": "@klokka/web",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Klokka's product web app (employer, employee and the operator console): Next.js App Router behind a same-origin BFF that adds the Logto token.",

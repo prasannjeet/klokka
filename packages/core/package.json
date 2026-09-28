@@ -1,6 +1,6 @@
 {
   "name": "@klokka/core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Klokka's platform-neutral core: the typed sv/en string catalogue (JSON, also read by the API), hours parsing and rounding, month and week geometry, and Intl formatters.",

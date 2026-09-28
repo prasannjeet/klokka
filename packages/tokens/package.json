@@ -1,6 +1,6 @@
 {
   "name": "@klokka/tokens",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Klokka design tokens (Nightshift, light and dark): a TypeScript source with hex colours for React Native and a generated theme.css (CSS variables + Tailwind v4 @theme) for the web.",

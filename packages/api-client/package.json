@@ -1,6 +1,6 @@
 {
   "name": "@klokka/api-client",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "The ONE TypeScript client for the Klokka API, generated (typescript-fetch) from apps/api/contract/src/main/openapi/openapi.yaml and committed. Web calls it through the BFF, mobile with a bearer token.",

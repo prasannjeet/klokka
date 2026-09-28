@@ -5,7 +5,7 @@
 
     <groupId>com.prasannjeet.klokka</groupId>
     <artifactId>klokka-api-parent</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>Klokka API (parent)</name>
     <description>Klokka: the contract module (OpenAPI + generated server interfaces and models) and the Quarkus service.</description>

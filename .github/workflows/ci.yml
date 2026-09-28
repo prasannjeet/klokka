@@ -399,6 +399,8 @@ jobs:
           --include-workspace-root --no-audit --no-fund
 
       # jest's default of one worker per core starves the shared host (tax-agent's measured 5 s timeouts).
+      - name: Typecheck (a wrong catalogue key would otherwise reach a phone as a runtime error)
+        run: npm run typecheck -w apps/mobile
       - name: Test
         run: npm test -w apps/mobile -- --maxWorkers=4
 
