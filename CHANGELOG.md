@@ -2,6 +2,13 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.0.2, 2026-09-28
+
+### Fixed
+- The production APK carried staging URLs: Metro's transform cache, shared across jobs on the build host, does not key
+  on `EXPO_PUBLIC_*` values. APK builds now use a job-local cache and fail unless the bundle contains the values
+  the job set.
+
 ## 1.0.1, 2026-09-28
 
 First production release build.
