@@ -720,6 +720,79 @@
       "hint_one": "You belong to {count} workspace. Switch any time from Profile.",
       "hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
       "rolesHint": "Roles are per workspace. An employer who also works for someone sees both here."
+    },
+    "employees": {
+      "joined": "Joined {when}"
+    },
+    "members": {
+      "removeConfirm": "Remove {name} from {workspace}? Their hours stay in the history.",
+      "deactivated": "{name} is deactivated.",
+      "reactivated": "{name} is active again.",
+      "removed": "{name} was removed.",
+      "rateSaved": "Rate saved.",
+      "rateLabel": "Hourly rate for {name}"
+    },
+    "entry": {
+      "sheetTitleDate": "{name}, {date}",
+      "remove": "Remove entry",
+      "saved": "Saved {hours} for {name}.",
+      "removed": "Entry removed."
+    },
+    "day": {
+      "editHours": "Edit hours",
+      "noEntry": "Nothing logged this day."
+    },
+    "month": {
+      "unlocked": "{month} is open for edits again.",
+      "exported": "CSV ready to share."
+    },
+    "settings": {
+      "account": "Account",
+      "editWorkspace": "Edit workspace",
+      "saved": "Saved."
+    },
+    "push": {
+      "title": "Know the moment your hours change",
+      "body": "Klokka sends a push when hours are added or changed, a flag is answered or a month is closed. Nothing else.",
+      "bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
+      "enable": "Turn on notifications",
+      "channelHours": "Hours",
+      "channelFlags": "Flags",
+      "channelWorkspace": "Workspace"
+    },
+    "flags": {
+      "sent": "Flag sent. {name} is notified.",
+      "messageRequired": "Write a short message."
+    },
+    "home": {
+      "yesterdayHours": "Yesterday {hours}",
+      "employerLine": "{name}, employer",
+      "tapPlus": "Tap a plus"
+    },
+    "week": {
+      "personPager": "People, one per page"
+    },
+    "workspace": {
+      "timezoneDevice": "Your phone says {timezone}.",
+      "emojiPick": "Pick an emoji",
+      "colourPick": "Pick a colour"
+    },
+    "share": {
+      "preparing": "Preparing the card"
+    },
+    "common": {
+      "confirm": "Confirm",
+      "edit": "Edit",
+      "done": "Done",
+      "thisWeek": "This week",
+      "hoursShort": "{hours} h"
+    },
+    "notifications": {
+      "openRow": "Open notification"
+    },
+    "invitation": {
+      "loading": "Checking the invitation",
+      "notFound": "This invitation link is not valid. Ask your employer to send a new one."
     }
   }
 }

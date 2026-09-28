@@ -214,3 +214,47 @@ export function linearGradientModule() {
       React.createElement(View, { style: props.style as object }, props.children as React.ReactNode),
   };
 }
+
+// expo-router outside a navigator: a recording router and empty params, overridable per test.
+export const routerState = {
+  pushes: [] as unknown[],
+  replaces: [] as unknown[],
+  backs: 0,
+  params: {} as Record<string, string>,
+};
+export function expoRouterModule() {
+  const React = require('react') as typeof import('react');
+  const router = {
+    push: (href: unknown) => {
+      routerState.pushes.push(href);
+    },
+    replace: (href: unknown) => {
+      routerState.replaces.push(href);
+    },
+    back: () => {
+      routerState.backs += 1;
+    },
+    navigate: (href: unknown) => {
+      routerState.pushes.push(href);
+    },
+    canGoBack: () => true,
+  };
+  return {
+    useRouter: () => router,
+    router,
+    useLocalSearchParams: () => routerState.params,
+    useGlobalSearchParams: () => routerState.params,
+    usePathname: () => '/',
+    useSegments: () => [],
+    useNavigation: () => ({ setOptions: () => undefined }),
+    Redirect: ({ href }: { href: unknown }) => {
+      routerState.replaces.push(href);
+      return null;
+    },
+    Link: ({ children }: { children: unknown }) => children,
+    Stack: () => null,
+    Tabs: () => null,
+    Slot: () => null,
+    useFocusEffect: (effect: () => void | (() => void)) => React.useEffect(effect, [effect]),
+  };
+}

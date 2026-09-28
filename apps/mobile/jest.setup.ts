@@ -27,3 +27,17 @@ process.env.EXPO_PUBLIC_API_BASE_URL = 'http://api.test/v1';
 process.env.EXPO_PUBLIC_LOGTO_ENDPOINT = 'https://logto.test';
 process.env.EXPO_PUBLIC_LOGTO_APP_ID = 'test-client';
 process.env.EXPO_PUBLIC_LOGTO_API_RESOURCE = 'https://api.klokka.app';
+jest.mock('expo-router', () => require('./src/testing/nativeMocks').expoRouterModule());
+jest.mock('expo-file-system', () => ({
+  Paths: { cache: 'file:///cache/' },
+  File: class {
+    uri: string;
+    constructor(dir: string, name: string) {
+      this.uri = `${dir}${name}`;
+    }
+    write() {
+      return undefined;
+    }
+  },
+}));
+jest.mock('expo-system-ui', () => ({ setBackgroundColorAsync: async () => undefined }));
