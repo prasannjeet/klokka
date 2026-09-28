@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
-# Build and push one Klokka image as <registry>/klokka-<app>:<tag> and :latest. Used by
-# .github/workflows/ci.yml and ./release.sh, so both produce the same image.
+# Build and push one Klokka image as <registry>/klokka-<app>:<tag>, plus :latest for a staging build. Used by
+# .github/workflows/ci.yml and ./deploy-staging.sh (staging, tag sha-<short>) and by .github/workflows/release.yml
+# (production, tag v<version>). A v* tag never moves :latest: production runs exactly the version it names.
 #
 #   image.sh <api|web|landing> <tag>
 #
 # api:          the Dockerfile copies the fast-jar, so run `mvn -f apps/api/pom.xml install` first; context apps/api.
 # web, landing: multi-stage apps/<app>/Dockerfile with the repository root as context (npm workspaces).
 # The landing bakes its public URLs at build time (NEXT_PUBLIC_*), so they are build arguments; the defaults are
-# staging's. The caller must already be logged in to the registry.
+# staging's. KLOKKA_BUILD_VERSION overrides the API's reported version (release.yml passes the tag's version).
+# The caller must already be logged in to the registry.
 set -euo pipefail
 
 if [ $# -ne 2 ]; then echo "usage: $0 <api|web|landing> <tag>" >&2; exit 2; fi
@@ -26,7 +28,7 @@ case "$app" in
     context=apps/api
     # /operator/health shows this as the running version.
     pom_version=$(sed -n 's:.*<version>\(.*\)</version>.*:\1:p' apps/api/pom.xml | head -1)
-    build_args=(--build-arg "KLOKKA_BUILD_VERSION=${pom_version%-SNAPSHOT}-$(git rev-parse --short=7 HEAD)")
+    build_args=(--build-arg "KLOKKA_BUILD_VERSION=${KLOKKA_BUILD_VERSION:-${pom_version%-SNAPSHOT}-$(git rev-parse --short=7 HEAD)}")
     [ -d apps/api/service/target/quarkus-app ] ||
       { echo "apps/api/service/target/quarkus-app is missing: run mvn -f apps/api/pom.xml install first" >&2; exit 1; }
     ;;
@@ -50,10 +52,13 @@ docker build --pull -f "$dockerfile" "${build_args[@]}" \
   --label "org.opencontainers.image.source=https://github.com/prasannjeet/klokka" \
   --label "org.opencontainers.image.revision=$revision" \
   --label "klokka.app=$app" \
-  -t "$image:$tag" -t "$image:latest" "$context"
+  -t "$image:$tag" "$context"
 docker push "$image:$tag"
-docker push "$image:latest"
-echo "pushed $image:$tag (and :latest)"
+if [[ $tag != v* ]]; then
+  docker tag "$image:$tag" "$image:latest"
+  docker push "$image:latest"
+fi
+echo "pushed $image:$tag"
 
 # Keep the build host's disk in check: drop the immutable tag locally (it lives in Nexus) and the previous
 # build of this app that the new :latest left dangling. Only images labelled by this script are touched.

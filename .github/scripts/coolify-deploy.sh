@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Deploy one immutable image tag to a Klokka app on STAGING Coolify, wait for the deployment to finish and,
-# optionally, for a health URL to answer. Used by .github/workflows/ci.yml and by ./release.sh.
+# optionally, for a health URL to answer. Used by .github/workflows/ci.yml and by ./deploy-staging.sh.
 #
 #   coolify-deploy.sh <app-uuid> <image-tag> [health-url]
 #

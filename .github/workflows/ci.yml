@@ -2,8 +2,8 @@ name: CI
 
 # A push to main builds and tests what changed, publishes the API contract to Nexus, pushes immutable images and
 # deploys STAGING through the Coolify API, and builds, signs and publishes the Android release APK
-# (docs/DECISIONS.md D13, docs/DEPLOYMENT.md "CI/CD"). Nothing here can deploy production: that is a later v*-tag
-# path (~/.agents/production-deploys.md), and the deploy script refuses any Coolify but staging's.
+# (docs/DECISIONS.md D13, docs/DEPLOYMENT.md "CI/CD"). Nothing here builds or deploys production: a v* tag runs
+# release.yml instead (docs/RELEASING.md), and the deploy script refuses any Coolify but staging's.
 #
 # Runners: the two self-hosted `build` runners on the dev host (klokka-01, klokka-02). Always ask for the LABEL,
 # never bare `self-hosted`. The jobs are path-filtered and independent so both runners stay busy; each job group
@@ -30,10 +30,11 @@ env:
   DOWNLOADS_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads
   # Uploads go over the LAN straight to Nexus (the runners sit on it): the public proxy cuts large uploads at 60 s.
   DOWNLOADS_UPLOAD_URL: http://192.168.0.4:8081/repository/klokka-downloads
-  # Public staging URLs. The landing bakes them at build time; the web app reads its runtime env from Coolify.
-  NEXT_PUBLIC_APP_URL: https://klokka-app.coolify.ooguy.com
-  NEXT_PUBLIC_SITE_URL: https://klokka.coolify.ooguy.com
-  NEXT_PUBLIC_APK_URL: https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk
+  # Public staging URLs (repository variables STAGING_*; production's PROD_* are read only by release.yml). The
+  # landing bakes them at build time; the web app reads its runtime env from Coolify.
+  NEXT_PUBLIC_APP_URL: ${{ vars.STAGING_APP_URL }}
+  NEXT_PUBLIC_SITE_URL: ${{ vars.STAGING_SITE_URL }}
+  NEXT_PUBLIC_APK_URL: ${{ vars.STAGING_APK_URL }}
 
 jobs:
   changes:
@@ -112,7 +113,7 @@ jobs:
       group: ci-api-${{ github.ref }}
       cancel-in-progress: true
     env:
-      HEALTH_URL: https://klokka-api.coolify.ooguy.com/q/health/ready
+      HEALTH_URL: ${{ vars.STAGING_API_URL }}/q/health/ready
     steps:
       - uses: actions/checkout@v6
 
@@ -245,7 +246,7 @@ jobs:
       group: ci-web-${{ github.ref }}
       cancel-in-progress: true
     env:
-      HEALTH_URL: https://klokka-app.coolify.ooguy.com/healthz
+      HEALTH_URL: ${{ vars.STAGING_APP_URL }}/healthz
     steps:
       - uses: actions/checkout@v6
 
@@ -306,7 +307,7 @@ jobs:
       group: ci-landing-${{ github.ref }}
       cancel-in-progress: true
     env:
-      HEALTH_URL: https://klokka.coolify.ooguy.com/
+      HEALTH_URL: ${{ vars.STAGING_SITE_URL }}/
     steps:
       - uses: actions/checkout@v6
 
@@ -370,10 +371,10 @@ jobs:
       ANDROID_HOME: /home/dev/Android/Sdk
       ANDROID_SDK_ROOT: /home/dev/Android/Sdk
       # Read at bundle time and baked into the release APK: staging values, all public identifiers.
-      EXPO_PUBLIC_API_BASE_URL: https://klokka-api.coolify.ooguy.com/v1
-      EXPO_PUBLIC_LOGTO_ENDPOINT: https://klokka-logto.coolify.ooguy.com
-      EXPO_PUBLIC_LOGTO_APP_ID: 1uhtt4uj8f0aevtgf6g3b
-      EXPO_PUBLIC_LOGTO_API_RESOURCE: https://api.klokka.app
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.STAGING_API_URL }}/v1
+      EXPO_PUBLIC_LOGTO_ENDPOINT: ${{ vars.STAGING_LOGTO_ENDPOINT }}
+      EXPO_PUBLIC_LOGTO_APP_ID: ${{ vars.STAGING_LOGTO_APP_ID }}
+      EXPO_PUBLIC_LOGTO_API_RESOURCE: ${{ vars.STAGING_API_RESOURCE }}
       EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
       APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
     steps:
