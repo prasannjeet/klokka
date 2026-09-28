@@ -233,6 +233,57 @@ export const sv = {
   "invitation.wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
   "invitation.youHaveBeenInvited": "Du har bjudits in av {workspace}",
   "invitation.yourEmail": "Din e-post",
+  "mobile.auth.signInFailed": "Inloggningen gick inte igenom. Försök igen.",
+  "mobile.chooseWorkspace.hint_one": "Du tillhör {count} arbetsplats. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.hint_other": "Du tillhör {count} arbetsplatser. Byt när som helst från Profil.",
+  "mobile.chooseWorkspace.rolesHint": "Roller gäller per arbetsplats. En arbetsgivare som också jobbar åt någon ser båda här.",
+  "mobile.common.confirm": "Bekräfta",
+  "mobile.common.done": "Klar",
+  "mobile.common.edit": "Ändra",
+  "mobile.common.hoursShort": "{hours} h",
+  "mobile.common.thisWeek": "Den här veckan",
+  "mobile.day.editHours": "Ändra timmar",
+  "mobile.day.noEntry": "Inget registrerat den här dagen.",
+  "mobile.employees.joined": "Började {when}",
+  "mobile.entry.remove": "Ta bort registrering",
+  "mobile.entry.removed": "Registreringen togs bort.",
+  "mobile.entry.saved": "Sparade {hours} för {name}.",
+  "mobile.entry.sheetTitleDate": "{name}, {date}",
+  "mobile.flags.messageRequired": "Skriv ett kort meddelande.",
+  "mobile.flags.sent": "Flaggan är skickad. {name} har fått en notis.",
+  "mobile.home.employerLine": "{name}, arbetsgivare",
+  "mobile.home.tapPlus": "Tryck på ett plus",
+  "mobile.home.yesterdayHours": "I går {hours}",
+  "mobile.invitation.loading": "Kontrollerar inbjudan",
+  "mobile.invitation.notFound": "Länken till inbjudan är inte giltig. Be din arbetsgivare skicka en ny.",
+  "mobile.members.deactivated": "{name} är inaktiverad.",
+  "mobile.members.rateLabel": "Timlön för {name}",
+  "mobile.members.rateSaved": "Timlön sparad.",
+  "mobile.members.reactivated": "{name} är aktiv igen.",
+  "mobile.members.removeConfirm": "Ta bort {name} från {workspace}? Timmarna finns kvar i historiken.",
+  "mobile.members.removed": "{name} togs bort.",
+  "mobile.month.exported": "CSV klar att dela.",
+  "mobile.month.unlocked": "{month} är öppen för ändringar igen.",
+  "mobile.noWorkspaces.body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa en arbetsplats här.",
+  "mobile.noWorkspaces.title": "Ingen arbetsplats än",
+  "mobile.notifications.openRow": "Öppna notis",
+  "mobile.push.body": "Klokka skickar en push när timmar läggs till eller ändras, en flagga besvaras eller en månad stängs. Inget annat.",
+  "mobile.push.bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
+  "mobile.push.channelFlags": "Flaggor",
+  "mobile.push.channelHours": "Timmar",
+  "mobile.push.channelWorkspace": "Arbetsplats",
+  "mobile.push.enable": "Slå på notiser",
+  "mobile.push.title": "Få veta direkt när dina timmar ändras",
+  "mobile.settings.account": "Konto",
+  "mobile.settings.editWorkspace": "Ändra arbetsplats",
+  "mobile.settings.saved": "Sparat.",
+  "mobile.share.preparing": "Förbereder kortet",
+  "mobile.week.personPager": "Personer, en per sida",
+  "mobile.welcome.taglineA": "En klocka.",
+  "mobile.welcome.taglineB": "Båda sidor.",
+  "mobile.workspace.colourPick": "Välj en färg",
+  "mobile.workspace.emojiPick": "Välj en emoji",
+  "mobile.workspace.timezoneDevice": "Din telefon säger {timezone}.",
   "month.avgPerWorkingDay": "Snitt per arbetsdag",
   "month.avgPerWorkingDayShort": "{hours} per arbetsdag",
   "month.bestWeek": "Bästa veckan",
@@ -865,6 +916,57 @@ export const en = {
   "invitation.wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
   "invitation.youHaveBeenInvited": "You have been invited by {workspace}",
   "invitation.yourEmail": "Your email",
+  "mobile.auth.signInFailed": "Sign-in did not go through. Try again.",
+  "mobile.chooseWorkspace.hint_one": "You belong to {count} workspace. Switch any time from Profile.",
+  "mobile.chooseWorkspace.hint_other": "You belong to {count} workspaces. Switch any time from Profile.",
+  "mobile.chooseWorkspace.rolesHint": "Roles are per workspace. An employer who also works for someone sees both here.",
+  "mobile.common.confirm": "Confirm",
+  "mobile.common.done": "Done",
+  "mobile.common.edit": "Edit",
+  "mobile.common.hoursShort": "{hours} h",
+  "mobile.common.thisWeek": "This week",
+  "mobile.day.editHours": "Edit hours",
+  "mobile.day.noEntry": "Nothing logged this day.",
+  "mobile.employees.joined": "Joined {when}",
+  "mobile.entry.remove": "Remove entry",
+  "mobile.entry.removed": "Entry removed.",
+  "mobile.entry.saved": "Saved {hours} for {name}.",
+  "mobile.entry.sheetTitleDate": "{name}, {date}",
+  "mobile.flags.messageRequired": "Write a short message.",
+  "mobile.flags.sent": "Flag sent. {name} is notified.",
+  "mobile.home.employerLine": "{name}, employer",
+  "mobile.home.tapPlus": "Tap a plus",
+  "mobile.home.yesterdayHours": "Yesterday {hours}",
+  "mobile.invitation.loading": "Checking the invitation",
+  "mobile.invitation.notFound": "This invitation link is not valid. Ask your employer to send a new one.",
+  "mobile.members.deactivated": "{name} is deactivated.",
+  "mobile.members.rateLabel": "Hourly rate for {name}",
+  "mobile.members.rateSaved": "Rate saved.",
+  "mobile.members.reactivated": "{name} is active again.",
+  "mobile.members.removeConfirm": "Remove {name} from {workspace}? Their hours stay in the history.",
+  "mobile.members.removed": "{name} was removed.",
+  "mobile.month.exported": "CSV ready to share.",
+  "mobile.month.unlocked": "{month} is open for edits again.",
+  "mobile.noWorkspaces.body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create a workspace here.",
+  "mobile.noWorkspaces.title": "No workspace yet",
+  "mobile.notifications.openRow": "Open notification",
+  "mobile.push.body": "Klokka sends a push when hours are added or changed, a flag is answered or a month is closed. Nothing else.",
+  "mobile.push.bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
+  "mobile.push.channelFlags": "Flags",
+  "mobile.push.channelHours": "Hours",
+  "mobile.push.channelWorkspace": "Workspace",
+  "mobile.push.enable": "Turn on notifications",
+  "mobile.push.title": "Know the moment your hours change",
+  "mobile.settings.account": "Account",
+  "mobile.settings.editWorkspace": "Edit workspace",
+  "mobile.settings.saved": "Saved.",
+  "mobile.share.preparing": "Preparing the card",
+  "mobile.week.personPager": "People, one per page",
+  "mobile.welcome.taglineA": "One clock.",
+  "mobile.welcome.taglineB": "Both sides.",
+  "mobile.workspace.colourPick": "Pick a colour",
+  "mobile.workspace.emojiPick": "Pick an emoji",
+  "mobile.workspace.timezoneDevice": "Your phone says {timezone}.",
   "month.avgPerWorkingDay": "Average per working day",
   "month.avgPerWorkingDayShort": "{hours} per working day",
   "month.bestWeek": "Best week",
@@ -1493,6 +1595,56 @@ export type MessageParams = {
   "invitation.wrongAccount": { email: string | number };
   "invitation.youHaveBeenInvited": { workspace: string | number };
   "invitation.yourEmail": Record<never, never>;
+  "mobile.auth.signInFailed": Record<never, never>;
+  "mobile.chooseWorkspace.hint": { count: string | number };
+  "mobile.chooseWorkspace.rolesHint": Record<never, never>;
+  "mobile.common.confirm": Record<never, never>;
+  "mobile.common.done": Record<never, never>;
+  "mobile.common.edit": Record<never, never>;
+  "mobile.common.hoursShort": { hours: string | number };
+  "mobile.common.thisWeek": Record<never, never>;
+  "mobile.day.editHours": Record<never, never>;
+  "mobile.day.noEntry": Record<never, never>;
+  "mobile.employees.joined": { when: string | number };
+  "mobile.entry.remove": Record<never, never>;
+  "mobile.entry.removed": Record<never, never>;
+  "mobile.entry.saved": { hours: string | number; name: string | number };
+  "mobile.entry.sheetTitleDate": { date: string | number; name: string | number };
+  "mobile.flags.messageRequired": Record<never, never>;
+  "mobile.flags.sent": { name: string | number };
+  "mobile.home.employerLine": { name: string | number };
+  "mobile.home.tapPlus": Record<never, never>;
+  "mobile.home.yesterdayHours": { hours: string | number };
+  "mobile.invitation.loading": Record<never, never>;
+  "mobile.invitation.notFound": Record<never, never>;
+  "mobile.members.deactivated": { name: string | number };
+  "mobile.members.rateLabel": { name: string | number };
+  "mobile.members.rateSaved": Record<never, never>;
+  "mobile.members.reactivated": { name: string | number };
+  "mobile.members.removeConfirm": { name: string | number; workspace: string | number };
+  "mobile.members.removed": { name: string | number };
+  "mobile.month.exported": Record<never, never>;
+  "mobile.month.unlocked": { month: string | number };
+  "mobile.noWorkspaces.body": Record<never, never>;
+  "mobile.noWorkspaces.title": Record<never, never>;
+  "mobile.notifications.openRow": Record<never, never>;
+  "mobile.push.body": Record<never, never>;
+  "mobile.push.bodyEmployer": Record<never, never>;
+  "mobile.push.channelFlags": Record<never, never>;
+  "mobile.push.channelHours": Record<never, never>;
+  "mobile.push.channelWorkspace": Record<never, never>;
+  "mobile.push.enable": Record<never, never>;
+  "mobile.push.title": Record<never, never>;
+  "mobile.settings.account": Record<never, never>;
+  "mobile.settings.editWorkspace": Record<never, never>;
+  "mobile.settings.saved": Record<never, never>;
+  "mobile.share.preparing": Record<never, never>;
+  "mobile.week.personPager": Record<never, never>;
+  "mobile.welcome.taglineA": Record<never, never>;
+  "mobile.welcome.taglineB": Record<never, never>;
+  "mobile.workspace.colourPick": Record<never, never>;
+  "mobile.workspace.emojiPick": Record<never, never>;
+  "mobile.workspace.timezoneDevice": { timezone: string | number };
   "month.avgPerWorkingDay": Record<never, never>;
   "month.avgPerWorkingDayShort": { hours: string | number };
   "month.bestWeek": Record<never, never>;
@@ -1892,6 +2044,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "entry.editedTimes",
   "flags.openFlags",
   "insights.streakDays",
+  "mobile.chooseWorkspace.hint",
   "month.daysNewestFirst",
   "month.workingDays",
   "nav.notificationsUnread",
