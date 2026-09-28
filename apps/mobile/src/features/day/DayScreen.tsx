@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import type { Entry, FlagReason } from '@klokka/api-client';
 import {
   formatDate,
   formatHours,
@@ -8,14 +10,16 @@ import {
   formatTime,
   isoWeek,
   type IsoDate,
+  type MessageKey,
 } from '@klokka/core';
-import { useEntries, useEntryHistory, useWorkspace } from '@/data/workspace';
+import { useEntries, useEntryHistory, useFlag, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText, Avatar, Button, Card, EmptyState, Header, Numeral, Pill, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
 import { FlagSheet, type FlagSheetHandle } from '@/features/flags/FlagSheet';
+import { toIsoDate } from '@/lib/dates';
 import { HistoryList } from './HistoryList';
 
 const styles = (t: Theme) =>
@@ -86,7 +90,7 @@ function DayScreenInner({
                 />
               ) : null}
               {entry.flag?.status === 'OPEN' ? (
-                <Pill label={t('status.open')} tone="warning" icon="flag" />
+                <Pill label={t('status.open')} tone="danger" icon="flag" />
               ) : null}
               {entry.locked ? <Pill label={t('status.monthClosed')} icon="lock" /> : null}
             </View>
@@ -106,6 +110,9 @@ function DayScreenInner({
                 </View>
                 <AppText variant="lead">{`"${entry.note}"`}</AppText>
               </Card>
+            ) : null}
+            {employer && entry.flag?.status === 'OPEN' ? (
+              <OpenFlagCard workspace={workspace} entry={entry} flagId={entry.flag.id} />
             ) : null}
             <View>
               <AppText variant="eyebrow" tone="accent">
@@ -162,6 +169,59 @@ function DayScreenInner({
         />
       )}
     </>
+  );
+}
+
+const REASON: Record<FlagReason, MessageKey> = {
+  MORE: 'flags.reasonMoreShort',
+  LESS: 'flags.reasonLessShort',
+  NOT_IN: 'flags.reasonNotInShort',
+};
+
+// The employee's open flag on the employer's day (CHQ-145, the web's day panel): why, what they say,
+// their message and when, and the way to resolve it.
+function OpenFlagCard({
+  workspace,
+  entry,
+  flagId,
+}: {
+  workspace: WorkspaceProps['workspace'];
+  entry: Entry;
+  flagId: string;
+}) {
+  const t = useT();
+  const locale = useLocale();
+  const theme = useTheme();
+  const router = useRouter();
+  const flag = useFlag(workspace.workspaceId, flagId);
+  if (!flag.data) return null;
+  const f = flag.data;
+  const first = f.memberName.split(' ')[0] ?? f.memberName;
+  return (
+    <Card style={{ backgroundColor: theme.color.dangerSoft, gap: theme.space[2] }} testID="day-open-flag">
+      <AppText weight={700} tone="danger">
+        {t('flags.flagFrom', { name: first })}
+      </AppText>
+      <AppText variant="small">
+        {t(REASON[f.reason])}
+        {f.suggestedHours != null
+          ? `. ${t('flags.says', { name: first })} ${formatHours(f.suggestedHours, locale)}`
+          : ''}
+      </AppText>
+      {f.message ? <AppText variant="lead">{`"${f.message}"`}</AppText> : null}
+      <AppText variant="caption" tone="muted">
+        {t('flags.raised', {
+          when: `${formatDate(toIsoDate(f.raisedAt), locale, 'weekdayDay')}, ${formatTime(f.raisedAt.toISOString(), locale, workspace.timezone)}`,
+        })}
+      </AppText>
+      <Button
+        label={t('flags.resolveFlag')}
+        icon="flag"
+        disabled={entry.locked}
+        onPress={() => router.push({ pathname: '/flag/[flagId]', params: { flagId } })}
+        testID="day-resolve-flag"
+      />
+    </Card>
   );
 }
 

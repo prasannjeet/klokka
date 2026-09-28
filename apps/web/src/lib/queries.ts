@@ -20,6 +20,7 @@ export const keys = {
   memberInsights: (id: string, membershipId: string, month: IsoMonth) =>
     ['member-insights', id, membershipId, month] as const,
   flags: (id: string, status: FlagStatus | 'ALL') => ['flags', id, status] as const,
+  flag: (id: string, flagId: string) => ['flags', id, 'one', flagId] as const,
   history: (id: string, entryId: string) => ['history', id, entryId] as const,
   notifications: (workspaceId: string, unreadOnly: boolean) =>
     ['notifications', workspaceId, unreadOnly] as const,
@@ -110,6 +111,15 @@ export function useFlags(workspaceId: string, status: FlagStatus | 'ALL') {
   return useQuery({
     queryKey: keys.flags(workspaceId, status),
     queryFn: () => api.flags.listFlags({ workspaceId, ...(status === 'ALL' ? {} : { status }) }),
+  });
+}
+
+// One flag with its message and when it was raised (the Employee view's day panel, CHQ-145).
+export function useFlag(workspaceId: string, flagId: string | null) {
+  return useQuery({
+    queryKey: keys.flag(workspaceId, flagId ?? ''),
+    queryFn: () => api.flags.getFlag({ workspaceId, flagId: flagId ?? '' }),
+    enabled: flagId !== null,
   });
 }
 

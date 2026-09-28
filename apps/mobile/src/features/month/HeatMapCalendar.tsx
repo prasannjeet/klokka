@@ -36,13 +36,13 @@ const styles = (t: Theme) =>
     dot: { position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3 },
   });
 
-// Six fill steps from the surface to the primary, chosen by hours relative to the month's busiest day.
+// Six fill steps, chosen by hours relative to the month's busiest day.
 export function intensityOf(hours: number, max: number): number {
   if (hours <= 0 || max <= 0) return 0;
   return Math.max(1, Math.min(5, Math.ceil((hours / max) * 5)));
 }
 
-function mixHex(a: string, b: string, ratio: number): string {
+export function mixHex(a: string, b: string, ratio: number): string {
   const p = (hex: string) => [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16));
   const [r1, g1, b1] = p(a) as [number, number, number];
   const [r2, g2, b2] = p(b) as [number, number, number];
@@ -51,6 +51,23 @@ function mixHex(a: string, b: string, ratio: number): string {
       .toString(16)
       .padStart(2, '0');
   return `#${mix(r1, r2)}${mix(g1, g2)}${mix(b1, b2)}`;
+}
+
+// Days with hours are tinted green by how full they are and a flagged day red (CHQ-145, the same as the
+// web): the success and danger tokens at low strength over the cell, so the numbers keep the text colour
+// and their contrast in both modes.
+export const HEAT_STRENGTH = [0.16, 0.24, 0.32, 0.4, 0.48] as const;
+export const FLAG_STRENGTH = 0.3;
+
+export function heatFills(theme: Theme): string[] {
+  return [
+    theme.color.surface2,
+    ...HEAT_STRENGTH.map((r) => mixHex(theme.color.surface2, theme.color.success, r)),
+  ];
+}
+
+export function flagFill(theme: Theme): string {
+  return mixHex(theme.color.surface2, theme.color.danger, FLAG_STRENGTH);
 }
 
 export interface HeatMapCalendarProps {
@@ -79,13 +96,8 @@ export function HeatMapCalendar({
   const weeks = useMemo(() => weeksOf(month, weekStart), [month, weekStart]);
   const byDate = useMemo(() => new Map(days.map((d) => [toIsoDate(d.date), d])), [days]);
   const max = useMemo(() => days.reduce((m, d) => Math.max(m, d.hours ?? 0), 0), [days]);
-  const fills = useMemo(
-    () => [
-      theme.color.surface2,
-      ...[0.3, 0.5, 0.7, 0.85, 1].map((r) => mixHex(theme.color.surface2, theme.color.primary, r)),
-    ],
-    [theme],
-  );
+  const fills = useMemo(() => heatFills(theme), [theme]);
+  const flagged = useMemo(() => flagFill(theme), [theme]);
   const order = weekdayOrder(weekStart);
   return (
     <View style={s.grid} accessibilityLabel={accessibilityLabel} testID="heat-map">
@@ -105,8 +117,9 @@ export function HeatMapCalendar({
             const day = byDate.get(cell.date);
             const hours = day?.hours ?? 0;
             const level = intensityOf(hours, max);
-            const fill = fills[level] as string;
-            const onFill = level >= 3 ? theme.color.onPrimary : theme.color.text;
+            const isFlagged = day?.flag?.status === 'OPEN';
+            const fill = isFlagged ? flagged : (fills[level] as string);
+            const onFill = theme.color.text;
             const isToday = cell.date === today;
             const label = `${cell.date}, ${hours > 0 ? formatHours(hours, locale) : t('entry.nothingYet')}${day?.flag?.status === 'OPEN' ? `, ${t('month.flag')}` : ''}`;
             return (
@@ -121,7 +134,7 @@ export function HeatMapCalendar({
                 style={[
                   s.cell,
                   s.line,
-                  { backgroundColor: hours > 0 ? fill : 'transparent' },
+                  { backgroundColor: hours > 0 || isFlagged ? fill : 'transparent' },
                   isToday ? s.today : null,
                 ]}
                 testID={`cell-${cell.date}`}
@@ -138,9 +151,7 @@ export function HeatMapCalendar({
                     {formatHours(hours, locale, { unit: false })}
                   </AppText>
                 ) : null}
-                {day?.flag?.status === 'OPEN' ? (
-                  <View style={[s.dot, { backgroundColor: theme.color.warning }]} />
-                ) : null}
+                {isFlagged ? <View style={[s.dot, { backgroundColor: theme.color.danger }]} /> : null}
               </AppPressable>
             );
           })}

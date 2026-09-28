@@ -190,8 +190,12 @@ export const sv = {
   "flags.openInGrid": "Öppna i rutnätet",
   "flags.raised": "Skickad {when}",
   "flags.reasonLess": "Jag jobbade mindre",
+  "flags.reasonLessShort": "Jobbade mindre än loggat",
   "flags.reasonMore": "Jag jobbade mer",
+  "flags.reasonMoreShort": "Jobbade mer än loggat",
   "flags.reasonNotIn": "Jag var inte där",
+  "flags.reasonNotInShort": "Var inte där den dagen",
+  "flags.resolveFlag": "Hantera flaggan",
   "flags.resolvedDismissed": "Åtgärdad: du behöll {hours}.",
   "flags.resolvedFixed": "Åtgärdad: du ändrade {before} till {after}.",
   "flags.says": "{name} säger",
@@ -1091,8 +1095,12 @@ export const en = {
   "flags.openInGrid": "Open in the grid",
   "flags.raised": "Raised {when}",
   "flags.reasonLess": "I worked less",
+  "flags.reasonLessShort": "Worked less than logged",
   "flags.reasonMore": "I worked more",
+  "flags.reasonMoreShort": "Worked more than logged",
   "flags.reasonNotIn": "I was not in",
+  "flags.reasonNotInShort": "Was not in that day",
+  "flags.resolveFlag": "Resolve the flag",
   "flags.resolvedDismissed": "Resolved: you kept {hours}.",
   "flags.resolvedFixed": "Resolved: you changed {before} to {after}.",
   "flags.says": "{name} says",
@@ -1989,8 +1997,12 @@ export type MessageParams = {
   "flags.openInGrid": Record<never, never>;
   "flags.raised": { when: string | number };
   "flags.reasonLess": Record<never, never>;
+  "flags.reasonLessShort": Record<never, never>;
   "flags.reasonMore": Record<never, never>;
+  "flags.reasonMoreShort": Record<never, never>;
   "flags.reasonNotIn": Record<never, never>;
+  "flags.reasonNotInShort": Record<never, never>;
+  "flags.resolveFlag": Record<never, never>;
   "flags.resolvedDismissed": { hours: string | number };
   "flags.resolvedFixed": { after: string | number; before: string | number };
   "flags.says": { name: string | number };

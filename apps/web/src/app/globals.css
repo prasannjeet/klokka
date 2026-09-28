@@ -1915,24 +1915,30 @@
     font-size: clamp(12px, 1.3vw, 16px);
     line-height: 1;
   }
+  /* Days with hours are tinted green by how full they are, a flagged day red (CHQ-145): the success and
+     danger tokens at low alpha over the cell, so the text keeps its own colour and its contrast. */
   .cal .d[data-l='1'] {
-    background: color-mix(in srgb, var(--primary) 28%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 16%, var(--surface-2));
   }
   .cal .d[data-l='2'] {
-    background: color-mix(in srgb, var(--primary) 52%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 24%, var(--surface-2));
   }
   .cal .d[data-l='3'] {
-    background: color-mix(in srgb, var(--primary) 78%, var(--surface-2));
-    color: var(--on-primary);
+    background: color-mix(in srgb, var(--success) 32%, var(--surface-2));
   }
   .cal .d[data-l='4'] {
-    background: var(--primary);
-    color: var(--on-primary);
+    background: color-mix(in srgb, var(--success) 40%, var(--surface-2));
   }
+  .cal .d[data-l='1'] .n,
+  .cal .d[data-l='2'] .n,
   .cal .d[data-l='3'] .n,
   .cal .d[data-l='4'] .n {
     color: inherit;
     opacity: 0.75;
+  }
+  .cal .d.flag,
+  .cal .d.flag.future {
+    background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
   }
   .cal .d.today {
     box-shadow: inset 0 0 0 2px var(--rule);
@@ -1955,7 +1961,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
     box-shadow: 0 0 0 2px var(--surface);
   }
   .cal .d.note::before {
@@ -1990,16 +1996,16 @@
     background: var(--surface-2);
   }
   .cal-legend i[data-l='1'] {
-    background: color-mix(in srgb, var(--primary) 28%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 16%, var(--surface-2));
   }
   .cal-legend i[data-l='2'] {
-    background: color-mix(in srgb, var(--primary) 52%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 24%, var(--surface-2));
   }
   .cal-legend i[data-l='3'] {
-    background: color-mix(in srgb, var(--primary) 78%, var(--surface-2));
+    background: color-mix(in srgb, var(--success) 32%, var(--surface-2));
   }
   .cal-legend i[data-l='4'] {
-    background: var(--primary);
+    background: color-mix(in srgb, var(--success) 40%, var(--surface-2));
   }
   .cal-legend .flagdot {
     margin-left: auto;
@@ -2008,10 +2014,21 @@
     align-items: center;
   }
   .cal-legend .flagdot i {
-    width: 8px;
-    height: 8px;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
+    position: relative;
+  }
+  .cal-legend .flagdot i::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
   }
 
   /* ---- a clean list of days (CHQ-145): the employee's week, the employer's day list ---- */
@@ -2542,6 +2559,9 @@
     box-shadow: inset 0 0 0 2px var(--focus);
     background: var(--bg);
   }
+  .wg .cell.has {
+    background: color-mix(in srgb, var(--success) 20%, var(--surface));
+  }
   .wg .cell.dirty {
     background: color-mix(in srgb, var(--primary) 16%, var(--surface));
   }
@@ -2568,7 +2588,8 @@
     pointer-events: none;
   }
   .wg .cell.flagged {
-    box-shadow: inset 0 0 0 2px var(--warning);
+    background: color-mix(in srgb, var(--danger) 22%, var(--surface));
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 70%, transparent);
   }
   .wg .cell.flagged::after {
     content: '';
@@ -2578,7 +2599,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--danger);
     pointer-events: none;
   }
   .wg .cell.error {
@@ -3033,14 +3054,22 @@
     gap: 6px;
     padding: 12px 14px;
     border-radius: var(--radius-md);
-    background: var(--warning-soft);
-    color: var(--warning);
+    background: var(--danger-soft);
+    color: var(--text);
     font-size: 13.5px;
   }
   .dd .flag-open b {
     display: flex;
     align-items: center;
     gap: 6px;
+    color: var(--danger);
+  }
+  .dd .flag-open .when {
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+  .dd .flag-open .acts {
+    padding-top: 2px;
   }
   .dd .flag-open .icon {
     width: 16px;
