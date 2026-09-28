@@ -15,3 +15,8 @@ packages/tokens/dist/
 .codex/
 .vscode/
 CLAUDE.md
+**/next-env.d.ts
+**/test-results/
+**/playwright-report/
+**/.next/
+**/dist/

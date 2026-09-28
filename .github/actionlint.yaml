@@ -1,0 +1,4 @@
+# actionlint config: the repository's self-hosted runners carry the `build` label (AGENTS.md "CI/CD").
+self-hosted-runner:
+  labels:
+    - build
