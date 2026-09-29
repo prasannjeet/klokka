@@ -230,6 +230,10 @@ jobs:
       - name: Generated outputs match their sources
         run: npm run check -w packages/core -w packages/tokens -w packages/api-client
 
+      # The Logto templates and the API's digest template are generated from the catalogue (CHQ-148).
+      - name: Email templates match the catalogue
+        run: npm run emails:check
+
       - name: Typecheck
         run: npm run typecheck -w packages/core -w packages/tokens -w packages/api-client
 

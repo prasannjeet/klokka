@@ -539,7 +539,10 @@
       "body": "{inviter} har lagt till dig som anställd på {workspace}. Varje timme hen loggar för dig kommer att synas i Klokka, dag för dag, månad för månad.",
       "action": "Acceptera inbjudan",
       "expires": "Länken fungerar till {date}.",
-      "footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det."
+      "footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
+      "title1": "{inviter} bjöd in dig.",
+      "title2": "Till {workspace}.",
+      "employer": "Arbetsgivare: {inviter}"
     },
     "digest": {
       "subject": "Din vecka {week} på {workspace}",
@@ -548,7 +551,58 @@
       "yourHours": "Dina timmar vecka {week}: {hours}",
       "teamHours": "Teamets timmar vecka {week}: {hours}",
       "monthSoFar": "{month} hittills: {hours}",
-      "unsubscribe": "Stäng av veckosammanfattningen under Inställningar."
+      "unsubscribe": "Stäng av veckosammanfattningen under Inställningar.",
+      "title1": "Vecka {week}.",
+      "title2_one": "{hours} timme.",
+      "title2_other": "{hours} timmar.",
+      "teamHoursLabel": "Teamets timmar vecka {week}",
+      "yourHoursLabel": "Dina timmar vecka {week}",
+      "monthSoFarLabel": "{month} hittills",
+      "dayOff": "ledig",
+      "action": "Öppna Klokka"
+    },
+    "common": {
+      "footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
+      "codeExpires": "Koden gäller i 10 minuter.",
+      "codeLabel": "Din kod"
+    },
+    "register": {
+      "subject": "Din verifieringskod för Klokka: {code}",
+      "title1": "Välkommen till Klokka.",
+      "title2": "Här är din kod.",
+      "body": "Skriv in koden för att bekräfta din e-post och bli klar med kontot."
+    },
+    "forgotPassword": {
+      "subject": "Återställ ditt lösenord: {code}",
+      "title1": "Glömt lösenordet?",
+      "title2": "Inga problem.",
+      "body": "Skriv in koden så får du välja ett nytt lösenord.",
+      "note": "Koden gäller i 10 minuter. Om det inte var du som bad om den är ditt lösenord oförändrat."
+    },
+    "signIn": {
+      "subject": "Din inloggningskod för Klokka: {code}",
+      "title1": "Logga in.",
+      "title2": "Här är din kod.",
+      "body": "Skriv in koden på inloggningssidan."
+    },
+    "bindNewIdentifier": {
+      "subject": "Bekräfta din nya e-postadress: {code}",
+      "title1": "Ny e-postadress?",
+      "title2": "Bekräfta den här.",
+      "body": "Skriv in koden, så loggar du in med den här adressen från och med nu."
+    },
+    "userPermissionValidation": {
+      "subject": "Är det du? Kod: {code}",
+      "title1": "Är det du?",
+      "title2": "Bekräfta med koden.",
+      "body": "Någon vill ändra inställningar på ditt Klokka-konto. Skriv in koden om det är du.",
+      "note": "Koden gäller i 10 minuter. Om det inte är du, byt lösenord."
+    },
+    "generic": {
+      "subject": "Din Klokka-kod: {code}",
+      "title1": "Din kod.",
+      "title2": "Från Klokka.",
+      "body": "Skriv in koden där du blev ombedd om den."
     }
   },
   "share": {

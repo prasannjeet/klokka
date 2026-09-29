@@ -25,7 +25,10 @@ public final class LogtoModels {
     public record CreateInvitation(String organizationId, String invitee, String inviterId, long expiresAt,
             List<String> organizationRoleIds, MessagePayload messagePayload) {}
 
-    public record MessagePayload(String link) {}
+    // What the OrganizationInvitation email is filled from (infra/logto/email-templates.json, CHQ-148). `locale` picks the
+    // template language; the rest are Klokka's own values, so the email never depends on Logto's profile names.
+    public record MessagePayload(String link, String locale, String inviteeName, String inviterName, String workspaceName,
+            String workspaceEmoji, String expiresOn) {}
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Invitation(String id, String organizationId, String invitee, String status, String acceptedUserId,

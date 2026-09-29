@@ -82,7 +82,12 @@ class MemberResourceTest {
         assertThat(invitation.get("invitee")).isEqualTo("lina.ahmed@example.com");
         assertThat(invitation.get("inviterId")).isEqualTo(NORA);
         assertThat((List<Object>) invitation.get("organizationRoleIds")).containsExactly("0ibpq0bo3w9b8p926ykrd");
-        assertThat(((Map<String, Object>) invitation.get("messagePayload")).get("link")).isEqualTo("https://app.klokka.test/join?token=" + token);
+        Map<String, Object> payload = (Map<String, Object>) invitation.get("messagePayload");
+        assertThat(payload.get("link")).isEqualTo("https://app.klokka.test/join?token=" + token);
+        // The email's values (CHQ-148): the inviting employer's language, both names, the business, the local expiry date.
+        assertThat(payload).containsEntry("locale", "sv").containsEntry("inviteeName", "Lina Ahmed")
+                .containsEntry("inviterName", "Nora Lind").containsEntry("workspaceName", "Members Corp")
+                .containsEntry("workspaceEmoji", "☕").containsEntry("expiresOn", "30 september 2026");
         assertThat(((Number) invitation.get("expiresAt")).longValue()).isEqualTo(java.time.Instant.parse("2026-09-30T12:00:00Z").toEpochMilli());
         assertThat(data.scalar("select logto_invitation_id from membership where id = ?::uuid", id)).isEqualTo(invitation.get("id"));
         assertThat(data.count("select count(*) from email_send where membership_id = ?::uuid and kind = 'INVITATION' and status = 'SENT'", id)).isEqualTo(1);

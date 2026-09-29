@@ -62,10 +62,11 @@ public class LogtoService {
     }
 
     // Logto sends the OrganizationInvitation email through the tenant's connector because messagePayload is set.
-    public String createInvitation(String organizationId, String email, String inviterUserId, Instant expiresAt, String link) {
+    public String createInvitation(String organizationId, String email, String inviterUserId, Instant expiresAt,
+            LogtoModels.MessagePayload message) {
         return call("create organization invitation", () -> api.createInvitation(new LogtoModels.CreateInvitation(
                 organizationId, email, inviterUserId, expiresAt.toEpochMilli(), List.of(roleId(Role.EMPLOYEE)),
-                new LogtoModels.MessagePayload(link)))).id();
+                message))).id();
     }
 
     public void acceptInvitation(String invitationId, String userId) {

@@ -539,7 +539,10 @@
       "body": "{inviter} added you as an employee at {workspace}. Every hour they log for you will show up in Klokka, day by day, month by month.",
       "action": "Accept the invitation",
       "expires": "The link works until {date}.",
-      "footer": "Klokka is free and open source. If you did not expect this email, ignore it."
+      "footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
+      "title1": "{inviter} invited you.",
+      "title2": "To {workspace}.",
+      "employer": "Employer: {inviter}"
     },
     "digest": {
       "subject": "Your week {week} at {workspace}",
@@ -548,7 +551,58 @@
       "yourHours": "Your hours in week {week}: {hours}",
       "teamHours": "Team hours in week {week}: {hours}",
       "monthSoFar": "{month} so far: {hours}",
-      "unsubscribe": "Turn the weekly digest off in Settings."
+      "unsubscribe": "Turn the weekly digest off in Settings.",
+      "title1": "Week {week}.",
+      "title2_one": "{hours} hour.",
+      "title2_other": "{hours} hours.",
+      "teamHoursLabel": "Team hours in week {week}",
+      "yourHoursLabel": "Your hours in week {week}",
+      "monthSoFarLabel": "{month} so far",
+      "dayOff": "off",
+      "action": "Open Klokka"
+    },
+    "common": {
+      "footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
+      "codeExpires": "The code works for 10 minutes.",
+      "codeLabel": "Your code"
+    },
+    "register": {
+      "subject": "Your Klokka verification code: {code}",
+      "title1": "Welcome to Klokka.",
+      "title2": "Here is your code.",
+      "body": "Enter the code to confirm your email and finish your account."
+    },
+    "forgotPassword": {
+      "subject": "Reset your Klokka password: {code}",
+      "title1": "Forgot your password?",
+      "title2": "No problem.",
+      "body": "Enter the code and choose a new password.",
+      "note": "The code works for 10 minutes. If you did not ask for it, your password stays as it is."
+    },
+    "signIn": {
+      "subject": "Your Klokka sign-in code: {code}",
+      "title1": "Sign in.",
+      "title2": "Here is your code.",
+      "body": "Enter the code on the sign-in page."
+    },
+    "bindNewIdentifier": {
+      "subject": "Confirm your new email: {code}",
+      "title1": "New email address?",
+      "title2": "Confirm it here.",
+      "body": "Enter the code and this address becomes your sign-in from now on."
+    },
+    "userPermissionValidation": {
+      "subject": "Is this you? Code: {code}",
+      "title1": "Is this you?",
+      "title2": "Confirm with the code.",
+      "body": "Someone wants to change settings on your Klokka account. Enter the code if it is you.",
+      "note": "The code works for 10 minutes. If it is not you, change your password."
+    },
+    "generic": {
+      "subject": "Your Klokka code: {code}",
+      "title1": "Your code.",
+      "title2": "From Klokka.",
+      "body": "Enter the code where you were asked for it."
     }
   },
   "share": {

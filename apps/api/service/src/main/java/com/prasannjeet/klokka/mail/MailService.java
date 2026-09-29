@@ -57,9 +57,16 @@ public class MailService {
 
     // Sends synchronously and records the outcome; a failure is logged and ledgered, never thrown into a job.
     public boolean send(String kind, String to, String subject, String text, String userId) {
+        return send(kind, to, subject, text, null, userId);
+    }
+
+    // With `html`, the email is HTML with `text` as its plain-text alternative (clients that show no HTML use it).
+    public boolean send(String kind, String to, String subject, String text, String html, String userId) {
         Instant now = clock.instant();
         try {
-            mailer.send(Mail.withText(to, subject, text));
+            Mail mail = Mail.withText(to, subject, text);
+            if (html != null) mail.setHtml(html);
+            mailer.send(mail);
             ledger.record(kind, to, null, null, userId, EmailSendRepository.STATUS_SENT, null, now);
             return true;
         } catch (RuntimeException e) {
