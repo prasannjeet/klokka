@@ -196,6 +196,13 @@ for it in Migadu.
 | Logto shows English to Swedish browsers | Logto has no built-in Swedish | custom phrases in Logto (not done yet) |
 | Sign-up email never arrives | sender mailbox not allowed to send, or the monthly quota used up | section 8 |
 | `v*` tag built but production unchanged | production deploys are by hand | section 5, step 2 |
+| Coolify's "Redirect to non-www" setting has no effect on the landing | the apps were created through the API with stored custom labels, which Coolify uses as they are | redirects live in the landing app's labels (below); after a domain change, edit the labels, never "reset to defaults" |
+
+**Landing proxy labels (2026-09-29, both environments).** The landing app's custom labels add three Traefik
+middlewares: `klokka-https-301` (http to https, permanent), `klokka-www-apex` (`www.klokka.se` to `klokka.se`, permanent,
+path and query kept) and `klokka-hsts` (`Strict-Transport-Security: max-age=31536000`, no subdomains, no preload).
+Check: `curl -sI https://www.klokka.se/en` answers 301 to `https://klokka.se/en`. Staging's http answers 302 from the
+homelab's front proxy before Traefik; Traefik itself answers 301.
 
 ## 10. Open items (production)
 
@@ -206,7 +213,6 @@ for it in Migadu.
   `ssh netcup docker exec postgres-hxthesh8i3rgrca3yldartx9 sh -c 'pg_dump -U "$POSTGRES_USER" -Fc logto' > logto-$(date +%F).dump`.
   Check a run: `GET /api/v1/databases/gual64hodx8mn2x4xr04lbhm/backups` (the endpoint also returns other databases'
   schedules that share the numeric id; trust each schedule's `database_type`).
-- `www.klokka.se` serves the site instead of redirecting to `klokka.se` (the canonical tag already says `klokka.se`).
 - One `app_user` row (`5zgfj0ng8gnz`, `smoke-test@klokka.se`) from the go-live sign-in test; its Logto user is deleted.
 - `prod/klokka-v1.0.1.apk` in Nexus carries staging URLs; delete it.
 - Mail quota 100 per month; raise it to the Migadu plan's limit.
