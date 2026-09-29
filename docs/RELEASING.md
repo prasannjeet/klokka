@@ -23,7 +23,18 @@ Nothing deploys automatically.
 ## Deploy (by hand)
 
 In production Coolify (`https://coolify.prod.roxa.org`, project **Klokka**), set each app's image tag to
-`v<version>` and deploy. Rollback is the same with an older tag; every release stays in Nexus. Never re-tag an old
+`v<version>` and deploy, the API first (it runs the Flyway migrations).
+
+| App | Coolify uuid | Domain | Health |
+|---|---|---|---|
+| `klokka-api` | `evaro481mmx2fpp5eev2cgj2` | `https://api.klokka.se` (network alias `klokka-api`, which the web app calls) | `/q/health/ready` |
+| `klokka-web` | `kakqu4trsp8yddirzntj2uct` | `https://app.klokka.se` | `/healthz` |
+| `klokka-landing` | `f7t6h4recxky32cx06iknx2x` | `https://klokka.se`, `https://www.klokka.se` | `/` |
+
+Logto is the Coolify service `logto-hxthesh8i3rgrca3yldartx9` (`https://auth.klokka.se`, console
+`https://auth-admin.klokka.se`), in the same project. The database is `klokka` on the Common Resources Postgres 18
+(`gual64hodx8mn2x4xr04lbhm`), owned by `klokka_migrate`, with `klokka_runtime` for the app. Health checks call
+`127.0.0.1`: with Coolify's default `localhost` they resolve to `::1`, which Next.js does not listen on. Rollback is the same with an older tag; every release stays in Nexus. Never re-tag an old
 commit to force a redeploy.
 
 ## Environment values
