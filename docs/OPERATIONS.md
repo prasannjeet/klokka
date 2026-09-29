@@ -206,13 +206,11 @@ homelab's front proxy before Traefik; Traefik itself answers 301.
 
 ## 10. Open items (production)
 
-- **Backups:** `klokka` is in the Common Resources backup job (`u9l6zw3q1fsnb1o6uupuefm3`, daily 01:05 CEST, to S3,
-  with `decrave`, `delhi6`, `sparen`) since 2026-09-29. **Logto's own Postgres (`logto`, users and sessions) has no
-  backup yet.** Manual dumps meanwhile:
-  `ssh netcup docker exec gual64hodx8mn2x4xr04lbhm pg_dump -U postgres -Fc klokka > klokka-$(date +%F).dump` and
-  `ssh netcup docker exec postgres-hxthesh8i3rgrca3yldartx9 sh -c 'pg_dump -U "$POSTGRES_USER" -Fc logto' > logto-$(date +%F).dump`.
-  Check a run: `GET /api/v1/databases/gual64hodx8mn2x4xr04lbhm/backups` (the endpoint also returns other databases'
-  schedules that share the numeric id; trust each schedule's `database_type`).
+- **Backups (done 2026-09-30):** `klokka` and `sawerashree` joined the Common Resources job
+  (`u9l6zw3q1fsnb1o6uupuefm3`, daily 01:05 CEST, to S3; first run succeeded). Logto's own Postgres has its own daily
+  job (`h70ykdq94q5vitsilysuuhqz`, 02:25 CEST, S3 only, 30 copies / 30 days; test run succeeded). Service-database
+  schedules are not visible through the API: read them in the Coolify UI (service, Postgres, Backups). Manual dump:
+  `ssh netcup docker exec gual64hodx8mn2x4xr04lbhm pg_dump -U postgres -Fc klokka > klokka-$(date +%F).dump`.
 - One `app_user` row (`5zgfj0ng8gnz`, `smoke-test@klokka.se`) from the go-live sign-in test; its Logto user is deleted.
 - `prod/klokka-v1.0.1.apk` in Nexus carries staging URLs; delete it.
 - Mail quota 100 per month; raise it to the Migadu plan's limit.
