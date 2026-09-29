@@ -146,7 +146,9 @@ an old commit. A rollback of the API across a migration needs thought: Flyway mi
 ## 6. Accounts and roles
 
 - **Anyone** signs up on the web app or the phone (email + password, email confirmed by a code from the
-  environment's sender mailbox). The first screen after sign-up creates their business; they become its EMPLOYER.
+  environment's sender mailbox). Signing in: email, then password or "Sign in with verification code"; "Forgot your
+  password?" resets by email code (both switched on 2026-09-30, staging and production). Every code costs one email
+  against the monthly quota. The first screen after sign-up creates their business; they become its EMPLOYER.
   Employees join through the invitation email an employer sends from the app. Nothing here needs an operator.
 - **Operator (`platform-admin`)**: the operator console needs the Logto global role `platform-admin`. Grant it after
   the person has signed up once, with `$TOKEN`, `$E` and `$L` from section 3:
