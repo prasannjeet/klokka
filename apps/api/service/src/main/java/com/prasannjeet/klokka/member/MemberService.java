@@ -16,6 +16,7 @@ import com.prasannjeet.klokka.contract.model.MemberUpdate;
 import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import com.prasannjeet.klokka.error.KlokkaException;
+import com.prasannjeet.klokka.invitation.InvitationMessages;
 import com.prasannjeet.klokka.logto.LogtoService;
 import com.prasannjeet.klokka.mail.EmailSendRepository;
 import com.prasannjeet.klokka.mail.MailService;
@@ -60,6 +61,9 @@ public class MemberService {
 
     @Inject
     MailService mail;
+
+    @Inject
+    InvitationMessages messages;
 
     @Inject
     KlokkaConfig config;
@@ -184,7 +188,8 @@ public class MemberService {
     private void sendInvitation(Access a, MembershipEntity m, Instant now) {
         Instant expires = now.plus(config.invitation().lifetime());
         String link = config.webBaseUrl().toString().replaceAll("/+$", "") + "/join?token=" + m.invitationToken;
-        m.logtoInvitationId = logto.createInvitation(a.workspace().logtoOrgId, m.email, a.userId(), expires, link);
+        m.logtoInvitationId = logto.createInvitation(a.workspace().logtoOrgId, m.email, a.userId(), expires,
+                messages.of(a.workspace(), m, a.membership(), expires, link));
         m.invitationSentAt = now;
         m.invitationExpiresAt = expires;
         mail.recordExternal(EmailSendRepository.KIND_INVITATION, m.email, m.workspaceId, m.id, null);

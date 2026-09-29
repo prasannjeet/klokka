@@ -25,12 +25,13 @@ import com.prasannjeet.klokka.contract.model.OperatorVolume;
 import com.prasannjeet.klokka.contract.model.OperatorVolumeDay;
 import com.prasannjeet.klokka.contract.model.OperatorVolumeKind;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspace;
-import com.prasannjeet.klokka.contract.model.WorkspaceColour;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspacePage;
 import com.prasannjeet.klokka.contract.model.OperatorWorkspaceSummary;
 import com.prasannjeet.klokka.contract.model.Role;
+import com.prasannjeet.klokka.contract.model.WorkspaceColour;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import com.prasannjeet.klokka.error.KlokkaException;
+import com.prasannjeet.klokka.invitation.InvitationMessages;
 import com.prasannjeet.klokka.logto.LogtoService;
 import com.prasannjeet.klokka.mail.EmailSendRepository;
 import com.prasannjeet.klokka.mail.MailService;
@@ -75,6 +76,9 @@ public class OperatorService {
 
     @Inject
     MailService mail;
+
+    @Inject
+    InvitationMessages messages;
 
     @Inject
     HealthProbe probe;
@@ -196,7 +200,8 @@ public class OperatorService {
         Instant now = clock.instant();
         Instant expires = now.plus(config.invitation().lifetime());
         String link = config.webBaseUrl().toString().replaceAll("/+$", "") + "/join?token=" + m.invitationToken;
-        m.logtoInvitationId = logto.createInvitation(w.logtoOrgId, m.email, employer.userId, expires, link);
+        m.logtoInvitationId = logto.createInvitation(w.logtoOrgId, m.email, employer.userId, expires,
+                messages.of(w, m, employer, expires, link));
         m.invitationSentAt = now;
         m.invitationExpiresAt = expires;
         m.invitationResendCount++;

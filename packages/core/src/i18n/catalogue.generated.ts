@@ -80,19 +80,59 @@ export const sv = {
   "common.today": "I dag",
   "common.unread": "Olästa",
   "common.yesterday": "I går",
+  "email.bindNewIdentifier.body": "Skriv in koden, så loggar du in med den här adressen från och med nu.",
+  "email.bindNewIdentifier.subject": "Bekräfta din nya e-postadress: {code}",
+  "email.bindNewIdentifier.title1": "Ny e-postadress?",
+  "email.bindNewIdentifier.title2": "Bekräfta den här.",
+  "email.common.codeExpires": "Koden gäller i 10 minuter.",
+  "email.common.codeLabel": "Din kod",
+  "email.common.footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
+  "email.digest.action": "Öppna Klokka",
+  "email.digest.dayOff": "ledig",
   "email.digest.intro": "Förra veckan i ett mejl, som du bad om.",
   "email.digest.monthSoFar": "{month} hittills: {hours}",
+  "email.digest.monthSoFarLabel": "{month} hittills",
   "email.digest.subject": "Din vecka {week} på {workspace}",
   "email.digest.subjectEmployer": "Vecka {week} på {workspace}: {hours}",
   "email.digest.teamHours": "Teamets timmar vecka {week}: {hours}",
+  "email.digest.teamHoursLabel": "Teamets timmar vecka {week}",
+  "email.digest.title1": "Vecka {week}.",
+  "email.digest.title2_one": "{hours} timme.",
+  "email.digest.title2_other": "{hours} timmar.",
   "email.digest.unsubscribe": "Stäng av veckosammanfattningen under Inställningar.",
   "email.digest.yourHours": "Dina timmar vecka {week}: {hours}",
+  "email.digest.yourHoursLabel": "Dina timmar vecka {week}",
+  "email.forgotPassword.body": "Skriv in koden så får du välja ett nytt lösenord.",
+  "email.forgotPassword.note": "Koden gäller i 10 minuter. Om det inte var du som bad om den är ditt lösenord oförändrat.",
+  "email.forgotPassword.subject": "Återställ ditt lösenord: {code}",
+  "email.forgotPassword.title1": "Glömt lösenordet?",
+  "email.forgotPassword.title2": "Inga problem.",
+  "email.generic.body": "Skriv in koden där du blev ombedd om den.",
+  "email.generic.subject": "Din Klokka-kod: {code}",
+  "email.generic.title1": "Din kod.",
+  "email.generic.title2": "Från Klokka.",
   "email.invitation.action": "Acceptera inbjudan",
   "email.invitation.body": "{inviter} har lagt till dig som anställd på {workspace}. Varje timme hen loggar för dig kommer att synas i Klokka, dag för dag, månad för månad.",
+  "email.invitation.employer": "Arbetsgivare: {inviter}",
   "email.invitation.expires": "Länken fungerar till {date}.",
   "email.invitation.footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
   "email.invitation.greeting": "Hej {name},",
   "email.invitation.subject": "{inviter} bjöd in dig till {workspace} på Klokka",
+  "email.invitation.title1": "{inviter} bjöd in dig.",
+  "email.invitation.title2": "Till {workspace}.",
+  "email.register.body": "Skriv in koden för att bekräfta din e-post och bli klar med kontot.",
+  "email.register.subject": "Din verifieringskod för Klokka: {code}",
+  "email.register.title1": "Välkommen till Klokka.",
+  "email.register.title2": "Här är din kod.",
+  "email.signIn.body": "Skriv in koden på inloggningssidan.",
+  "email.signIn.subject": "Din inloggningskod för Klokka: {code}",
+  "email.signIn.title1": "Logga in.",
+  "email.signIn.title2": "Här är din kod.",
+  "email.userPermissionValidation.body": "Någon vill ändra inställningar på ditt Klokka-konto. Skriv in koden om det är du.",
+  "email.userPermissionValidation.note": "Koden gäller i 10 minuter. Om det inte är du, byt lösenord.",
+  "email.userPermissionValidation.subject": "Är det du? Kod: {code}",
+  "email.userPermissionValidation.title1": "Är det du?",
+  "email.userPermissionValidation.title2": "Bekräfta med koden.",
   "employees.actions": "Åtgärder",
   "employees.addEmployee": "Lägg till anställd",
   "employees.addEmployeeHint": "De får ett mejl från Klokka, väljer ett lösenord och hamnar i {workspace} som anställd. Tills dess visas de som Inbjuden.",
@@ -990,19 +1030,59 @@ export const en = {
   "common.today": "Today",
   "common.unread": "Unread",
   "common.yesterday": "Yesterday",
+  "email.bindNewIdentifier.body": "Enter the code and this address becomes your sign-in from now on.",
+  "email.bindNewIdentifier.subject": "Confirm your new email: {code}",
+  "email.bindNewIdentifier.title1": "New email address?",
+  "email.bindNewIdentifier.title2": "Confirm it here.",
+  "email.common.codeExpires": "The code works for 10 minutes.",
+  "email.common.codeLabel": "Your code",
+  "email.common.footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
+  "email.digest.action": "Open Klokka",
+  "email.digest.dayOff": "off",
   "email.digest.intro": "Last week in one email, as you asked for.",
   "email.digest.monthSoFar": "{month} so far: {hours}",
+  "email.digest.monthSoFarLabel": "{month} so far",
   "email.digest.subject": "Your week {week} at {workspace}",
   "email.digest.subjectEmployer": "Week {week} at {workspace}: {hours}",
   "email.digest.teamHours": "Team hours in week {week}: {hours}",
+  "email.digest.teamHoursLabel": "Team hours in week {week}",
+  "email.digest.title1": "Week {week}.",
+  "email.digest.title2_one": "{hours} hour.",
+  "email.digest.title2_other": "{hours} hours.",
   "email.digest.unsubscribe": "Turn the weekly digest off in Settings.",
   "email.digest.yourHours": "Your hours in week {week}: {hours}",
+  "email.digest.yourHoursLabel": "Your hours in week {week}",
+  "email.forgotPassword.body": "Enter the code and choose a new password.",
+  "email.forgotPassword.note": "The code works for 10 minutes. If you did not ask for it, your password stays as it is.",
+  "email.forgotPassword.subject": "Reset your Klokka password: {code}",
+  "email.forgotPassword.title1": "Forgot your password?",
+  "email.forgotPassword.title2": "No problem.",
+  "email.generic.body": "Enter the code where you were asked for it.",
+  "email.generic.subject": "Your Klokka code: {code}",
+  "email.generic.title1": "Your code.",
+  "email.generic.title2": "From Klokka.",
   "email.invitation.action": "Accept the invitation",
   "email.invitation.body": "{inviter} added you as an employee at {workspace}. Every hour they log for you will show up in Klokka, day by day, month by month.",
+  "email.invitation.employer": "Employer: {inviter}",
   "email.invitation.expires": "The link works until {date}.",
   "email.invitation.footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
   "email.invitation.greeting": "Hi {name},",
   "email.invitation.subject": "{inviter} invited you to {workspace} on Klokka",
+  "email.invitation.title1": "{inviter} invited you.",
+  "email.invitation.title2": "To {workspace}.",
+  "email.register.body": "Enter the code to confirm your email and finish your account.",
+  "email.register.subject": "Your Klokka verification code: {code}",
+  "email.register.title1": "Welcome to Klokka.",
+  "email.register.title2": "Here is your code.",
+  "email.signIn.body": "Enter the code on the sign-in page.",
+  "email.signIn.subject": "Your Klokka sign-in code: {code}",
+  "email.signIn.title1": "Sign in.",
+  "email.signIn.title2": "Here is your code.",
+  "email.userPermissionValidation.body": "Someone wants to change settings on your Klokka account. Enter the code if it is you.",
+  "email.userPermissionValidation.note": "The code works for 10 minutes. If it is not you, change your password.",
+  "email.userPermissionValidation.subject": "Is this you? Code: {code}",
+  "email.userPermissionValidation.title1": "Is this you?",
+  "email.userPermissionValidation.title2": "Confirm with the code.",
   "employees.actions": "Actions",
   "employees.addEmployee": "Add employee",
   "employees.addEmployeeHint": "They get one email from Klokka, set a password and land in {workspace} as an employee. Until then they show as Invited.",
@@ -1900,19 +1980,58 @@ export type MessageParams = {
   "common.today": Record<never, never>;
   "common.unread": Record<never, never>;
   "common.yesterday": Record<never, never>;
+  "email.bindNewIdentifier.body": Record<never, never>;
+  "email.bindNewIdentifier.subject": { code: string | number };
+  "email.bindNewIdentifier.title1": Record<never, never>;
+  "email.bindNewIdentifier.title2": Record<never, never>;
+  "email.common.codeExpires": Record<never, never>;
+  "email.common.codeLabel": Record<never, never>;
+  "email.common.footer": Record<never, never>;
+  "email.digest.action": Record<never, never>;
+  "email.digest.dayOff": Record<never, never>;
   "email.digest.intro": Record<never, never>;
   "email.digest.monthSoFar": { hours: string | number; month: string | number };
+  "email.digest.monthSoFarLabel": { month: string | number };
   "email.digest.subject": { week: string | number; workspace: string | number };
   "email.digest.subjectEmployer": { hours: string | number; week: string | number; workspace: string | number };
   "email.digest.teamHours": { hours: string | number; week: string | number };
+  "email.digest.teamHoursLabel": { week: string | number };
+  "email.digest.title1": { week: string | number };
+  "email.digest.title2": { count: string | number; hours: string | number };
   "email.digest.unsubscribe": Record<never, never>;
   "email.digest.yourHours": { hours: string | number; week: string | number };
+  "email.digest.yourHoursLabel": { week: string | number };
+  "email.forgotPassword.body": Record<never, never>;
+  "email.forgotPassword.note": Record<never, never>;
+  "email.forgotPassword.subject": { code: string | number };
+  "email.forgotPassword.title1": Record<never, never>;
+  "email.forgotPassword.title2": Record<never, never>;
+  "email.generic.body": Record<never, never>;
+  "email.generic.subject": { code: string | number };
+  "email.generic.title1": Record<never, never>;
+  "email.generic.title2": Record<never, never>;
   "email.invitation.action": Record<never, never>;
   "email.invitation.body": { inviter: string | number; workspace: string | number };
+  "email.invitation.employer": { inviter: string | number };
   "email.invitation.expires": { date: string | number };
   "email.invitation.footer": Record<never, never>;
   "email.invitation.greeting": { name: string | number };
   "email.invitation.subject": { inviter: string | number; workspace: string | number };
+  "email.invitation.title1": { inviter: string | number };
+  "email.invitation.title2": { workspace: string | number };
+  "email.register.body": Record<never, never>;
+  "email.register.subject": { code: string | number };
+  "email.register.title1": Record<never, never>;
+  "email.register.title2": Record<never, never>;
+  "email.signIn.body": Record<never, never>;
+  "email.signIn.subject": { code: string | number };
+  "email.signIn.title1": Record<never, never>;
+  "email.signIn.title2": Record<never, never>;
+  "email.userPermissionValidation.body": Record<never, never>;
+  "email.userPermissionValidation.note": Record<never, never>;
+  "email.userPermissionValidation.subject": { code: string | number };
+  "email.userPermissionValidation.title1": Record<never, never>;
+  "email.userPermissionValidation.title2": Record<never, never>;
   "employees.actions": Record<never, never>;
   "employees.addEmployee": Record<never, never>;
   "employees.addEmployeeHint": { workspace: string | number };
@@ -2712,6 +2831,7 @@ export type MessageKey = keyof MessageParams;
 export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "common.days",
   "common.people",
+  "email.digest.title2",
   "entry.changesThisMonth",
   "entry.editedTimes",
   "flags.openFlags",

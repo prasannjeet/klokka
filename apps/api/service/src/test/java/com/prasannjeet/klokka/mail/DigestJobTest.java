@@ -67,7 +67,7 @@ class DigestJobTest {
     }
 
     @Test
-    void sendsOncePerWeekAtMondaySevenLocalTime() {
+    void sendsOncePerWeekAtMondaySevenLocalTime() throws java.io.IOException {
         // Monday 21 September 2026, 06:30 in Stockholm (04:30Z): too early.
         clock.set(Instant.parse("2026-09-21T04:30:00Z"));
         assertThat(job.run().sent()).isZero();
@@ -86,6 +86,19 @@ class DigestJobTest {
         assertThat(toNora).hasSize(1);
         assertThat(toNora.get(0).getSubject()).isEqualTo("Week 38 at Digest Corp: 10.5 h");
         assertThat(toNora.get(0).getText()).contains("Team hours in week 38: 10.5 h");
+        // The HTML version (CHQ-148): same numbers in the designed layout, a week grid with the busiest day marked.
+        String sv = toMaria.get(0).getHtml();
+        assertThat(sv).contains("<html lang=\"sv\">").contains("Vecka 38.").contains("10,5 timmar.").contains("Hej Maria Lind,")
+                .contains("Digest Corp").contains("14\u201320 september").contains(">Mån<").contains(">Tor<").contains(">Sön<").contains(">ledig<")
+                .contains(">4<").contains("Dina timmar vecka 38").contains("September 2026 hittills").contains("Öppna Klokka")
+                .contains("Stäng av veckosammanfattningen under Inställningar.").doesNotContain("{m.").doesNotContain("{w.");
+        assertThat(sv).containsPattern("background:#FF006E;[^>]*>6,5<");
+        String en = toNora.get(0).getHtml();
+        // Kept for a look in a real mail client (target/ is not committed).
+        java.nio.file.Files.writeString(java.nio.file.Path.of("target/digest-sv.html"), sv);
+        java.nio.file.Files.writeString(java.nio.file.Path.of("target/digest-en.html"), en);
+        assertThat(en).contains("<html lang=\"en\">").contains("Week 38.").contains("10.5 hours.").contains(">Mon<")
+                .contains("Team hours in week 38").contains("Open Klokka").contains(">off<");
         assertThat(data.count("select count(*) from email_send where kind = 'DIGEST' and recipient in ('maria@example.com', 'nora@cafenord.example') and status = 'SENT'")).isEqualTo(2);
         assertThat(data.query("select iso_week from digest_run where logto_user_id = ?", MARIA)).containsExactly(List.of("2026-W38"));
 
