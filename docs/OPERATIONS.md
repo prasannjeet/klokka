@@ -199,10 +199,13 @@ for it in Migadu.
 
 ## 10. Open items (production)
 
-- **Backups:** the Common Resources backup job (`u9l6zw3q1fsnb1o6uupuefm3`, daily 01:05, to S3) dumps `decrave`,
-  `delhi6`, `sparen`, **not `klokka`**; add `klokka` to its database list. Logto's own Postgres has no scheduled
-  backup. Until then, a manual dump:
-  `ssh netcup docker exec gual64hodx8mn2x4xr04lbhm pg_dump -U postgres -Fc klokka > klokka-$(date +%F).dump`.
+- **Backups:** `klokka` is in the Common Resources backup job (`u9l6zw3q1fsnb1o6uupuefm3`, daily 01:05 CEST, to S3,
+  with `decrave`, `delhi6`, `sparen`) since 2026-09-29. **Logto's own Postgres (`logto`, users and sessions) has no
+  backup yet.** Manual dumps meanwhile:
+  `ssh netcup docker exec gual64hodx8mn2x4xr04lbhm pg_dump -U postgres -Fc klokka > klokka-$(date +%F).dump` and
+  `ssh netcup docker exec postgres-hxthesh8i3rgrca3yldartx9 sh -c 'pg_dump -U "$POSTGRES_USER" -Fc logto' > logto-$(date +%F).dump`.
+  Check a run: `GET /api/v1/databases/gual64hodx8mn2x4xr04lbhm/backups` (the endpoint also returns other databases'
+  schedules that share the numeric id; trust each schedule's `database_type`).
 - `www.klokka.se` serves the site instead of redirecting to `klokka.se` (the canonical tag already says `klokka.se`).
 - One `app_user` row (`5zgfj0ng8gnz`, `smoke-test@klokka.se`) from the go-live sign-in test; its Logto user is deleted.
 - `prod/klokka-v1.0.1.apk` in Nexus carries staging URLs; delete it.
