@@ -23,10 +23,10 @@ Deliver correct, maintainable changes with minimal risk.
 - Languages: Swedish and English everywhere. Public site: switcher, `sv` at `/`, `en` at `/en`. Signed-in web app and
   phone app: a user setting stored server-side, defaulting to the device language on first sign-in.
 - Theme: Nightshift (owner's choice), light and dark. Signal and Clay remain in `docs/design/tokens.css` as history.
-- **Status: v1 candidate (CHQ-143 staging pass, CHQ-144 review).** Every operation of the contract is implemented
+- **Status: v1 live in production (v1.0.2, CHQ-146), staging pass CHQ-143, review CHQ-144.** Every operation of the contract is implemented
   on the API and both clients; `docs/STAGING_SMOKE.md` is what was exercised on staging and `docs/REVIEW.md` the
   pre-tag review with its open findings.
-- Documentation map: `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
+- Documentation map: `docs/OPERATIONS.md` (runbook: access, checkup, deploy, accounts, both environments), `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
   docs when they differ), `docs/research/*.md` (evidence per area), `docs/design/DIRECTION.md` + `docs/design/mockups/`
   (visual direction, tokens, mockups), `docs/brand/` (logo), `docs/JIRA_PLAN.md` (epics and stories).
 
@@ -156,7 +156,14 @@ guarded by a regenerate-and-diff check.
   picks them up; a native or dependency change needs a fresh APK.
 - Release APKs are signed with the project keystore (outside git); the Android package id never changes once set.
 
-## Environments (staging only; never production without the owner's explicit ask)
+## Environments (runbook: `docs/OPERATIONS.md`, skill `klokka-ops`)
+- **Production is live (v1.0.2, 2026-09-29)** on NetCup Coolify `https://coolify.prod.roxa.org` (`ssh netcup`, MCP
+  `coolify-prod` read-only, `coolify-prod-rw` only with the owner's go-ahead per change), project **Klokka**:
+  `klokka.se` (landing), `app.klokka.se` (web), `api.klokka.se` (API), `auth.klokka.se` / `auth-admin.klokka.se`
+  (Logto, own template Postgres); database `klokka` on the Common Resources Postgres 18 (`gual64hodx8mn2x4xr04lbhm`);
+  sender `no-reply@klokka.se` (Migadu). Deployed by hand from `v*` tags (`docs/RELEASING.md`). Credentials:
+  `.agents/local-credentials/*-prod.json`. Test and experiment on staging, never on production.
+- Staging, below, is where every test, probe and experiment runs.
 - Staging Coolify `https://coolify.coolify.ooguy.com/` (`ssh testenv`, MCP `coolify-testenv`), project **Klokka**. Apps
   deploy as `dockerimage` from `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}` (512m, `--init`, healthchecks).
   Addresses: `klokka.coolify.ooguy.com` (landing), `klokka-app.coolify.ooguy.com` (web app),
