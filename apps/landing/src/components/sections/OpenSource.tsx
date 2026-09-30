@@ -1,6 +1,5 @@
-import { Icon } from '@/components/ui/Icon';
+import { RepoCard } from '@/components/ui/RepoCard';
 import type { Dictionary } from '@/lib/i18n';
-import { cloneCommand, repoHost, repoUrl } from '@/lib/links';
 
 export function OpenSource({ t }: { t: Dictionary }) {
   const o = t.openSource;
@@ -17,19 +16,7 @@ export function OpenSource({ t }: { t: Dictionary }) {
           <p className="lead">{o.lead}</p>
         </div>
         <div className="oss">
-          <div className="card oss-big reveal">
-            <div className="mit" role="img" aria-label={o.mitLabel}>
-              MIT
-            </div>
-            <p className="lead max-w-[40ch]">{o.mitBody}</p>
-            <code className="code" aria-label={o.cloneLabel}>
-              {cloneCommand}
-            </code>
-            <a className="gh" href={repoUrl}>
-              <Icon name="github" />
-              {repoHost}
-            </a>
-          </div>
+          <RepoCard t={t} className="reveal" />
           <div className="oss-side">
             {o.cards.map((card) => (
               <div key={card.title} className="card oss-item reveal">

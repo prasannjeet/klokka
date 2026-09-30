@@ -2,7 +2,14 @@ import type { PageId } from '@/lib/pages/registry';
 import type { Locale } from '../config';
 import { getDictionary } from '../index';
 import * as about from './about';
+import * as app from './app';
+import * as calculator from './calculator';
+import * as guideChange from './guide-change';
+import * as guideTimesheet from './guide-timesheet';
+import * as openSource from './open-source';
 import * as privacy from './privacy';
+import * as smallBusiness from './small-business';
+import * as template from './template';
 import * as terms from './terms';
 import type { GuideCopy, PageCopyBase, TableCopy, ToolCopy } from './types';
 
@@ -42,6 +49,13 @@ function homeCopy(locale: Locale): PageCopyBase {
 const copies: { [K in PageId]?: Record<Locale, CopyFor<K>> } = {
   home: { sv: homeCopy('sv'), en: homeCopy('en') },
   about,
+  app,
+  'small-business': smallBusiness,
+  'open-source': openSource,
+  'guide-timesheet': guideTimesheet,
+  'guide-change': guideChange,
+  calculator,
+  template,
   privacy,
   terms,
 };

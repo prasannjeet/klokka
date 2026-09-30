@@ -2337,4 +2337,248 @@
   .cta-dark.cta-page {
     min-height: 0;
   }
+
+  /* A link in the CTA band's text: the band's own colour, told apart by its underline. */
+  .on-color .inline-link {
+    color: inherit;
+  }
+
+  /* ---- product and guide pages (components/pages/ProductPage, GuidePage) ---- */
+  .page-visual {
+    max-width: var(--container-narrow);
+    margin-top: var(--space-8);
+  }
+  .page-visual .illustrative {
+    margin-top: var(--space-3);
+  }
+  .guide-meta {
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+  .toc {
+    border-left: 2px solid var(--border);
+    padding-left: var(--space-4);
+  }
+  .toc ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+  .toc li::marker {
+    color: var(--text-muted);
+  }
+  .toc a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+  }
+  .toc a:hover {
+    color: var(--accent);
+  }
+  .prose h2[id] {
+    scroll-margin-top: var(--space-11);
+  }
+  .note-box {
+    padding: var(--space-6);
+  }
+  .note-box > * + * {
+    margin-top: var(--space-3);
+  }
+  .sources ol {
+    list-style: decimal;
+    padding-left: 1.25em;
+  }
+  .sources li + li {
+    margin-top: var(--space-2);
+  }
+}
+@layer components {
+  /* ---- tool pages: the work-hours calculator and the template downloads (components/tools) ---- */
+  .tool-slot {
+    max-width: var(--container-narrow);
+    margin-block: var(--space-8) var(--space-4);
+  }
+  .hc,
+  .td {
+    padding: clamp(16px, 4vw, 32px);
+    display: grid;
+    gap: var(--space-5);
+  }
+  .hc > *,
+  .td > * {
+    min-width: 0;
+  }
+  .hc-modes {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-self: start;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+  }
+  .hc-mode {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding: 0 18px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .hc-mode input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .hc-mode:has(input:checked) {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .hc-mode:has(input:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .hc-panel {
+    display: grid;
+  }
+  /* A day: name and total on one line, the three fields under it; one line from 720 px. */
+  .hc-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
+    align-items: end;
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--border);
+  }
+  .hc-day {
+    grid-column: 1 / 3;
+    font-weight: 600;
+  }
+  .hc-sum {
+    grid-column: 3;
+    justify-self: end;
+    white-space: nowrap;
+  }
+  .hc-row-span .hc-error,
+  .hc-row .hc-error {
+    grid-column: 1 / -1;
+  }
+  @media (min-width: 720px) {
+    .hc-row {
+      grid-template-columns: 7rem repeat(3, minmax(0, 1fr)) 7.5rem;
+    }
+    .hc-day {
+      grid-column: 1;
+      grid-row: 1;
+      align-self: center;
+    }
+    .hc-sum {
+      grid-column: 5;
+      grid-row: 1;
+      align-self: center;
+    }
+    .hc-row-span {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .hc-field {
+    display: grid;
+    gap: 4px;
+  }
+  .hc-field label {
+    font-size: var(--text-small);
+    color: var(--text-muted);
+  }
+  .hc-input {
+    width: 100%;
+    min-height: var(--tap-min);
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+  }
+  .hc-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+  .hc-input[aria-invalid='true'] {
+    border-color: var(--danger);
+    box-shadow: inset 0 0 0 1px var(--danger);
+  }
+  .hc-error {
+    color: var(--danger);
+    font-size: var(--text-small);
+    font-weight: 600;
+  }
+  .hc-result {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-5);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+  }
+  .hc-result-label {
+    font-weight: 600;
+  }
+  .hc-result-main {
+    font-family: var(--font-display);
+    font-size: calc(var(--text-h-2) * var(--font-display-scale));
+    line-height: 1.1;
+    color: var(--accent);
+  }
+  .hc-wage {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    max-width: 24rem;
+  }
+  .hc-pay {
+    font-size: var(--text-lead);
+  }
+  .hc-note {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--warning-soft);
+  }
+  .hc-save {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--border);
+  }
+  .hc-save .btn,
+  .td-actions .btn {
+    white-space: normal;
+    text-align: center;
+  }
+  @media (min-width: 900px) {
+    .td {
+      grid-template-columns: minmax(0, 1fr) 320px;
+      align-items: start;
+    }
+  }
+  .td-copy {
+    display: grid;
+    gap: var(--space-5);
+    justify-items: start;
+  }
+  .td-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .td-preview {
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
 }

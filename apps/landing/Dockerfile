@@ -47,6 +47,8 @@ RUN addgroup --system --gid 1001 nodejs \
  && adduser --system --uid 1001 --ingroup nodejs nextjs
 COPY --from=builder --chown=nextjs:nodejs /app/apps/landing/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/landing/.next/static ./apps/landing/.next/static
+# public/ (the timesheet template downloads) is not part of the standalone output either.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/landing/public ./apps/landing/public
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \

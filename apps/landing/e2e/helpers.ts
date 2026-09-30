@@ -18,6 +18,34 @@ export const PAGES = [
 export const SUBPAGES = [
   { id: 'about', locale: 'sv', path: '/om', lang: 'sv-SE', h1: 'Om Klokka' },
   { id: 'privacy', locale: 'en', path: '/en/privacy', lang: 'en', h1: 'Privacy policy' },
+  {
+    id: 'calculator',
+    locale: 'sv',
+    path: '/rakna-arbetstimmar',
+    lang: 'sv-SE',
+    h1: 'Räkna ut arbetstid och timmar',
+  },
+  {
+    id: 'template',
+    locale: 'en',
+    path: '/en/timesheet-template',
+    lang: 'en',
+    h1: 'Free monthly timesheet template in Excel and PDF',
+  },
+  {
+    id: 'app',
+    locale: 'sv',
+    path: '/tidrapportering-app',
+    lang: 'sv-SE',
+    h1: 'Tidrapportering i en app, för både arbetsgivaren och de anställda',
+  },
+  {
+    id: 'guide-change',
+    locale: 'en',
+    path: '/en/guide/can-an-employer-change-hours',
+    lang: 'en',
+    h1: 'Can an employer change the hours on your timesheet?',
+  },
 ] as const;
 
 /** Collects console errors and page errors from the moment it is called. */

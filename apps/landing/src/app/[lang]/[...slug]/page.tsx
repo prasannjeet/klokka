@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { GuidePage, isGuideId } from '@/components/pages/GuidePage';
 import { LegalPage } from '@/components/pages/LegalPage';
+import { ProductPage } from '@/components/pages/ProductPage';
+import { isToolId, ToolPage } from '@/components/pages/ToolPage';
 import { isLocale } from '@/lib/i18n';
 import { pageForSlug, staticSlugParams } from '@/lib/pages';
 import { metadataForPage } from '@/lib/seo';
@@ -34,6 +37,14 @@ export default async function Page({ params }: Props) {
   switch (page.kind) {
     case 'legal':
       return <LegalPage id={page.id} locale={locale} />;
+    case 'product':
+      return <ProductPage id={page.id} locale={locale} />;
+    case 'guide':
+      if (!isGuideId(page.id)) throw new Error(`guide page "${page.id}" needs a guide- id for its copy type`);
+      return <GuidePage id={page.id} locale={locale} />;
+    case 'tool':
+      if (!isToolId(page.id)) throw new Error(`tool page "${page.id}" has no tool component`);
+      return <ToolPage id={page.id} locale={locale} />;
     default:
       // A registered page without a layout must fail the build, never ship as a blank or a 404.
       throw new Error(`no layout for page "${page.id}" of kind "${page.kind}"`);

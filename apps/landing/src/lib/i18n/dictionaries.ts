@@ -363,6 +363,16 @@ export const sv = {
     },
     copyright: '© 2026 Klokka. MIT-licens.',
   },
+  /** The frame of a guide page (components/pages/GuidePage): `{author}` and `{date}` come from the guide's copy. */
+  guide: {
+    reviewed: 'Av {author}. Granskad {date}, källor längst ner.',
+    disclaimer: 'Det här är en allmän genomgång, inte juridisk rådgivning.',
+    toc: 'Innehåll',
+    sources: 'Källor',
+    aboutTitle: 'Om Klokka',
+    aboutBody:
+      'Klokka är gratis att använda och har öppen källkod under MIT-licens. Det finns ingen gräns för antalet anställda, och Klokka fungerar på webben och i Android-appen, på svenska och engelska. Arbetsgivaren för in timmarna och båda ser samma månad: [så funkar Klokka](page:home).',
+  },
   notFound: {
     title: 'Sidan finns inte.',
     back: 'Till startsidan',
@@ -720,6 +730,15 @@ export const en: Dictionary = {
       create: 'Create a business',
     },
     copyright: '© 2026 Klokka. MIT licensed.',
+  },
+  guide: {
+    reviewed: 'By {author}. Reviewed {date}, sources at the end.',
+    disclaimer: 'This is a general overview, not legal advice.',
+    toc: 'Contents',
+    sources: 'Sources',
+    aboutTitle: 'About Klokka',
+    aboutBody:
+      'Klokka is free to use and open source under the MIT licence. There is no limit on the number of employees, and it works on the web and in the Android app, in Swedish and English. The employer logs the hours and both sides see the same month: [how Klokka works](page:home).',
   },
   notFound: {
     title: 'Page not found.',

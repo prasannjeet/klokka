@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { downloadHref, templateFiles } from '@/lib/downloads';
 import { getDictionary, htmlLang, locales, ogLocale, otherLocale, type Locale } from '@/lib/i18n';
 import { pageCopy } from '@/lib/i18n/pages';
 import { apkUrl, appUrl, contactEmail, indexable, licenseUrl, repoUrl, siteUrl } from '@/lib/links';
@@ -69,8 +70,8 @@ export function metadataForPage(id: PageId, locale: Locale): Metadata {
 
 /**
  * One JSON-LD graph per page: the Organization and WebSite every page shares (by @id), this page's WebPage, its
- * breadcrumbs, its FAQ, the one SoftwareApplication (home and app page only) and an Article for a guide. No
- * ratings: there are no genuine reviews to mark up.
+ * breadcrumbs, its FAQ, the one SoftwareApplication (home and app page only), the SoftwareSourceCode (open source
+ * page) and an Article for a guide. No ratings: there are no genuine reviews to mark up.
  */
 export function jsonLdForPage(id: PageId, locale: Locale) {
   const page = pageById(id);
@@ -153,6 +154,58 @@ export function jsonLdForPage(id: PageId, locale: Locale) {
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'SEK' },
       publisher: { '@id': org },
     });
+  }
+
+  if (id === 'open-source') {
+    graph.push({
+      '@type': 'SoftwareSourceCode',
+      '@id': `${siteUrl}/#source`,
+      name: 'Klokka',
+      codeRepository: repoUrl,
+      license: licenseUrl,
+      programmingLanguage: ['Java', 'TypeScript'],
+      targetProduct: { '@id': `${siteUrl}/#app` },
+      publisher: { '@id': org },
+    });
+  }
+
+  if (id === 'calculator') {
+    graph.push({
+      '@type': 'WebApplication',
+      '@id': `${url}#calculator`,
+      name: copy.h1,
+      url,
+      applicationCategory: 'UtilitiesApplication',
+      browserRequirements: 'Requires JavaScript',
+      isAccessibleForFree: true,
+      inLanguage: htmlLang[locale],
+      publisher: { '@id': org },
+    });
+  }
+
+  if (id === 'template') {
+    const files = templateFiles[locale];
+    const documents = [
+      {
+        file: files.xlsx,
+        kind: 'Excel',
+        format: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      },
+      { file: files.pdf, kind: 'PDF', format: 'application/pdf' },
+    ];
+    graph.push(
+      ...documents.map(({ file, kind, format }) => ({
+        '@type': 'DigitalDocument',
+        '@id': `${absolute(downloadHref(file))}#file`,
+        name: `${copy.breadcrumb} (${kind})`,
+        url: absolute(downloadHref(file)),
+        encodingFormat: format,
+        isAccessibleForFree: true,
+        inLanguage: htmlLang[locale],
+        isPartOf: { '@id': webPage },
+        publisher: { '@id': org },
+      })),
+    );
   }
 
   if (page.kind === 'guide') {

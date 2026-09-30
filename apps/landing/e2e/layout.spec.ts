@@ -130,6 +130,55 @@ test('an unknown URL answers 404 with the bilingual page', async ({ page }) => {
 test.describe('interactions at phone width', () => {
   test.use({ viewport: PHONES[1] });
 
+  test('the calculator adds up a day, flags an unreadable time, and survives the soft keyboard', async ({
+    page,
+  }) => {
+    const errors = collectErrors(page);
+    await page.goto('/rakna-arbetstimmar');
+    const monday = page.getByRole('group', { name: 'Måndag' });
+    await monday.getByLabel('Start').fill('8');
+    await monday.getByLabel('Slut').fill('16:30');
+    await monday.getByLabel('Rast (min)').fill('30');
+    const total = page.locator('.hc-result');
+    await expect(total).toContainText('Veckan totalt');
+    await expect(page.locator('.hc-result-main')).toHaveText('8 h');
+    await expect(total).toContainText('8:00');
+    await expect(monday.locator('.hc-sum')).toContainText('8 h');
+
+    const tuesday = page.getByRole('group', { name: 'Tisdag' });
+    await tuesday.getByLabel('Start').fill('25');
+    await tuesday.getByLabel('Slut').focus();
+    await expect(tuesday.getByLabel('Start')).toHaveAttribute('aria-invalid', 'true');
+    await expect(tuesday.locator('.hc-error')).toHaveText('Skriv tiden som 8, 8:30 eller 0830.');
+
+    // The soft keyboard proxy: focus an input, then blur it; the page must not scroll sideways at any point.
+    const noSideScroll = () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+    await page.getByRole('group', { name: 'Söndag' }).getByLabel('Rast (min)').focus();
+    expect(await noSideScroll()).toBe(true);
+    await page.locator('h1').click();
+    expect(await noSideScroll()).toBe(true);
+    expect(await escapingElements(page)).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+
+  test('the template page offers both files with the download attribute', async ({ page, request }) => {
+    await page.goto('/tidrapport-mall');
+    for (const [name, type] of [
+      ['Ladda ner Excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+      ['Ladda ner PDF', 'application/pdf'],
+    ] as const) {
+      const link = page.getByRole('link', { name: new RegExp(`^${name} \\(.+ kB\\)$`) });
+      await expect(link).toHaveAttribute('download', '');
+      const res = await request.get((await link.getAttribute('href'))!);
+      expect(res.status(), name).toBe(200);
+      expect(res.headers()['content-type'], name).toContain(type);
+    }
+    await expect(page.locator('img.td-preview')).toHaveAttribute(
+      'alt',
+      /^Förhandsvisning av tidrapport mallen/,
+    );
+  });
+
   test('the menu opens as a dialog, takes focus, and Escape closes it', async ({ page }) => {
     await page.goto('/en');
     const burger = page.getByRole('button', { name: 'Open menu' });

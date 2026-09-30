@@ -140,7 +140,7 @@ export const en: PageCopyOf<typeof sv> = {
     {
       h2: 'The code is open',
       body: [
-        `Klokka\'s source code is licensed under the [MIT licence](${licenseUrl}). The licence covers the code; these terms cover the service we run on klokka.se.`,
+        `Klokka’s source code is licensed under the [MIT licence](${licenseUrl}). The licence covers the code; these terms cover the service we run on klokka.se.`,
       ],
     },
     {

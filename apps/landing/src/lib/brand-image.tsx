@@ -129,7 +129,7 @@ function HomeCard({ art, locale }: { art: string; locale: Locale }) {
         fontFamily: 'Inter',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- Satori draws <img>, there is no next/image here */}
+      {/* eslint-disable-next-line -- no-img-element: Satori draws <img>, there is no next/image here (the root config has no Next plugin) */}
       <img
         src={art}
         alt=""
@@ -204,6 +204,9 @@ function HomeCard({ art, locale }: { art: string; locale: Locale }) {
 /** Every other page's card: eyebrow, title and the page's address over its artwork. */
 function PageCard({ art, id, locale }: { art: string; id: PageId; locale: Locale }) {
   const { card } = pageCopy(id, locale);
+  // The phones stand further left than the clock (the left phone's edge is about 530 px in), so on that artwork
+  // the eyebrow and title get a narrower column and a smaller title.
+  const phones = pageById(id).background === 'phones';
   const address = `${siteUrl.replace(/^https?:\/\//, '')}${hrefFor(id, locale)}`;
   return (
     <div
@@ -216,7 +219,7 @@ function PageCard({ art, id, locale }: { art: string; id: PageId; locale: Locale
         fontFamily: 'Inter',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- Satori draws <img>, there is no next/image here */}
+      {/* eslint-disable-next-line -- no-img-element: Satori draws <img>, there is no next/image here (the root config has no Next plugin) */}
       <img
         src={art}
         alt=""
@@ -249,7 +252,9 @@ function PageCard({ art, id, locale }: { art: string; id: PageId; locale: Locale
         }}
       >
         <Logo size={50} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', gap: 20, ...(phones ? { maxWidth: 440 } : {}) }}
+        >
           <div
             style={{
               fontSize: 22,
@@ -265,7 +270,7 @@ function PageCard({ art, id, locale }: { art: string; id: PageId; locale: Locale
           <div
             style={{
               fontFamily: 'Unbounded',
-              fontSize: 64,
+              fontSize: phones ? 52 : 64,
               lineHeight: 1.08,
               letterSpacing: '-0.02em',
               color: ink.text,
