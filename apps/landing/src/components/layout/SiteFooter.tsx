@@ -1,22 +1,40 @@
 import { Mark } from '@/components/ui/Icon';
 import type { Dictionary, Locale } from '@/lib/i18n';
+import { pageCopy } from '@/lib/i18n/pages';
 import { apkUrl, appUrl, issuesUrl, licenseUrl, repoUrl } from '@/lib/links';
+import { footerColumns, hrefFor, type FooterGroup, type PageId } from '@/lib/pages';
 import { LocaleSwitch } from './LocaleSwitch';
 
-export function SiteFooter({ t, locale }: { t: Dictionary; locale: Locale }) {
+type Link = { href: string; label: string };
+
+/** `page` is the page being shown, so the language switch leads to the same page in the other language. */
+export function SiteFooter({ t, locale, page }: { t: Dictionary; locale: Locale; page: PageId }) {
   const f = t.footer;
-  const columns = [
+  const home = (hash: string) => hrefFor('home', locale, hash);
+  // The registry's pages per footer group, named by their breadcrumb.
+  const registered = footerColumns(locale);
+  const pagesIn = (group: FooterGroup): Link[] =>
+    (registered.find((c) => c.group === group)?.links ?? []).map((link) => ({
+      href: link.href,
+      label: pageCopy(link.id, locale).breadcrumb,
+    }));
+
+  const columns: { title: string; links: Link[] }[] = [
     {
-      title: f.product,
+      title: f.groups.product,
       links: [
-        { href: '#how', label: f.links.how },
-        { href: '#employers', label: f.links.employers },
-        { href: '#employees', label: f.links.employees },
-        { href: '#insights', label: f.links.insights },
-        { href: '#pay', label: f.links.pay },
+        ...pagesIn('product'),
+        { href: home('#how'), label: f.links.how },
+        { href: home('#employers'), label: f.links.employers },
+        { href: home('#employees'), label: f.links.employees },
+        { href: home('#insights'), label: f.links.insights },
+        { href: home('#pay'), label: f.links.pay },
         { href: apkUrl, label: f.links.android },
       ],
     },
+    ...(['tools', 'guides', 'industries'] as const)
+      .map((group) => ({ title: f.groups[group], links: pagesIn(group) }))
+      .filter((column) => column.links.length > 0),
     {
       title: f.openSource,
       links: [
@@ -26,9 +44,10 @@ export function SiteFooter({ t, locale }: { t: Dictionary; locale: Locale }) {
       ],
     },
     {
-      title: f.help,
+      title: f.groups.klokka,
       links: [
-        { href: '#faq', label: f.links.faq },
+        ...pagesIn('klokka'),
+        { href: home('#faq'), label: f.links.faq },
         { href: appUrl, label: f.links.login },
         { href: appUrl, label: f.links.create },
       ],
@@ -40,7 +59,7 @@ export function SiteFooter({ t, locale }: { t: Dictionary; locale: Locale }) {
       <div className="wrap">
         <div className="foot-grid">
           <div>
-            <a className="wordmark" href="#top" aria-label={t.a11y.home}>
+            <a className="wordmark" href={hrefFor('home', locale)} aria-label={t.a11y.home}>
               <Mark className="mark" />
               klokka
             </a>
@@ -63,7 +82,7 @@ export function SiteFooter({ t, locale }: { t: Dictionary; locale: Locale }) {
         </div>
         <div className="foot-bar">
           <span>{f.copyright}</span>
-          <LocaleSwitch locale={locale} label={t.a11y.language} />
+          <LocaleSwitch locale={locale} page={page} label={t.a11y.language} />
         </div>
       </div>
       <div className="wrap foot-big" aria-hidden="true">

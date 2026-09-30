@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1.7
-# klokka-web: Next.js standalone on node:24-alpine, non-root, port 3000, runtime env only.
+# klokka-web: Next.js standalone on node:24-alpine, non-root, port 3000. Runtime env only, except the marketing
+# site's URL (the share-preview image), which Next.js inlines at build time and so is a build argument.
 # Build from the repo root so the TypeScript-source workspace packages are in the context:
 #   docker build -f apps/web/Dockerfile -t docker.nexus.coolify.ooguy.com/klokka-web:<tag> .
 # apps/web/Dockerfile.dockerignore trims the context (BuildKit reads it next to this file).
@@ -21,6 +22,9 @@ FROM deps AS build
 WORKDIR /repo
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Where the Open Graph image lives (<site>/og/home-<locale>.jpg); the default is staging's, as in image.sh.
+ARG NEXT_PUBLIC_SITE_URL=https://klokka.coolify.ooguy.com
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 RUN npm run build --workspace @klokka/web
 
 FROM node:24-alpine AS runner

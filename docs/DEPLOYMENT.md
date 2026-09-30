@@ -124,9 +124,13 @@ deleted from Coolify.
   `LOGTO_BASE_URL`, `KLOKKA_API_RESOURCE` (the names are the ones `apps/web/src/lib/env.ts` reads; the
   provisional `LOGTO_API_RESOURCE` made every page answer 500 and was replaced during CHQ-143),
   `KLOKKA_API_BASE_URL` (`http://klokka-api:8080/v1`, see below), `KLOKKA_ANDROID_APK_URL` (the join page's
-  "Get the Android app" link), `NEXT_PUBLIC_APP_URL`.
+  "Get the Android app" link), `NEXT_PUBLIC_APP_URL`. `NEXT_PUBLIC_SITE_URL` is a build argument only (`image.sh`
+  passes the workflow's value, the Dockerfile defaults to staging's landing): the share-preview image is
+  `<site>/og/home-<locale>.jpg`.
 - `klokka-landing` (`0sbvfkrt1vvbofzkk5q8ndv6`): `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_APP_URL`,
   `NEXT_PUBLIC_APK_URL` (also passed as build arguments, since Next.js inlines `NEXT_PUBLIC_*` at build time).
+  `NEXT_PUBLIC_INDEXABLE` is a build argument only: `false` by default (staging, noindex, checked by CI after each
+  deploy with `.github/scripts/index-check.sh`), `true` only in `release.yml` for production.
 
 ### Staging specifics
 

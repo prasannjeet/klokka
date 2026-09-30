@@ -8,7 +8,10 @@
 # api:          the Dockerfile copies the fast-jar, so run `mvn -f apps/api/pom.xml install` first; context apps/api.
 # web, landing: multi-stage apps/<app>/Dockerfile with the repository root as context (npm workspaces).
 # The landing bakes its public URLs at build time (NEXT_PUBLIC_*), so they are build arguments; the defaults are
-# staging's. KLOKKA_BUILD_VERSION overrides the API's reported version (release.yml passes the tag's version).
+# staging's. The web app bakes in NEXT_PUBLIC_SITE_URL too: its share-preview image lives on the landing.
+# NEXT_PUBLIC_INDEXABLE (default false) lets search engines index the landing: only release.yml sets it to true, so
+# a staging or local image is always noindex. KLOKKA_BUILD_VERSION overrides the API's reported version
+# (release.yml passes the tag's version).
 # The caller must already be logged in to the registry.
 set -euo pipefail
 
@@ -34,12 +37,12 @@ case "$app" in
     ;;
   web)
     context=.
-    build_args=(--build-arg "NEXT_PUBLIC_APP_URL=$APP_URL")
+    build_args=(--build-arg "NEXT_PUBLIC_APP_URL=$APP_URL" --build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL")
     ;;
   landing)
     context=.
     build_args=(--build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL" --build-arg "NEXT_PUBLIC_APP_URL=$APP_URL"
-      --build-arg "NEXT_PUBLIC_APK_URL=$APK_URL")
+      --build-arg "NEXT_PUBLIC_APK_URL=$APK_URL" --build-arg "NEXT_PUBLIC_INDEXABLE=${NEXT_PUBLIC_INDEXABLE:-false}")
     ;;
   *) echo "unknown app: $app (api, web or landing)" >&2; exit 2 ;;
 esac

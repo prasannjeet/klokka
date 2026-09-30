@@ -888,6 +888,10 @@
     }
   },
   "web": {
+    "meta": {
+      "description": "Arbetsgivaren för in timmarna och de anställda ser samma månad. Gratis att använda och öppen källkod.",
+      "ogAlt": "Klokka. En klocka. För båda."
+    },
     "shell": {
       "clockLabel": "En järnvägsklocka som visar tiden just nu",
       "operatorConsole": "Operatörskonsol"

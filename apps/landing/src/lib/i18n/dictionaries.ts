@@ -14,11 +14,14 @@
 
 export const sv = {
   meta: {
-    title: 'Klokka, gratis tidrapportering för småföretag',
+    title: 'Gratis tidrapportering för småföretag | Klokka',
     description:
-      'Arbetsgivaren för in timmarna och de anställda ser samma månad i mobilen, direkt när något ändras. Gratis att använda och öppen källkod. Lön visas bara om du vill.',
+      'Gratis tidrapportering för småföretag: du för in de anställdas timmar per dag och båda ser samma månad. Öppen källkod, webb och Android.',
     ogAlt: 'Klokka. En klocka. För båda.',
-    ogLine: 'Timmarna som både arbetsgivaren och de anställda ser.',
+    card: { eyebrow: 'Öppen källkod, MIT', title: 'Gratis tidrapportering för småföretag' },
+    breadcrumb: 'Klokka',
+    /** The pill on the homepage's link card. */
+    cardPill: 'Gratis och öppen källkod · klokka.se',
     jsonLdDescription:
       'Klokka är en gratis app med öppen källkod där arbetsgivaren för in timmarna varje anställd har jobbat och båda ser samma månad. Lön är valfritt.',
   },
@@ -33,6 +36,7 @@ export const sv = {
     switchLanguage: 'In English',
     theme: 'Byt mellan ljust och mörkt läge',
     external: 'öppnas på en annan webbplats',
+    breadcrumbs: 'Du är här',
   },
   nav: {
     how: 'Så funkar det',
@@ -48,12 +52,12 @@ export const sv = {
     badge: 'Gratis och öppen källkod. MIT-licens.',
     line1: 'En klocka.',
     line2: 'För båda.',
-    madeFor: 'Gjord för',
+    madeFor: 'Gratis tidrapportering för',
     words: ['kaféet', 'pizzerian', 'frisörsalongen', 'städfirman', 'bageriet', 'kvartersbutiken'],
     lead: 'Arbetsgivaren för in timmarna som var och en har jobbat. De anställda ser samma månad i mobilen, dag för dag, direkt när något ändras. Lönen är ett val, inte ett krav.',
     primaryCta: 'Skapa ditt företag',
     secondaryCta: 'Se hur det funkar',
-    note: 'Gratis att använda, inget kort behövs.',
+    note: 'Gratis att använda, inget kort behövs. Öppen källkod under MIT-licens, ingen gräns för antalet anställda. Fungerar på webben och i Android-appen, på svenska och engelska.',
     trust: [
       'Android och webb, samma funktioner',
       'Svenska och engelska',
@@ -92,7 +96,7 @@ export const sv = {
   },
   how: {
     eyebrow: 'Så funkar det',
-    title: 'Tre steg. Sen sköter det sig självt.',
+    title: 'Tidrapportering i tre steg. Sen sköter det sig självt.',
     lead: 'Klokka gör en enda sak: timmarna någon har jobbat, så att båda är överens. Allt annat i appen finns för att det ska gå på några sekunder.',
     steps: [
       {
@@ -287,6 +291,10 @@ export const sv = {
         a: 'Ja. Klokka är gratis att använda och du behöver inget kort för att registrera dig. Koden är MIT-licensierad, så du kan också köra en egen kopia.',
       },
       {
+        q: 'Vilken gratis app för tidrapportering passar ett litet företag?',
+        a: 'Det beror på vem som för in tiden. Klokka passar för tidrapportering där arbetsgivaren för in timmarna åt en handfull anställda och båda ser samma månad. Ska personalen stämpla in själv, eller behöver ni schema, passar en stämpelklocka eller ett schemaverktyg bättre.',
+      },
+      {
         q: 'Måste jag visa lön?',
         a: 'Nej. Lön är ett reglage för företaget och det är av från början. Slå på det så får varje anställd en timlön och ser pengar bredvid timmarna. Slå av det så är det bara timmar.',
       },
@@ -310,6 +318,10 @@ export const sv = {
         q: 'Vad är en flagga?',
         a: 'Den anställdas sätt att säga att en post är fel, med ett meddelande. Arbetsgivaren rättar eller avfärdar den, båda får en notis och historiken visar vad som hände.',
       },
+      {
+        q: 'Är Klokka en personalliggare?',
+        a: 'Nej. I Klokka förs timmarna in i efterhand, och det är ingen personalliggare. Kaféer, restauranger och frisörsalonger som måste föra personalliggare behöver den fortfarande, vid sidan av Klokka.',
+      },
     ],
   },
   cta: {
@@ -327,9 +339,14 @@ export const sv = {
   footer: {
     blurb:
       'Timmarna, synliga för båda. Gratis och öppen källkod, byggd i Sverige för alla ställen som betalar per timme.',
-    product: 'Produkt',
     openSource: 'Öppen källkod',
-    help: 'Hjälp',
+    groups: {
+      product: 'Produkt',
+      tools: 'Verktyg och mallar',
+      guides: 'Guider',
+      industries: 'Branscher',
+      klokka: 'Om Klokka',
+    },
     links: {
       how: 'Så funkar det',
       employers: 'För arbetsgivare',
@@ -358,11 +375,13 @@ export type Dictionary = Widen<typeof sv>;
 
 export const en: Dictionary = {
   meta: {
-    title: 'Klokka, free hours tracking for small employers',
+    title: 'Free timesheet app for employee hours | Klokka',
     description:
-      'The employer logs the hours each person worked and both sides see the same month, the moment it changes. Free to use and open source. Pay is optional.',
+      'A free timesheet app for employee hours: you log what each person worked, day by day, and both sides see the same month. Open source, on web and Android.',
     ogAlt: 'Klokka. One clock. Both sides.',
-    ogLine: 'The hours an employer and their employees both see.',
+    card: { eyebrow: 'Open source, MIT', title: 'Free timesheet app for small teams' },
+    breadcrumb: 'Klokka',
+    cardPill: 'Free and open source · klokka.se',
     jsonLdDescription:
       'Klokka is a free, open-source app where an employer logs the hours each employee worked and both of them see the same month. Pay is optional.',
   },
@@ -377,6 +396,7 @@ export const en: Dictionary = {
     switchLanguage: 'På svenska',
     theme: 'Switch between light and dark mode',
     external: 'opens on another site',
+    breadcrumbs: 'Breadcrumb',
   },
   nav: {
     how: 'How it works',
@@ -392,12 +412,12 @@ export const en: Dictionary = {
     badge: 'Free and open source. MIT licence.',
     line1: 'One clock.',
     line2: 'Both sides.',
-    madeFor: 'Made for the',
+    madeFor: 'Free time tracking for the',
     words: ['cafe', 'salon', 'bakery', 'cleaning crew', 'corner shop', 'small agency'],
     lead: 'The employer logs the hours each person worked. Every employee sees the same month on their phone, day by day, the moment it changes. Pay is a switch, not a requirement.',
     primaryCta: 'Create your business',
     secondaryCta: 'See how it works',
-    note: 'Free to use, no card needed.',
+    note: 'Free to use, no card needed. Open source under the MIT licence, no limit on the number of employees. Works on the web and in the Android app, in English and Swedish.',
     trust: [
       'Android and web, same features',
       'English and Swedish',
@@ -436,7 +456,7 @@ export const en: Dictionary = {
   },
   how: {
     eyebrow: 'How it works',
-    title: 'Three steps. Then it runs itself.',
+    title: 'Timesheets in three steps. Then they run themselves.',
     lead: 'Klokka does one job: the hours a person worked, agreed by both sides. Everything else in the app exists to make that job take seconds.',
     steps: [
       {
@@ -631,6 +651,10 @@ export const en: Dictionary = {
         a: 'Yes. Klokka is free to use and you need no card to sign up. The code is MIT licensed, so you can also run your own copy.',
       },
       {
+        q: 'Which free timesheet app suits a small business?',
+        a: 'It depends on who records the time. Klokka fits time tracking where the employer logs the hours for a handful of staff and both sides see the same month. If staff should clock in themselves, or you need schedules, a time clock or a scheduling tool fits better.',
+      },
+      {
         q: 'Do I have to show pay?',
         a: 'No. Pay is a switch per business, off by default. Turn it on and every employee gets an hourly rate and sees money next to hours. Turn it off and it is hours only.',
       },
@@ -654,6 +678,10 @@ export const en: Dictionary = {
         q: 'What is a flag?',
         a: "An employee's way to say an entry is wrong, with a message. The employer fixes or dismisses it; both sides are notified and the history shows what happened.",
       },
+      {
+        q: 'Is Klokka a staff register (personalliggare)?',
+        a: 'No. Klokka records hours after the fact; it is not a staff register. Cafes, restaurants and salons in Sweden that must keep a personalliggare still need one, alongside Klokka.',
+      },
     ],
   },
   cta: {
@@ -669,9 +697,14 @@ export const en: Dictionary = {
   },
   footer: {
     blurb: 'Hours in the open. Free, open source, built in Sweden for every place that pays by the hour.',
-    product: 'Product',
     openSource: 'Open source',
-    help: 'Help',
+    groups: {
+      product: 'Product',
+      tools: 'Tools and templates',
+      guides: 'Guides',
+      industries: 'Industries',
+      klokka: 'About Klokka',
+    },
     links: {
       how: 'How it works',
       employers: 'For employers',

@@ -888,6 +888,10 @@
     }
   },
   "web": {
+    "meta": {
+      "description": "The employer logs the hours and every employee sees the same month. Free to use and open source.",
+      "ogAlt": "Klokka. One clock. Both sides."
+    },
     "shell": {
       "clockLabel": "A railway clock showing the current time",
       "operatorConsole": "Operator console"

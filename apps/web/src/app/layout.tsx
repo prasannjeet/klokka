@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Unbounded } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { requestLocale, requestMode } from '@/lib/server-prefs';
+import { translator } from '@klokka/core';
+import { requestLocale, requestMode, requestPreviewLocale } from '@/lib/server-prefs';
 import { Providers } from './providers';
 import './globals.css';
 
@@ -14,11 +15,38 @@ const unbounded = Unbounded({
 const inter = Inter({ subsets: ['latin', 'latin-ext'], variable: '--font-inter', display: 'swap' });
 const jetbrains = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
 
-export const metadata: Metadata = {
-  title: 'Klokka',
-  applicationName: 'Klokka',
-  robots: { index: false, follow: false },
-};
+// The marketing site serves the share images (1200x630); inlined at build time, like the landing's own URLs.
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://klokka.coolify.ooguy.com').replace(/\/+$/, '');
+
+// Never indexed (also X-Robots-Tag in next.config.ts), but a shared link, an invitation above all, still gets a
+// proper preview in the viewer's language (Swedish for a preview bot that sends no language at all).
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await requestPreviewLocale();
+  const t = translator(locale);
+  const description = t('web.meta.description');
+  const image = {
+    url: `${SITE_URL}/og/home-${locale}.jpg`,
+    width: 1200,
+    height: 630,
+    type: 'image/jpeg',
+    alt: t('web.meta.ogAlt'),
+  };
+  return {
+    title: 'Klokka',
+    applicationName: 'Klokka',
+    description,
+    robots: { index: false, follow: false },
+    openGraph: {
+      type: 'website',
+      siteName: 'Klokka',
+      title: 'Klokka',
+      description,
+      locale: locale === 'sv' ? 'sv_SE' : 'en_US',
+      images: [image],
+    },
+    twitter: { card: 'summary_large_image', title: 'Klokka', description, images: [image] },
+  };
+}
 
 export const viewport: Viewport = {
   width: 'device-width',

@@ -1,10 +1,9 @@
-import type { Metadata, Viewport } from 'next';
+import type { Viewport } from 'next';
 import { color } from '@klokka/tokens';
 import '../globals.css';
 import { IconSprite } from '@/components/ui/IconSprite';
 import { fontVariables } from '@/lib/fonts';
 import { getDictionary, htmlLang, locales, resolveLocale } from '@/lib/i18n';
-import { jsonLd, metadataFor } from '@/lib/seo';
 
 type Props = {
   children: React.ReactNode;
@@ -22,11 +21,6 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: color.dark.bg },
   ],
 };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { lang } = await params;
-  return metadataFor(resolveLocale(lang));
-}
 
 /**
  * Runs before first paint: marks the page as scripted (the reveal fallback hides content only then) and
@@ -51,10 +45,6 @@ export default async function RootLayout({ children, params }: Props) {
         </a>
         <IconSprite />
         {children}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(locale)).replace(/</g, '\\u003c') }}
-        />
       </body>
     </html>
   );

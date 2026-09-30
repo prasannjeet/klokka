@@ -15,7 +15,7 @@ both. The commit deploys staging like any push; the tag runs `.github/workflows/
 
 | Job | Produces |
 |---|---|
-| `images` | `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version>`. The landing is built with the production URLs (Next.js bakes them). A `v*` tag never moves `:latest`. |
+| `images` | `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version>`. The landing is built with the production URLs (Next.js bakes them) and `NEXT_PUBLIC_INDEXABLE=true`; the job then runs it and fails unless `/` and `/en` are indexable (`.github/scripts/index-check.sh`). A `v*` tag never moves `:latest`. |
 | `apk` | signed production APK at `klokka-downloads/prod/klokka-v<version>.apk` and `prod/klokka-latest.apk` (the landing's link). Refuses to build while a `PROD_*` app setting is empty. |
 
 Nothing deploys automatically.

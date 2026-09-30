@@ -361,6 +361,11 @@ jobs:
           TAG: ${{ steps.image.outputs.tag }}
         run: .github/scripts/coolify-deploy.sh "$APP_UUID" "$TAG" "$HEALTH_URL"
 
+      # Staging duplicates production's pages, so it must never be indexed: / and /en need the noindex robots meta
+      # and the X-Robots-Tag header (NEXT_PUBLIC_INDEXABLE is unset here, so image.sh builds with false).
+      - name: Staging is noindex
+        run: .github/scripts/index-check.sh "$NEXT_PUBLIC_SITE_URL" noindex
+
   mobile:
     name: Mobile (test, signed release APK, publish)
     needs: changes

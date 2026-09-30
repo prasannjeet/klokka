@@ -3,7 +3,7 @@ import type { Dictionary } from '@/lib/i18n';
 import { apkUrl } from '@/lib/links';
 import { Icon } from './Icon';
 
-/** "Get the Android app": the signed release APK on Nexus, with the one-line sideloading note. */
+/** "Get the Android app": the signed release APK (through /download/android), with the one-line sideloading note. */
 export function ApkLink({
   t,
   variant = 'secondary',

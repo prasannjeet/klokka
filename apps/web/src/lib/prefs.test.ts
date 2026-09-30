@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { localeFrom, modeFrom } from './prefs';
+import { localeFrom, modeFrom, previewLocaleFrom } from './prefs';
 
 describe('localeFrom', () => {
   it('prefers the stored cookie', () => {
@@ -12,6 +12,20 @@ describe('localeFrom', () => {
   });
   it('treats a missing header as English', () => {
     expect(localeFrom(undefined, null)).toBe('en');
+  });
+});
+
+describe('previewLocaleFrom', () => {
+  it('gives a request with no language signal (a link-preview bot) Swedish', () => {
+    expect(previewLocaleFrom(undefined, null)).toBe('sv');
+    expect(previewLocaleFrom(undefined, '')).toBe('sv');
+    expect(previewLocaleFrom('xx', '  ')).toBe('sv');
+  });
+  it('follows the cookie or the header whenever there is one, like the page', () => {
+    expect(previewLocaleFrom('en', null)).toBe('en');
+    expect(previewLocaleFrom(undefined, 'en-US,en;q=0.9')).toBe('en');
+    expect(previewLocaleFrom(undefined, 'nb-NO')).toBe('en');
+    expect(previewLocaleFrom(undefined, 'sv-SE')).toBe('sv');
   });
 });
 

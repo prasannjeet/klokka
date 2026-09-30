@@ -14,6 +14,12 @@ export const PAGES = [
   { locale: 'en', path: '/en', lang: 'en', tagline: 'One clock.' },
 ] as const;
 
+/** One registry page per layout kind: width, targets, language, and a head that points at the page's own card. */
+export const SUBPAGES = [
+  { id: 'about', locale: 'sv', path: '/om', lang: 'sv-SE', h1: 'Om Klokka' },
+  { id: 'privacy', locale: 'en', path: '/en/privacy', lang: 'en', h1: 'Privacy policy' },
+] as const;
+
 /** Collects console errors and page errors from the moment it is called. */
 export function collectErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -51,7 +57,8 @@ export async function smallTargets(page: Page): Promise<string[]> {
   return page.evaluate(() => {
     const out: string[] = [];
     for (const el of Array.from(document.querySelectorAll<HTMLElement>('a, button, summary'))) {
-      if (el.closest('.sprite, .skip, .menu[hidden]')) continue;
+      // Links inside running text are exempt from the target size (WCAG 2.5.8, inline exception).
+      if (el.closest('.sprite, .skip, .menu[hidden], .inline-link')) continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       const tooShort = r.height < 44 - 0.5;

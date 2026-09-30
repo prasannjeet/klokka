@@ -1,25 +1,29 @@
 import { Mark } from '@/components/ui/Icon';
-import { htmlLang, localeHref, otherLocale, type Dictionary, type Locale } from '@/lib/i18n';
+import { htmlLang, otherLocale, type Dictionary, type Locale } from '@/lib/i18n';
 import { appUrl } from '@/lib/links';
+import { hrefFor, type PageId } from '@/lib/pages';
 import { LocaleSwitch } from './LocaleSwitch';
 import { MobileMenu } from './MobileMenu';
 import { ThemeToggle } from './ThemeToggle';
 
-export function SiteNav({ t, locale }: { t: Dictionary; locale: Locale }) {
+/** `page` is the page being shown: the language button leads to the same page in the other language. */
+export function SiteNav({ t, locale, page }: { t: Dictionary; locale: Locale; page: PageId }) {
   const other = otherLocale(locale);
+  // Homepage sections, as full links so they also work from every other page.
+  const home = (hash: string) => hrefFor('home', locale, hash);
   const items = [
-    { href: '#how', label: t.nav.how },
-    { href: '#employers', label: t.nav.employers },
-    { href: '#employees', label: t.nav.employees },
-    { href: '#insights', label: t.nav.insights },
-    { href: '#open-source', label: t.nav.openSource },
-    { href: '#faq', label: t.nav.faq },
+    { href: home('#how'), label: t.nav.how },
+    { href: home('#employers'), label: t.nav.employers },
+    { href: home('#employees'), label: t.nav.employees },
+    { href: home('#insights'), label: t.nav.insights },
+    { href: home('#open-source'), label: t.nav.openSource },
+    { href: home('#faq'), label: t.nav.faq },
   ];
 
   return (
     <div className="wrap">
       <nav className="nav" aria-label={t.a11y.mainNav}>
-        <a className="wordmark" href="#top" aria-label={t.a11y.home}>
+        <a className="wordmark" href={hrefFor('home', locale)} aria-label={t.a11y.home}>
           <Mark className="mark" />
           klokka
         </a>
@@ -33,7 +37,7 @@ export function SiteNav({ t, locale }: { t: Dictionary; locale: Locale }) {
         <div className="nav-right">
           <a
             className="icon-btn"
-            href={localeHref(other)}
+            href={hrefFor(page, other)}
             hrefLang={htmlLang[other]}
             lang={htmlLang[other]}
             aria-label={t.a11y.switchLanguage}
@@ -63,7 +67,7 @@ export function SiteNav({ t, locale }: { t: Dictionary; locale: Locale }) {
             }
             foot={
               <>
-                <LocaleSwitch locale={locale} label={t.a11y.language} />
+                <LocaleSwitch locale={locale} page={page} label={t.a11y.language} />
                 <ThemeToggle label={t.a11y.theme} />
               </>
             }

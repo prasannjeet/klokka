@@ -60,9 +60,9 @@ test('pay switch on, en light 1440', async ({ page }) => {
 
 for (const locale of ['sv', 'en'] as const) {
   test(`social card ${locale}`, async ({ request }) => {
-    const res = await request.get(locale === 'sv' ? '/og.png' : '/og-en.png');
+    const res = await request.get(`/og/home-${locale}.jpg`);
     expect(res.status()).toBe(200);
     const { writeFile } = await import('node:fs/promises');
-    await writeFile(`${OUT}/og-${locale}.png`, await res.body());
+    await writeFile(`${OUT}/og-home-${locale}.jpg`, await res.body());
   });
 }

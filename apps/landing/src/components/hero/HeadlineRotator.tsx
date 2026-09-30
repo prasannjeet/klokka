@@ -6,8 +6,8 @@ const SWAP_MS = 380;
 const HOLD_MS = 3400;
 
 /**
- * The swap move: one noun replaces the next ("Made for the cafe / salon / ..."), out with rotateX and blur,
- * in from the opposite side, 3.4 s hold. Skipped entirely under reduced motion (the first word stays).
+ * The swap move: one noun replaces the next ("Free time tracking for the cafe / salon / ..."), out with rotateX
+ * and blur, in from the opposite side, 3.4 s hold. Skipped entirely under reduced motion (the first word stays).
  */
 export function HeadlineRotator({ words }: { words: readonly string[] }) {
   const [index, setIndex] = useState(0);

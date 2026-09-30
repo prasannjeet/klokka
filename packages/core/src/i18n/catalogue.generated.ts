@@ -756,6 +756,8 @@ export const sv = {
   "web.join.revoked": "Inbjudan har dragits tillbaka. Be {name} skicka en ny om du fortfarande ska gå med.",
   "web.join.signedIn": "Du är inloggad. Det räcker med ett klick för att gå med.",
   "web.join.toSignIn": "Till inloggningen",
+  "web.meta.description": "Arbetsgivaren för in timmarna och de anställda ser samma månad. Gratis att använda och öppen källkod.",
+  "web.meta.ogAlt": "Klokka. En klocka. För båda.",
   "web.month.closedBy": "Stängd {date} av {name}",
   "web.month.closedToast": "{month} är stängd.",
   "web.month.closedToastBody": "Alla i företaget får veta det, och CSV-filen är klar.",
@@ -1706,6 +1708,8 @@ export const en = {
   "web.join.revoked": "This invitation was withdrawn. Ask {name} to send a new one if you should still join.",
   "web.join.signedIn": "You are signed in. Joining takes one click.",
   "web.join.toSignIn": "Go to sign in",
+  "web.meta.description": "The employer logs the hours and every employee sees the same month. Free to use and open source.",
+  "web.meta.ogAlt": "Klokka. One clock. Both sides.",
   "web.month.closedBy": "Closed {date} by {name}",
   "web.month.closedToast": "{month} is closed.",
   "web.month.closedToastBody": "Everyone in the business is told, and the CSV is ready.",
@@ -2638,6 +2642,8 @@ export type MessageParams = {
   "web.join.revoked": { name: string | number };
   "web.join.signedIn": Record<never, never>;
   "web.join.toSignIn": Record<never, never>;
+  "web.meta.description": Record<never, never>;
+  "web.meta.ogAlt": Record<never, never>;
   "web.month.closedBy": { date: string | number; name: string | number };
   "web.month.closedToast": { month: string | number };
   "web.month.closedToastBody": Record<never, never>;

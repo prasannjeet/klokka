@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { collectErrors, escapingElements, PAGES, PHONES, smallTargets, VIEWPORTS } from './helpers';
+import { collectErrors, escapingElements, PAGES, PHONES, smallTargets, SUBPAGES, VIEWPORTS } from './helpers';
 
 for (const p of PAGES) {
   for (const vp of VIEWPORTS) {
@@ -47,11 +47,47 @@ for (const p of PAGES) {
     }));
     expect(head.canonical).toMatch(p.locale === 'sv' ? /^https?:\/\/[^/]+$/ : /\/en$/);
     expect(head.hreflang.sort()).toEqual(['en', 'sv-SE', 'x-default']);
-    expect(head.ogImage).toMatch(p.locale === 'sv' ? /\/og\.png$/ : /\/og-en\.png$/);
+    expect(head.ogImage).toMatch(p.locale === 'sv' ? /\/og\/home-sv\.jpg$/ : /\/og\/home-en\.jpg$/);
     expect(head.ogLocale).toBe(p.locale === 'sv' ? 'sv_SE' : 'en_GB');
     expect(head.description?.length ?? 0).toBeGreaterThan(80);
     const types = (head.jsonLd['@graph'] as Array<{ '@type': string }>).map((n) => n['@type']);
-    expect(types).toEqual(['Organization', 'SoftwareApplication']);
+    expect(types).toEqual(['Organization', 'WebSite', 'WebPage', 'FAQPage', 'SoftwareApplication']);
+  });
+}
+
+for (const p of SUBPAGES) {
+  for (const vp of VIEWPORTS) {
+    test(`${p.path} ${vp.width}x${vp.height}: fits the width, 44 px targets, right language`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(vp);
+      const errors = collectErrors(page);
+      await page.goto(p.path);
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page.locator('html')).toHaveAttribute('lang', p.lang);
+      await expect(page.locator('h1')).toHaveText(p.h1);
+      const [scrollWidth, innerWidth] = await page.evaluate(() => [
+        document.documentElement.scrollWidth,
+        window.innerWidth,
+      ]);
+      expect(scrollWidth).toBeLessThanOrEqual(innerWidth);
+      expect(await escapingElements(page)).toEqual([]);
+      expect(await smallTargets(page)).toEqual([]);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  test(`${p.path}: head points at its own card and its twin page`, async ({ page }) => {
+    await page.goto(p.path);
+    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(ogImage).toMatch(new RegExp(`/og/${p.id}-${p.locale}\\.jpg$`));
+    const hreflang = await page
+      .locator('link[rel="alternate"][hreflang]')
+      .evaluateAll((ls) => ls.map((l) => l.getAttribute('hreflang')));
+    expect(hreflang.sort()).toEqual(['en', 'sv-SE', 'x-default']);
+    expect(
+      (await page.request.get(ogImage!.replace(/^https?:\/\/[^/]+/, ''))).headers()['content-type'],
+    ).toBe('image/jpeg');
   });
 }
 
@@ -67,7 +103,13 @@ test('robots, sitemap, social cards, icon and security headers', async ({ reques
   const sitemap = await (await request.get('/sitemap.xml')).text();
   expect(sitemap).toContain('hreflang="sv-SE"');
   expect(sitemap).toContain('/en</loc>');
-  for (const path of ['/og.png', '/og-en.png', '/logo.png']) {
+  for (const path of ['/og/home-sv.jpg', '/og/about-en.jpg']) {
+    const res = await request.get(path);
+    expect(res.status(), path).toBe(200);
+    expect(res.headers()['content-type']).toBe('image/jpeg');
+    expect((await res.body()).length, path).toBeLessThan(200 * 1024);
+  }
+  for (const path of ['/logo.png', '/icon-192.png', '/icon-512.png', '/icon-maskable.png']) {
     const res = await request.get(path);
     expect(res.status(), path).toBe(200);
     expect(res.headers()['content-type']).toBe('image/png');

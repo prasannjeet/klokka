@@ -20,7 +20,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
   return (
     <>
       <header className="hero" id="top">
-        <SiteNav t={t} locale={locale} />
+        <SiteNav t={t} locale={locale} page="home" />
         <Hero t={t} locale={locale} />
         <Ticker t={t} />
       </header>
@@ -36,7 +36,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
         <Faq t={t} />
         <Cta t={t} />
       </main>
-      <SiteFooter t={t} locale={locale} />
+      <SiteFooter t={t} locale={locale} page="home" />
       <InViewObserver />
     </>
   );

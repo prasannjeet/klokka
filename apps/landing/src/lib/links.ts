@@ -11,11 +11,27 @@ export const siteUrl = origin(process.env.NEXT_PUBLIC_SITE_URL, 'https://klokka.
 /** The web app: sign-up ("Create your business") and sign-in ("Log in"). */
 export const appUrl = origin(process.env.NEXT_PUBLIC_APP_URL, 'https://klokka-app.coolify.ooguy.com');
 
-/** The signed Android release APK, published to Nexus (raw) by CI (docs/DECISIONS.md D4, D13). */
-export const apkUrl =
+/**
+ * The signed Android release APK, published to Nexus (raw) by CI (docs/DECISIONS.md D4, D13). Only
+ * next.config.ts uses it, as the target of the /download/android redirect.
+ */
+export const apkSourceUrl =
   process.env.NEXT_PUBLIC_APK_URL && process.env.NEXT_PUBLIC_APK_URL.trim() !== ''
     ? process.env.NEXT_PUBLIC_APK_URL
     : 'https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk';
+
+/** What the site links to for the APK: a klokka.se address that redirects (307) to `apkSourceUrl`. */
+export const apkUrl = `${siteUrl}/download/android`;
+
+/**
+ * Whether search engines may index this build. Only the literal 'true' turns it on (release.yml sets it for the
+ * production image); absent or anything else is false, so an unconfigured build, staging included, stays out of
+ * the index.
+ */
+export const indexable: boolean = process.env.NEXT_PUBLIC_INDEXABLE === 'true';
+
+/** The public contact: a role address, never a person's name (about, privacy, terms, Organization JSON-LD). */
+export const contactEmail = 'hej@klokka.se';
 
 export const repoUrl = 'https://github.com/prasannjeet/klokka';
 export const repoHost = 'github.com/prasannjeet/klokka';

@@ -1,13 +1,18 @@
 import type { MetadataRoute } from 'next';
-import { htmlLang, localeHref, locales } from '@/lib/i18n';
-import { absolute as url } from '@/lib/seo';
+import { locales } from '@/lib/i18n';
+import { indexable } from '@/lib/links';
+import { hrefFor, pages } from '@/lib/pages';
+import { absolute as url, languageAlternates } from '@/lib/seo';
 
+/** Every registered page in both languages, each with its hreflang set (x-default included) and lastmod. */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const languages = Object.fromEntries(locales.map((l) => [htmlLang[l], url(localeHref(l))]));
-  return locales.map((locale) => ({
-    url: url(localeHref(locale)),
-    changeFrequency: 'monthly',
-    priority: locale === 'sv' ? 1 : 0.8,
-    alternates: { languages },
-  }));
+  // A sitemap of noindex URLs sends mixed signals: a build that may not be indexed lists nothing.
+  if (!indexable) return [];
+  return pages.flatMap((page) =>
+    locales.map((locale) => ({
+      url: url(hrefFor(page.id, locale)),
+      lastModified: page.lastmod,
+      alternates: { languages: languageAlternates(page.id) },
+    })),
+  );
 }

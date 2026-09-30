@@ -18,6 +18,11 @@ const config: NextConfig = {
   agentRules: false,
   devIndicators: false,
   reactStrictMode: true,
+  // The product app is never indexed: the header covers every response (API routes and files included), the
+  // robots meta in layout.tsx the pages. robots.ts still lets crawlers in, so link-preview bots read the tags.
+  async headers() {
+    return [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }];
+  },
 };
 
 export default config;

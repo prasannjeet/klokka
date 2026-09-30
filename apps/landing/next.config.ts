@@ -1,5 +1,7 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
+import { apkSourceUrl } from './src/lib/links.ts';
+import { swedishRewrites } from './src/lib/pages/registry.ts';
 
 // The repository root. Turbopack only resolves files under its root, so it must be the monorepo root for
 // the @klokka/* workspace packages to build, and standalone tracing needs the same root (docs/research/web.md 1).
@@ -28,6 +30,11 @@ const securityHeaders = [
   ...(process.env.NODE_ENV === 'production'
     ? [{ key: 'Content-Security-Policy', value: contentSecurityPolicy }]
     : []),
+  // Any build but production's (release.yml sets NEXT_PUBLIC_INDEXABLE=true) stays out of search results, on
+  // every response including images and files the robots meta cannot cover. Same rule as `indexable` in links.ts.
+  ...(process.env.NEXT_PUBLIC_INDEXABLE === 'true'
+    ? []
+    : [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }]),
 ];
 
 const nextConfig: NextConfig = {
@@ -49,12 +56,14 @@ const nextConfig: NextConfig = {
       // Swedish lives at the root, so /sv is a duplicate: one canonical URL per language.
       { source: '/sv', destination: '/', permanent: true },
       { source: '/sv/:path*', destination: '/:path*', permanent: true },
+      // The site's own address for the APK; temporary (307) because "latest" changes with every release.
+      { source: '/download/android', destination: apkSourceUrl, permanent: false },
     ];
   },
   async rewrites() {
     return {
-      // Serve the Swedish page from / without exposing the /sv prefix.
-      beforeFiles: [{ source: '/', destination: '/sv' }],
+      // Serve the Swedish pages from the root without exposing the /sv prefix: '/' and one rule per page.
+      beforeFiles: [{ source: '/', destination: '/sv' }, ...swedishRewrites()],
       afterFiles: [],
       fallback: [],
     };

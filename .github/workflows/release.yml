@@ -26,6 +26,8 @@ env:
   NEXT_PUBLIC_APP_URL: ${{ vars.PROD_APP_URL }}
   NEXT_PUBLIC_SITE_URL: ${{ vars.PROD_SITE_URL }}
   NEXT_PUBLIC_APK_URL: ${{ vars.PROD_APK_URL }}
+  # Production is the one build search engines may index; every other build is noindex (the default is false).
+  NEXT_PUBLIC_INDEXABLE: 'true'
 
 jobs:
   version:
@@ -98,6 +100,44 @@ jobs:
         env:
           KLOKKA_BUILD_VERSION: ${{ needs.version.outputs.version }}
         run: .github/scripts/image.sh "${{ matrix.app }}" "${{ needs.version.outputs.tag }}"
+
+      # The production landing must say `index`, or klokka.se would drop out of search the day it is pinned. Runs
+      # the image just pushed (image.sh drops the local copy, so it comes back from Nexus) on a free loopback port
+      # and fails the release when / or /en carries a noindex. Every wait is bounded: 30 tries, 1 s apart.
+      - name: Check klokka-landing:${{ needs.version.outputs.tag }} is indexable
+        if: matrix.app == 'landing'
+        env:
+          IMAGE: ${{ env.REGISTRY }}/klokka-landing:${{ needs.version.outputs.tag }}
+          CONTAINER: klokka-landing-index-check-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          docker pull -q "$IMAGE"
+          docker run -d --init --name "$CONTAINER" -p 127.0.0.1::3000 "$IMAGE" >/dev/null
+          port=$(docker port "$CONTAINER" 3000/tcp | head -1 | sed 's/.*://')
+          [[ $port =~ ^[0-9]+$ ]] || { echo "::error::no host port for $CONTAINER"; exit 1; }
+          base="http://127.0.0.1:$port"
+          up=false
+          for _ in $(seq 1 30); do
+            sleep 1
+            curl -sf --max-time 5 -o /dev/null "$base/" || continue
+            up=true
+            break
+          done
+          if [ "$up" != true ]; then
+            echo "::error::klokka-landing did not answer on $base/ within 30 tries"
+            docker logs --tail 50 "$CONTAINER"
+            exit 1
+          fi
+          .github/scripts/index-check.sh "$base" index
+
+      - name: Remove the index-check container
+        if: always() && matrix.app == 'landing'
+        env:
+          IMAGE: ${{ env.REGISTRY }}/klokka-landing:${{ needs.version.outputs.tag }}
+          CONTAINER: klokka-landing-index-check-${{ github.run_id }}
+        run: |
+          docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+          docker image rm "$IMAGE" >/dev/null 2>&1 || true
 
   apk:
     name: Production APK
