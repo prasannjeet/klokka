@@ -24,6 +24,8 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
     public static final String DUPLICATE_ORG_MARKER = "DUPLICATE-ORG";
     public static final String FAIL_ORG_MARKER = "FAIL-ORG";
     public static final String FAIL_INVITE_MARKER = "fail-invite@";
+    // Answers after 11 s, as the real Logto can while it sends the invitation email (CHQ-148).
+    public static final String SLOW_INVITE_MARKER = "slow-invite@";
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private HttpServer server;
@@ -160,6 +162,13 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
             if (String.valueOf(request.get("invitee")).startsWith(FAIL_INVITE_MARKER)) {
                 respond(exchange, 422, "{\"message\":\"invitee rejected\"}");
                 return;
+            }
+            if (String.valueOf(request.get("invitee")).startsWith(SLOW_INVITE_MARKER)) {
+                try {
+                    Thread.sleep(11_000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
             }
             String id = "inv_" + counter.incrementAndGet();
             request.put("id", id);

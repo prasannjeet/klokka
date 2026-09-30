@@ -100,6 +100,16 @@ class MemberResourceTest {
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aSlowLogtoStillCreatesTheInvitation() {
+        // Logto sends the invitation email before it answers; on staging that took 14 s once (CHQ-148).
+        given().contentType("application/json").body("{\"name\":\"Slow\",\"email\":\"" + FakeServers.SLOW_INVITE_MARKER + "example.com\"}")
+                .when().post("/v1/workspaces/" + ws + "/members")
+                .then().statusCode(201).body("status", is("INVITED"));
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
     void aLogtoRefusalLeavesNoInvitedMember() {
         given().contentType("application/json").body("{\"name\":\"Nope\",\"email\":\"" + FakeServers.FAIL_INVITE_MARKER + "example.com\"}")
                 .when().post("/v1/workspaces/" + ws + "/members")
