@@ -18,6 +18,10 @@ export const legalEntity = {
   },
 } as const;
 
+// Fact check 2026-09-30 (CHQ-149): GDPR article 12(3) (one month, IMY's Swedish full text), IMY as the Swedish
+// supervisory authority (imy.se, article 77), Switzerland's adequacy and the EU-US DPF (European Commission adequacy
+// page), Expo's and Google's DPF self-certification (their privacy pages). The employee-hours legal basis no longer
+// cites a general duty to record working time, which Swedish law does not have (arbetstidslagen 11 §).
 const mail = `[${contactEmail}](mailto:${contactEmail})` as const;
 
 export const sv = {
@@ -59,7 +63,7 @@ export const sv = {
       h2: 'Varför uppgifterna behandlas',
       body: [
         'Kontouppgifterna behandlas för att ge dig tjänsten du har registrerat dig för (avtal). Säkerhet och drift, som loggar och säkerhetskopior, vilar på berättigat intresse.',
-        'Timmarna om anställda behandlas på arbetsgivarens uppdrag. Den rättsliga grunden för dem är arbetsgivarens, till exempel anställningsavtalet eller skyldigheten att registrera arbetstid.',
+        'Timmarna om anställda behandlas på arbetsgivarens uppdrag. Den rättsliga grunden för dem är arbetsgivarens, till exempel anställningsavtalet eller skyldigheten att föra anteckningar om jourtid, övertid och mertid enligt arbetstidslagen.',
       ],
     },
     {
@@ -92,7 +96,7 @@ export const sv = {
       body: [
         'Uppgifterna sparas så länge kontot eller företaget finns. Det finns ingen automatisk radering.',
         'Databasen säkerhetskopieras varje dag till vår egen server i Sverige, över en krypterad förbindelse. Säkerhetskopiorna sparas en begränsad tid och ersätts sedan av nyare, så uppgifter som har raderats försvinner också ur dem efter en tid.',
-        `Det går inte att radera ett konto eller ett företag i appen än. Mejla ${mail} så raderar vi det åt dig. Vi svarar inom en månad.`,
+        `Det går inte att radera ett konto eller ett företag i appen än. Mejla ${mail} så raderar vi det åt dig. Vi svarar utan onödigt dröjsmål och senast inom en månad.`,
       ],
     },
     {
@@ -158,7 +162,7 @@ export const en: PageCopyOf<typeof sv> = {
       h2: 'Why the data is processed',
       body: [
         'Account data is processed to provide the service you signed up for (contract). Security and operations, such as logs and backups, rest on legitimate interest.',
-        "Employees' hours are processed on the employer's behalf. The legal basis for them is the employer's, for example the employment contract or the duty to record working time.",
+        "Employees' hours are processed on the employer's behalf. The legal basis for them is the employer's, for example the employment contract or the duty under the Working Hours Act to record on-call time, overtime and additional hours.",
       ],
     },
     {
@@ -191,7 +195,7 @@ export const en: PageCopyOf<typeof sv> = {
       body: [
         'Data is kept for as long as the account or the business exists. Nothing is deleted automatically.',
         'The database is backed up every day to our own server in Sweden, over an encrypted connection. Backups are kept for a limited period and then replaced by newer ones, so deleted data also disappears from them after a while.',
-        `The app cannot delete an account or a business yet. Email ${mail} and we will delete it for you. We answer within one month.`,
+        `The app cannot delete an account or a business yet. Email ${mail} and we will delete it for you. We answer without undue delay and at the latest within one month.`,
       ],
     },
     {

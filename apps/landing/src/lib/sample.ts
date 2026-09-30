@@ -75,3 +75,38 @@ export const calendar: readonly CalDay[] = Array.from({ length: 30 }, (_, i) => 
   const kind = full.has(day) ? 'full' : short.has(day) ? 'short' : 'none';
   return day === 22 ? { day, kind, flag: true } : { day, kind };
 });
+
+/**
+ * The example week on each trade page (week 39 of 2026, like the homepage), with names and hours typical of the
+ * trade: the café opens early, closes late and works weekends; cleaners split the day between morning and evening
+ * sites (one total per day, the sites go in the note); the salon is open Tuesday to Saturday; the shop is staffed
+ * on weekday afternoons and Saturdays. Illustrative, labelled as such on the page.
+ */
+export const tradeRows: Readonly<
+  Record<'trade-cafe' | 'trade-cleaning' | 'trade-salon' | 'trade-shop', readonly WeekRow[]>
+> = {
+  'trade-cafe': [
+    { name: 'Elin', tone: 'c1', hours: [7, 7, null, 7, 7, 8, null] },
+    { name: 'Omar', tone: 'c2', hours: [null, 5, 5, 5.5, 6, 7, 6] },
+    { name: 'Linnea', tone: 'c3', hours: [null, null, null, null, 4, 8, 7] },
+    { name: 'Kevin', tone: 'c4', hours: [6, 6, 6, null, null, 6, 6] },
+  ],
+  'trade-cleaning': [
+    { name: 'Fatima', tone: 'c1', hours: [6, 6, 6, 6, 5, null, null] },
+    { name: 'Dragan', tone: 'c2', hours: [4, 4, 4, 4, 4, null, null] },
+    { name: 'Sara', tone: 'c3', hours: [2.5, null, 2.5, null, 2.5, null, null] },
+    { name: 'Ahmed', tone: 'c4', hours: [8, 7.5, 8, 7.5, 6, 3, null] },
+  ],
+  'trade-salon': [
+    { name: 'Hanna', tone: 'c1', hours: [null, 8, 8, 8, 8, 7, null] },
+    { name: 'Sofia', tone: 'c2', hours: [null, 6, null, 6, 8, 7, null] },
+    { name: 'Leila', tone: 'c3', hours: [null, null, 5, 5, 5, 7, null] },
+    { name: 'Amir', tone: 'c4', hours: [null, 8, 8, 8, 8, null, null] },
+  ],
+  'trade-shop': [
+    { name: 'Yusuf', tone: 'c1', hours: [8, 8, 8, 8, 8, null, null] },
+    { name: 'Alva', tone: 'c2', hours: [4, 4, null, 4, 4, 7, null] },
+    { name: 'Emil', tone: 'c3', hours: [null, 4.5, 4.5, null, 4.5, 7, null] },
+    { name: 'Maja', tone: 'c4', hours: [null, null, null, null, 4, 7, 5] },
+  ],
+};

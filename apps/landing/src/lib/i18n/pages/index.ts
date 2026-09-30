@@ -4,29 +4,43 @@ import { getDictionary } from '../index';
 import * as about from './about';
 import * as app from './app';
 import * as calculator from './calculator';
+import * as guideBestFree from './guide-best-free';
 import * as guideChange from './guide-change';
+import * as guidePersonalliggare from './guide-personalliggare';
 import * as guideTimesheet from './guide-timesheet';
+import * as guideWorkingHoursAct from './guide-working-hours-act';
+import * as hourly from './hourly';
+import * as hours from './hours';
+import * as hours2026 from './hours-2026';
+import * as hours2027 from './hours-2027';
 import * as openSource from './open-source';
 import * as privacy from './privacy';
 import * as smallBusiness from './small-business';
 import * as template from './template';
 import * as terms from './terms';
-import type { GuideCopy, PageCopyBase, TableCopy, ToolCopy } from './types';
+import * as tradeCafe from './trade-cafe';
+import * as tradeCleaning from './trade-cleaning';
+import * as tradeSalon from './trade-salon';
+import * as tradeShop from './trade-shop';
+import type { GuideCopy, IndustryCopy, PageCopyBase, TableCopy, ToolCopy } from './types';
 
 export type * from './types';
 
 type GuideId = Extract<PageId, `guide-${string}`>;
 type ToolId = 'calculator' | 'template';
 type TableId = 'hours' | 'hours-2026' | 'hours-2027';
+type IndustryId = Extract<PageId, `trade-${string}`>;
 
-/** The copy type a page id carries: guides, tools and tables add their own fields to the base. */
+/** The copy type a page id carries: guides, tools, tables and trades add their own fields to the base. */
 type CopyFor<K extends PageId> = K extends GuideId
   ? GuideCopy
   : K extends ToolId
     ? ToolCopy
     : K extends TableId
       ? TableCopy
-      : PageCopyBase;
+      : K extends IndustryId
+        ? IndustryCopy
+        : PageCopyBase;
 
 /** The homepage keeps its own dictionary (dictionaries.ts); this is the part every page shares. */
 function homeCopy(locale: Locale): PageCopyBase {
@@ -51,11 +65,22 @@ const copies: { [K in PageId]?: Record<Locale, CopyFor<K>> } = {
   about,
   app,
   'small-business': smallBusiness,
+  hourly,
   'open-source': openSource,
   'guide-timesheet': guideTimesheet,
   'guide-change': guideChange,
+  'guide-best-free': guideBestFree,
+  'guide-personalliggare': guidePersonalliggare,
+  'guide-working-hours-act': guideWorkingHoursAct,
   calculator,
   template,
+  hours,
+  'hours-2026': hours2026,
+  'hours-2027': hours2027,
+  'trade-cafe': tradeCafe,
+  'trade-cleaning': tradeCleaning,
+  'trade-salon': tradeSalon,
+  'trade-shop': tradeShop,
   privacy,
   terms,
 };

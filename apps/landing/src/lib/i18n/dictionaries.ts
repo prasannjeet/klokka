@@ -320,7 +320,7 @@ export const sv = {
       },
       {
         q: 'Är Klokka en personalliggare?',
-        a: 'Nej. I Klokka förs timmarna in i efterhand, och det är ingen personalliggare. Kaféer, restauranger och frisörsalonger som måste föra personalliggare behöver den fortfarande, vid sidan av Klokka.',
+        a: 'Nej. I Klokka förs timmarna in i efterhand, och det är ingen personalliggare. Kaféer, restauranger och frisörsalonger som måste föra personalliggare behöver den fortfarande, vid sidan av Klokka. Läs mer i [personalliggare eller tidrapport](page:guide-personalliggare).',
       },
     ],
   },
@@ -690,7 +690,7 @@ export const en: Dictionary = {
       },
       {
         q: 'Is Klokka a staff register (personalliggare)?',
-        a: 'No. Klokka records hours after the fact; it is not a staff register. Cafes, restaurants and salons in Sweden that must keep a personalliggare still need one, alongside Klokka.',
+        a: 'No. Klokka records hours after the fact; it is not a staff register. Cafes, restaurants and salons in Sweden that must keep a personalliggare still need one, alongside Klokka. Read more in [personalliggare in Sweden](page:guide-personalliggare).',
       },
     ],
   },

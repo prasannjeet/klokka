@@ -1,6 +1,6 @@
 import { RichText } from '@/components/RichText';
 import { getDictionary, type Locale } from '@/lib/i18n';
-import { pageCopy } from '@/lib/i18n/pages';
+import { pageCopy, type CopyTable } from '@/lib/i18n/pages';
 import type { PageId } from '@/lib/pages';
 import { Breadcrumbs } from './Breadcrumbs';
 import { CtaBand } from './CtaBand';
@@ -24,6 +24,46 @@ export function headingId(text: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * A comparison table in a guide. The caption sits above the box so it always wraps to the screen; the table
+ * scrolls sideways inside its own box on a narrow screen, never the page.
+ */
+function CopyTableView({ table, locale, id }: { table: CopyTable; locale: Locale; id: string }) {
+  const captionId = `${id}-table`;
+  return (
+    <figure className="copy-table">
+      <figcaption id={captionId}>{table.caption}</figcaption>
+      <div className="copy-table-scroll" role="region" aria-labelledby={captionId} tabIndex={0}>
+        <table aria-labelledby={captionId}>
+          <thead>
+            <tr>
+              {table.head.map((cell) => (
+                <th key={cell} scope="col">
+                  {cell}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map(([first, ...rest]) => (
+              <tr key={first}>
+                <th scope="row">
+                  <RichText text={first ?? ''} locale={locale} />
+                </th>
+                {rest.map((cell, i) => (
+                  <td key={i}>
+                    <RichText text={cell} locale={locale} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </figure>
+  );
 }
 
 /**
@@ -88,6 +128,7 @@ export function GuidePage({ id, locale }: { id: GuideId; locale: Locale }) {
                     ))}
                   </ul>
                 )}
+                {section.table && <CopyTableView table={section.table} locale={locale} id={section.id} />}
                 {i === 0 && (
                   <aside className="card note-box" aria-labelledby="about-klokka">
                     <p className="eyebrow" id="about-klokka">
@@ -115,7 +156,7 @@ export function GuidePage({ id, locale }: { id: GuideId; locale: Locale }) {
             <ol>
               {copy.sources.map((source) => (
                 <li key={source.url}>
-                  <a className="inline-link" href={source.url} rel="noopener">
+                  <a href={source.url} rel="noopener">
                     {source.label}
                   </a>
                 </li>

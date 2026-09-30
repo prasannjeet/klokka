@@ -2,11 +2,12 @@ import { RichText } from '@/components/RichText';
 import { Icon } from '@/components/ui/Icon';
 import { RepoCard } from '@/components/ui/RepoCard';
 import { WeekGrid } from '@/components/ui/WeekGrid';
-import { getDictionary, type Dictionary, type Locale } from '@/lib/i18n';
+import type { ReactNode } from 'react';
+import { getDictionary, type Locale } from '@/lib/i18n';
 import { pageCopy } from '@/lib/i18n/pages';
 import { apkUrl } from '@/lib/links';
 import type { PageId } from '@/lib/pages';
-import { employerRows } from '@/lib/sample';
+import { employerRows, type WeekRow } from '@/lib/sample';
 import { Breadcrumbs } from './Breadcrumbs';
 import { CtaBand } from './CtaBand';
 import { FaqList } from './FaqList';
@@ -19,44 +20,80 @@ const visuals: Partial<Record<PageId, Visual>> = {
   app: 'week',
   'small-business': 'week',
   'open-source': 'repo',
+  hourly: 'week',
 };
 
-/** The employer's week grid from the homepage, labelled as an example with made-up numbers. */
-function WeekVisual({ t, locale }: { t: Dictionary; locale: Locale }) {
-  const g = t.employers.grid;
+type WeekCard = { label: string; title: string; subtitle: string; gridLabel: string; caption: string };
+
+/** A week grid drawn as UI, labelled as an example with made-up numbers. */
+export function WeekVisual({
+  card,
+  rows,
+  locale,
+}: {
+  card: WeekCard;
+  rows: readonly WeekRow[];
+  locale: Locale;
+}) {
+  const t = getDictionary(locale);
   return (
-    <figure className="page-visual wg" aria-label={g.label}>
+    <figure className="page-visual wg" aria-label={card.label}>
       <div className="card wg-card">
         <div className="wg-head">
           <div className="stage-title">
-            {g.title}
-            <small>{g.subtitle}</small>
+            {card.title}
+            <small>{card.subtitle}</small>
           </div>
         </div>
-        <WeekGrid
-          locale={locale}
-          label={g.gridLabel}
-          days={t.stage.days}
-          off={t.stage.off}
-          rows={employerRows}
-        />
+        <WeekGrid locale={locale} label={card.gridLabel} days={t.stage.days} off={t.stage.off} rows={rows} />
       </div>
       <figcaption className="illustrative">
         <Icon name="info" />
-        {t.insights.illustrative}
+        {card.caption}
       </figcaption>
     </figure>
   );
 }
 
-/**
- * The product pages (app, small business, open source): breadcrumbs, H1 and lede, one homepage visual, sections,
- * FAQ, and the CTA band with sign-up plus the Android download.
- */
+/** The product pages (app, small business, hourly staff, open source), each with its homepage visual. */
 export function ProductPage({ id, locale }: { id: PageId; locale: Locale }) {
-  const copy = pageCopy(id, locale);
   const t = getDictionary(locale);
   const visual = visuals[id];
+  const g = t.employers.grid;
+  return (
+    <ProductLayout
+      id={id}
+      locale={locale}
+      visual={
+        visual === 'week' ? (
+          <WeekVisual card={{ ...g, caption: t.insights.illustrative }} rows={employerRows} locale={locale} />
+        ) : visual === 'repo' ? (
+          <div className="page-visual">
+            <RepoCard t={t} />
+          </div>
+        ) : null
+      }
+    />
+  );
+}
+
+/**
+ * The product page shell, shared with the trade pages: breadcrumbs, H1 and lede, an optional notice and visual,
+ * sections, FAQ, and the CTA band with sign-up plus the Android download.
+ */
+export function ProductLayout({
+  id,
+  locale,
+  notice,
+  visual,
+}: {
+  id: PageId;
+  locale: Locale;
+  notice?: ReactNode;
+  visual?: ReactNode;
+}) {
+  const copy = pageCopy(id, locale);
+  const t = getDictionary(locale);
   return (
     <PageShell id={id} locale={locale}>
       <article className="section pt-6">
@@ -69,13 +106,9 @@ export function ProductPage({ id, locale }: { id: PageId; locale: Locale }) {
                 <RichText text={text} locale={locale} />
               </p>
             ))}
+            {notice}
           </div>
-          {visual === 'week' && <WeekVisual t={t} locale={locale} />}
-          {visual === 'repo' && (
-            <div className="page-visual">
-              <RepoCard t={t} />
-            </div>
-          )}
+          {visual}
           <div className="prose">
             {copy.sections.map((section) => (
               <section key={section.h2}>

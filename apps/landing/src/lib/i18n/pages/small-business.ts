@@ -12,7 +12,7 @@ export const sv = {
   h1: 'Tidrapportering för småföretag med några få anställda',
   lede: [
     'Klokka är ett gratis tidrapporteringssystem för småföretag: du som arbetsgivare loggar varje anställds timmar per dag, och de anställda ser samma siffror i mobilen. Det har öppen källkod under MIT-licens, ingen gräns för antalet anställda och fungerar på webben och i Android-appen, på svenska och engelska.',
-    'Klokka är gjort för kaféet, salongen, städfirman och butiken: ställen där ägaren vet vem som jobbade och bara vill att timmarna ska stämma, utan ett system som kräver en utbildning.',
+    'Klokka är gjort för [kaféet](page:trade-cafe), [salongen](page:trade-salon), [städfirman](page:trade-cleaning) och [butiken](page:trade-shop): ställen där ägaren vet vem som jobbade och bara vill att timmarna ska stämma, utan ett system som kräver en utbildning.',
   ],
   sections: [
     {
@@ -58,7 +58,7 @@ export const sv = {
     {
       h2: 'Vad Klokka inte gör',
       body: [
-        'Klokka gör inga scheman, har ingen stämpelklocka och kör ingen lön. Klokka räknar inte ut OB eller övertid, och det är ingen personalliggare. Klokka gör en sak: timmarna som har jobbats, så att båda är överens.',
+        'Klokka gör inga scheman, har ingen stämpelklocka och kör ingen lön. Klokka räknar inte ut OB eller övertid, och det är ingen [personalliggare](page:guide-personalliggare). Klokka gör en sak: timmarna som har jobbats, så att båda är överens.',
       ],
     },
     {
@@ -74,7 +74,7 @@ export const sv = {
   faq: [
     {
       q: 'Måste man tidrapportera varje vecka?',
-      a: 'Arbetstidslagen säger inte hur ofta ordinarie timmar ska rapporteras. Den kräver att arbetsgivaren för anteckningar om jourtid, övertid och mertid. Många arbetsgivare och kollektivavtal har en rutin per vecka eller månad. I Klokka förs timmarna in per dag, stäms av per vecka och stängs per månad. Läs mer i guiden om [tidrapport](page:guide-timesheet).',
+      a: '[Arbetstidslagen](page:guide-working-hours-act) säger inte hur ofta ordinarie timmar ska rapporteras. Den kräver att arbetsgivaren för anteckningar om jourtid, övertid och mertid. Många arbetsgivare och kollektivavtal har en rutin per vecka eller månad. I Klokka förs timmarna in per dag, stäms av per vecka och stängs per månad. Läs mer i guiden om [tidrapport](page:guide-timesheet).',
     },
     {
       q: 'Hur rapporterar jag arbetstid?',
@@ -112,7 +112,7 @@ export const en: PageCopyOf<typeof sv> = {
   h1: 'A timesheet app for small businesses with hourly staff',
   lede: [
     "Klokka is free time tracking for small businesses: you, the employer, log each employee's hours per day, and your staff see the same numbers on their phones. It is open source under the MIT licence, has no limit on employees, and works on the web and in the Android app, in English and Swedish.",
-    'Klokka is made for the café, the salon, the cleaning company and the shop: places where the owner knows who worked and just wants the hours to be right, without a system that needs a training course.',
+    'Klokka is made for [the café](page:trade-cafe), [the salon](page:trade-salon), [the cleaning company](page:trade-cleaning) and [the shop](page:trade-shop): places where the owner knows who worked and just wants the hours to be right, without a system that needs a training course.',
   ],
   sections: [
     {
@@ -158,7 +158,7 @@ export const en: PageCopyOf<typeof sv> = {
     {
       h2: 'What Klokka does not do',
       body: [
-        'Klokka does no scheduling, has no time clock and runs no payroll. It does not calculate unsocial-hours pay or overtime, and it is not a personalliggare (the staff register some Swedish trades must keep). Klokka does one thing: the hours worked, so both sides agree.',
+        'Klokka does no scheduling, has no time clock and runs no payroll. It does not calculate unsocial-hours pay or overtime, and it is not a [personalliggare](page:guide-personalliggare) (the staff register some Swedish trades must keep). Klokka does one thing: the hours worked, so both sides agree.',
       ],
     },
     {
@@ -174,7 +174,7 @@ export const en: PageCopyOf<typeof sv> = {
   faq: [
     {
       q: 'Do I need to report hours every week?',
-      a: 'The Swedish Working Hours Act does not say how often ordinary hours must be reported. It requires the employer to keep records of on-call time, overtime and additional hours. Many employers and collective agreements use a weekly or monthly routine. In Klokka the hours are logged per day, checked per week and closed per month. Read more in the guide on [how to track employee hours](page:guide-timesheet).',
+      a: 'The [Swedish Working Hours Act](page:guide-working-hours-act) does not say how often ordinary hours must be reported. It requires the employer to keep records of on-call time, overtime and additional hours. Many employers and collective agreements use a weekly or monthly routine. In Klokka the hours are logged per day, checked per week and closed per month. Read more in the guide on [how to track employee hours](page:guide-timesheet).',
     },
     {
       q: 'How do I record working hours?',

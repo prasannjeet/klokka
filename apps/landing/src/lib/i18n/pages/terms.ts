@@ -2,6 +2,10 @@ import { contactEmail, licenseUrl } from '@/lib/links';
 import { legalEntity } from './privacy';
 import type { PageCopyBase, PageCopyOf } from './types';
 
+// Fact check 2026-09-30 (CHQ-149): the processor section was checked against GDPR article 28(3) (IMY's Swedish full
+// text): it now names the subject matter, duration, nature, purpose, data types and data subjects, and adds points f
+// (help with articles 32 to 36), h (information and audits), the unlawful-instruction notice and 28(4) (same duties
+// for sub-processors).
 const mail = `[${contactEmail}](mailto:${contactEmail})` as const;
 
 export const sv = {
@@ -48,15 +52,17 @@ export const sv = {
     {
       h2: 'Personuppgiftsbiträdesavtal',
       body: [
-        'För uppgifterna en arbetsgivare för in om sina anställda är arbetsgivaren personuppgiftsansvarig och Klokka personuppgiftsbiträde. Det här avsnittet är avtalet om den behandlingen (artikel 28 i dataskyddsförordningen). Klokka:',
+        'För uppgifterna en arbetsgivare för in om sina anställda är arbetsgivaren personuppgiftsansvarig och Klokka personuppgiftsbiträde. Behandlingen gäller de anställda som arbetsgivaren bjuder in: deras namn, e-postadress, timmar, anteckningar, flaggor och eventuell timlön. Den består i att lagra uppgifterna och visa dem för rätt personer, pågår så länge arbetsgivaren använder Klokka och har bara ett ändamål, att ge arbetsgivaren tjänsten. Det här avsnittet är avtalet om den behandlingen (artikel 28 i dataskyddsförordningen). Klokka:',
       ],
       list: [
-        'behandlar uppgifterna bara enligt arbetsgivarens instruktioner, som är att ge tjänsten så som den fungerar i appen,',
+        'behandlar uppgifterna bara enligt arbetsgivarens dokumenterade instruktioner, som är att ge tjänsten så som den fungerar i appen, och säger till direkt om en instruktion skulle strida mot dataskyddsreglerna,',
         'ser till att de som har tillgång till uppgifterna har tystnadsplikt,',
         'skyddar uppgifterna med lämpliga tekniska och organisatoriska åtgärder, bland annat krypterade anslutningar, åtskillnad mellan företag och säkerhetskopior,',
-        'anlitar bara underbiträdena som står i [integritetspolicyn](page:privacy) och meddelar ändringar där innan de gäller, så att arbetsgivaren kan invända,',
+        'anlitar bara underbiträdena som står i [integritetspolicyn](page:privacy), ålägger dem samma skyldigheter som här och meddelar ändringar där innan de gäller, så att arbetsgivaren kan invända,',
         'hjälper arbetsgivaren att svara när en anställd vill ta del av, rätta eller radera sina uppgifter,',
-        'raderar eller lämnar tillbaka uppgifterna när arbetsgivaren slutar använda tjänsten, efter arbetsgivarens val.',
+        'hjälper arbetsgivaren med säkerheten, med personuppgiftsincidenter och med konsekvensbedömningar (artiklarna 32 till 36),',
+        'raderar eller lämnar tillbaka uppgifterna när arbetsgivaren slutar använda tjänsten, efter arbetsgivarens val, och raderar kvarvarande kopior om inte lag kräver att de sparas,',
+        'ger arbetsgivaren den information som behövs för att visa att det här avsnittet följs, och möjliggör granskningar.',
       ],
     },
     {
@@ -70,7 +76,7 @@ export const sv = {
       body: [
         'Svensk lag gäller för villkoren.',
         'Ändras villkoren meddelar vi det på webbplatsen innan de gäller. Använder du Klokka efter det gäller de nya villkoren.',
-        `Frågor om villkoren ställer du till ${mail}. Senast ändrade 29 september 2026.`,
+        `Frågor om villkoren ställer du till ${mail}. Senast ändrade 30 september 2026.`,
       ],
     },
   ],
@@ -126,15 +132,17 @@ export const en: PageCopyOf<typeof sv> = {
     {
       h2: 'Data processing agreement',
       body: [
-        'For the data an employer logs about their employees, the employer is the controller and Klokka is the processor. This section is the agreement for that processing (Article 28 of the GDPR). Klokka:',
+        'For the data an employer logs about their employees, the employer is the controller and Klokka is the processor. The processing concerns the employees the employer invites: their names, email addresses, hours, notes, flags and any hourly rate. It consists of storing the data and showing it to the right people, lasts as long as the employer uses Klokka and has one purpose only, to provide the service to the employer. This section is the agreement for that processing (Article 28 of the GDPR). Klokka:',
       ],
       list: [
-        "processes the data only on the employer's instructions, which are to provide the service as it works in the app,",
+        "processes the data only on the employer's documented instructions, which are to provide the service as it works in the app, and says so at once if an instruction would break data protection rules,",
         'makes sure everyone with access to the data is bound by confidentiality,',
         'protects the data with appropriate technical and organisational measures, including encrypted connections, separation between businesses and backups,',
-        'uses only the sub-processors listed in the [privacy policy](page:privacy) and announces changes there before they apply, so the employer can object,',
+        'uses only the sub-processors listed in the [privacy policy](page:privacy), holds them to the same obligations as here and announces changes there before they apply, so the employer can object,',
         'helps the employer respond when an employee asks to access, correct or delete their data,',
-        'deletes or returns the data, as the employer chooses, when the employer stops using the service.',
+        'helps the employer with security, personal data breaches and impact assessments (Articles 32 to 36),',
+        'deletes or returns the data, as the employer chooses, when the employer stops using the service, and deletes remaining copies unless the law requires them to be kept,',
+        'gives the employer the information needed to show that this section is followed, and allows for audits.',
       ],
     },
     {
@@ -148,7 +156,7 @@ export const en: PageCopyOf<typeof sv> = {
       body: [
         'Swedish law applies to these terms.',
         'If the terms change, we announce it on the website before the change applies. Using Klokka after that means the new terms apply.',
-        `Send questions about the terms to ${mail}. Last changed 29 September 2026.`,
+        `Send questions about the terms to ${mail}. Last changed 30 September 2026.`,
       ],
     },
   ],

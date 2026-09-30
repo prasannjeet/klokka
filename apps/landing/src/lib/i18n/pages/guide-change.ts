@@ -1,8 +1,9 @@
 import type { GuideCopy, PageCopyOf } from './types';
 
-// Facts and sources: docs/research/seo/gapfill.md sections 2b and 2c (arbetstidslagen 11, 12 and 15 §§,
-// brottsbalken 14 kap. 1 §). No statute regulates an employer correcting hours directly; the page says so and
-// gives no legal conclusions beyond what the linked texts state.
+// Fact check 2026-09-30 (CHQ-149) against the law texts on riksdagen.se: arbetstidslagen 11, 12 and 15 §§ (12 §:
+// "verksamhetens art"), brottsbalken 14 kap. 1 § (obehörigen ... ändrar eller fyller ut en äkta urkund, fara i
+// bevishänseende; the electronic document definition). The page claims only what those texts say: arbetstidslagen
+// has no rule on correcting a timesheet, and the pay claim about employment contracts was cut (no source read).
 const atl =
   'https://www.riksdagen.se/sv/dokument-och-lagar/dokument/svensk-forfattningssamling/arbetstidslag-1982673_sfs-1982-673/';
 const brb =
@@ -21,7 +22,7 @@ export const sv = {
   breadcrumb: 'Guide: ändra tidrapport',
   h1: 'Får arbetsgivaren ändra i tidrapporten?',
   lede: [
-    'Ja, arbetsgivaren får rätta en tidrapport som är fel, och ingen svensk lag reglerar sådana rättelser direkt. Gränsen går vid att utan lov ändra en tidrapport som någon annan har skrivit eller skrivit under, och lönen för de timmar du faktiskt har arbetat bestäms av ditt anställningsavtal och eventuellt kollektivavtal, inte av vad som står kvar i rapporten.',
+    'Ja, arbetsgivaren får rätta en tidrapport som är fel, och arbetstidslagen har ingen regel om hur sådana rättelser ska göras. Gränsen går vid att obehörigen ändra en tidrapport som någon annan har skrivit eller skrivit under, vilket kan vara urkundsförfalskning enligt brottsbalken.',
     'Den här guiden går igenom vem som ansvarar för tidrapporten, när en ändring är rimlig, vad du kan göra om du inte håller med och hur ändringar kan göras öppet, så att båda sidor vet vad som gäller.',
   ],
   sections: [
@@ -29,7 +30,7 @@ export const sv = {
       h2: 'Kort svar',
       body: ['Det här är det viktigaste, i fyra punkter:'],
       list: [
-        'Arbetsgivaren får rätta fel i en tidrapport. Ingen lag förbjuder eller reglerar det direkt.',
+        'Arbetsgivaren får rätta fel i en tidrapport. Arbetstidslagen har ingen regel om hur det ska göras.',
         `Att obehörigen ändra en tidrapport som någon annan har skrivit eller skrivit under kan vara urkundsförfalskning ([brottsbalken 14 kap. 1 §](${brb})).`,
         `Du har rätt att se arbetsgivarens anteckningar om din jourtid, övertid och mertid ([arbetstidslagen 11 §](${atl})).`,
         `Ändringar i schemat, alltså när den ordinarie arbetstiden läggs, ska som huvudregel meddelas minst två veckor i förväg ([arbetstidslagen 12 §](${atl})).`,
@@ -45,9 +46,9 @@ export const sv = {
     {
       h2: 'Var går gränsen?',
       body: [
-        `Brottsbalken säger att den som obehörigen ändrar eller fyller i en äkta urkund gör sig skyldig till urkundsförfalskning, om det innebär fara i bevishänseende ([brottsbalken 14 kap. 1 §](${brb})). Som urkund räknas också en elektronisk handling som är gjord för att visa något och där det går att kontrollera vem som har ställt ut den.`,
+        `Brottsbalken säger att den som obehörigen ändrar eller fyller ut en äkta urkund döms för urkundsförfalskning, om åtgärden innebär fara i bevishänseende ([brottsbalken 14 kap. 1 §](${brb})). Som urkund räknas också en elektronisk handling som är upprättad som bevis eller annars har betydelse som bevis, och där det på ett tillförlitligt sätt går att kontrollera vem som har ställt ut den.`,
         'Det betyder att det är skillnad på att rätta sin egen anteckning och att i hemlighet ändra en rapport som den anställda har skrivit eller skrivit under. Det första är vardag. Det andra ska inte göras utan den anställdas vetskap.',
-        `En närliggande fråga är om arbetsgivaren får ändra schemat. Där finns en tydlig regel: ändringar i när den ordinarie arbetstiden läggs ska meddelas minst två veckor i förväg, om inte arbetets art eller något oförutsett kräver kortare varsel ([arbetstidslagen 12 §](${atl})). Kolla ert kollektivavtal, det kan ha andra regler.`,
+        `En närliggande fråga är om arbetsgivaren får ändra schemat. Där finns en tydlig regel: ändringar i när den ordinarie arbetstiden läggs ska meddelas minst två veckor i förväg, om inte verksamhetens art eller något oförutsett ger anledning till kortare varsel ([arbetstidslagen 12 §](${atl})). Kolla ert kollektivavtal, det kan ha andra regler.`,
       ],
     },
     {
@@ -103,15 +104,15 @@ export const sv = {
   faq: [
     {
       q: 'Får arbetsgivaren ändra tidrapporten utan att säga till?',
-      a: 'Ingen lag reglerar det direkt, men att i hemlighet ändra en rapport som du har skrivit eller skrivit under kan vara urkundsförfalskning. Oavsett vem som skrev rapporten är det god praxis att berätta vad som ändrades och varför. Du har också rätt att se anteckningarna om din jourtid, övertid och mertid.',
+      a: 'Arbetstidslagen säger inget om det, men att obehörigen ändra en rapport som du har skrivit eller skrivit under kan vara urkundsförfalskning. Oavsett vem som skrev rapporten är det god praxis att berätta vad som ändrades och varför. Du har också rätt att se anteckningarna om din jourtid, övertid och mertid.',
     },
     {
       q: 'Får chefen dra av rast som jag inte tog?',
-      a: 'Står det en rast i rapporten som du inte fick ta, ta upp det direkt och visa dina egna anteckningar. Arbetstidslagen säger att ingen ska arbeta mer än fem timmar i följd utan rast (15 §), och hur raster räknas kan också stå i ert kollektivavtal.',
+      a: 'Står det en rast i rapporten som du inte fick ta, ta upp det direkt och visa dina egna anteckningar. [Arbetstidslagen](page:guide-working-hours-act) säger att ingen ska arbeta mer än fem timmar i följd utan rast (15 §), och hur raster räknas kan också stå i ert kollektivavtal.',
     },
     {
       q: 'Får arbetsgivaren ändra mitt schema?',
-      a: 'Ja, men ändringar i när den ordinarie arbetstiden läggs ska som huvudregel meddelas minst två veckor i förväg, enligt arbetstidslagen 12 §. Kortare varsel är tillåtet när arbetets art eller något oförutsett kräver det. Kollektivavtal kan ha andra regler.',
+      a: 'Ja, men ändringar i när den ordinarie arbetstiden läggs ska som huvudregel meddelas minst två veckor i förväg, enligt arbetstidslagen 12 §. Kortare varsel är tillåtet när verksamhetens art eller något oförutsett ger anledning till det. Kollektivavtal kan ha andra regler.',
     },
     {
       q: 'Vem kan hjälpa mig?',
@@ -147,7 +148,7 @@ export const en: PageCopyOf<typeof sv> = {
   breadcrumb: 'Guide: changed hours',
   h1: 'Can an employer change the hours on your timesheet?',
   lede: [
-    'Yes, in Sweden an employer may correct a timesheet that is wrong, and no Swedish statute regulates such corrections directly. The line is drawn at changing, without permission, a timesheet that someone else wrote or signed, and the pay for hours you actually worked is set by your employment contract and any collective agreement, not by what is left in the report.',
+    'Yes, in Sweden an employer may correct a timesheet that is wrong, and the Working Hours Act has no rule on how such corrections are made. The line is drawn at changing, without authority, a timesheet that someone else wrote or signed, which can be forgery under the Swedish Criminal Code.',
     'This guide covers who is responsible for the timesheet, when a change is reasonable, what you can do if you disagree, and how changes can be made in the open so both sides know where they stand.',
   ],
   sections: [
@@ -155,7 +156,7 @@ export const en: PageCopyOf<typeof sv> = {
       h2: 'The short answer',
       body: ['The essentials, in four points:'],
       list: [
-        'The employer may correct mistakes in a timesheet. No Swedish law forbids or regulates it directly.',
+        'The employer may correct mistakes in a timesheet. The Working Hours Act has no rule on how that is done.',
         `Changing, without authority, a timesheet someone else wrote or signed can be forgery (urkundsförfalskning) under the [Swedish Criminal Code, chapter 14 section 1](${brb}).`,
         `You have the right to see the employer's records of your on-call time, overtime and additional hours ([Working Hours Act, section 11](${atl})).`,
         `Changes to your schedule, meaning when your ordinary hours fall, must as a rule be announced at least two weeks ahead ([Working Hours Act, section 12](${atl})).`,
@@ -171,9 +172,9 @@ export const en: PageCopyOf<typeof sv> = {
     {
       h2: 'Where is the line?',
       body: [
-        `The Swedish Criminal Code says that whoever, without authority, alters or fills in a genuine document commits forgery if it puts the evidence at risk ([chapter 14 section 1](${brb})). An electronic record made to prove something, where it can be reliably checked who issued it, also counts as such a document.`,
+        `The Swedish Criminal Code says that whoever, without authority, alters or completes a genuine document is convicted of forgery if the act puts its value as evidence at risk ([chapter 14 section 1](${brb})). An electronic document drawn up as evidence or otherwise of importance as evidence, where it can be reliably checked who issued it, also counts as such a document.`,
         'So there is a difference between correcting your own record and quietly changing a report the employee wrote or signed. The first is routine. The second should not be done without the employee knowing.',
-        `A related question is whether the employer may change your schedule. There is a clear rule here: changes to when your ordinary hours fall must be announced at least two weeks ahead, unless the nature of the work or something unforeseen calls for shorter notice ([Working Hours Act, section 12](${atl})). Check your collective agreement, it may have other rules.`,
+        `A related question is whether the employer may change your schedule. There is a clear rule here: changes to when your ordinary hours fall must be announced at least two weeks ahead, unless the nature of the business or something unforeseen gives reason for shorter notice ([Working Hours Act, section 12](${atl})). Check your collective agreement, it may have other rules.`,
       ],
     },
     {
@@ -231,15 +232,15 @@ export const en: PageCopyOf<typeof sv> = {
   faq: [
     {
       q: 'Can my employer change my timesheet without telling me in Sweden?',
-      a: 'No law regulates it directly, but quietly changing a report you wrote or signed can be forgery. Whoever wrote the report, it is good practice to say what changed and why. You also have the right to see the records of your on-call time, overtime and additional hours.',
+      a: 'The Working Hours Act says nothing about it, but changing, without authority, a report you wrote or signed can be forgery. Whoever wrote the report, it is good practice to say what changed and why. You also have the right to see the records of your on-call time, overtime and additional hours.',
     },
     {
       q: 'Can my manager deduct a break I did not take?',
-      a: 'If the report shows a break you did not get to take, raise it straight away and show your own notes. The Working Hours Act says no one should work more than five hours in a row without a break (section 15), and how breaks count may also be set in your collective agreement.',
+      a: 'If the report shows a break you did not get to take, raise it straight away and show your own notes. The [Working Hours Act](page:guide-working-hours-act) says no one should work more than five hours in a row without a break (section 15), and how breaks count may also be set in your collective agreement.',
     },
     {
       q: 'Can my employer change my schedule in Sweden?',
-      a: 'Yes, but changes to when your ordinary hours fall must as a rule be announced at least two weeks ahead, under section 12 of the Working Hours Act. Shorter notice is allowed when the nature of the work or something unforeseen calls for it. Collective agreements may have other rules.',
+      a: 'Yes, but changes to when your ordinary hours fall must as a rule be announced at least two weeks ahead, under section 12 of the Working Hours Act. Shorter notice is allowed when the nature of the business or something unforeseen gives reason for it. Collective agreements may have other rules.',
     },
     {
       q: 'Who can help me?',

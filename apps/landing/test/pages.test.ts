@@ -14,7 +14,7 @@ import {
   type Locale as RegistryLocale,
   type PageId,
 } from '@/lib/pages';
-import { parseRichText } from '@/lib/rich-text';
+import { parseRichText, plainText } from '@/lib/rich-text';
 
 type Leaf = { path: string; value: string };
 
@@ -134,7 +134,11 @@ describe('page copy', () => {
         it('never talks about pricing, tiers or seats (business model rule)', () => {
           const banned =
             /\b(pric(e|es|ing)|tiers?|seats?|subscriptions?|premium|paid plans?|pris(er|plan)?|abonnemang|licensavgift|per användare)\b/i;
-          expect(all.filter((l) => banned.test(l.value)).map((l) => `${l.path}: ${l.value}`)).toEqual([]);
+          // What a reader sees: link targets and source URLs (a vendor's /pricing page) are addresses, not copy.
+          const read = all
+            .filter((l) => !l.path.endsWith('.url'))
+            .map((l) => ({ ...l, value: plainText(l.value) }));
+          expect(read.filter((l) => banned.test(l.value)).map((l) => `${l.path}: ${l.value}`)).toEqual([]);
         });
 
         it('links only to registered pages', () => {

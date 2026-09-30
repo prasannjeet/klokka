@@ -1,8 +1,9 @@
+import { RichText } from '@/components/RichText';
 import { Icon } from '@/components/ui/Icon';
-import type { Dictionary } from '@/lib/i18n';
+import type { Dictionary, Locale } from '@/lib/i18n';
 
-/** Native details/summary: keyboard and screen reader support for free, no script. */
-export function Faq({ t }: { t: Dictionary }) {
+/** Native details/summary: keyboard and screen reader support for free, no script. Answers may carry page links. */
+export function Faq({ t, locale }: { t: Dictionary; locale: Locale }) {
   return (
     <section className="section pt-0" id="faq" aria-labelledby="faq-title">
       <div className="wrap">
@@ -21,7 +22,9 @@ export function Faq({ t }: { t: Dictionary }) {
                 {item.q}
                 <Icon name="plus" />
               </summary>
-              <p className="a">{item.a}</p>
+              <p className="a">
+                <RichText text={item.a} locale={locale} />
+              </p>
             </details>
           ))}
         </div>

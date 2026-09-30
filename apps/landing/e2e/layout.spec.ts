@@ -97,12 +97,39 @@ test('/sv redirects to / (one canonical URL per language)', async ({ request }) 
   expect(res.headers()['location']).toBe('/');
 });
 
-test('robots, sitemap, social cards, icon and security headers', async ({ request }) => {
+// What the running build must tell search engines: `npm run dev` and a default build are noindex; set
+// PW_EXPECT_INDEXABLE=true (with PW_BASE_URL) when testing a production-style build made with
+// NEXT_PUBLIC_INDEXABLE=true. The sitemap's entries themselves are checked in test/sitemap.test.ts.
+const expectIndexable = process.env.PW_EXPECT_INDEXABLE === 'true';
+
+test(`indexing signals match the build (${expectIndexable ? 'indexable' : 'noindex'})`, async ({
+  request,
+}) => {
   const robots = await request.get('/robots.txt');
   expect(await robots.text()).toContain('Sitemap:');
   const sitemap = await (await request.get('/sitemap.xml')).text();
-  expect(sitemap).toContain('hreflang="sv-SE"');
-  expect(sitemap).toContain('/en</loc>');
+  for (const path of ['/', '/en']) {
+    const res = await request.get(path);
+    const meta = (await res.text()).match(/<meta name="robots" content="([^"]*)"/)?.[1];
+    if (expectIndexable) {
+      expect(meta, path).toMatch(/^index, follow/);
+      expect(res.headers()['x-robots-tag'], path).toBeUndefined();
+    } else {
+      expect(meta, path).toMatch(/^noindex/);
+      expect(res.headers()['x-robots-tag'], path).toContain('noindex');
+    }
+  }
+  if (expectIndexable) {
+    expect(sitemap).toContain('hreflang="sv-SE"');
+    expect(sitemap).toContain('hreflang="x-default"');
+    expect(sitemap).toContain('/en</loc>');
+  } else {
+    expect(sitemap).toContain('<urlset');
+    expect(sitemap).not.toContain('<url>');
+  }
+});
+
+test('social cards, icons and security headers', async ({ request }) => {
   for (const path of ['/og/home-sv.jpg', '/og/about-en.jpg']) {
     const res = await request.get(path);
     expect(res.status(), path).toBe(200);
@@ -238,4 +265,36 @@ test.describe('interactions at phone width', () => {
     );
     expect(delay).toMatch(/^-?\d+(\.\d+)?s$/);
   });
+});
+
+test('the 2026 hours table scrolls inside its own region at 360x640, never the page', async ({ page }) => {
+  await page.setViewportSize(PHONES[0]);
+  const errors = collectErrors(page);
+  await page.goto('/arbetstid-per-manad/2026');
+  await page.evaluate(() => document.fonts.ready);
+  const region = page.getByRole('region', { name: 'Arbetsdagar och arbetstimmar per månad 2026' });
+  await expect(region.locator('tbody tr')).toHaveCount(12);
+  await expect(region.locator('tfoot')).toContainText('251');
+  await expect(region.locator('tfoot')).toContainText('2 008');
+
+  const box = await region.evaluate((el) => ({
+    overflowX: getComputedStyle(el).overflowX,
+    scrollWidth: el.scrollWidth,
+    clientWidth: el.clientWidth,
+    right: el.getBoundingClientRect().right,
+  }));
+  expect(['auto', 'scroll']).toContain(box.overflowX);
+  expect(box.right).toBeLessThanOrEqual(360);
+  // The table is wider than a 360 px phone; if a layout change ever makes it fit, the region simply never scrolls.
+  if (box.scrollWidth > box.clientWidth) {
+    await region.evaluate((el) => el.scrollBy({ left: 200 }));
+    expect(await region.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  }
+  const [scrollWidth, innerWidth] = await page.evaluate(() => [
+    document.documentElement.scrollWidth,
+    window.innerWidth,
+  ]);
+  expect(scrollWidth).toBeLessThanOrEqual(innerWidth);
+  expect(await page.evaluate(() => window.scrollX)).toBe(0);
+  expect(errors).toEqual([]);
 });

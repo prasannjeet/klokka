@@ -6,9 +6,9 @@
 #
 # For each app: build from the checked-out commit (the tree must be clean, so the tag names exactly what is in the
 # image), push docker.nexus.coolify.ooguy.com/klokka-<app>:sha-<short> and :latest, pin and deploy that tag on
-# staging Coolify, and wait for the app's health URL. The API is built and tested with Maven first (SKIP_TESTS=1
-# skips its tests); web and landing are built inside their Dockerfiles. `all` skips an app whose Dockerfile does not
-# exist yet.
+# staging Coolify, and wait for the app's health URL; for the landing, then check that staging answers noindex
+# (.github/scripts/index-check.sh). The API is built and tested with Maven first (SKIP_TESTS=1 skips its tests);
+# web and landing are built inside their Dockerfiles. `all` skips an app whose Dockerfile does not exist yet.
 #
 # Credentials: .agents/local-credentials/coolify-staging.json (Coolify write token, app uuids, URLs, health paths)
 # and this user's Nexus docker login (~/.docker/config.json). Production is never reachable from here: it is built by
@@ -44,6 +44,9 @@ deploy() {
   fqdn=$(jq -r --arg a "klokka-$app" '.applications[$a].fqdn' "$CRED")
   health=$(jq -r --arg a "klokka-$app" '.applications[$a].health' "$CRED")
   .github/scripts/coolify-deploy.sh "$uuid" "$tag" "$fqdn$health"
+  # coolify-deploy.sh returns once the new container answers its health URL, so this checks the new build. Staging
+  # must stay out of search results, exactly as ci.yml checks after its deploy.
+  if [ "$app" = landing ]; then .github/scripts/index-check.sh "$fqdn" noindex; fi
 }
 
 echo "Releasing ${targets[*]} at $tag to STAGING"

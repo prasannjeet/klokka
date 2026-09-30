@@ -46,6 +46,27 @@ export const SUBPAGES = [
     lang: 'en',
     h1: 'Can an employer change the hours on your timesheet?',
   },
+  {
+    id: 'hours-2026',
+    locale: 'sv',
+    path: '/arbetstid-per-manad/2026',
+    lang: 'sv-SE',
+    h1: 'Arbetstid per månad 2026',
+  },
+  {
+    id: 'trade-cafe',
+    locale: 'sv',
+    path: '/tidrapportering-cafe-restaurang',
+    lang: 'sv-SE',
+    h1: 'Tidrapportering för café och restaurang',
+  },
+  {
+    id: 'guide-best-free',
+    locale: 'en',
+    path: '/en/guide/best-free-timesheet-apps',
+    lang: 'en',
+    h1: 'The best free timesheet apps in 2026, compared honestly',
+  },
 ] as const;
 
 /** Collects console errors and page errors from the moment it is called. */
@@ -64,8 +85,16 @@ export async function escapingElements(page: Page): Promise<string[]> {
     const vw = document.documentElement.clientWidth;
     const out: string[] = [];
     const skip = '.ticker, .foot-big, .menu, .sprite, .skip';
+    const scrollsSideways = (from: HTMLElement | null) => {
+      for (let a = from; a && a !== document.body; a = a.parentElement) {
+        if (['auto', 'scroll'].includes(getComputedStyle(a).overflowX)) return true;
+      }
+      return false;
+    };
     for (const el of Array.from(document.querySelectorAll<HTMLElement>('body *'))) {
       if (el.closest(skip)) continue;
+      // Inside a sideways-scrolling region (a wide table) content may extend past the screen; the region may not.
+      if (scrollsSideways(el.parentElement)) continue;
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
       const style = getComputedStyle(el);

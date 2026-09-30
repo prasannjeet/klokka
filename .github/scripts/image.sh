@@ -10,7 +10,7 @@
 # The landing bakes its public URLs at build time (NEXT_PUBLIC_*), so they are build arguments; the defaults are
 # staging's. The web app bakes in NEXT_PUBLIC_SITE_URL too: its share-preview image lives on the landing.
 # NEXT_PUBLIC_INDEXABLE (default false) lets search engines index the landing: only release.yml sets it to true, so
-# a staging or local image is always noindex. KLOKKA_BUILD_VERSION overrides the API's reported version
+# a staging or local image is always noindex; set to true with any tag but v<version>, the landing build refuses. KLOKKA_BUILD_VERSION overrides the API's reported version
 # (release.yml passes the tag's version).
 # The caller must already be logged in to the registry.
 set -euo pipefail
@@ -40,6 +40,12 @@ case "$app" in
     build_args=(--build-arg "NEXT_PUBLIC_APP_URL=$APP_URL" --build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL")
     ;;
   landing)
+    # An indexable landing is a production image, and production images carry a v<version> tag (release.yml).
+    # Anything else (./deploy-staging.sh, a CI sha-* build) would put staging into search results.
+    if [ "${NEXT_PUBLIC_INDEXABLE:-false}" = true ] && [[ ! $tag =~ ^v[0-9] ]]; then
+      echo "refusing to build an indexable landing (NEXT_PUBLIC_INDEXABLE=true) under tag $tag: only a v<version> release tag may be indexable" >&2
+      exit 2
+    fi
     context=.
     build_args=(--build-arg "NEXT_PUBLIC_SITE_URL=$SITE_URL" --build-arg "NEXT_PUBLIC_APP_URL=$APP_URL"
       --build-arg "NEXT_PUBLIC_APK_URL=$APK_URL" --build-arg "NEXT_PUBLIC_INDEXABLE=${NEXT_PUBLIC_INDEXABLE:-false}")

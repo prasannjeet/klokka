@@ -141,3 +141,27 @@ Nexus is reachable as `docker.nexus.coolify.ooguy.com` / `nexus.coolify.ooguy.co
 
 Metro 8083, APK static server 8898, API 8080 (dev) with `quarkus.http.test-port=0` in tests, web 3000,
 landing 3001. Kulram keeps 8082 / 8899 / 8081.
+
+## D18. The public site: one page registry, a card per page, indexable only from a release (CHQ-149, 2026-09-30)
+
+- **One registry drives every page.** `apps/landing/src/lib/pages/registry.ts` lists each page as plain data (id,
+  kind, Swedish and English path, parent, footer group, lastmod, card background) with no imports, so
+  `next.config.ts` can read it. From it come the routes (one catch-all route with static params, Swedish paths
+  rewritten to `/sv/...`), the metadata (canonical, hreflang pair plus `x-default` = Swedish), the JSON-LD
+  (breadcrumbs from `parent`), the sitemap (lastmod per entry), the footer columns and `llms.txt`. Copy lives in one
+  file per page (`src/lib/i18n/pages/<id>.ts`, English typed against the Swedish), and `test/pages.test.ts` guards
+  the pair: title, description and card lengths, no em dash, every `page:` link registered, the same shape in both
+  languages. An entry is added in the change that builds its page, so nothing links to a page that does not exist.
+- **A link card per page and language.** `/og/<id>-<locale>.jpg` is drawn at build time (`next/og`, then `sharp`
+  to JPEG under 200 KB) from the page's own card text over one of four backgrounds; `og:image` always points at the
+  page's own card. Why JPEG: the backgrounds are photographic, and JPEG keeps a card well under WhatsApp's limit
+  (600 KB documented, about 300 KB reported; `docs/research/seo/social-specs.md`). Why one per page: a share of a
+  guide or the calculator should show that page's title, not the homepage's.
+- **Indexable only when built by a release.** `NEXT_PUBLIC_INDEXABLE` is a build argument, `true` only in
+  `.github/workflows/release.yml`; absent or anything else means not indexable, so an unconfigured build is safe.
+  A non-indexable build sends a `noindex` meta tag and an `X-Robots-Tag` header and an empty sitemap, while
+  `robots.txt` keeps allowing crawling so crawlers can see the noindex. `.github/scripts/index-check.sh` proves it
+  both ways: CI checks staging for `noindex` after every deploy, the release job checks the built image for
+  `index` and fails the release otherwise, and `docs/RELEASING.md` runs it against `https://klokka.se` after the
+  tag is pinned. Why a build flag and not a hostname check: the flag is decided by which pipeline built the image,
+  so a staging image can never be indexed by accident, whatever domain it is served on.

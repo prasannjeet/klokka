@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { GuidePage, isGuideId } from '@/components/pages/GuidePage';
+import { IndustryPage, isIndustryId } from '@/components/pages/IndustryPage';
 import { LegalPage } from '@/components/pages/LegalPage';
 import { ProductPage } from '@/components/pages/ProductPage';
+import { isTableId, TablePage } from '@/components/pages/TablePage';
 import { isToolId, ToolPage } from '@/components/pages/ToolPage';
 import { isLocale } from '@/lib/i18n';
 import { pageForSlug, staticSlugParams } from '@/lib/pages';
@@ -45,6 +47,13 @@ export default async function Page({ params }: Props) {
     case 'tool':
       if (!isToolId(page.id)) throw new Error(`tool page "${page.id}" has no tool component`);
       return <ToolPage id={page.id} locale={locale} />;
+    case 'table':
+      if (!isTableId(page.id)) throw new Error(`table page "${page.id}" has no table`);
+      return <TablePage id={page.id} locale={locale} />;
+    case 'industry':
+      if (!isIndustryId(page.id))
+        throw new Error(`industry page "${page.id}" needs a trade- id for its copy type`);
+      return <IndustryPage id={page.id} locale={locale} />;
     default:
       // A registered page without a layout must fail the build, never ship as a blank or a 404.
       throw new Error(`no layout for page "${page.id}" of kind "${page.kind}"`);

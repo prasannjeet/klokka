@@ -57,5 +57,12 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
+  // The landing's own config (apps/landing/eslint.config.mjs) adds Next's rules, and its disable directives
+  // name those rules; this config has no Next plugin, so it would report them as unused. The landing's own lint
+  // still reports unused directives.
+  {
+    files: ['apps/landing/**'],
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
+  },
   prettier,
 );

@@ -129,7 +129,7 @@ function HomeCard({ art, locale }: { art: string; locale: Locale }) {
         fontFamily: 'Inter',
       }}
     >
-      {/* eslint-disable-next-line -- no-img-element: Satori draws <img>, there is no next/image here (the root config has no Next plugin) */}
+      {/* eslint-disable-next-line -- no-img-element: Satori draws a plain <img>; next/image does not apply to OG images */}
       <img
         src={art}
         alt=""
@@ -219,7 +219,7 @@ function PageCard({ art, id, locale }: { art: string; id: PageId; locale: Locale
         fontFamily: 'Inter',
       }}
     >
-      {/* eslint-disable-next-line -- no-img-element: Satori draws <img>, there is no next/image here (the root config has no Next plugin) */}
+      {/* eslint-disable-next-line -- no-img-element: Satori draws a plain <img>; next/image does not apply to OG images */}
       <img
         src={art}
         alt=""

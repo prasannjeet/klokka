@@ -25,7 +25,9 @@ Migadu) needs the owner's explicit go-ahead for that change.
 | Images | `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:sha-<short>` | same repositories, `:v<version>` |
 | Android APK | `.../klokka-downloads/klokka-latest.apk` | `.../klokka-downloads/prod/klokka-latest.apk` (+ `prod/klokka-v<version>.apk`) |
 | Sender mailbox | `no-reply@cleanhq.se` (Migadu) | `no-reply@klokka.se` (Migadu) |
+| Contact mailbox | none | `hej@klokka.se` (Migadu): the address on the about, privacy and terms pages |
 | Deploys | every push to `main` (CI) | `./release.sh`, then pin the tag in Coolify by hand |
+| DNS | no own domain (`*.coolify.ooguy.com`) | `klokka.se` at Dynu (`ns1` to `ns6.dynu.com`): add records such as the Search Console TXT verification in Dynu's control panel |
 
 All apps are Coolify `dockerimage` apps: 512 MB, `--init`, health checks on `127.0.0.1` (section 9). The web app
 calls the API over the Docker network at `http://klokka-api:8080/v1` (the API app's network alias `klokka-api`),
@@ -43,6 +45,7 @@ chat. `README.md` in that folder lists every file.
 | Logto console login, M2M app, app ids and secrets, webhook key | `logto.json` | `logto-prod.json` |
 | Postgres roles and passwords | `postgres.json` | `postgres-prod.json` |
 | SMTP sender | `smtp.json` | `smtp-prod.json` |
+| Contact mailbox `hej@klokka.se` (IMAP/SMTP) | none | `mailbox-hej-prod.json` |
 | Test accounts | `staging-accounts.json` | none (use your own account) |
 | Expo, Firebase, Android signing | `expo.json`, `firebase-service-account.json`, `google-services.json`, `klokka-release.keystore`, `android-signing.json` (shared by both) | same |
 | Staging host sudo | `sudo.json` | n/a (`ssh netcup` is root) |
@@ -53,6 +56,7 @@ CI secrets and build values live in GitHub (`gh secret list`, `gh variable list`
 
 Mailboxes are also in the email MCP (`mcp-email-server account list`): `cleanhq-noreply` (staging sender),
 `klokka-noreply` (production sender), plus `blixo-test` / `cleanhq-info` for delivery tests.
+`klokka-hej` is the production contact mailbox `hej@klokka.se`: read it for mail from the public site.
 
 ## 3. Access
 
@@ -71,6 +75,13 @@ TOKEN=$(curl -s -u "$(jq -r '.applications["klokka-api"] | .id+":"+.secret' $L)"
   -d grant_type=client_credentials -d resource=https://default.logto.app/api -d scope=all "$E/oidc/token" | jq -r .access_token)
 curl -s -H "Authorization: Bearer $TOKEN" "$E/api/applications" | jq -r '.[] | "\(.name) \(.id)"'
 ```
+
+**Terms and privacy links on the Logto sign-in page** (`termsOfUseUrl`, `privacyPolicyUrl` in the sign-in
+experience; CHQ-149): staging points at the staging landing, `https://klokka.coolify.ooguy.com/villkor` and
+`/integritet` (set 2026-09-30); production points at `https://klokka.se/villkor` and `https://klokka.se/integritet`
+(a production change: the owner's go-ahead). Read them with
+`curl -s -H "Authorization: Bearer $TOKEN" "$E/api/sign-in-exp" | jq '{termsOfUseUrl, privacyPolicyUrl}'` and
+change them with `PATCH $E/api/sign-in-exp` and the same two fields.
 
 **Postgres (Klokka's database):** neither server is published on the internet; go through the host.
 
@@ -142,6 +153,14 @@ skipped (one already running): read the body.
 
 **Roll back:** the same PATCH (or the Coolify UI) with the previous tag; every version stays in Nexus. Never re-tag
 an old commit. A rollback of the API across a migration needs thought: Flyway migrations only go forward.
+
+**Indexing (CHQ-149).** Only a landing image built by `release.yml` may be indexed: it is built with
+`NEXT_PUBLIC_INDEXABLE=true`, which Next.js bakes in. Every other build, staging included, answers with a `noindex`
+robots meta tag, an `X-Robots-Tag: noindex, nofollow` header and an empty sitemap, while `robots.txt` still allows
+crawling (a crawler has to fetch a page to see its noindex). `bash .github/scripts/index-check.sh <base-url>
+index|noindex` checks `/` and `/en`: CI runs it with `noindex` against staging after every deploy, `release.yml` with
+`index` against the freshly built image, and after pinning a tag it is run against `https://klokka.se` by hand
+(`docs/RELEASING.md`). The web app is never indexable in either environment (noindex header and meta).
 
 ## 6. Accounts and roles
 

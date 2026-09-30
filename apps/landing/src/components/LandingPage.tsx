@@ -33,7 +33,7 @@ export function LandingPage({ locale }: { locale: Locale }) {
           <Insights t={t} locale={locale} />
         </PayScope>
         <OpenSource t={t} />
-        <Faq t={t} />
+        <Faq t={t} locale={locale} />
         <Cta t={t} />
       </main>
       <SiteFooter t={t} locale={locale} page="home" />

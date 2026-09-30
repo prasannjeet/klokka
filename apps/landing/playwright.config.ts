@@ -6,6 +6,7 @@ import { defineConfig, devices } from '@playwright/test';
 //   lan     the same site over this host's LAN address, proving it hydrates there (AGENTS.md, local previews)
 //   shots   non-gating screenshot producer for visual review against docs/design/mockups/landing.html
 // Set PW_BASE_URL to test a running build instead of starting `next dev`; LAN_URL overrides the LAN address.
+// PW_EXPECT_INDEXABLE=true expects a build made with NEXT_PUBLIC_INDEXABLE=true (default: noindex, like `next dev`).
 
 const PORT = 3001;
 
