@@ -39,6 +39,9 @@ Deliver correct, maintainable changes with minimal risk.
 
 ## Version control / Jira
 - Work directly on `main` by default; branch only for work explicitly agreed to be isolated.
+- Other sessions often work in this checkout at the same time. Stage explicit paths and read `git diff` of each file
+  before committing (a shared file may hold someone else's unfinished edits); never `git add -A`, never touch their
+  untracked files. Cut a release from a clean worktree of `main` (`git worktree add`) when the tree is not clean.
 - Jira project is **CHQ**. Every ticket summary starts with `KLOKKA: ` and carries the label `klokka` (the Repository select
   has no klokka option yet). Every feature ticket has a **Parity** section (API / web / mobile).
 - Once implementation starts: branch `CHQ-<n>-<slug>`, every commit subject `CHQ-<n>: ...`.
@@ -185,8 +188,10 @@ guarded by a regenerate-and-diff check.
   `com.prasannjeet.klokka` (fixed forever). `google-services.json` is copied from `.agents/local-credentials/` at build time.
 - Postgres: `klokka` database on the Common Resources PostgreSQL 18 (Coolify uuid `k10e48k41urcbb1erev0vhmu`), two roles
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
-- SMTP: Migadu `smtp.migadu.com:587` STARTTLS; ~100 emails/month on staging, so email is for invitations (2 per invitee)
-  and opt-in digests only. Credentials live only in Coolify env vars and `.env` files that are gitignored.
+- SMTP: Migadu `smtp.migadu.com:587` STARTTLS, senders `no-reply@cleanhq.se` (staging) and `no-reply@klokka.se`
+  (production). Migadu allows about 100 emails a day per mailbox, so tests send a handful, never loops; the API also caps
+  itself with `KLOKKA_MAIL_MONTHLY_QUOTA` (100 in both today). Klokka emails only codes, invitations and the opt-in
+  digest; notifications are push. Credentials live only in Coolify env vars and gitignored files.
 - Staging deploys from CI on every push to `main`; `./deploy-staging.sh` is the manual fallback. Production is
   `./release.sh patch|minor|major|x.y.z`: a `v*` tag builds `klokka-*:v<version>` and the production APK
   (`docs/RELEASING.md`), and the owner pins the tag in production Coolify by hand. Environment URLs are the
