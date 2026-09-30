@@ -119,6 +119,9 @@ guarded by a regenerate-and-diff check.
 - All user-facing text lives in `packages/core/i18n/{sv,en}.json`. TypeScript gets a generated typed `t()`; the API loads
   the same JSON for push and email text. `{name}` placeholders, `_one`/`_other` plural keys. Never a hardcoded string in
   JSX, RN components or Java notification code.
+- Email text is catalogue text too (`email.*`). After changing it run `npm run emails` (regenerates the Logto templates and
+  the API's digest template; CI checks drift) and push to Logto with `npm run emails:push staging`, then `production`
+  (`docs/OPERATIONS.md` section 8).
 - Never use an em dash in any user-facing text (UI copy, notifications, emails, catalogue entries). Rewrite with a comma,
   colon, parentheses or a period. Lint enforces it on TS, JSX text and the JSON catalogue.
 

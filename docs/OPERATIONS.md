@@ -181,12 +181,26 @@ The production host also ships container logs to the staging Elastic stack (serv
 
 ## 8. Email
 
-Both senders are Migadu mailboxes (`smtp.migadu.com:587` STARTTLS). Each is used twice: by the environment's Logto
-(sign-up codes, password reset) and by the API (invitations, digests), which caps itself at
-`KLOKKA_MAIL_MONTHLY_QUOTA` (100 in both environments today). Test delivery with the email MCP: send from
-`klokka-noreply` to `blixo-test` and list `blixo-test`'s inbox, or `POST $E/api/connectors/simple-mail-transfer-protocol/test`
-to test Logto's connector. A new Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled
-for it in Migadu.
+Both senders are Migadu mailboxes (`smtp.migadu.com:587` STARTTLS; Migadu allows about 100 emails a day per
+mailbox). Each is used twice: by the environment's Logto (sign-up, sign-in and password reset codes, invitations) and
+by the API (weekly digest), which caps itself at `KLOKKA_MAIL_MONTHLY_QUOTA`.
+
+**Templates (CHQ-148).** Every email has the klokka.se design, in Swedish and English, generated from one layout:
+
+- Text lives in the catalogue (`packages/core/i18n/{sv,en}.json`, `email.*`). After changing it, run `npm run emails`:
+  it writes `infra/logto/email-templates.json` (7 Logto templates x sv/en) and the API's
+  `apps/api/service/src/main/resources/templates/digest.html` (Qute). CI fails when they drift (`npm run emails:check`).
+- Logto gets them with `npm run emails:push staging` (then `production`): the per-language templates, the English
+  set as the connector's fallback, and Swedish sign-in texts (`infra/logto/custom-phrases/sv.json`). Without the
+  Swedish texts Logto cannot resolve `sv` and sends English.
+- Language: Logto codes follow the sign-in page's language (the browser's); invitations follow the inviting
+  employer's Klokka language (the API passes `locale`); the digest follows the reader's own setting. Light or dark is
+  chosen by the reader's mail app.
+- An API code change reaches the digest only through a deploy (staging on push, production by release).
+
+Test delivery with the email MCP (`klokka-noreply` in production, `cleanhq-noreply` on staging; read `blixo-test` or
+`cleanhq-info`). `+` addresses are not delivered on blixo.ai. Logto also limits messages per recipient (429). A new
+Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled for it in Migadu.
 
 ## 9. Troubleshooting (things that already happened)
 
@@ -195,7 +209,8 @@ for it in Migadu.
 | A new Coolify app deploys, then "New container is not healthy, rolling back" | Coolify probes `localhost`, which resolves to `::1`; Next.js listens on IPv4 only | set the app's health check host to `127.0.0.1` |
 | A phone signs in against the wrong environment | Metro's cache inlined old `EXPO_PUBLIC_*` values (fixed in v1.0.2: job-local cache + a bundle check) | rebuild; never ship an APK whose check step failed |
 | API answers 401 to a signed-in client | the client did not send `resource` (Logto then issues an opaque token) or the audience differs | clients must send the environment's API resource |
-| Logto shows English to Swedish browsers | Logto has no built-in Swedish | custom phrases in Logto (not done yet) |
+| Logto sends English emails to Swedish browsers | Swedish is not in Logto's language library | push the Swedish texts (`npm run emails:push <env>`) |
+| Inviting an employee fails with "Logto is unreachable" after ~10 s | Logto sends the invitation email before answering | the API waits up to 30 s (`quarkus.rest-client.logto.read-timeout`) |
 | Sign-up email never arrives | sender mailbox not allowed to send, or the monthly quota used up | section 8 |
 | `v*` tag built but production unchanged | production deploys are by hand | section 5, step 2 |
 | Coolify's "Redirect to non-www" setting has no effect on the landing | the apps were created through the API with stored custom labels, which Coolify uses as they are | redirects live in the landing app's labels (below); after a domain change, edit the labels, never "reset to defaults" |
@@ -216,4 +231,3 @@ homelab's front proxy before Traefik; Traefik itself answers 301.
 - One `app_user` row (`5zgfj0ng8gnz`, `smoke-test@klokka.se`) from the go-live sign-in test; its Logto user is deleted.
 - `prod/klokka-v1.0.1.apk` in Nexus carries staging URLs; delete it.
 - Mail quota 100 per month; raise it to the Migadu plan's limit.
-- Logto sign-in pages in Swedish (custom phrases).
