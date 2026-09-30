@@ -2,6 +2,22 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.1.0, 2026-09-30
+
+### Added
+- klokka.se grows from one page per language to 22 (CHQ-149): the app, small businesses, hourly staff, open source,
+  a work-hours calculator, a monthly timesheet template (Excel and PDF), working hours per month for 2026 and 2027,
+  pages for cafés and restaurants, cleaning firms, salons and shops, five guides with official sources, and about,
+  privacy and terms pages, all in Swedish and English.
+- Every page has its own link-preview card; the homepage card shows the employer's and the employee's phone.
+  Favicons and app icons in every size, `llms.txt`, a sitemap with hreflang, IndexNow.
+- The web app gives shared links a proper preview and stays out of search results.
+
+### Changed
+- Only production is indexable: staging builds carry `noindex` everywhere, and CI and the release check both ways.
+- The Android download is served from `klokka.se/download/android`.
+- `www.klokka.se` and plain http now redirect permanently to `https://klokka.se`, with HSTS.
+
 ## 1.0.3, 2026-09-30
 
 ### Added
