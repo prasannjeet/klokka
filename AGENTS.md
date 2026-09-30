@@ -26,7 +26,7 @@ Deliver correct, maintainable changes with minimal risk.
 - **Status: v1 live in production (v1.0.2, CHQ-146), staging pass CHQ-143, review CHQ-144.** Every operation of the contract is implemented
   on the API and both clients; `docs/STAGING_SMOKE.md` is what was exercised on staging and `docs/REVIEW.md` the
   pre-tag review with its open findings.
-- Documentation map: `docs/OPERATIONS.md` (runbook: access, checkup, deploy, accounts, both environments), `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
+- Documentation map: `docs/OPERATIONS.md` (runbook: access, checkup, deploy, accounts, both environments), `docs/SEO.md` (marketing site: page registry, keyword ownership, indexing, link cards, content upkeep, Search Console), `docs/PRODUCT_BRIEF.md` (what), `docs/DECISIONS.md` (cross-cutting calls; wins over the research
   docs when they differ), `docs/research/*.md` (evidence per area), `docs/design/DIRECTION.md` + `docs/design/mockups/`
   (visual direction, tokens, mockups), `docs/brand/` (logo), `docs/JIRA_PLAN.md` (epics and stories).
 
@@ -140,6 +140,14 @@ guarded by a regenerate-and-diff check.
   rows on the shared Dev Services database; `@QuarkusTest` for slices, `@QuarkusIntegrationTest` against the fast-jar;
   ArchUnit through `archunit-junit6`; `%test.quarkus.http.test-port=0` (8081 is taken on this host). Testcontainers 2.x
   worked without `-Dapi.version=1.43` in the proof; keep the flag as a documented fallback.
+
+## Marketing site and SEO (`docs/SEO.md`)
+- Every landing page is a registry entry + a copy file (`apps/landing/AGENTS.md`, "Adding a page"); tests enforce title
+  60 / description 155 chars, hreflang pairs, resolvable links and no "personalliggare" in product titles or H1s.
+- Only `v*` release builds are indexable (`NEXT_PUBLIC_INDEXABLE`); staging is noindex and CI checks it after every
+  deploy. Never block a noindexed host with robots.txt.
+- Legal or labour-law statements on the site need an official source (riksdagen.se, av.se, skatteverket.se); guides
+  carry a review date and their sources. Dates to act on are in `docs/SEO.md` section 5.
 
 ## Frontend rules (web and mobile)
 - Design tokens come from `@klokka/tokens` only; no literal colours, radii or easings in components. Light and dark both,
