@@ -2,6 +2,16 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.0.3, 2026-09-30
+
+### Added
+- Every email in the klokka.se design, in Swedish and English (CHQ-148): the seven Logto emails (sign-up, sign-in
+  and password reset codes, invitation, new email, identity check, generic) and the weekly digest, now HTML with a week
+  grid and a plain-text alternative. Logto's sign-in pages in Swedish. Sign-in by email code and password reset are on.
+
+### Fixed
+- Inviting an employee could fail while Logto was still sending the invitation email: the API now waits up to 30 s.
+
 ## 1.0.2, 2026-09-28
 
 ### Fixed
