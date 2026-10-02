@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Member } from '@klokka/api-client';
 import { formatDate, formatHours, formatMonthName, formatRate } from '@klokka/core';
@@ -66,6 +67,7 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const s = useThemedStyles(styles);
   const router = useRouter();
   const toast = useToast();
@@ -181,7 +183,7 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
           </Card>
         ) : null}
       </Screen>
-      <View style={[s.footer, { bottom: theme.space[6] }]}>
+      <View style={[s.footer, { bottom: insets.bottom + theme.space[6] }]}>
         <Button
           label={t('employees.addEmployee')}
           icon="plus"

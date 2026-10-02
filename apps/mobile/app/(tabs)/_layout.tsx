@@ -1,5 +1,6 @@
 import { Redirect, Tabs } from 'expo-router';
 import { Platform, type ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useActiveWorkspace } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useTheme } from '@/theme';
@@ -10,6 +11,7 @@ import { Icon, type IconName } from '@/ui';
 export default function TabsLayout() {
   const t = useT();
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const { workspace, me } = useActiveWorkspace();
   if (me && !workspace) return <Redirect href="/" />;
   const employer = workspace?.role === 'EMPLOYER';
@@ -26,7 +28,9 @@ export default function TabsLayout() {
           backgroundColor: theme.color.surface,
           borderTopColor: theme.color.border,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 84 : 68,
+          // A numeric height replaces the navigator's own "bar + inset" sum, while it still pads the
+          // bar by the inset: without adding it here the system navigation eats the icons and labels.
+          height: (Platform.OS === 'ios' ? 50 : 68) + insets.bottom,
           paddingTop: theme.space[2],
         },
         tabBarLabelStyle: { ...theme.text('caption', 600), marginTop: 2 },

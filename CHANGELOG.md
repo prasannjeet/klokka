@@ -2,6 +2,14 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.1.1, 2026-10-02
+
+### Fixed
+- Android: the bottom tab bar and the "Add employee" button no longer sit under the system navigation, with the
+  three buttons or the gesture line (CHQ-152).
+- Production: creating a business failed because the API used the staging Logto's role ids. Both role ids are now
+  set on the production API (configuration, CHQ-152).
+
 ## 1.1.0, 2026-09-30
 
 ### Added

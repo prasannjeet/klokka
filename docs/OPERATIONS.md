@@ -230,6 +230,7 @@ Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled 
 | API answers 401 to a signed-in client | the client did not send `resource` (Logto then issues an opaque token) or the audience differs | clients must send the environment's API resource |
 | Logto sends English emails to Swedish browsers | Swedish is not in Logto's language library | push the Swedish texts (`npm run emails:push <env>`) |
 | Inviting an employee fails with "Logto is unreachable" after ~10 s | Logto sends the invitation email before answering | the API waits up to 30 s (`quarkus.rest-client.logto.read-timeout`) |
+| Creating a business or inviting an employee fails with a generic error; the API log shows Logto 422 `entity.relation_foreign_key_not_found` on `assignUserRoles` | `KLOKKA_LOGTO_EMPLOYER_ROLE_ID` / `KLOKKA_LOGTO_EMPLOYEE_ROLE_ID` are not set, so the API uses the defaults, which are the staging Logto's role ids (production, 2026-10-02) | set both on the API app to that Logto's organization role ids (console, Organization template) and restart |
 | Sign-up email never arrives | sender mailbox not allowed to send, or the monthly quota used up | section 8 |
 | `v*` tag built but production unchanged | production deploys are by hand | section 5, step 2 |
 | Coolify's "Redirect to non-www" setting has no effect on the landing | the apps were created through the API with stored custom labels, which Coolify uses as they are | redirects live in the landing app's labels (below); after a domain change, edit the labels, never "reset to defaults" |
