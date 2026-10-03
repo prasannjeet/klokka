@@ -1,0 +1,4 @@
+# fastlane (Homebrew, `fastlane supply`) reads this when run from apps/mobile. The Play API key is the Firebase
+# service account, gitignored in .agents/local-credentials/ (docs/OPERATIONS.md section 2).
+json_key_file("../../.agents/local-credentials/firebase-service-account.json")
+package_name("com.prasannjeet.klokka")

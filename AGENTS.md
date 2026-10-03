@@ -186,6 +186,13 @@ guarded by a regenerate-and-diff check.
   with Kulram's Logto (`logto-vgyjk5a0t98xjk8l0vphgyeh...`), which stays Kulram's.
 - Push: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase project `klokka-64f3a`, Android package
   `com.prasannjeet.klokka` (fixed forever). `google-services.json` is copied from `.agents/local-credentials/` at build time.
+- Google Play: use the `fastlane` CLI (Homebrew, `/home/linuxbrew/.linuxbrew/bin/fastlane`), run from `apps/mobile`, where
+  `fastlane/Appfile` points it at the key and the package, so no flags are needed: `fastlane supply --aab <file> --track
+  internal`, `fastlane run validate_play_store_json_key`. The key is the Firebase service account
+  `firebase-adminsdk-fbsvc@klokka-64f3a.iam.gserviceaccount.com` (`.agents/local-credentials/firebase-service-account.json`).
+  The Play Android Developer API is enabled in Cloud project `klokka-64f3a` and the account is a user of the CleanHQ Play
+  developer account (2026-10-03) with release rights on every app there, Pooja Pro included: touch only Klokka.
+  Creating the app and its first upload are manual in Play Console (CHQ-153).
 - Postgres: `klokka` database on the Common Resources PostgreSQL 18 (Coolify uuid `k10e48k41urcbb1erev0vhmu`), two roles
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
 - SMTP: Migadu `smtp.migadu.com:587` STARTTLS, senders `no-reply@cleanhq.se` (staging) and `no-reply@klokka.se`

@@ -12,6 +12,7 @@ Klokka's runbook is `docs/OPERATIONS.md`. Read the section you need before actin
 - Section 5 is deploy and rollback. Production is `./release.sh`, then pinning `v<version>` in production Coolify,
   API first. Never cut a tag or deploy production without the owner asking for it.
 - Sections 3, 6, 7, 8: access (Coolify, Logto, Postgres), accounts and `platform-admin`, logs, email.
+- Google Play (uploads, tracks, testers, listing) goes through `fastlane` from `apps/mobile`; AGENTS.md, "Google Play".
 - Section 9 lists failures already seen and their fixes; section 10 the open production items.
 - The marketing site's SEO (indexing per environment, link cards, the page registry, IndexNow, Search Console, content
   review dates) is `docs/SEO.md`; release-day SEO steps are in `docs/RELEASING.md`, "After the landing is deployed".

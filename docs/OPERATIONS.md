@@ -48,6 +48,7 @@ chat. `README.md` in that folder lists every file.
 | Contact mailbox `hej@klokka.se` (IMAP/SMTP) | none | `mailbox-hej-prod.json` |
 | Test accounts | `staging-accounts.json` | none (use your own account) |
 | Expo, Firebase, Android signing | `expo.json`, `firebase-service-account.json`, `google-services.json`, `klokka-release.keystore`, `android-signing.json` (shared by both) | same |
+| Google Play API (`fastlane`, run from `apps/mobile`; `fastlane/Appfile` holds the key path and the package) | none | `firebase-service-account.json` (Play Android Developer API enabled in `klokka-64f3a`; a user of the CleanHQ Play developer account with release rights on all its apps, 2026-10-03) |
 | Staging host sudo | `sudo.json` | n/a (`ssh netcup` is root) |
 
 CI secrets and build values live in GitHub (`gh secret list`, `gh variable list`): `NEXUS_*`, `COOLIFY_TOKEN` +
