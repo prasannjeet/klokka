@@ -32,7 +32,7 @@ const config: ExpoConfig = {
   name: 'Klokka',
   slug: 'klokka',
   owner: 'prasannjeet',
-  version: '1.1.1',
+  version: '1.1.2',
   orientation: 'portrait',
   icon: './assets/icon.png',
   scheme: 'klokka',
@@ -41,7 +41,7 @@ const config: ExpoConfig = {
   android: {
     // Fixed forever (docs/DECISIONS.md D12); matches the Firebase Android app.
     package: 'com.prasannjeet.klokka',
-    versionCode: 6,
+    versionCode: 7,
     adaptiveIcon: {
       backgroundColor: NIGHT,
       foregroundImage: './assets/adaptive-icon-foreground.png',
