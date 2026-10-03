@@ -70,6 +70,23 @@ describe('HomeScreen (employer, today)', () => {
     expect(call.entryUpsert.hours).toBe(4.5);
   });
 
+  it('saves a typed number rounded by the workspace rule and refuses one out of range', async () => {
+    const api = homeApi();
+    await renderApp(<HomeScreen />, { api });
+    await screen.findByText('Sam');
+    await fireEvent.press(screen.getByTestId('add-mem-sam'));
+    await screen.findByText('Sam Ali, today');
+    await fireEvent.changeText(screen.getByTestId('hours-input'), '25');
+    expect(screen.getByText('Enter hours between 0 and 24, like 2.5 or 7,5.')).toBeTruthy();
+    await fireEvent.changeText(screen.getByTestId('hours-input'), '3,8');
+    expect(screen.queryByText('Enter hours between 0 and 24, like 2.5 or 7,5.')).toBeNull();
+    expect(screen.getByText('Save 4 h for Sam Ali')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('save-hours'));
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'upsertEntry')).toBe(true));
+    const call = api.calls.find((c) => c.op === 'upsertEntry')?.args[0] as { entryUpsert: { hours: number } };
+    expect(call.entryUpsert.hours).toBe(4);
+  });
+
   it('routes the flag row to the resolve screen and the person card to their month', async () => {
     await renderApp(<HomeScreen />, { api: homeApi() });
     await screen.findByText('Maria');

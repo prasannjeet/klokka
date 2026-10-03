@@ -1,11 +1,12 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import type { Entry, MyWorkspace, Rounding } from '@klokka/api-client';
 import {
   QUICK_CHIPS,
   formatDate,
   formatHours,
   isValidHours,
+  parseHours,
   roundHours,
   stepHours,
   type IsoDate,
@@ -20,8 +21,6 @@ import {
   AppText,
   Button,
   Chip,
-  Field,
-  Numeral,
   Stepper,
   TextField,
   haptic,
@@ -50,11 +49,15 @@ export interface AddHoursSheetHandle {
 const styles = (t: Theme) =>
   StyleSheet.create({
     top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    hoursRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4, flexShrink: 1 },
+    hoursInput: { ...t.text('displayXl'), color: t.color.text, padding: 0, minWidth: t.space[9] },
+    note: { minHeight: t.tapMin * 2, textAlignVertical: 'top' },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
     actions: { gap: t.space[2] },
   });
 
-// The quick-add sheet (CHQ-117): chips set the number, the stepper nudges it by half an hour,
+// The quick-add sheet (CHQ-117): the big number is typed (any value the workspace rounding allows, CHQ-154),
+// chips set it, the stepper nudges it by half an hour,
 // "same as yesterday" repeats, and the button always says what it will save. A haptic on every chip.
 export const AddHoursSheet = forwardRef<
   AddHoursSheetHandle,
@@ -69,14 +72,15 @@ export const AddHoursSheet = forwardRef<
   const upsert = useUpsertEntry(workspace.workspaceId);
   const remove = useDeleteEntry(workspace.workspaceId);
   const [target, setTarget] = useState<AddHoursTarget | null>(null);
-  const [hours, setHours] = useState(0);
+  // The typed text is the source of truth; chips and the stepper write a formatted number into it.
+  const [hoursText, setHoursText] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({
     open: (next) => {
       setTarget(next);
-      setHours(next.existing?.hours ?? 0);
+      setHoursText(next.existing ? formatHours(next.existing.hours, locale, { unit: false }) : '');
       setNote(next.existing?.note ?? '');
       setError(null);
       sheet.current?.present();
@@ -94,8 +98,11 @@ export const AddHoursSheet = forwardRef<
           name: target.memberName,
           date: formatDate(target.date, locale, 'weekdayDay'),
         });
+  const parsed = parseHours(hoursText);
+  const hours = parsed ?? 0;
+  const setHours = (value: number) => setHoursText(formatHours(value, locale, { unit: false }));
   const rounded = roundHours(hours, target.rounding);
-  const canSave = isValidHours(rounded) && rounded > 0;
+  const canSave = parsed !== null && isValidHours(rounded) && rounded > 0;
   const hoursLabel = formatHours(rounded, locale);
 
   const save = async () => {
@@ -138,16 +145,28 @@ export const AddHoursSheet = forwardRef<
     >
       <View style={{ gap: theme.space[4] }}>
         <View style={s.top}>
-          <Numeral
-            value={formatHours(rounded, locale, { unit: false })}
-            unit={t('common.hourUnit')}
-            variant="displayXl"
-            accessibilityLabel={hoursLabel}
-            testID="hours-numeral"
-          />
+          <View style={s.hoursRow}>
+            <TextInput
+              value={hoursText}
+              onChangeText={setHoursText}
+              placeholder="0"
+              placeholderTextColor={theme.color.textMuted}
+              keyboardType="decimal-pad"
+              selectTextOnFocus
+              maxLength={5}
+              accessibilityLabel={t('entry.hoursYouWorked')}
+              selectionColor={theme.color.primary}
+              cursorColor={theme.color.primary}
+              style={s.hoursInput}
+              testID="hours-input"
+            />
+            <AppText variant="h3" weight={700} tone="muted">
+              {t('common.hourUnit')}
+            </AppText>
+          </View>
           <Stepper
-            onDecrement={() => setHours((h) => stepHours(h, -1))}
-            onIncrement={() => setHours((h) => stepHours(h, 1))}
+            onDecrement={() => setHours(stepHours(hours, -1))}
+            onIncrement={() => setHours(stepHours(hours, 1))}
             decrementLabel={t('entry.halfHourLess')}
             incrementLabel={t('entry.halfHourMore')}
             canDecrement={hours > 0}
@@ -186,16 +205,22 @@ export const AddHoursSheet = forwardRef<
             testID="same-as-yesterday"
           />
         ) : null}
-        <Field label={t('week.noteOptional')}>
-          <TextField
-            label={t('week.note')}
-            placeholder={t('week.notePlaceholder')}
-            value={note}
-            onChangeText={setNote}
-            maxLength={200}
-            testID="entry-note"
-          />
-        </Field>
+        {hoursText !== '' && parsed === null ? (
+          <AppText variant="small" tone="danger" accessibilityLiveRegion="polite">
+            {t('entry.invalidHours')}
+          </AppText>
+        ) : null}
+        <TextField
+          label={t('week.noteOptional')}
+          placeholder={t('week.notePlaceholder')}
+          value={note}
+          onChangeText={setNote}
+          maxLength={200}
+          multiline
+          numberOfLines={3}
+          style={s.note}
+          testID="entry-note"
+        />
         {error ? (
           <AppText variant="small" tone="danger" accessibilityLiveRegion="polite">
             {error}

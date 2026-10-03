@@ -2,6 +2,12 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.1.2, 2026-10-03
+
+### Changed
+- Phone app: the hours in the add-hours sheet can be typed (for example 7,25), so quarter hours work with the
+  workspace's quarter-hour rounding; the note is a three-line box with one label (CHQ-154).
+
 ## 1.1.1, 2026-10-02
 
 ### Fixed
