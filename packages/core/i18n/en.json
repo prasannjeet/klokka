@@ -31,6 +31,9 @@
     "hourUnit": "h",
     "hours": "hours",
     "hoursValue": "{hours} h",
+    "minuteUnit": "min",
+    "durationHm": "{hours} h {minutes} min",
+    "durationM": "{minutes} min",
     "perHour": "{rate} per hour",
     "perHourShort": "{rate}/h",
     "people_one": "{count} person",
@@ -309,7 +312,10 @@
     "nothingYet": "Nothing yet",
     "counter": "Counter",
     "invalidHours": "Enter hours between 0 and 24, like 2.5 or 7,5.",
-    "monthLocked": "This month is closed. Unlock it in the month view to change entries."
+    "monthLocked": "This month is closed. Unlock it in the month view to change entries.",
+    "hoursWheel": "Hours",
+    "minutesWheel": "Minutes",
+    "savedAs": "Saved as {hours}"
   },
   "month": {
     "title": "{name} in {month}",

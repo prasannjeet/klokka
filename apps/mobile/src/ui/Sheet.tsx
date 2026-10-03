@@ -2,7 +2,7 @@ import { forwardRef, useImperativeHandle, useRef, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { BottomSheetModal, BottomSheetView } from '@expo/ui/community/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme, useThemedStyles, type Theme } from '@/theme';
+import { RaisedTheme, raisedTheme, useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText } from './AppText';
 import { Icon } from './Icon';
 import { AppPressable } from './Pressable';
@@ -44,8 +44,6 @@ export const AppSheet = forwardRef<SheetHandle, AppSheetProps>(function AppSheet
   ref,
 ) {
   const theme = useTheme();
-  const s = useThemedStyles(styles);
-  const insets = useSafeAreaInsets();
   const sheet = useRef<BottomSheetModal>(null);
   useImperativeHandle(ref, () => ({
     present: () => sheet.current?.present(),
@@ -57,33 +55,61 @@ export const AppSheet = forwardRef<SheetHandle, AppSheetProps>(function AppSheet
       enablePanDownToClose
       enableDynamicSizing
       onDismiss={onDismiss}
-      backgroundStyle={{ backgroundColor: theme.color.surface }}
+      backgroundStyle={{ backgroundColor: raisedTheme(theme).color.surface }}
     >
-      <BottomSheetView style={[s.content, { paddingBottom: insets.bottom + theme.space[6] }]}>
-        <View testID={testID}>
-          {title ? (
-            <View style={s.header}>
-              <View style={s.headerText}>
-                <AppText variant="h3">{title}</AppText>
-                {subtitle ? (
-                  <AppText variant="small" tone="muted">
-                    {subtitle}
-                  </AppText>
-                ) : null}
-              </View>
-              <AppPressable
-                accessibilityRole="button"
-                accessibilityLabel={closeLabel}
-                onPress={() => sheet.current?.dismiss()}
-                style={s.close}
-              >
-                <Icon name="x" size={20} />
-              </AppPressable>
-            </View>
-          ) : null}
+      <RaisedTheme>
+        <SheetBody
+          title={title}
+          subtitle={subtitle}
+          closeLabel={closeLabel}
+          onClose={() => sheet.current?.dismiss()}
+          testID={testID}
+        >
           {children}
-        </View>
-      </BottomSheetView>
+        </SheetBody>
+      </RaisedTheme>
     </BottomSheetModal>
   );
 });
+
+// The sheet's content, rendered inside RaisedTheme so its own close button and everything in it read the
+// sheet's surfaces.
+function SheetBody({
+  title,
+  subtitle,
+  closeLabel,
+  onClose,
+  children,
+  testID,
+}: Omit<AppSheetProps, 'onDismiss'> & { onClose: () => void }) {
+  const theme = useTheme();
+  const s = useThemedStyles(styles);
+  const insets = useSafeAreaInsets();
+  return (
+    <BottomSheetView style={[s.content, { paddingBottom: insets.bottom + theme.space[6] }]}>
+      <View testID={testID}>
+        {title ? (
+          <View style={s.header}>
+            <View style={s.headerText}>
+              <AppText variant="h3">{title}</AppText>
+              {subtitle ? (
+                <AppText variant="small" tone="muted">
+                  {subtitle}
+                </AppText>
+              ) : null}
+            </View>
+            <AppPressable
+              accessibilityRole="button"
+              accessibilityLabel={closeLabel}
+              onPress={onClose}
+              style={s.close}
+            >
+              <Icon name="x" size={20} />
+            </AppPressable>
+          </View>
+        ) : null}
+        {children}
+      </View>
+    </BottomSheetView>
+  );
+}

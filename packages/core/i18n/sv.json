@@ -31,6 +31,9 @@
     "hourUnit": "h",
     "hours": "timmar",
     "hoursValue": "{hours} h",
+    "minuteUnit": "min",
+    "durationHm": "{hours} h {minutes} min",
+    "durationM": "{minutes} min",
     "perHour": "{rate} per timme",
     "perHourShort": "{rate}/h",
     "people_one": "{count} person",
@@ -309,7 +312,10 @@
     "nothingYet": "Inget än",
     "counter": "Kassan",
     "invalidHours": "Ange timmar mellan 0 och 24, till exempel 2,5 eller 7.5.",
-    "monthLocked": "Den här månaden är stängd. Lås upp den i månadsvyn för att ändra poster."
+    "monthLocked": "Den här månaden är stängd. Lås upp den i månadsvyn för att ändra poster.",
+    "hoursWheel": "Timmar",
+    "minutesWheel": "Minuter",
+    "savedAs": "Sparas som {hours}"
   },
   "month": {
     "title": "{name} i {month}",

@@ -22,6 +22,7 @@ export { Header } from './Header';
 export { EmptyState } from './EmptyState';
 export { Toast, useToast, ToastProvider } from './Toast';
 export { Stepper } from './Stepper';
+export { Wheel } from './Wheel';
 export { Chip } from './Chip';
 export { Clock } from './Clock';
 export { Mark, Wordmark } from './Wordmark';

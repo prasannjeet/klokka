@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { isValidHours, parseHours, roundHours, stepHours, sumHours } from '../src/hours.ts';
+import {
+  isValidHours,
+  joinHours,
+  minuteOptions,
+  parseHours,
+  roundHours,
+  splitHours,
+  stepHours,
+  sumHours,
+} from '../src/hours.ts';
 
 describe('parseHours', () => {
   it('accepts a comma or a dot as the decimal separator', () => {
@@ -76,5 +85,29 @@ describe('stepHours and sums', () => {
     expect(isValidHours(2.555)).toBe(false);
     expect(isValidHours(-1)).toBe(false);
     expect(isValidHours(24.01)).toBe(false);
+  });
+});
+
+describe('minuteOptions, splitHours and joinHours', () => {
+  it('offers the minutes the rounding rule allows', () => {
+    expect(minuteOptions('QUARTER')).toEqual([0, 15, 30, 45]);
+    expect(minuteOptions('HALF')).toEqual([0, 30]);
+    expect(minuteOptions('NONE')).toHaveLength(60);
+  });
+
+  it('splits decimal hours into hours and the nearest offered minute, carrying into the next hour', () => {
+    expect(splitHours(7.25, 'QUARTER')).toEqual({ hours: 7, minutes: 15 });
+    expect(splitHours(7.33, 'QUARTER')).toEqual({ hours: 7, minutes: 15 });
+    expect(splitHours(7.33, 'NONE')).toEqual({ hours: 7, minutes: 20 });
+    expect(splitHours(7.9, 'HALF')).toEqual({ hours: 8, minutes: 0 });
+    expect(splitHours(23.95, 'QUARTER')).toEqual({ hours: 24, minutes: 0 });
+    expect(splitHours(0, 'NONE')).toEqual({ hours: 0, minutes: 0 });
+  });
+
+  it('joins back to two decimals, and every minute round-trips', () => {
+    expect(joinHours(7, 15)).toBe(7.25);
+    expect(joinHours(24, 30)).toBe(24);
+    for (let m = 0; m < 60; m++)
+      expect(splitHours(joinHours(7, m), 'NONE')).toEqual({ hours: 7, minutes: m });
   });
 });

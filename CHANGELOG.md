@@ -2,6 +2,14 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.1.3, 2026-10-04
+
+### Changed
+- Phone app: the add-hours sheet picks the time with an hours wheel and a minutes wheel. The minutes follow the
+  workspace rounding (quarter hours, half hours, or every minute), quick picks sit in one row below, and the save
+  button says hours and minutes (CHQ-155).
+- Phone app: sheets stand out from the screen behind them in dark mode (CHQ-155).
+
 ## 1.1.2, 2026-10-03
 
 ### Changed

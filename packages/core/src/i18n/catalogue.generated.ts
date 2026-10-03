@@ -46,6 +46,8 @@ export const sv = {
   "common.days_one": "{count} dag",
   "common.days_other": "{count} dagar",
   "common.dismiss": "Avfärda",
+  "common.durationHm": "{hours} h {minutes} min",
+  "common.durationM": "{minutes} min",
   "common.earlier": "Tidigare",
   "common.hourUnit": "h",
   "common.hours": "timmar",
@@ -54,6 +56,7 @@ export const sv = {
   "common.keep": "Behåll",
   "common.loading": "Laddar",
   "common.manage": "Hantera",
+  "common.minuteUnit": "min",
   "common.next": "Nästa",
   "common.notNow": "Inte nu",
   "common.notYet": "Inte än",
@@ -185,14 +188,17 @@ export const sv = {
   "entry.historyFlagged": "{name} flaggade posten",
   "entry.historyLogged": "{name} loggade {hours}",
   "entry.historyRemoved": "{name} tog bort {hours}",
+  "entry.hoursWheel": "Timmar",
   "entry.hoursYouWorked": "Timmar du jobbade",
   "entry.invalidHours": "Ange timmar mellan 0 och 24, till exempel 2,5 eller 7.5.",
   "entry.loggedAt": "loggad {time}",
   "entry.loggedItAt": "{name} loggade den {time}",
+  "entry.minutesWheel": "Minuter",
   "entry.monthLocked": "Den här månaden är stängd. Lås upp den i månadsvyn för att ändra poster.",
   "entry.note": "{name}s anteckning",
   "entry.nothingYet": "Inget än",
   "entry.saveFor": "Spara {hours} för {name}",
+  "entry.savedAs": "Sparas som {hours}",
   "entry.sheetTitle": "{name}, i dag",
   "entry.todayLoggedAt": "I dag, loggad {time}",
   "errors.CONFLICT": "Någon ändrade det här samtidigt. Ladda om och försök igen.",
@@ -998,6 +1004,8 @@ export const en = {
   "common.days_one": "{count} day",
   "common.days_other": "{count} days",
   "common.dismiss": "Dismiss",
+  "common.durationHm": "{hours} h {minutes} min",
+  "common.durationM": "{minutes} min",
   "common.earlier": "Earlier",
   "common.hourUnit": "h",
   "common.hours": "hours",
@@ -1006,6 +1014,7 @@ export const en = {
   "common.keep": "Keep",
   "common.loading": "Loading",
   "common.manage": "Manage",
+  "common.minuteUnit": "min",
   "common.next": "Next",
   "common.notNow": "Not now",
   "common.notYet": "Not yet",
@@ -1137,14 +1146,17 @@ export const en = {
   "entry.historyFlagged": "{name} flagged the entry",
   "entry.historyLogged": "{name} logged {hours}",
   "entry.historyRemoved": "{name} removed {hours}",
+  "entry.hoursWheel": "Hours",
   "entry.hoursYouWorked": "Hours you worked",
   "entry.invalidHours": "Enter hours between 0 and 24, like 2.5 or 7,5.",
   "entry.loggedAt": "logged {time}",
   "entry.loggedItAt": "{name} logged it at {time}",
+  "entry.minutesWheel": "Minutes",
   "entry.monthLocked": "This month is closed. Unlock it in the month view to change entries.",
   "entry.note": "{name}'s note",
   "entry.nothingYet": "Nothing yet",
   "entry.saveFor": "Save {hours} for {name}",
+  "entry.savedAs": "Saved as {hours}",
   "entry.sheetTitle": "{name}, today",
   "entry.todayLoggedAt": "Today, logged {time}",
   "errors.CONFLICT": "Someone changed this at the same time. Reload and try again.",
@@ -1951,6 +1963,8 @@ export type MessageParams = {
   "common.close": Record<never, never>;
   "common.days": { count: string | number };
   "common.dismiss": Record<never, never>;
+  "common.durationHm": { hours: string | number; minutes: string | number };
+  "common.durationM": { minutes: string | number };
   "common.earlier": Record<never, never>;
   "common.hourUnit": Record<never, never>;
   "common.hours": Record<never, never>;
@@ -1959,6 +1973,7 @@ export type MessageParams = {
   "common.keep": Record<never, never>;
   "common.loading": Record<never, never>;
   "common.manage": Record<never, never>;
+  "common.minuteUnit": Record<never, never>;
   "common.next": Record<never, never>;
   "common.notNow": Record<never, never>;
   "common.notYet": Record<never, never>;
@@ -2086,14 +2101,17 @@ export type MessageParams = {
   "entry.historyFlagged": { name: string | number };
   "entry.historyLogged": { hours: string | number; name: string | number };
   "entry.historyRemoved": { hours: string | number; name: string | number };
+  "entry.hoursWheel": Record<never, never>;
   "entry.hoursYouWorked": Record<never, never>;
   "entry.invalidHours": Record<never, never>;
   "entry.loggedAt": { time: string | number };
   "entry.loggedItAt": { name: string | number; time: string | number };
+  "entry.minutesWheel": Record<never, never>;
   "entry.monthLocked": Record<never, never>;
   "entry.note": { name: string | number };
   "entry.nothingYet": Record<never, never>;
   "entry.saveFor": { hours: string | number; name: string | number };
+  "entry.savedAs": { hours: string | number };
   "entry.sheetTitle": { name: string | number };
   "entry.todayLoggedAt": { time: string | number };
   "errors.CONFLICT": Record<never, never>;

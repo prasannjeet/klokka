@@ -13,7 +13,8 @@ const invitation = {
   email: 'maria.lind@example.com',
   role: 'EMPLOYEE' as const,
   status: 'PENDING' as const,
-  expiresAt: new Date('2026-10-02T00:00:00Z'),
+  // Relative to now: a fixed date made this test fail once the calendar passed it.
+  expiresAt: new Date(Date.now() + 7 * 24 * 3600 * 1000),
   language: 'en' as const,
 };
 

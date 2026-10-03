@@ -1,14 +1,14 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import type { Entry, MyWorkspace, Rounding } from '@klokka/api-client';
 import {
   QUICK_CHIPS,
   formatDate,
   formatHours,
-  isValidHours,
-  parseHours,
+  joinHours,
+  minuteOptions,
   roundHours,
-  stepHours,
+  splitHours,
   type IsoDate,
 } from '@klokka/core';
 import { useDeleteEntry, useUpsertEntry } from '@/data/workspace';
@@ -16,17 +16,7 @@ import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
-import {
-  AppSheet,
-  AppText,
-  Button,
-  Chip,
-  Stepper,
-  TextField,
-  haptic,
-  useToast,
-  type SheetHandle,
-} from '@/ui';
+import { AppSheet, AppText, Button, Chip, TextField, Wheel, haptic, useToast, type SheetHandle } from '@/ui';
 
 export interface AddHoursTarget {
   membershipId: string;
@@ -41,6 +31,8 @@ export interface AddHoursTarget {
   defaultDayHours: number;
 }
 
+const HOUR_VALUES = Array.from({ length: 25 }, (_, i) => i);
+
 export interface AddHoursSheetHandle {
   open: (target: AddHoursTarget) => void;
   dismiss: () => void;
@@ -48,17 +40,36 @@ export interface AddHoursSheetHandle {
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    hoursRow: { flexDirection: 'row', alignItems: 'baseline', gap: 4, flexShrink: 1 },
-    hoursInput: { ...t.text('displayXl'), color: t.color.text, padding: 0, minWidth: t.space[9] },
+    // The time card is a well in the raised sheet; the band marks the row the wheels choose.
+    card: {
+      backgroundColor: t.color.surface2,
+      borderRadius: t.radius.card,
+      borderWidth: 1,
+      borderColor: t.color.border,
+      padding: t.space[3],
+      gap: t.space[2],
+    },
+    wheels: { flexDirection: 'row', gap: t.space[2] },
+    band: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: t.tapMin * 2,
+      height: t.tapMin,
+      borderRadius: t.radius.md,
+      backgroundColor: t.color.surface,
+      borderWidth: 1,
+      borderColor: t.color.secondary,
+    },
     note: { minHeight: t.tapMin * 2, textAlignVertical: 'top' },
-    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
+    chips: { gap: t.space[2], paddingHorizontal: t.space[5] },
+    chipRow: { marginHorizontal: -t.space[5] },
     actions: { gap: t.space[2] },
   });
 
-// The quick-add sheet (CHQ-117): the big number is typed (any value the workspace rounding allows, CHQ-154),
-// chips set it, the stepper nudges it by half an hour,
-// "same as yesterday" repeats, and the button always says what it will save. A haptic on every chip.
+// The quick-add sheet (CHQ-117): an hours wheel and a minutes wheel (CHQ-155; the minutes are the ones the
+// workspace rounding allows, every minute when nothing is rounded), quick picks below them, and the button
+// always says what it will save. The API still stores decimal hours; 7 h 15 min is saved as 7.25.
 export const AddHoursSheet = forwardRef<
   AddHoursSheetHandle,
   { workspace: MyWorkspace; onSaved?: (entry: Entry) => void }
@@ -72,15 +83,14 @@ export const AddHoursSheet = forwardRef<
   const upsert = useUpsertEntry(workspace.workspaceId);
   const remove = useDeleteEntry(workspace.workspaceId);
   const [target, setTarget] = useState<AddHoursTarget | null>(null);
-  // The typed text is the source of truth; chips and the stepper write a formatted number into it.
-  const [hoursText, setHoursText] = useState('');
+  const [time, setTime] = useState({ hours: 0, minutes: 0 });
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({
     open: (next) => {
       setTarget(next);
-      setHoursText(next.existing ? formatHours(next.existing.hours, locale, { unit: false }) : '');
+      setTime(splitHours(next.existing?.hours ?? 0, next.rounding));
       setNote(next.existing?.note ?? '');
       setError(null);
       sheet.current?.present();
@@ -98,12 +108,18 @@ export const AddHoursSheet = forwardRef<
           name: target.memberName,
           date: formatDate(target.date, locale, 'weekdayDay'),
         });
-  const parsed = parseHours(hoursText);
-  const hours = parsed ?? 0;
-  const setHours = (value: number) => setHoursText(formatHours(value, locale, { unit: false }));
-  const rounded = roundHours(hours, target.rounding);
-  const canSave = parsed !== null && isValidHours(rounded) && rounded > 0;
-  const hoursLabel = formatHours(rounded, locale);
+  const minutes = minuteOptions(target.rounding);
+  const setHours = (value: number) => setTime(splitHours(value, target.rounding));
+  const rounded = roundHours(joinHours(time.hours, time.minutes), target.rounding);
+  const canSave = rounded > 0;
+  // "7 h 15 min" everywhere a person reads it; the decimal is shown once, as what gets saved.
+  const duration = (h: number) => {
+    const p = splitHours(h, 'NONE');
+    if (p.minutes === 0) return t('common.hoursValue', { hours: String(p.hours) });
+    if (p.hours === 0) return t('common.durationM', { minutes: String(p.minutes) });
+    return t('common.durationHm', { hours: String(p.hours), minutes: String(p.minutes) });
+  };
+  const hoursLabel = duration(rounded);
 
   const save = async () => {
     setError(null);
@@ -144,40 +160,43 @@ export const AddHoursSheet = forwardRef<
       testID="add-hours-sheet"
     >
       <View style={{ gap: theme.space[4] }}>
-        <View style={s.top}>
-          <View style={s.hoursRow}>
-            <TextInput
-              value={hoursText}
-              onChangeText={setHoursText}
-              placeholder="0"
-              placeholderTextColor={theme.color.textMuted}
-              keyboardType="decimal-pad"
-              selectTextOnFocus
-              maxLength={5}
-              accessibilityLabel={t('entry.hoursYouWorked')}
-              selectionColor={theme.color.primary}
-              cursorColor={theme.color.primary}
-              style={s.hoursInput}
-              testID="hours-input"
+        <View style={s.card}>
+          <View style={s.wheels}>
+            <View style={s.band} pointerEvents="none" />
+            <Wheel
+              values={HOUR_VALUES}
+              value={time.hours}
+              onChange={(h) => setTime({ hours: h, minutes: h === 24 ? 0 : time.minutes })}
+              format={String}
+              unit={t('common.hourUnit')}
+              accessibilityLabel={t('entry.hoursWheel')}
+              testID="wheel-hours"
             />
-            <AppText variant="h3" weight={700} tone="muted">
-              {t('common.hourUnit')}
-            </AppText>
+            <Wheel
+              values={time.hours === 24 ? [0] : minutes}
+              value={time.minutes}
+              onChange={(m) => setTime({ hours: time.hours, minutes: m })}
+              format={(m) => String(m).padStart(2, '0')}
+              unit={t('common.minuteUnit')}
+              accessibilityLabel={t('entry.minutesWheel')}
+              testID="wheel-minutes"
+            />
           </View>
-          <Stepper
-            onDecrement={() => setHours(stepHours(hours, -1))}
-            onIncrement={() => setHours(stepHours(hours, 1))}
-            decrementLabel={t('entry.halfHourLess')}
-            incrementLabel={t('entry.halfHourMore')}
-            canDecrement={hours > 0}
-            canIncrement={hours < 24}
-          />
+          <AppText variant="small" tone="muted" style={{ textAlign: 'center' }} testID="saved-as">
+            {t('entry.savedAs', { hours: formatHours(rounded, locale) })}
+          </AppText>
         </View>
-        <View style={s.chips} accessibilityLabel={t('week.quickHours')}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={s.chipRow}
+          contentContainerStyle={s.chips}
+          accessibilityLabel={t('week.quickHours')}
+        >
           {QUICK_CHIPS.map((value, i) => (
             <Chip
               key={value}
-              label={formatHours(value, locale, { unit: false })}
+              label={duration(value)}
               selected={rounded === value}
               onPress={() => setHours(value)}
               index={i}
@@ -185,31 +204,23 @@ export const AddHoursSheet = forwardRef<
             />
           ))}
           <Chip
-            label={t('week.fullDayWithHours', {
-              hours: formatHours(target.defaultDayHours, locale, { unit: false }),
-            })}
+            label={t('week.fullDayWithHours', { hours: duration(target.defaultDayHours) })}
             selected={rounded === target.defaultDayHours}
             onPress={() => setHours(target.defaultDayHours)}
             index={QUICK_CHIPS.length}
             testID="chip-full-day"
           />
-        </View>
-        {target.yesterdayHours != null && target.yesterdayHours > 0 ? (
-          <Button
-            label={t('week.sameAsYesterdayWithHours', { hours: formatHours(target.yesterdayHours, locale) })}
-            variant="outline"
-            icon="history"
-            compact
-            hapticKind="tick"
-            onPress={() => setHours(target.yesterdayHours as number)}
-            testID="same-as-yesterday"
-          />
-        ) : null}
-        {hoursText !== '' && parsed === null ? (
-          <AppText variant="small" tone="danger" accessibilityLiveRegion="polite">
-            {t('entry.invalidHours')}
-          </AppText>
-        ) : null}
+          {target.yesterdayHours != null && target.yesterdayHours > 0 ? (
+            <Chip
+              label={t('week.sameAsYesterdayWithHours', { hours: duration(target.yesterdayHours) })}
+              icon="history"
+              selected={rounded === target.yesterdayHours}
+              onPress={() => setHours(target.yesterdayHours as number)}
+              index={QUICK_CHIPS.length + 1}
+              testID="same-as-yesterday"
+            />
+          ) : null}
+        </ScrollView>
         <TextField
           label={t('week.noteOptional')}
           placeholder={t('week.notePlaceholder')}

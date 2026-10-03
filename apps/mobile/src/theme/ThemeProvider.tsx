@@ -30,6 +30,25 @@ export function ThemeProvider({ preference, children }: ThemeProviderProps) {
   return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
 }
 
+// Inside a sheet the two surfaces trade places in dark mode: the sheet is the raised surface and what
+// normally sits on surface2 (fields, chips, the close button) becomes a darker well in it, so the sheet
+// reads as lifted off the screen instead of melting into it (CHQ-155). Light mode already lifts it.
+const raised = new WeakMap<Theme, Theme>();
+export function raisedTheme(theme: Theme): Theme {
+  if (theme.mode === 'light') return theme;
+  let r = raised.get(theme);
+  if (!r) {
+    r = { ...theme, color: { ...theme.color, surface: theme.color.surface2, surface2: theme.color.surface } };
+    raised.set(theme, r);
+  }
+  return r;
+}
+
+export function RaisedTheme({ children }: { children: ReactNode }) {
+  const theme = raisedTheme(useContext(ThemeContext));
+  return <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>;
+}
+
 export function useTheme(): Theme {
   return useContext(ThemeContext);
 }

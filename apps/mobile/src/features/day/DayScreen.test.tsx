@@ -70,7 +70,7 @@ describe('DayScreen', () => {
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
     await screen.findByText('6.5');
     await fireEvent.press(screen.getByTestId('day-edit'));
-    expect(await screen.findByText('Save 6.5 h for Maria Lind')).toBeTruthy();
+    expect(await screen.findByText('Save 6 h 30 min for Maria Lind')).toBeTruthy();
     expect(screen.getByTestId('remove-hours')).toBeTruthy();
   });
 

@@ -47,6 +47,38 @@ export function stepHours(hours: number, direction: 1 | -1, step = HOURS_STEP): 
   return Math.min(HOURS_MAX, Math.max(HOURS_MIN, roundToCents(hours + direction * step)));
 }
 
+// The minutes the add-hours wheel offers under a workspace rounding rule: quarter and half hours as the rule
+// allows, every minute when nothing is rounded (a minute is 0.0167 h, so two decimals still round-trip).
+export function minuteOptions(rule: Rounding): readonly number[] {
+  if (rule === 'HALF') return [0, 30];
+  if (rule === 'QUARTER') return [0, 15, 30, 45];
+  return Array.from({ length: 60 }, (_, i) => i);
+}
+
+// Decimal hours as whole hours and a minute the rule offers, nearest first (7.33 under QUARTER is 7 h 15 min;
+// 7.9 under HALF carries to 8 h 0 min). 24 h is the ceiling.
+export function splitHours(hours: number, rule: Rounding): { hours: number; minutes: number } {
+  const total = Math.min(HOURS_MAX * 60, Math.max(0, Math.round(hours * 60)));
+  const options = minuteOptions(rule);
+  let h = Math.floor(total / 60);
+  const rest = total - h * 60;
+  let m = options.reduce(
+    (best, v) => (Math.abs(v - rest) < Math.abs(best - rest) ? v : best),
+    options[0] ?? 0,
+  );
+  if (60 - rest < Math.abs(m - rest)) {
+    h += 1;
+    m = 0;
+  }
+  if (h >= HOURS_MAX) return { hours: HOURS_MAX, minutes: 0 };
+  return { hours: h, minutes: m };
+}
+
+export function joinHours(hours: number, minutes: number): number {
+  if (hours >= HOURS_MAX) return HOURS_MAX;
+  return roundToCents(hours + minutes / 60);
+}
+
 export function sumHours(values: readonly number[]): number {
   return roundToCents(values.reduce((acc, v) => acc + v, 0));
 }

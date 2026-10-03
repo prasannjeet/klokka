@@ -49,16 +49,18 @@ describe('HomeScreen (employer, today)', () => {
     expect(screen.getByText('Café Nord')).toBeTruthy();
   });
 
-  it('opens the quick-add sheet from the plus, chips set the hours, save calls upsertEntry rounded by the workspace rule', async () => {
+  it('opens the quick-add sheet from the plus, a chip and the minutes wheel set the time, save sends decimal hours', async () => {
     const api = homeApi();
     await renderApp(<HomeScreen />, { api });
     await screen.findByText('Sam');
     await fireEvent.press(screen.getByTestId('add-mem-sam'));
     expect(await screen.findByText('Sam Ali, today')).toBeTruthy();
-    expect(screen.getByText('Full day, 7.5')).toBeTruthy();
+    expect(screen.getByText('Full day, 7 h 30 min')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('chip-4'));
-    await fireEvent.press(screen.getByTestId('stepper-plus'));
-    expect(screen.getByText('Save 4.5 h for Sam Ali')).toBeTruthy();
+    expect(screen.getByText('Save 4 h for Sam Ali')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
+    expect(screen.getByText('Save 4 h 30 min for Sam Ali')).toBeTruthy();
+    expect(screen.getByText('Saved as 4.5 h')).toBeTruthy();
     expect(hapticCalls.some((c) => c.includes('segment-tick') || c === 'selection')).toBe(true);
     await fireEvent.press(screen.getByTestId('save-hours'));
     await waitFor(() => expect(api.calls.some((c) => c.op === 'upsertEntry')).toBe(true));
@@ -70,21 +72,24 @@ describe('HomeScreen (employer, today)', () => {
     expect(call.entryUpsert.hours).toBe(4.5);
   });
 
-  it('saves a typed number rounded by the workspace rule and refuses one out of range', async () => {
+  it('offers only the minutes the rounding allows, and 24 h has no minutes', async () => {
     const api = homeApi();
     await renderApp(<HomeScreen />, { api });
     await screen.findByText('Sam');
     await fireEvent.press(screen.getByTestId('add-mem-sam'));
     await screen.findByText('Sam Ali, today');
-    await fireEvent.changeText(screen.getByTestId('hours-input'), '25');
-    expect(screen.getByText('Enter hours between 0 and 24, like 2.5 or 7,5.')).toBeTruthy();
-    await fireEvent.changeText(screen.getByTestId('hours-input'), '3,8');
-    expect(screen.queryByText('Enter hours between 0 and 24, like 2.5 or 7,5.')).toBeNull();
-    expect(screen.getByText('Save 4 h for Sam Ali')).toBeTruthy();
+    expect(screen.getByText('Save 0 h for Sam Ali')).toBeTruthy();
+    // Half-hour rounding: the minutes wheel is 00 and 30, nothing in between.
+    expect(screen.queryByTestId('wheel-minutes-15')).toBeNull();
+    await fireEvent.press(screen.getByTestId('wheel-hours-23'));
+    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
+    expect(screen.getByText('Save 23 h 30 min for Sam Ali')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('wheel-hours-24'));
+    expect(screen.queryByTestId('wheel-minutes-30')).toBeNull();
     await fireEvent.press(screen.getByTestId('save-hours'));
     await waitFor(() => expect(api.calls.some((c) => c.op === 'upsertEntry')).toBe(true));
     const call = api.calls.find((c) => c.op === 'upsertEntry')?.args[0] as { entryUpsert: { hours: number } };
-    expect(call.entryUpsert.hours).toBe(4);
+    expect(call.entryUpsert.hours).toBe(24);
   });
 
   it('routes the flag row to the resolve screen and the person card to their month', async () => {
