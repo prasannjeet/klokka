@@ -5,7 +5,7 @@ import { resolveAppConfig, AppConfigError } from './config';
 
 // app.config.ts cannot import workspace TypeScript (Expo's config loader compiles it alone), so its
 // colour literals are pinned here against @klokka/tokens, and the fixed identity values against the
-// decisions (docs/DECISIONS.md D12, docs/INFRA.md).
+// decisions (docs/DECISIONS.md D19, docs/INFRA.md).
 describe('app.config.ts', () => {
   const source = readFileSync(join(__dirname, '..', 'app.config.ts'), 'utf8');
 
@@ -16,11 +16,22 @@ describe('app.config.ts', () => {
   });
 
   it('keeps the package id, scheme, slug and owner fixed', () => {
-    expect(source).toContain("package: 'com.prasannjeet.klokka'");
-    expect(source).toContain("bundleIdentifier: 'com.prasannjeet.klokka'");
+    expect(source).toContain("package: 'se.klokka.app'");
+    expect(source).toContain("bundleIdentifier: 'se.klokka.app'");
     expect(source).toContain("scheme: 'klokka'");
     expect(source).toContain("slug: 'klokka'");
     expect(source).toContain("owner: 'prasannjeet'");
+  });
+
+  it('keeps permissions nothing uses out of the release manifest', () => {
+    for (const permission of [
+      'SYSTEM_ALERT_WINDOW',
+      'READ_EXTERNAL_STORAGE',
+      'WRITE_EXTERNAL_STORAGE',
+      'USE_BIOMETRIC',
+    ]) {
+      expect(source).toContain(`'android.permission.${permission}'`);
+    }
   });
 
   it('embeds the two families the tokens name, through the expo-font plugin', () => {

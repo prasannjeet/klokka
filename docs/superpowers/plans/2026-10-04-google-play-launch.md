@@ -57,31 +57,31 @@ Play rules this plan is built around (Google policy, as of 2026; re-check the Co
 
 | Topic | Decision | Status |
 |---|---|---|
-| Package id | `se.klokka.app` (the owner owns klokka.se; matches Kulram's `se.kulram.app`). Supersedes D12. Existing sideloaded installs of `com.prasannjeet.klokka` (a handful of users) reinstall once; the old app keeps working against the same API until uninstalled. | Owner asked for `se.klokka`; **confirm `se.klokka.app` before Task A1**, it can never change after the first Play upload |
+| Package id | `se.klokka.app` (the owner owns klokka.se; matches Kulram's `se.kulram.app`). Supersedes D12. Existing sideloaded installs of `com.prasannjeet.klokka` (a handful of users) reinstall once; the old app keeps working against the same API until uninstalled. | **Owner confirmed 2026-10-04** (D19) |
 | Signing | Play App Signing with **our existing key** (PEPK upload). Upload key = the same key. Sideloaded APK and Play build are interchangeable. | Agent decision |
 | Distribution | Play becomes the main channel; the APK on klokka.se stays (same package, same signature) for people without Play. Supersedes D4 in part. | Agent decision |
 | Staging APK | keeps the same package (one phone holds staging or production, as today) | unchanged |
 | Upload pipeline | every `v*` tag uploads the AAB to the **internal** track; promotion to production is a separate, explicit command | Agent decision |
 | Account deletion | CHQ-157 rules (employer deletes own workspaces; employee memberships follow `removeMember`) | Agent decision, in CHQ-157 |
 | Unused permissions | blocked in `app.config.ts` (`android.blockedPermissions`) | Agent decision |
-| Developer account type | decides the production path (Phases F and G) | **Owner checks** (Play Console, Settings, Developer account) |
+| Developer account type | **personal** (owner, 2026-10-04): Phase F (12 testers, 14 days) applies | decided |
 
 ## 2. Owner checklist (everything that cannot be done from this host)
 
 Each item says when it is needed. Answers to type are in `docs/PLAY_STORE.md` (written in Task C4).
 
-- [ ] **O1, before A1:** confirm the package `se.klokka.app`.
-- [ ] **O2, any time:** tell the agent the developer account type (personal or organization).
+- [x] **O1, before A1:** confirm the package `se.klokka.app` (2026-10-04).
+- [x] **O2, any time:** tell the agent the developer account type: personal (2026-10-04).
 - [ ] **O3, any time:** in Play Console, Create app: name "Klokka", default language Swedish (sv-SE), App, Free,
   accept the declarations. (No package is asked here.)
 - [ ] **O4, during C3:** on the phone, Developer options, Wireless debugging, "Pair device with pairing code"; give the
   agent the IP:port and the six-digit code. Leave the phone unlocked on the staging app while screenshots run.
-- [ ] **O5, Phase D:** say "release" (the agent runs `./release.sh minor`), then pin `v1.2.0` in production Coolify, API
+- [ ] **O5, Phase D:** say "release" (the agent runs `./release.sh minor`), then pin `v1.3.0` in production Coolify, API
   first, then web and landing (or tell the agent to do it with `coolify-prod-rw`).
 - [ ] **O6, Phase E:** first upload by hand (Testing, Internal testing, Create new release): when Play asks about app
   signing, choose "Use a different key", "Export and upload a key from Java keystore", download the
   `encryption_public_key.pem` and give it to the agent; upload the `klokka-key.zip` the agent returns; then upload
-  `klokka-v1.2.0.aab` (the agent gives the path or URL) and roll out to Internal testing.
+  `klokka-v1.3.0.aab` (the agent gives the path or URL) and roll out to Internal testing.
 - [ ] **O7, Phase E:** App content: fill each form from `docs/PLAY_STORE.md` (privacy policy, app access with the
   review account, ads, content rating, target audience, data safety, government app, financial features, health,
   news). Store settings: category, contact email, website.
@@ -301,7 +301,7 @@ Verify: targeted `mvn -pl service -Dtest=AccountDeletionTest test` with `JAVA_HO
 - [ ] `npm test` in `apps/landing` (registry rules: title <= 60, description <= 155, hreflang pair, links resolve).
 
 Phase B commit: `CHQ-157: delete your own account: DELETE /me, web and mobile confirmation, public page, privacy
-copy`. CHANGELOG `## 1.2.0` gains it under Added.
+copy`. CHANGELOG `## 1.3.0` gains it under Added.
 
 ## Phase C: store listing, images and the Console answers (CHQ-153)
 
@@ -309,7 +309,7 @@ copy`. CHANGELOG `## 1.2.0` gains it under Added.
 
 - [ ] `apps/mobile/fastlane/metadata/android/sv-SE/` and `en-US/`: `title.txt` (<= 30), `short_description.txt`
   (<= 80), `full_description.txt` (<= 4000, plain text with line breaks; Play renders no Markdown),
-  `changelogs/<versionCode>.txt` (<= 500) for the release's versionCode (7 for v1.2.0).
+  `changelogs/<versionCode>.txt` (<= 500) for the release's versionCode (the one `release.sh` sets for v1.3.0).
 - [ ] Source the words from `docs/research/seo/keywords.md` and `page-briefs.md` (the homepage and app page
   briefs): "tidrapport", "gratis tidrapportering", "timmar", "arbetstid" lead the Swedish copy; the product rules from
   AGENTS.md hold (free to use, open source, direct sign-up, never prices or tiers; "personalliggare" never in the
@@ -387,11 +387,11 @@ Consumes O4 (phone paired over Wi-Fi). Produces 5 framed screenshots per languag
 Phase C commit: `CHQ-153: Play listing texts, icon, feature graphic, screenshots; Console answers in
 docs/PLAY_STORE.md`.
 
-## Phase D: release v1.2.0 (owner gate O5)
+## Phase D: release v1.3.0 (owner gate O5; v1.2.0 is the jobs release, CHQ-156)
 
-- [ ] `CHANGELOG.md` `## 1.2.0, <date>`: Added (account deletion, Google Play), Changed (package `se.klokka.app`: the
+- [ ] `CHANGELOG.md` `## 1.3.0, <date>`: Added (account deletion, Google Play), Changed (package `se.klokka.app`: the
   old app must be reinstalled once; permissions trimmed).
-- [ ] Owner says "release": `./release.sh minor` from a clean, synced `main` (versionCode 6 to 7). Watch the Release
+- [ ] Owner says "release": `./release.sh minor` from a clean, synced `main` (versionCode + 1). Watch the Release
   run with a bounded `gh run watch`; every job green, including the new AAB checks. `PLAY_UPLOAD` is still `false`,
   so nothing goes to Play yet.
 - [ ] Production pins (owner, or the agent with `coolify-prod-rw` on an explicit go-ahead): API first
@@ -409,7 +409,7 @@ docs/PLAY_STORE.md`.
   `.agents/local-credentials/klokka-release.keystore`, alias and passwords from `android-signing.json`, options
   `--include-cert --rsa-aes-encryption --encryption-key-path=<pem> --output=<scratchpad>/klokka-key.zip`. Hand the zip
   to the owner (SendUserFile), never commit it, delete it after the owner confirms the upload.
-- [ ] Owner uploads the zip, then `klokka-v1.2.0.aab` (from Nexus `prod/`), rolls out Internal testing, does O7 and
+- [ ] Owner uploads the zip, then `klokka-v1.3.0.aab` (from Nexus `prod/`), rolls out Internal testing, does O7 and
   O8.
 - [ ] Agent verifies with the API (read-only): `fastlane run validate_play_store_json_key` and a read of the internal
   track (`edits.insert` + `edits.tracks.get internal`, then `edits.delete`, so no edit is left open); the version

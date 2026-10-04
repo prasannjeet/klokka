@@ -1,7 +1,8 @@
 name: Release
 
 # A pushed v<major>.<minor>.<patch> tag (cut by ./release.sh) builds the PRODUCTION artifacts of the tagged commit:
-# docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version> and the signed production APK. Nothing else
+# docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version>, the signed production APK and the AAB for
+# Google Play (uploaded to the internal track when PLAY_UPLOAD is true, docs/PLAY_STORE.md). Nothing else
 # builds them; a push to main builds staging only (ci.yml). Production values come from the PROD_* repository
 # variables. No job deploys: the owner pins the new tag in production Coolify by hand (docs/RELEASING.md).
 #
@@ -140,7 +141,7 @@ jobs:
           docker image rm "$IMAGE" >/dev/null 2>&1 || true
 
   apk:
-    name: Production APK
+    name: Production APK and AAB
     needs: version
     runs-on: [self-hosted, build]
     timeout-minutes: 90
@@ -154,6 +155,7 @@ jobs:
       EXPO_PUBLIC_LOGTO_API_RESOURCE: ${{ vars.PROD_API_RESOURCE }}
       EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
       APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+      AAB: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
     steps:
       # A production APK with an empty issuer or client id could not sign anyone in: refuse to build it.
       - name: Production app settings are set
@@ -222,13 +224,31 @@ jobs:
             -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
             -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
 
+      # Google Play takes an AAB. Same prebuild, Metro cache and key as the APK, so both carry the same code.
+      - name: Bundle the signed release AAB
+        working-directory: apps/mobile/android
+        env:
+          TMPDIR: ${{ runner.temp }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew bundleRelease --no-daemon --stacktrace \
+            -PreactNativeArchitectures=armeabi-v7a,arm64-v8a \
+            -Pandroid.injected.signing.store.file="$KEYSTORE" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
+
       # The bundle must carry the values this job set, or the phone would talk to the wrong environment.
       - name: Verify the baked environment
         run: |
           set -euo pipefail
-          unzip -p "$APK" assets/index.android.bundle > "$RUNNER_TEMP/bundle"
-          for want in "$EXPO_PUBLIC_API_BASE_URL" "$EXPO_PUBLIC_LOGTO_ENDPOINT" "$EXPO_PUBLIC_LOGTO_APP_ID" "$EXPO_PUBLIC_LOGTO_API_RESOURCE"; do
-            grep -aqF "$want" "$RUNNER_TEMP/bundle" || { echo "::error::the APK bundle does not contain $want"; exit 1; }
+          for artifact in "$APK:assets/index.android.bundle" "$AAB:base/assets/index.android.bundle"; do
+            unzip -p "${artifact%%:*}" "${artifact#*:}" > "$RUNNER_TEMP/bundle"
+            for want in "$EXPO_PUBLIC_API_BASE_URL" "$EXPO_PUBLIC_LOGTO_ENDPOINT" "$EXPO_PUBLIC_LOGTO_APP_ID" "$EXPO_PUBLIC_LOGTO_API_RESOURCE"; do
+              grep -aqF "$want" "$RUNNER_TEMP/bundle" || { echo "::error::${artifact%%:*} does not contain $want"; exit 1; }
+            done
           done
           rm -f "$RUNNER_TEMP/bundle"
 
@@ -247,6 +267,29 @@ jobs:
             echo "::error::app-release.apk is not signed with the Klokka release key"
             exit 1
           fi
+          aab=$(keytool -printcert -jarfile "$AAB" | awk '/SHA256:/ {print $2}' | tr -d ':' | tr 'A-F' 'a-f')
+          if [ "$want" != "$aab" ]; then
+            echo "::error::app-release.aab is not signed with the Klokka release key"
+            exit 1
+          fi
+
+      # What Play's review reads: the package (D19), the target SDK, no permission app.config.ts blocks, no
+      # advertising id, no background location, and native libraries aligned for 16 KB pages.
+      - name: Verify the package, permissions and 16 KB alignment
+        run: |
+          set -euo pipefail
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          badging=$("$build_tools/aapt2" dump badging "$APK")
+          grep -q "^package: name='se.klokka.app'" <<<"$badging" || { echo "::error::the package is not se.klokka.app"; exit 1; }
+          target=$(sed -n "s/^targetSdkVersion:'\([0-9]*\)'/\1/p" <<<"$badging")
+          [ "${target:-0}" -ge 36 ] || { echo "::error::targetSdkVersion $target is below 36"; exit 1; }
+          for p in SYSTEM_ALERT_WINDOW READ_EXTERNAL_STORAGE WRITE_EXTERNAL_STORAGE USE_BIOMETRIC USE_FINGERPRINT \
+            ACCESS_BACKGROUND_LOCATION com.google.android.gms.permission.AD_ID; do
+            if grep -q "uses-permission: name='\(android.permission.\)\?$p'" <<<"$badging"; then
+              echo "::error::the release manifest asks for $p"; exit 1
+            fi
+          done
+          "$build_tools/zipalign" -c -P 16 4 "$APK" || { echo "::error::native libraries are not 16 KB aligned"; exit 1; }
 
       # prod/klokka-v<version>.apk is immutable; prod/klokka-latest.apk (PROD_APK_URL, the landing's link) follows.
       - name: Publish the APK to Nexus
@@ -260,7 +303,28 @@ jobs:
             curl -sSf --max-time 900 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$APK" "$DOWNLOADS_UPLOAD_URL/$name"
             echo "published $DOWNLOADS_URL/$name"
           done
+          # The AAB has no latest alias: only Play (and the owner's first manual upload) takes it.
+          curl -sSf --max-time 900 -u "$NEXUS_USERNAME:$NEXUS_PASSWORD" --upload-file "$AAB" "$DOWNLOADS_UPLOAD_URL/prod/klokka-$TAG.aab"
+          echo "published $DOWNLOADS_URL/prod/klokka-$TAG.aab"
+
+      # Off (PLAY_UPLOAD=false) until the first AAB was uploaded by hand: Play binds the package only then. Draft until
+      # the app passed its first review (PLAY_RELEASE_STATUS). Production is a separate promote (docs/PLAY_STORE.md).
+      - name: Upload to Google Play (internal track)
+        if: vars.PLAY_UPLOAD == 'true'
+        working-directory: apps/mobile
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          RELEASE_STATUS: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
+          FASTLANE_SKIP_UPDATE_CHECK: '1'
+          FASTLANE_HIDE_CHANGELOG: '1'
+        run: |
+          set -euo pipefail
+          printf '%s' "$PLAY_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/play.json"
+          chmod 600 "$RUNNER_TEMP/play.json"
+          /home/linuxbrew/.linuxbrew/bin/fastlane supply --aab "$GITHUB_WORKSPACE/$AAB" --track internal \
+            --release_status "$RELEASE_STATUS" --json_key "$RUNNER_TEMP/play.json" \
+            --skip_upload_metadata --skip_upload_images --skip_upload_screenshots
 
       - name: Remove the signing material
         if: always()
-        run: rm -f "$RUNNER_TEMP/klokka-release.keystore" apps/mobile/google-services.json
+        run: rm -f "$RUNNER_TEMP/klokka-release.keystore" "$RUNNER_TEMP/play.json" apps/mobile/google-services.json

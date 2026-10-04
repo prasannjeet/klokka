@@ -40,7 +40,7 @@ const config: ExpoConfig = {
   backgroundColor: NIGHT,
   android: {
     // Fixed forever (docs/DECISIONS.md D12); matches the Firebase Android app.
-    package: 'com.prasannjeet.klokka',
+    package: 'se.klokka.app',
     versionCode: 9,
     adaptiveIcon: {
       backgroundColor: NIGHT,
@@ -53,11 +53,20 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     // ADJUST_RESIZE: the IME becomes an inset the app consumes (react-native-keyboard-controller).
     softwareKeyboardLayoutMode: 'resize',
+    // Pulled in by libraries, used by nothing in Klokka (exports go to the app cache, no biometric lock, no overlay);
+    // Play's review reads the manifest, so they stay out of release builds. release.yml checks the result.
+    blockedPermissions: [
+      'android.permission.SYSTEM_ALERT_WINDOW',
+      'android.permission.READ_EXTERNAL_STORAGE',
+      'android.permission.WRITE_EXTERNAL_STORAGE',
+      'android.permission.USE_BIOMETRIC',
+      'android.permission.USE_FINGERPRINT',
+    ],
   },
   ios: {
     // Not built yet (no Apple account); the identity is reserved so the door stays open.
     supportsTablet: false,
-    bundleIdentifier: 'com.prasannjeet.klokka',
+    bundleIdentifier: 'se.klokka.app',
     infoPlist: { UIBackgroundModes: ['remote-notification'] },
   },
   plugins: [

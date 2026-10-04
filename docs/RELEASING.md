@@ -29,7 +29,7 @@ both. The commit deploys staging like any push; the tag runs `.github/workflows/
 | Job | Produces |
 |---|---|
 | `images` | `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:v<version>`. The landing is built with the production URLs (Next.js bakes them) and `NEXT_PUBLIC_INDEXABLE=true`; the job then runs it and fails unless `/` and `/en` are indexable (`.github/scripts/index-check.sh`). A `v*` tag never moves `:latest`. |
-| `apk` | signed production APK at `klokka-downloads/prod/klokka-v<version>.apk` and `prod/klokka-latest.apk` (the landing's link). Refuses to build while a `PROD_*` app setting is empty. |
+| `apk` | signed production APK at `klokka-downloads/prod/klokka-v<version>.apk` and `prod/klokka-latest.apk` (the landing's link), and the AAB at `prod/klokka-v<version>.aab`. Refuses to build while a `PROD_*` app setting is empty, and fails when the APK's package is not `se.klokka.app`, it targets below API 36, carries a blocked permission, background location or the advertising id, or its native libraries are not 16 KB aligned. With `PLAY_UPLOAD=true` it uploads the AAB to Google Play's internal track (status `PLAY_RELEASE_STATUS`). |
 
 Nothing deploys automatically.
 
@@ -98,5 +98,11 @@ Build-time values are GitHub repository variables (`gh variable list`), one set 
 
 Runtime values (database, secrets, Logto M2M, SMTP) live in each Coolify app's environment, not here.
 
-The staging and production APKs share the package id `com.prasannjeet.klokka` and the signing key, so one phone
-holds one of them at a time.
+The staging and production APKs share the package id `se.klokka.app` (D19) and the signing key, so one phone holds
+one of them at a time; the Play build is the production one.
+
+## Google Play
+
+A tag puts the AAB on the internal track once `PLAY_UPLOAD` is `true` (set after the first, manual upload).
+Promoting to the closed track or to production is a deliberate step per release, with the commands in
+`docs/PLAY_STORE.md`. Play never takes an older versionCode back: a fix is a new release.

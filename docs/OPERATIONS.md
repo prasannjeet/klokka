@@ -23,7 +23,7 @@ Migadu) needs the owner's explicit go-ahead for that change.
 | Postgres | Common Resources `k10e48k41urcbb1erev0vhmu`, database `klokka` | Common Resources `gual64hodx8mn2x4xr04lbhm`, database `klokka` |
 | Logto's own Postgres | inside the Logto service (`postgres:14-alpine`) | inside the Logto service (`postgres-hxthesh8i3rgrca3yldartx9`) |
 | Images | `docker.nexus.coolify.ooguy.com/klokka-{api,web,landing}:sha-<short>` | same repositories, `:v<version>` |
-| Android APK | `.../klokka-downloads/klokka-latest.apk` | `.../klokka-downloads/prod/klokka-latest.apk` (+ `prod/klokka-v<version>.apk`) |
+| Android APK | `.../klokka-downloads/klokka-latest.apk` | `.../klokka-downloads/prod/klokka-latest.apk` (+ `prod/klokka-v<version>.apk` and the Play AAB `prod/klokka-v<version>.aab`) |
 | Sender mailbox | `no-reply@cleanhq.se` (Migadu) | `no-reply@klokka.se` (Migadu) |
 | Contact mailbox | none | `hej@klokka.se` (Migadu): the address on the about, privacy and terms pages |
 | Deploys | every push to `main` (CI) | `./release.sh`, then pin the tag in Coolify by hand |
@@ -32,7 +32,8 @@ Migadu) needs the owner's explicit go-ahead for that change.
 All apps are Coolify `dockerimage` apps: 512 MB, `--init`, health checks on `127.0.0.1` (section 9). The web app
 calls the API over the Docker network at `http://klokka-api:8080/v1` (the API app's network alias `klokka-api`),
 never through the public domain. Push notifications: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase
-`klokka-64f3a`, package `com.prasannjeet.klokka` for both environments (one phone holds one of the two APKs).
+`klokka-64f3a`, package `se.klokka.app` for both environments (one phone holds one of the two APKs; D19). The old
+package `com.prasannjeet.klokka` stays registered in Firebase and Expo so older installs keep their push.
 
 ## 2. Where the credentials are
 

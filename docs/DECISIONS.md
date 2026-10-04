@@ -39,7 +39,10 @@ verification).
 
 Employees download a signed release APK from the landing site (and from the invite page). A Play Store
 listing is a post-v1 ticket. Release builds are signed with our own keystore from day one (kept out of
-git, held as a repository secret for the runners). Package id: D12.
+git, held as a repository secret for the runners). Package id: D12, now D19.
+
+Amended by D19 (2026-10-04): Google Play becomes the main channel; the APK stays on klokka.se for phones
+without Play, with the same package and signature.
 
 ## D5. Push prerequisites (owner delivered 2026-09-27)
 
@@ -90,7 +93,7 @@ Nightshift (violet, magenta, cyan over deep night; Unbounded + Inter), light and
 the web app, the operator console and the phone. The mark takes the theme primary (magenta). Signal and
 Clay stay in `tokens.css` as history, not as options.
 
-## D12. Android package id: `com.prasannjeet.klokka` (owner)
+## D12. Android package id: `com.prasannjeet.klokka` (owner). Superseded by D19
 
 Fixed; matches the Firebase Android app. EAS project id and the Firebase config live in
 `.agents/local-credentials/` (gitignored), never in the repo.
@@ -165,3 +168,20 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   `index` and fails the release otherwise, and `docs/RELEASING.md` runs it against `https://klokka.se` after the
   tag is pinned. Why a build flag and not a hostname check: the flag is decided by which pipeline built the image,
   so a staging image can never be indexed by accident, whatever domain it is served on.
+
+## D19. Android package `se.klokka.app` and Google Play (owner, 2026-10-04, CHQ-153)
+
+- **Package `se.klokka.app`** replaces `com.prasannjeet.klokka` before the first Play upload, after which it can never
+  change. The owner owns klokka.se; Kulram's app is `se.kulram.app`. Phones with the old package keep a separate,
+  working app until they uninstall it; the switch costs one reinstall for the handful of sideloaded users.
+- Firebase `klokka-64f3a` holds both Android apps and `google-services.json` lists both clients, so builds of
+  either package work. Expo (EAS) has FCM V1 credentials for both, with the same service-account key.
+- **Signing:** Play App Signing with our existing release key (uploaded once with Google's PEPK tool), which is
+  also the upload key. The Play build and the APK on klokka.se therefore share a signature and update each other.
+- **Pipeline:** a `v*` tag builds the APK and an AAB from the same prebuild; the AAB goes to Nexus and, with
+  `PLAY_UPLOAD=true`, to Play's internal track through fastlane (`PLAY_RELEASE_STATUS` draft until the first
+  review passes). Production is a separate promote, never automatic (`docs/PLAY_STORE.md`).
+- **Account type:** the CleanHQ Play developer account is personal, so production needs a closed test with at
+  least 12 opted-in testers for 14 days first.
+- Release builds block permissions nothing in Klokka uses (overlay, external storage, biometrics), and
+  `release.yml` fails a build that carries them, background location or the advertising id.

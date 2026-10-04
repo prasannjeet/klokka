@@ -168,7 +168,8 @@ guarded by a regenerate-and-diff check.
   breaks the native CMake step. Kulram uses 8082/8899; never reuse them.
 - Runtime values (API URL, Logto issuer, client id, audience) come from `EXPO_PUBLIC_*` at Metro time, so a JS reload
   picks them up; a native or dependency change needs a fresh APK.
-- Release APKs are signed with the project keystore (outside git); the Android package id never changes once set.
+- Release APKs and AABs are signed with the project keystore (outside git), which is also Play's app signing key; the
+  Android package id `se.klokka.app` (D19) never changes once uploaded to Play.
 
 ## Environments (runbook: `docs/OPERATIONS.md`, skill `klokka-ops`)
 - **Production is live (v1.1.0, 2026-09-30)** on NetCup Coolify `https://coolify.prod.roxa.org` (`ssh netcup`, MCP
@@ -185,7 +186,8 @@ guarded by a regenerate-and-diff check.
 - Logto: Klokka's OWN Logto service in the Klokka project (own Postgres, admin console, email connector); nothing is shared
   with Kulram's Logto (`logto-vgyjk5a0t98xjk8l0vphgyeh...`), which stays Kulram's.
 - Push: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase project `klokka-64f3a`, Android package
-  `com.prasannjeet.klokka` (fixed forever). `google-services.json` is copied from `.agents/local-credentials/` at build time.
+  `se.klokka.app` (D19, replaced `com.prasannjeet.klokka` before the first Play upload). `google-services.json` (both
+  clients) is copied from `.agents/local-credentials/` at build time.
 - Google Play: use the `fastlane` CLI (Homebrew, `/home/linuxbrew/.linuxbrew/bin/fastlane`), run from `apps/mobile`, where
   `fastlane/Appfile` points it at the key and the package, so no flags are needed: `fastlane supply --aab <file> --track
   internal`, `fastlane run validate_play_store_json_key`. The key is the Firebase service account
