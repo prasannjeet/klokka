@@ -9,6 +9,10 @@
 can run from this host (code, CLI, API tokens) done by the agent, and the owner's Play Console clicks reduced to one
 short checklist with ready answers.
 
+**Status 2026-10-04:** A1, A2 done (local release build verified: package, permissions, 16 KB, AAB signature); B1 to B5
+done (API, web, mobile and landing tests green); C1, C2, C4 done (privacy page now covers job places and Google Maps
+from CHQ-156). Open: A3 and C3 (need the phone), the review account (production, needs go-ahead), D onwards.
+
 **Tickets:** CHQ-153 (Play launch: package, AAB, signing, listing, upload pipeline) and CHQ-157 (account deletion,
 API + web + mobile + public page; a Play blocker). Session:
 https://claude.ai/code/session_01W1MBPy3jTfcPSH3HNPCMyM
