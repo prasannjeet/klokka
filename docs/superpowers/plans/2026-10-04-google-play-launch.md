@@ -11,7 +11,9 @@ short checklist with ready answers.
 
 **Status 2026-10-04:** A1, A2 done (local release build verified: package, permissions, 16 KB, AAB signature); B1 to B5
 done (API, web, mobile and landing tests green); C1, C2, C4 done (privacy page now covers job places and Google Maps
-from CHQ-156). Open: A3 and C3 (need the phone), the review account (production, needs go-ahead), D onwards.
+from CHQ-156). Review fixes applied. **D done:** v1.3.0 released and pinned in production 2026-10-04 (API, web,
+landing; APK `se.klokka.app` versionCode 10; AAB on Nexus; IndexNow sent). Open: A3 and C3 (need the phone), the
+review account (production, needs go-ahead), E onwards.
 
 **Tickets:** CHQ-153 (Play launch: package, AAB, signing, listing, upload pipeline) and CHQ-157 (account deletion,
 API + web + mobile + public page; a Play blocker). Session:
