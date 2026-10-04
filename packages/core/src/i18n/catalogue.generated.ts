@@ -3,6 +3,16 @@
 /* eslint-disable */
 
 export const sv = {
+  "account.delete.confirm": "Radera mitt konto",
+  "account.delete.confirmLabel": "Skriv {word} för att bekräfta",
+  "account.delete.confirmWord": "RADERA",
+  "account.delete.done": "Ditt konto är raderat.",
+  "account.delete.employeeNote": "Dina timmar finns kvar hos dina arbetsgivare under ditt namn, så att deras underlag är komplett. Din e-post, din avatar och din inloggning tas bort.",
+  "account.delete.failed": "Kontot kunde inte raderas. Försök igen om en stund.",
+  "account.delete.hint": "Tar bort ditt konto och loggar ut dig överallt. Det går inte att ångra.",
+  "account.delete.ownerWarning_one": "Du äger {workspaces}. Det raderas också, med alla anställdas timmar.",
+  "account.delete.ownerWarning_other": "Du äger {workspaces}. De raderas också, med alla anställdas timmar.",
+  "account.delete.title": "Radera konto",
   "api.csv.amount": "Belopp",
   "api.csv.date": "Datum",
   "api.csv.hours": "Timmar",
@@ -1067,6 +1077,16 @@ export const sv = {
 } as const;
 
 export const en = {
+  "account.delete.confirm": "Delete my account",
+  "account.delete.confirmLabel": "Type {word} to confirm",
+  "account.delete.confirmWord": "DELETE",
+  "account.delete.done": "Your account is deleted.",
+  "account.delete.employeeNote": "Your hours stay with your employers under your name, so their records are complete. Your email, avatar and sign-in are removed.",
+  "account.delete.failed": "The account could not be deleted. Try again in a moment.",
+  "account.delete.hint": "Removes your account and signs you out everywhere. This cannot be undone.",
+  "account.delete.ownerWarning_one": "You own {workspaces}. It is deleted too, with every employee's hours.",
+  "account.delete.ownerWarning_other": "You own {workspaces}. They are deleted too, with every employee's hours.",
+  "account.delete.title": "Delete account",
   "api.csv.amount": "Amount",
   "api.csv.date": "Date",
   "api.csv.hours": "Hours",
@@ -2133,6 +2153,15 @@ export const en = {
 export type CatalogueKey = keyof typeof sv;
 
 export type MessageParams = {
+  "account.delete.confirm": Record<never, never>;
+  "account.delete.confirmLabel": { word: string | number };
+  "account.delete.confirmWord": Record<never, never>;
+  "account.delete.done": Record<never, never>;
+  "account.delete.employeeNote": Record<never, never>;
+  "account.delete.failed": Record<never, never>;
+  "account.delete.hint": Record<never, never>;
+  "account.delete.ownerWarning": { count: string | number; workspaces: string | number };
+  "account.delete.title": Record<never, never>;
   "api.csv.amount": Record<never, never>;
   "api.csv.date": Record<never, never>;
   "api.csv.hours": Record<never, never>;
@@ -3169,6 +3198,7 @@ export type MessageParams = {
 export type MessageKey = keyof MessageParams;
 
 export const pluralKeys: ReadonlySet<string> = new Set<string>([
+  "account.delete.ownerWarning",
   "common.days",
   "common.people",
   "email.digest.title2",

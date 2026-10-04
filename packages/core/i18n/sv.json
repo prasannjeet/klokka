@@ -213,6 +213,20 @@
     "pastHoursHint": "Dina tidigare timmar syns fortfarande för er båda.",
     "editProfile": "Redigera profil"
   },
+  "account": {
+    "delete": {
+      "title": "Radera konto",
+      "hint": "Tar bort ditt konto och loggar ut dig överallt. Det går inte att ångra.",
+      "ownerWarning_one": "Du äger {workspaces}. Det raderas också, med alla anställdas timmar.",
+      "ownerWarning_other": "Du äger {workspaces}. De raderas också, med alla anställdas timmar.",
+      "employeeNote": "Dina timmar finns kvar hos dina arbetsgivare under ditt namn, så att deras underlag är komplett. Din e-post, din avatar och din inloggning tas bort.",
+      "confirmLabel": "Skriv {word} för att bekräfta",
+      "confirmWord": "RADERA",
+      "confirm": "Radera mitt konto",
+      "done": "Ditt konto är raderat.",
+      "failed": "Kontot kunde inte raderas. Försök igen om en stund."
+    }
+  },
   "overview": {
     "title": "{month} i korthet",
     "subtitle": "{workspace}. {date}, {daysLeft} kvar av månaden.",

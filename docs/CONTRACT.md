@@ -21,6 +21,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 |---|---|---|---|
 | `getMe` | `GET /me` | user | every app start, workspace switcher, profile |
 | `updateMe` | `PATCH /me` | user | profile (name, emoji avatar) |
+| `deleteMe` | `DELETE /me` | user | profile (web), Settings or Profile (mobile): delete the account and every owned workspace (CHQ-157) |
 | `updateMyPreferences` | `PATCH /me/preferences` | user | profile and settings (language, push, digest, theme, job reminders and their lead time) |
 | `registerPushToken` | `POST /me/push-tokens` | user | mobile sign-in |
 | `deletePushToken` | `DELETE /me/push-tokens/{token}` | user | mobile sign-out |

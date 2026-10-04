@@ -63,6 +63,10 @@ public interface LogtoManagementApi {
     @Path("/users/{id}")
     LogtoModels.User getUser(@PathParam("id") String id);
 
+    @DELETE
+    @Path("/users/{id}")
+    void deleteUser(@PathParam("id") String id);
+
     @PATCH
     @Path("/users/{id}")
     LogtoModels.User updateUser(@PathParam("id") String id, LogtoModels.UserUpdate body);

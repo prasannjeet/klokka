@@ -39,11 +39,13 @@ public class LogtoService {
                 new LogtoModels.CreateOrganization(name, "Klokka workspace " + workspaceId, null))).id();
     }
 
+    // An organization or user that is already gone counts as deleted, so deleting is safe to repeat.
     public void deleteOrganization(String organizationId) {
-        call("delete organization", () -> {
-            api.deleteOrganization(organizationId);
-            return null;
-        });
+        callIgnoringNotFound("delete organization", () -> api.deleteOrganization(organizationId));
+    }
+
+    public void deleteUser(String userId) {
+        callIgnoringNotFound("delete user", () -> api.deleteUser(userId));
     }
 
     public void addMember(String organizationId, String userId, Role role) {
@@ -132,6 +134,18 @@ public class LogtoService {
 
     private String roleId(Role role) {
         return role == Role.EMPLOYER ? config.logto().employerRoleId() : config.logto().employeeRoleId();
+    }
+
+    private static void callIgnoringNotFound(String what, Runnable action) {
+        try {
+            call(what, () -> {
+                action.run();
+                return null;
+            });
+        } catch (KlokkaException e) {
+            if (e.getCause() instanceof WebApplicationException w && w.getResponse().getStatus() == 404) return;
+            throw e;
+        }
     }
 
     private static <T> T call(String what, Supplier<T> action) {

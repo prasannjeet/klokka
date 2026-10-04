@@ -96,7 +96,7 @@ export const sv = {
       body: [
         'Uppgifterna sparas så länge kontot eller företaget finns. Det finns ingen automatisk radering.',
         'Databasen säkerhetskopieras varje dag till vår egen server i Sverige, över en krypterad förbindelse. Säkerhetskopiorna sparas en begränsad tid och ersätts sedan av nyare, så uppgifter som har raderats försvinner också ur dem efter en tid.',
-        `Det går inte att radera ett konto eller ett företag i appen än. Mejla ${mail} så raderar vi det åt dig. Vi svarar utan onödigt dröjsmål och senast inom en månad.`,
+        `Du kan radera ditt konto själv i appen eller på webben, se [Radera ditt konto](page:delete-account). Kommer du inte åt kontot, mejla ${mail} så raderar vi det åt dig. Vi svarar utan onödigt dröjsmål och senast inom en månad.`,
       ],
     },
     {
@@ -111,7 +111,7 @@ export const sv = {
       h2: 'Ändringar',
       body: [
         'Ändras policyn uppdaterar vi den här sidan och datumet nedan. Större ändringar meddelar vi på webbplatsen innan de gäller.',
-        'Senast ändrad 30 september 2026.',
+        'Senast ändrad 4 oktober 2026.',
       ],
     },
   ],
@@ -195,7 +195,7 @@ export const en: PageCopyOf<typeof sv> = {
       body: [
         'Data is kept for as long as the account or the business exists. Nothing is deleted automatically.',
         'The database is backed up every day to our own server in Sweden, over an encrypted connection. Backups are kept for a limited period and then replaced by newer ones, so deleted data also disappears from them after a while.',
-        `The app cannot delete an account or a business yet. Email ${mail} and we will delete it for you. We answer without undue delay and at the latest within one month.`,
+        `You can delete your account yourself in the app or on the web, see [Delete your account](page:delete-account). If you cannot get into the account, email ${mail} and we will delete it for you. We answer without undue delay and at the latest within one month.`,
       ],
     },
     {
@@ -210,7 +210,7 @@ export const en: PageCopyOf<typeof sv> = {
       h2: 'Changes',
       body: [
         'If this policy changes, we update this page and the date below. Larger changes are announced on the website before they apply.',
-        'Last changed 30 September 2026.',
+        'Last changed 4 October 2026.',
       ],
     },
   ],

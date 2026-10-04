@@ -2,6 +2,19 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.3.0 (unreleased)
+
+### Added
+- Delete your own account, in the Android app (Settings or Profile), in the web app (Profile) and explained on
+  klokka.se/radera-konto. Businesses you own are deleted with everything in them; as an employee your hours stay with
+  the employer under your name (CHQ-157).
+- Google Play: the release builds an AAB next to the APK and can put it on Play's internal track (CHQ-153).
+
+### Changed
+- The Android app is now `se.klokka.app`. Phones with the earlier app install the new one once and can uninstall the
+  old one (CHQ-153).
+- Release builds no longer ask for permissions Klokka never used (screen overlay, storage, fingerprint) (CHQ-153).
+
 ## 1.2.0, 2026-10-04
 
 ### Added

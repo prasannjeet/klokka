@@ -20,6 +20,7 @@ import {
   type SheetHandle,
 } from '@/ui';
 import { WorkspaceRow } from '@/features/workspaces/WorkspaceRow';
+import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 import { enterApp } from '@/features/shell/enterApp';
 import { WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
@@ -56,6 +57,7 @@ export function ProfileScreen() {
   const { me, workspace } = useActiveWorkspace();
   const switchTo = useSwitchWorkspace();
   const signOut = useSignOut();
+  const deleteSheet = useRef<SheetHandle>(null);
   const updateMe = useUpdateMe();
   const editSheet = useRef<SheetHandle>(null);
   const [name, setName] = useState('');
@@ -156,11 +158,20 @@ export function ProfileScreen() {
             chevron={false}
             testID="sign-out"
           />
+          <Row
+            title={t('account.delete.title')}
+            icon="trash"
+            danger
+            onPress={() => deleteSheet.current?.present()}
+            chevron={false}
+            testID="delete-account"
+          />
         </Card>
         <AppText variant="caption" tone="muted" align="center">
           {t('profile.pastHoursHint')}
         </AppText>
       </Screen>
+      <DeleteAccountSheet ref={deleteSheet} />
       <AppSheet
         ref={editSheet}
         title={t('profile.editProfile')}

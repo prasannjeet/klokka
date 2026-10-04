@@ -23,6 +23,9 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
     public static final String DEAD_TOKEN = "ExponentPushToken[dead]";
     public static final String DUPLICATE_ORG_MARKER = "DUPLICATE-ORG";
     public static final String FAIL_ORG_MARKER = "FAIL-ORG";
+    // An organization id containing this answers 500 on DELETE; a user id containing GONE_USER_MARKER answers 404.
+    public static final String FAIL_ORG_DELETE_MARKER = "fail-delete";
+    public static final String GONE_USER_MARKER = "gone";
     public static final String FAIL_INVITE_MARKER = "fail-invite@";
     // Answers after 11 s, as the real Logto can while it sends the invitation email (CHQ-148).
     public static final String SLOW_INVITE_MARKER = "slow-invite@";
@@ -78,6 +81,7 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         state.put("tokenRequests", 0);
         state.put("createdOrganizations", new ArrayList<Map<String, Object>>());
         state.put("deletedOrganizations", new ArrayList<String>());
+        state.put("deletedUsers", new ArrayList<String>());
         state.put("addedUsers", new ArrayList<Map<String, Object>>());
         state.put("assignedRoles", new ArrayList<Map<String, Object>>());
         state.put("removedUsers", new ArrayList<Map<String, Object>>());
@@ -154,7 +158,12 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
             this.<Map<String, Object>>list("createdOrganizations").add(request);
             respond(exchange, 201, JSON.writeValueAsString(Map.of("id", id, "name", name)));
         } else if (path.matches("/organizations/[^/]+") && method.equals("DELETE")) {
-            this.<String>list("deletedOrganizations").add(path.substring("/organizations/".length()));
+            String id = path.substring("/organizations/".length());
+            if (id.contains(FAIL_ORG_DELETE_MARKER)) {
+                respond(exchange, 500, "{\"message\":\"organization delete failed\"}");
+                return;
+            }
+            this.<String>list("deletedOrganizations").add(id);
             respond(exchange, 204, null);
         } else if (path.matches("/organizations/[^/]+/users") && method.equals("POST")) {
             Map<String, Object> request = JSON.readValue(body, Map.class);
@@ -206,6 +215,15 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
             Map<String, String> user = users.get(id);
             if (user != null && request.get("name") != null) user.put("name", String.valueOf(request.get("name")));
             respond(exchange, 200, JSON.writeValueAsString(Map.of("id", id, "name", String.valueOf(request.get("name")))));
+        } else if (path.matches("/users/[^/]+") && method.equals("DELETE")) {
+            String id = path.split("/")[2];
+            if (id.contains(GONE_USER_MARKER)) {
+                respond(exchange, 404, "{\"message\":\"user not found\"}");
+                return;
+            }
+            this.<String>list("deletedUsers").add(id);
+            users.remove(id);
+            respond(exchange, 204, null);
         } else if (path.matches("/users/[^/]+") && method.equals("GET")) {
             Map<String, String> user = users.get(path.split("/")[2]);
             if (user == null) respond(exchange, 404, "{\"message\":\"user not found\"}");

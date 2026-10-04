@@ -14,6 +14,7 @@ import * as hours from './hours';
 import * as hours2026 from './hours-2026';
 import * as hours2027 from './hours-2027';
 import * as openSource from './open-source';
+import * as deleteAccount from './delete-account';
 import * as privacy from './privacy';
 import * as smallBusiness from './small-business';
 import * as template from './template';
@@ -83,6 +84,7 @@ const copies: { [K in PageId]?: Record<Locale, CopyFor<K>> } = {
   'trade-shop': tradeShop,
   privacy,
   terms,
+  'delete-account': deleteAccount,
 };
 
 /** A page's copy in one language. Every registered page has copy (test/pages.test.ts); anything else throws. */

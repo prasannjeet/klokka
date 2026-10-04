@@ -41,7 +41,8 @@ export type IconName =
   | 'map-pin'
   | 'navigation'
   | 'crosshair'
-  | 'briefcase';
+  | 'briefcase'
+  | 'trash';
 
 export interface IconProps {
   name: IconName;
@@ -215,6 +216,14 @@ function glyph(name: IconName, c: Common) {
         <>
           <Path {...c} d="M4 20h4l11-11-4-4L4 16z" />
           <Path {...c} d="M13 7l4 4" />
+        </>
+      );
+    case 'trash':
+      return (
+        <>
+          <Path {...c} d="M4 7h16" />
+          <Path {...c} d="M9 7V4h6v3" />
+          <Path {...c} d="M6 7l1 13h10l1-13" />
         </>
       );
     case 'log-out':

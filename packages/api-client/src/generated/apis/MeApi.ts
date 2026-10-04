@@ -78,6 +78,52 @@ export interface UpdateMyPreferencesRequest {
 export class MeApi extends runtime.BaseAPI {
 
     /**
+     * Creates request options for deleteMe without sending the request
+     */
+    async deleteMeRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/me`;
+
+        return {
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Deletes the signed-in user\'s account (CHQ-157). Every workspace the user owns (role EMPLOYER) is deleted with all its hours, jobs, flags, month locks and members, and its Logto organization. Each EMPLOYEE membership follows `removeMember`: with hours it is deactivated and unlinked (the employer keeps the hours under the display name, the email is replaced), without hours it is removed. Then the user\'s own data (profile, preferences, push tokens, notifications) and the Logto user are deleted. Safe to repeat: a second call answers `204` and changes nothing. A Logto failure answers `500` before or after the database step; calling again finishes the deletion. 
+     * Delete my account
+     */
+    async deleteMeRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const requestOptions = await this.deleteMeRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Deletes the signed-in user\'s account (CHQ-157). Every workspace the user owns (role EMPLOYER) is deleted with all its hours, jobs, flags, month locks and members, and its Logto organization. Each EMPLOYEE membership follows `removeMember`: with hours it is deactivated and unlinked (the employer keeps the hours under the display name, the email is replaced), without hours it is removed. Then the user\'s own data (profile, preferences, push tokens, notifications) and the Logto user are deleted. Safe to repeat: a second call answers `204` and changes nothing. A Logto failure answers `500` before or after the database step; calling again finishes the deletion. 
+     * Delete my account
+     */
+    async deleteMe(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.deleteMeRaw(initOverrides);
+    }
+
+    /**
      * Creates request options for deletePushToken without sending the request
      */
     async deletePushTokenRequestOpts(requestParameters: DeletePushTokenRequest): Promise<runtime.RequestOpts> {

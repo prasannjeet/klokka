@@ -2,7 +2,8 @@
 
 // Profile (CHQ-134 and CHQ-139, mockup web-employee.html "Profile"): one account for every workspace. Emoji
 // avatar and name (PATCH /me), language applied to the whole app at once, appearance following the device
-// or forced light or dark, push and digest, the workspaces, and sign out. Changes save one at a time.
+// or forced light or dark, push and digest, the workspaces, sign out, and deleting the account (CHQ-157). Changes
+// save one at a time.
 import Link from 'next/link';
 import { useState, type CSSProperties, type KeyboardEvent } from 'react';
 import type { Language, ThemePreference } from '@klokka/api-client';
@@ -14,6 +15,7 @@ import { AVATAR_EMOJIS, colourVar, initials } from '@/lib/visual';
 import { useWorkspace } from '@/lib/workspace';
 import { Avatar } from '../avatar';
 import { ChoiceGroup } from '../choice-group';
+import { DeleteAccountDialog } from './delete-account-dialog';
 import { Icon } from '../icons';
 import { roleLine } from '../shell/role-line';
 import { ViewHeader } from '../view-header';
@@ -36,6 +38,7 @@ export function ProfileView() {
   const savePreference = usePreferenceSave(markSaved);
   const [nameDraft, setNameDraft] = useState<string | null>(null);
   const [nameError, setNameError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const employerCount = me.workspaces.filter((w) => w.role === 'EMPLOYER').length;
   const employeeCount = me.workspaces.filter((w) => w.role === 'EMPLOYEE').length;
@@ -258,6 +261,22 @@ export function ProfileView() {
           {t('common.signOut')}
         </button>
       </form>
+
+      <section className="card sgroup" aria-labelledby="pf-del-h" style={{ marginTop: 16 }}>
+        <div className="srow">
+          <div>
+            <h2 id="pf-del-h" className="t">
+              {t('account.delete.title')}
+            </h2>
+            <p>{t('account.delete.hint')}</p>
+          </div>
+          <button className="btn btn-danger" type="button" onClick={() => setDeleting(true)}>
+            <Icon name="trash" />
+            {t('account.delete.title')}
+          </button>
+        </div>
+      </section>
+      <DeleteAccountDialog me={me} open={deleting} onClose={() => setDeleting(false)} />
     </section>
   );
 }

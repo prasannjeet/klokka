@@ -89,6 +89,12 @@ export function useUpdateMe() {
   });
 }
 
+// DELETE /me (CHQ-157). The caller signs out afterwards; nothing is cached for a user who no longer exists.
+export function useDeleteMe() {
+  const api = useApi();
+  return useMutation({ mutationFn: () => api.me.deleteMe() });
+}
+
 function stripUndefined<T extends object>(value: T): Partial<T> {
   const out: Partial<T> = {};
   for (const [k, v] of Object.entries(value)) if (v !== undefined) (out as Record<string, unknown>)[k] = v;

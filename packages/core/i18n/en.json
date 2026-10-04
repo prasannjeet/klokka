@@ -213,6 +213,20 @@
     "pastHoursHint": "Your past hours stay visible to both of you.",
     "editProfile": "Edit profile"
   },
+  "account": {
+    "delete": {
+      "title": "Delete account",
+      "hint": "Removes your account and signs you out everywhere. This cannot be undone.",
+      "ownerWarning_one": "You own {workspaces}. It is deleted too, with every employee's hours.",
+      "ownerWarning_other": "You own {workspaces}. They are deleted too, with every employee's hours.",
+      "employeeNote": "Your hours stay with your employers under your name, so their records are complete. Your email, avatar and sign-in are removed.",
+      "confirmLabel": "Type {word} to confirm",
+      "confirmWord": "DELETE",
+      "confirm": "Delete my account",
+      "done": "Your account is deleted.",
+      "failed": "The account could not be deleted. Try again in a moment."
+    }
+  },
   "overview": {
     "title": "{month} at a glance",
     "subtitle": "{workspace}. {date}, {daysLeft} left in the month.",

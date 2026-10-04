@@ -30,6 +30,7 @@ import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspa
 import { OptionSheet } from '@/ui/OptionSheet';
 import { AppPreferenceRows, NotificationPreferenceRows } from '@/features/profile/PreferenceRows';
 import { WORKSPACE_COLOURS, WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
+import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 
 const styles = (t: Theme) =>
@@ -76,6 +77,7 @@ function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
   const workspace = useWorkspace(active.workspaceId);
   const update = useUpdateWorkspace(active.workspaceId);
   const signOut = useSignOut();
+  const deleteSheet = useRef<SheetHandle>(null);
   const editSheet = useRef<SheetHandle>(null);
   const dayLengthSheet = useRef<SheetHandle>(null);
   const roundingSheet = useRef<SheetHandle>(null);
@@ -279,11 +281,20 @@ function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
             chevron={false}
             testID="sign-out"
           />
+          <Row
+            title={t('account.delete.title')}
+            icon="trash"
+            danger
+            onPress={() => deleteSheet.current?.present()}
+            chevron={false}
+            testID="delete-account"
+          />
         </Card>
         <AppText variant="caption" tone="muted" align="center">
           {t('settings.savesPerField')}
         </AppText>
       </Screen>
+      <DeleteAccountSheet ref={deleteSheet} />
       <AppSheet
         ref={editSheet}
         title={t('mobile.settings.editWorkspace')}

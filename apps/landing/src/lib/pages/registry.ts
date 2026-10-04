@@ -28,7 +28,8 @@ export type PageId =
   | 'trade-shop'
   | 'about'
   | 'privacy'
-  | 'terms';
+  | 'terms'
+  | 'delete-account';
 
 export type PageKind = 'home' | 'product' | 'tool' | 'guide' | 'industry' | 'table' | 'legal';
 
@@ -235,7 +236,7 @@ export const pages: readonly PageEntry[] = [
     path: { sv: '/integritet', en: '/privacy' },
     parent: 'home',
     footer: 'klokka',
-    lastmod: '2026-09-30',
+    lastmod: '2026-10-04',
     background: 'clock',
   },
   {
@@ -245,6 +246,15 @@ export const pages: readonly PageEntry[] = [
     parent: 'home',
     footer: 'klokka',
     lastmod: '2026-09-29',
+    background: 'clock',
+  },
+  {
+    id: 'delete-account',
+    kind: 'legal',
+    path: { sv: '/radera-konto', en: '/delete-account' },
+    parent: 'privacy',
+    footer: 'klokka',
+    lastmod: '2026-10-04',
     background: 'clock',
   },
 ];

@@ -12,12 +12,16 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import java.util.Optional;
 
-// /me, /me/preferences, /me/push-tokens: the generated MeApi implemented against the database.
+// /me, /me/preferences, /me/push-tokens: the generated MeApi implemented against the database. DELETE /me is
+// AccountDeletionService (CHQ-157).
 @Authenticated
 public class MeResource implements MeApi {
 
     @Inject
     MeService service;
+
+    @Inject
+    AccountDeletionService deletion;
 
     @Context
     HttpHeaders headers;
@@ -25,6 +29,11 @@ public class MeResource implements MeApi {
     @Override
     public Me getMe() {
         return service.me(Optional.ofNullable(headers.getHeaderString(HttpHeaders.ACCEPT_LANGUAGE)));
+    }
+
+    @Override
+    public void deleteMe() {
+        deletion.deleteCurrentUser();
     }
 
     @Override

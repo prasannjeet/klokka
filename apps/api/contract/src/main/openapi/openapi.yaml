@@ -113,6 +113,25 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         default:
           $ref: '#/components/responses/Problem'
+    delete:
+      tags: [me]
+      operationId: deleteMe
+      summary: Delete my account
+      description: |
+        Deletes the signed-in user's account (CHQ-157). Every workspace the user owns (role EMPLOYER) is deleted with
+        all its hours, jobs, flags, month locks and members, and its Logto organization. Each EMPLOYEE membership
+        follows `removeMember`: with hours it is deactivated and unlinked (the employer keeps the hours under the
+        display name, the email is replaced), without hours it is removed. Then the user's own data (profile,
+        preferences, push tokens, notifications) and the Logto user are deleted. Safe to repeat: a second call
+        answers `204` and changes nothing. A Logto failure answers `500` before or after the database step; calling
+        again finishes the deletion.
+      responses:
+        '204':
+          description: The account is deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        default:
+          $ref: '#/components/responses/Problem'
 
   /me/preferences:
     patch:
