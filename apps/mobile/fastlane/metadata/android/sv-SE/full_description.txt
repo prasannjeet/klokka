@@ -1,0 +1,22 @@
+Klokka är tidrapportering för små företag: arbetsgivaren för in timmarna varje anställd har jobbat, dag för dag, och båda ser samma månad räknas ihop. Appen är gratis att använda och har öppen källkod.
+
+FÖR ARBETSGIVAREN
+• För in timmar per person och dag, eller hela veckan på en gång.
+• Dela upp en dag i jobb, med starttid, plats och anteckning.
+• Avrundning till kvart eller halvtimme och en standardlängd för arbetsdagen.
+• Stäng månaden när den stämmer och exportera den som CSV till lönen.
+• Visa lön om du vill: varje anställd får en timlön och ser beloppet bredvid timmarna.
+
+FÖR DEN ANSTÄLLDA
+• Se månadens dagar, summan och snittet per arbetsdag.
+• Få en notis när timmar läggs till eller ändras, en per tillfälle.
+• Flagga en rad som ser fel ut, med ett meddelande till arbetsgivaren.
+• Varje ändring sparas i en historik som båda ser.
+
+ETT KONTO, FLERA FÖRETAG
+Jobbar du på två ställen byter du mellan företagen i samma app.
+
+SVENSKA OCH ENGELSKA, LJUST OCH MÖRKT
+Appen följer telefonens språk och tema, och du kan välja själv.
+
+Klokka finns också som webbapp på app.klokka.se. Källkoden är MIT-licensierad på GitHub.

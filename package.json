@@ -28,7 +28,7 @@
     "emails:check": "node scripts/emails/build.mjs --check",
     "emails:push": "node scripts/emails/push-logto.mjs",
     "generate": "npm run generate --workspaces --if-present",
-    "lint": "eslint . && prettier --check . && bash scripts/check-em-dash.sh",
+    "lint": "eslint . && prettier --check . && bash scripts/check-em-dash.sh && bash scripts/check-play-metadata.sh",
     "format": "prettier --write .",
     "mock:api": "prism mock apps/api/contract/src/main/openapi/openapi.yaml -p 4010 -h 0.0.0.0"
   },

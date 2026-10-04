@@ -11,6 +11,7 @@ paths=(
   packages/api-client/src/index.ts
   apps/api/contract/src/main/openapi
   apps/api/service/src
+  apps/mobile/fastlane/metadata
 )
 existing=()
 for p in "${paths[@]}"; do

@@ -1,0 +1,22 @@
+Klokka is time reporting for small businesses: the employer logs the hours each employee worked, day by day, and both sides see the same month add up. The app is free to use and open source.
+
+FOR THE EMPLOYER
+• Log hours per person and day, or a whole week at once.
+• Split a day into jobs, with a start time, a place and a note.
+• Round to the quarter or half hour and set a standard working day.
+• Close the month when it is right and export it as CSV for payroll.
+• Show pay if you want: each employee gets an hourly rate and sees the amount next to the hours.
+
+FOR THE EMPLOYEE
+• See the month's days, the total and the average per working day.
+• Get a notification when hours are added or changed, one per change.
+• Flag a line that looks wrong, with a message to the employer.
+• Every change is kept in a history both sides can see.
+
+ONE ACCOUNT, SEVERAL BUSINESSES
+Work in two places? Switch between the businesses in the same app.
+
+SWEDISH AND ENGLISH, LIGHT AND DARK
+The app follows the phone's language and theme, and you can choose yourself.
+
+Klokka is also a web app at app.klokka.se. The source code is MIT licensed on GitHub.
