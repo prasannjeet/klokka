@@ -1606,6 +1606,8 @@
     background: var(--surface);
     color: var(--text);
     padding: 0;
+    /* Centred: Tailwind's preflight resets the UA's margin: auto on <dialog> to 0 (phones override below). */
+    margin: auto;
     width: min(calc(100% - 2 * var(--gutter)), 500px);
     max-height: 92dvh;
     box-shadow: var(--shadow-float);
@@ -2099,7 +2101,7 @@
   }
   .daylist .what .note {
     font-size: 14px;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
   }
   .daylist .what .meta {
     display: flex;

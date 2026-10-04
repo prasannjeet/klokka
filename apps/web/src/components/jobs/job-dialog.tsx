@@ -186,7 +186,7 @@ function JobForm({
               onChange={(e) => setStartTime(e.target.value)}
             />
             <span className="hint">
-              {startTime && hours > 0
+              {startTime
                 ? t('jobs.runsReminder', { from: startTime, to: endTime(startTime, hours), name })
                 : t('jobs.noStartNoReminder', { name })}
             </span>
