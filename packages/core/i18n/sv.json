@@ -180,7 +180,14 @@
     "followDevice": "Följ enheten",
     "light": "Ljust",
     "dark": "Mörkt",
-    "savesPerField": "Inställningar sparas ett fält i taget; inget här behöver en Spara-knapp."
+    "savesPerField": "Inställningar sparas ett fält i taget; inget här behöver en Spara-knapp.",
+    "employees": "Anställda",
+    "notifyDeclined": "Berätta för anställda när du avslår en flagga",
+    "notifyDeclinedOn": "De får en notis med ditt svar. En godkänd ändring berättas alltid.",
+    "notifyDeclinedOff": "En avslagen flagga stängs i tysthet. En godkänd ändring berättas alltid.",
+    "employeesSeeInsights": "Visa analys för anställda",
+    "employeesSeeInsightsOn": "Snitt, trender och månadsprognos på deras månadssida.",
+    "employeesSeeInsightsOff": "Anställda ser sina timmar och jobb, utan snitt, trender eller prognos."
   },
   "profile": {
     "title": "Profil",
@@ -316,6 +323,90 @@
     "hoursWheel": "Timmar",
     "minutesWheel": "Minuter",
     "savedAs": "Sparas som {hours}"
+  },
+  "jobs": {
+    "title": "Jobb",
+    "addJob": "Lägg till ett jobb",
+    "addJobFor": "Lägg till ett jobb för {name}",
+    "addAnother": "Lägg till ett jobb till",
+    "newJobFor": "Nytt jobb för {name}",
+    "editJobFor": "Jobb för {name}",
+    "saveJob": "Spara jobbet, {duration}",
+    "chooseTimeFirst": "Välj tiden först",
+    "removeJob": "Ta bort jobbet",
+    "removed": "Jobbet är borttaget.",
+    "saved": "Sparade {duration} för {name}.",
+    "noJobs": "Inga jobb den här dagen",
+    "noJobsHint": "Lägg till vad {name} jobbade, eller planera ett jobb i förväg. Varje jobb har egen tid, plats och anteckning.",
+    "noJobsEmployee": "Inget den här dagen.",
+    "jobCount_one": "{count} jobb",
+    "jobCount_other": "{count} jobb",
+    "placeCount_one": "{count} plats",
+    "placeCount_other": "{count} platser",
+    "jobNumber": "Jobb {number}",
+    "location": "Plats",
+    "noLocation": "Ingen plats",
+    "startsAt": "Börjar",
+    "notSet": "Inte satt",
+    "timeRange": "{from} till {to}",
+    "runsReminder": "Pågår {from} till {to}. {name} får en påminnelse innan det börjar.",
+    "noStartNoReminder": "Ingen starttid: {name} får ingen påminnelse för det här jobbet.",
+    "directions": "Vägbeskrivning",
+    "directionsInMaps": "Vägbeskrivning i Google Maps",
+    "planned": "Planerat",
+    "dayTotalSoFar": "{date}, dagens summa hittills {duration}",
+    "previousDay": "Föregående dag",
+    "nextDay": "Nästa dag",
+    "today": "I dag",
+    "monthClosed": "{month} är stängd. Lås upp den för att lägga till eller ändra jobb.",
+    "monthOpen": "Månaden är öppen",
+    "freeDay": "Ledig dag, tryck för att planera",
+    "worked": "Arbetat",
+    "soFarPlanned": "{hours} hittills, {planned} planerat",
+    "nextUp": "Nästa: {date}",
+    "tapAnyDay": "Klicka på en dag för att lägga till eller ändra jobb, bakåt eller framåt.",
+    "jobsThisMonth": "Jobb den här månaden",
+    "severalJobsCell": "En dag med två jobb eller fler visar summan; öppna den för att ändra jobben.",
+    "onePerCellHint": "En dag med ett jobb eller inget: skriv timmarna direkt i rutan.",
+    "futureOpen": "Kommande veckor går att planera.",
+    "myDay": "Min dag",
+    "flagThisDay": "Stämmer något inte? Flagga dagen",
+    "flagThisDayHint": "Din arbetsgivare ser flaggan och svarar på den.",
+    "removeConfirm": "Ta bort jobbet?",
+    "edit": "Ändra",
+    "change": "Byt",
+    "history": "Historik: {summary}"
+  },
+  "places": {
+    "title": "Jobbets plats",
+    "search": "Sök en adress eller en plats",
+    "useHere": "Använd där jag är nu",
+    "useHereHint": "Frågar efter din plats en gång",
+    "recent": "Senaste platser",
+    "results": "Resultat",
+    "none": "Ingen plats för det här jobbet",
+    "use": "Använd {name}",
+    "saveWithout": "Spara utan plats",
+    "poweredBy": "Platser från Google",
+    "noResults": "Inga platser matchar.",
+    "locationDenied": "Klokka får inte använda din plats. Sök efter platsen i stället.",
+    "mapOf": "Karta över {place}"
+  },
+  "reminders": {
+    "title": "Jobbpåminnelser",
+    "toggle": "Påminn mig innan ett jobb börjar",
+    "on": "På, {lead}.",
+    "off": "Av. Du får inga påminnelser före jobb.",
+    "hint": "Påminnelser kommer som en notis i telefonen för jobb med starttid. Din arbetsgivare kan inte se eller ändra det här.",
+    "howEarly": "Hur tidigt",
+    "default": "Standard",
+    "lead": {
+      "MINUTES_15": "15 minuter innan",
+      "MINUTES_30": "30 minuter innan",
+      "HOUR_1": "1 timme innan",
+      "HOURS_2": "2 timmar innan",
+      "DAY_BEFORE": "Dagen innan, samma tid"
+    }
   },
   "month": {
     "title": "{name} i {month}",
@@ -479,7 +570,15 @@
     "loggedVsSays": "Loggat {logged}, {name} säger {suggested}",
     "resolvedFixed": "Åtgärdad: du ändrade {before} till {after}.",
     "resolvedDismissed": "Åtgärdad: du behöll {hours}.",
-    "alreadyOpen": "Den här posten har redan en öppen flagga."
+    "alreadyOpen": "Den här posten har redan en öppen flagga.",
+    "declineQuiet": "{name} får inget besked när du avslår. Ändra det i Inställningar, Anställda.",
+    "declineTold": "{name} får besked i båda fallen.",
+    "severalJobs": "Den här dagen har {count} jobb. Ändra rätt jobb och godkänn sedan flaggan som den är.",
+    "oneJob": "Den här dagen har ett jobb. Godkänner du sätts det till {hours}.",
+    "changeJobs": "Ändra jobben",
+    "approveAsIs": "Godkänn, {hours} som det är",
+    "approve": "Godkänn, ändra till {hours}",
+    "decline": "Avslå, behåll {hours}"
   },
   "notifications": {
     "title": "Notiser",
@@ -536,6 +635,18 @@
     "monthReopened": {
       "title": "{name} öppnade {month} igen",
       "body": "{workspace}: poster kan ändras igen"
+    },
+    "jobReminder": {
+      "titlePlace": "Jobb på {place} om {lead}",
+      "title": "Jobb om {lead}",
+      "titlePlaceTomorrow": "Jobb på {place} i morgon kl. {time}",
+      "titleTomorrow": "Jobb i morgon kl. {time}",
+      "body": "{workspace}: börjar {time}, {hours}.",
+      "bodyAddress": "{workspace}: börjar {time}, {hours}. {address}",
+      "in15": "15 minuter",
+      "in30": "30 minuter",
+      "in60": "1 timme",
+      "in120": "2 timmar"
     }
   },
   "email": {
@@ -771,6 +882,9 @@
     "INVITATION_EXPIRED": "Inbjudan har gått ut.",
     "INVITATION_EMAIL_MISMATCH": "Inbjudan skickades till en annan e-postadress.",
     "FLAG_ALREADY_OPEN": "Den här posten har redan en öppen flagga.",
+    "ENTRY_HAS_JOBS": "Den här dagen har flera jobb. Ändra dem ett i taget.",
+    "MAPS_NOT_CONFIGURED": "Platser är inte inställda på den här servern.",
+    "MAPS_UNAVAILABLE": "Kartan svarade inte. Försök igen om en stund.",
     "NOT_IMPLEMENTED": "Inte tillgängligt än.",
     "INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
     "NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen."
@@ -829,7 +943,8 @@
       "enable": "Slå på notiser",
       "channelHours": "Timmar",
       "channelFlags": "Flaggor",
-      "channelWorkspace": "Företag"
+      "channelWorkspace": "Företag",
+      "channelReminders": "Jobbpåminnelser"
     },
     "flags": {
       "sent": "Flaggan är skickad. {name} har fått en notis.",
@@ -1069,7 +1184,8 @@
         "ENTRY_FLAGGED": "Post flaggad",
         "FLAG_RESOLVED": "Flagga löst",
         "MONTH_CLOSED": "Månad stängd",
-        "MONTH_REOPENED": "Månad öppnad igen"
+        "MONTH_REOPENED": "Månad öppnad igen",
+        "JOB_REMINDER": "Jobbpåminnelser"
       },
       "health": {
         "UP": "Uppe",

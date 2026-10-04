@@ -166,6 +166,44 @@ function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
         </Card>
         <Card>
           <AppText variant="eyebrow" tone="accent">
+            {t('settings.employees')}
+          </AppText>
+          <Row
+            title={t('settings.notifyDeclined')}
+            subtitle={
+              (ws?.notifyFlagDeclined ?? active.notifyFlagDeclined)
+                ? t('settings.notifyDeclinedOn')
+                : t('settings.notifyDeclinedOff')
+            }
+            trailing={
+              <AppSwitch
+                value={ws?.notifyFlagDeclined ?? active.notifyFlagDeclined}
+                onValueChange={(v) => void save({ notifyFlagDeclined: v })}
+                accessibilityLabel={t('settings.notifyDeclined')}
+                testID="notify-declined"
+              />
+            }
+          />
+          <Separator />
+          <Row
+            title={t('settings.employeesSeeInsights')}
+            subtitle={
+              (ws?.employeesSeeInsights ?? active.employeesSeeInsights)
+                ? t('settings.employeesSeeInsightsOn')
+                : t('settings.employeesSeeInsightsOff')
+            }
+            trailing={
+              <AppSwitch
+                value={ws?.employeesSeeInsights ?? active.employeesSeeInsights}
+                onValueChange={(v) => void save({ employeesSeeInsights: v })}
+                accessibilityLabel={t('settings.employeesSeeInsights')}
+                testID="employees-see-insights"
+              />
+            }
+          />
+        </Card>
+        <Card>
+          <AppText variant="eyebrow" tone="accent">
             {t('settings.time')}
           </AppText>
           <Row

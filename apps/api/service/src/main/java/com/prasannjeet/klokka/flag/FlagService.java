@@ -142,8 +142,11 @@ public class FlagService {
                 flag.status == FlagStatus.FIXED ? EntryChangeKind.FLAG_FIXED : EntryChangeKind.FLAG_DISMISSED,
                 before, entry.hours, null, null, a.userId(), now);
         change.flagId = flag.id;
-        notifications.flagResolved(a.workspace(), member.userId, member.id, entry.id, flag.id, a.membership().displayName,
-                entry.workDate, flag.status == FlagStatus.FIXED ? "FIX" : "DISMISS", entry.hours, note);
+        // A decline is told only when the workspace says so (CHQ-156); an approved change always is.
+        if (flag.status == FlagStatus.FIXED || a.workspace().notifyFlagDeclined) {
+            notifications.flagResolved(a.workspace(), member.userId, member.id, entry.id, flag.id, a.membership().displayName,
+                    entry.workDate, flag.status == FlagStatus.FIXED ? "FIX" : "DISMISS", entry.hours, note);
+        }
         return view(a, flag, entry);
     }
 

@@ -60,6 +60,13 @@ public class WorkspaceEntity {
     @Column(nullable = false, length = 16)
     public String emoji;
 
+    // CHQ-156: tell the employee when a flag is declined; let employees see their analysis.
+    @Column(name = "notify_flag_declined", nullable = false)
+    public boolean notifyFlagDeclined = true;
+
+    @Column(name = "employees_see_insights", nullable = false)
+    public boolean employeesSeeInsights = true;
+
     @Column(name = "created_at", nullable = false)
     public Instant createdAt;
 }

@@ -114,6 +114,7 @@ class DigestJobTest {
     void aWeekWithNothingToReportCostsNoEmailButIsRecorded() {
         // Every workspace these two are in (earlier tests in this class made their own): nothing logged anywhere.
         data.run("delete from hour_entry_change where workspace_id in (select workspace_id from membership where logto_user_id in (?, ?))", NORA, MARIA);
+        data.run("delete from job where workspace_id in (select workspace_id from membership where logto_user_id in (?, ?))", NORA, MARIA);
         data.run("delete from hour_entry where workspace_id in (select workspace_id from membership where logto_user_id in (?, ?))", NORA, MARIA);
         clock.set(Instant.parse("2026-09-21T05:15:00Z"));
         DigestJob.Result result = job.run();

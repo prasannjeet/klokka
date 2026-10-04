@@ -40,6 +40,10 @@ public interface KlokkaConfig {
 
     Operator operator();
 
+    Maps maps();
+
+    Reminders reminders();
+
     // Opt-in test switches; mapped here because every klokka.* key must be known (unknown keys fail the boot).
     It it();
 
@@ -67,6 +71,12 @@ public interface KlokkaConfig {
         @Min(1)
         @Max(366)
         int rangeMaxDays();
+
+        // Jobs one member may have on one day (CHQ-156).
+        @WithDefault("20")
+        @Min(1)
+        @Max(100)
+        int jobsPerDayMax();
     }
 
     interface Push {
@@ -120,6 +130,41 @@ public interface KlokkaConfig {
         String employerRoleId();
 
         String employeeRoleId();
+    }
+
+    // Google Maps Platform for job locations (CHQ-156). The key is server-side only; absent means the places
+    // operations answer 503 MAPS_NOT_CONFIGURED and jobs are saved without locations.
+    interface Maps {
+        Optional<String> apiKey();
+
+        // Map images kept on disk so a card seen twice costs Google one request.
+        @WithDefault("2000")
+        @Min(1)
+        @Max(100000)
+        int imageCacheMax();
+
+        // Suggestions returned per keystroke and places listed as recent.
+        @WithDefault("5")
+        @Min(1)
+        @Max(5)
+        int suggestions();
+
+        @WithDefault("8")
+        @Min(1)
+        @Max(50)
+        int recentPlaces();
+    }
+
+    // Job reminders (CHQ-156): the sweep runs every minute; a reminder whose moment passed more than `grace`
+    // ago is not sent late (a job added after its reminder time gets none).
+    interface Reminders {
+        @WithDefault("PT10M")
+        Duration grace();
+
+        @WithDefault("500")
+        @Min(1)
+        @Max(10000)
+        int batchSize();
     }
 
     interface It {

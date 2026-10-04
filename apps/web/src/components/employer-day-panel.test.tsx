@@ -11,6 +11,7 @@ import { ToastProvider } from './toast';
 
 const calls = vi.hoisted(() => ({ getFlag: vi.fn(), resolveFlag: vi.fn(), getEntryHistory: vi.fn() }));
 vi.mock('@/lib/api', () => ({
+  bffUrl: (path: string) => `/api/k/${path}`,
   api: {
     flags: { getFlag: calls.getFlag, resolveFlag: calls.resolveFlag },
     entries: { getEntryHistory: calls.getEntryHistory },
@@ -18,6 +19,7 @@ vi.mock('@/lib/api', () => ({
 }));
 
 const my = {
+  notifyFlagDeclined: true,
   workspaceId: 'ws',
   membershipId: 'm-anna',
   name: 'Kafé Nord',
@@ -45,7 +47,17 @@ const flag: Flag = {
   raisedBy: { userId: 'u-test', name: 'Test Testsson' },
 };
 
-function day(withFlag: boolean): MemberMonthDay {
+const JOB = {
+  id: 'j1',
+  hours: 5,
+  startTime: '09:00',
+  note: 'Counter',
+  location: { placeId: 'p1', name: 'Café Nord', address: 'Kungsgatan 12', latitude: 59.3, longitude: 18 },
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+function day(withFlag: boolean, jobs: (typeof JOB)[] = [JOB]): MemberMonthDay {
   return {
     date: parseDate('2026-09-29'),
     weekday: 'TUESDAY',
@@ -54,12 +66,13 @@ function day(withFlag: boolean): MemberMonthDay {
     entryId: 'e1',
     hours: 5,
     note: null,
+    jobs,
     earnings: null,
     ...(withFlag ? { flag: { id: 'f1', status: 'OPEN', reason: 'MORE', suggestedHours: 6 } } : {}),
   } as MemberMonthDay;
 }
 
-function renderPanel(withFlag: boolean) {
+function renderPanel(withFlag: boolean, jobs: (typeof JOB)[] = [JOB], editing = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
@@ -67,10 +80,15 @@ function renderPanel(withFlag: boolean) {
         <ToastProvider>
           <EmployerDayPanel
             ws={viewOf(my)}
-            day={day(withFlag)}
+            day={day(withFlag, jobs)}
             date="2026-09-29"
             personName="Test Testsson"
             currency="SEK"
+            {...(editing
+              ? {
+                  editing: { membershipId: 'm-test', rounding: 'QUARTER', defaultDayHours: 8, locked: false },
+                }
+              : {})}
           />
         </ToastProvider>
       </LocaleProvider>
@@ -98,6 +116,33 @@ describe('EmployerDayPanel', () => {
         workspaceId: 'ws',
         flagId: 'f1',
         flagResolve: { action: 'DISMISS' },
+      }),
+    );
+  });
+
+  it("shows the day's jobs with where, when, how long and directions, and the employer's job actions (CHQ-156)", async () => {
+    renderPanel(false, [JOB], true);
+    expect(await screen.findByText('Café Nord')).toBeTruthy();
+    expect(screen.getByText('09:00 to 14:00, Kungsgatan 12')).toBeTruthy();
+    expect(screen.getAllByText('5 h').length).toBeGreaterThan(0);
+    expect(screen.getByText('Counter')).toBeTruthy();
+    const directions = screen.getByRole('link', { name: 'Directions' });
+    expect(directions.getAttribute('href')).toBe(
+      'https://www.google.com/maps/search/?api=1&query=59.3%2C18&query_place_id=p1',
+    );
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Add another job' })).toBeTruthy();
+  });
+
+  it('approves a flag on a day with several jobs as the day stands', async () => {
+    const second = { ...JOB, id: 'j2', hours: 2, startTime: '15:00' };
+    renderPanel(true, [JOB, second], true);
+    fireEvent.click(await screen.findByRole('button', { name: 'Approve, 5 h as it stands' }));
+    await waitFor(() =>
+      expect(calls.resolveFlag).toHaveBeenCalledWith({
+        workspaceId: 'ws',
+        flagId: 'f1',
+        flagResolve: { action: 'FIX', hours: 5 },
       }),
     );
   });

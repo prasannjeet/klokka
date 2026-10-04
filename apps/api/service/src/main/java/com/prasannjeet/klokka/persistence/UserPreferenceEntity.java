@@ -1,5 +1,6 @@
 package com.prasannjeet.klokka.persistence;
 
+import com.prasannjeet.klokka.contract.model.JobReminderLead;
 import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.contract.model.ThemePreference;
 import jakarta.persistence.Column;
@@ -33,6 +34,14 @@ public class UserPreferenceEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 6)
     public ThemePreference theme;
+
+    // CHQ-156: a push before each job with a start time, this long before it.
+    @Column(name = "job_reminders", nullable = false)
+    public boolean jobReminders = true;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "job_reminder_lead", nullable = false, length = 10)
+    public JobReminderLead jobReminderLead = JobReminderLead.HOUR_1;
 
     @Column(name = "updated_at", nullable = false)
     public Instant updatedAt;

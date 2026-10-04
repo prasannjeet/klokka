@@ -21,12 +21,12 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 |---|---|---|---|
 | `getMe` | `GET /me` | user | every app start, workspace switcher, profile |
 | `updateMe` | `PATCH /me` | user | profile (name, emoji avatar) |
-| `updateMyPreferences` | `PATCH /me/preferences` | user | profile and settings (language, push, digest, theme) |
+| `updateMyPreferences` | `PATCH /me/preferences` | user | profile and settings (language, push, digest, theme, job reminders and their lead time) |
 | `registerPushToken` | `POST /me/push-tokens` | user | mobile sign-in |
 | `deletePushToken` | `DELETE /me/push-tokens/{token}` | user | mobile sign-out |
 | `createWorkspace` | `POST /workspaces` | user | sign-up step 2, "Create workspace" |
 | `getWorkspace` | `GET /workspaces/{workspaceId}` | member | settings, every workspace screen's header |
-| `updateWorkspace` | `PATCH /workspaces/{workspaceId}` | employer | settings (name, colour, emoji, time zone, week start, currency, rounding, day length, show pay) |
+| `updateWorkspace` | `PATCH /workspaces/{workspaceId}` | employer | settings (name, colour, emoji, time zone, week start, currency, rounding, day length, show pay, tell employees about a declined flag, show analysis to employees) |
 | `listMembers` | `GET /workspaces/{workspaceId}/members` | member (rates: employer or self) | employees table, week grid rows, mobile People and Employees |
 | `inviteMember` | `POST /workspaces/{workspaceId}/members` | employer | add employee |
 | `getMember` | `GET /workspaces/{workspaceId}/members/{membershipId}` | employer or self | employee month header |
@@ -36,8 +36,16 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `getInvitation` | `GET /invitations/{token}?lang=` | public | join page before sign-in, mobile invitation screen |
 | `acceptInvitation` | `POST /invitations/{token}/accept` | user | join page after sign-in, mobile "Join" |
 | `listEntries` | `GET /workspaces/{workspaceId}/entries?from&to&membershipId` | member (employees: own only) | week grid, mobile Week and Home cards |
-| `upsertEntry` | `PUT /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | add-hours sheet, single cell |
+| `upsertEntry` | `PUT /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | week grid single cell (a day with 2+ jobs answers `409 ENTRY_HAS_JOBS`) |
 | `deleteEntry` | `DELETE /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | clear a day |
+| `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job sheet and dialog, any day (CHQ-156) |
+| `updateJob` | `PUT /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog |
+| `deleteJob` | `DELETE /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog "Remove" |
+| `autocompletePlaces` | `GET /workspaces/{workspaceId}/places/autocomplete?input&session` | employer | location search (Google Places through the API) |
+| `getPlace` | `GET /workspaces/{workspaceId}/places/{placeId}?session` | employer | picking a search result |
+| `reverseGeocode` | `GET /workspaces/{workspaceId}/places/reverse?latitude&longitude` | employer | "Use where I am now" |
+| `listRecentPlaces` | `GET /workspaces/{workspaceId}/places/recent` | employer | location search, empty box |
+| `getMapImage` | `GET /workspaces/{workspaceId}/map.png?latitude&longitude&width&height&dark` | member | job cards (cached a week) |
 | `batchUpsertEntries` | `POST /workspaces/{workspaceId}/entries/batch` | employer | week grid Save (D8) |
 | `getEntryHistory` | `GET /workspaces/{workspaceId}/entries/{entryId}/history` | employer or self | day detail history, employee month day list |
 | `getMonth` | `GET /workspaces/{workspaceId}/months/{month}` | member | month header lock badge |

@@ -87,6 +87,8 @@ public class MeService {
         if (update.getPushEnabled() != null) preferences.pushEnabled = update.getPushEnabled();
         if (update.getDigestEnabled() != null) preferences.digestEnabled = update.getDigestEnabled();
         if (update.getTheme() != null) preferences.theme = update.getTheme();
+        if (update.getJobReminders() != null) preferences.jobReminders = update.getJobReminders();
+        if (update.getJobReminderLead() != null) preferences.jobReminderLead = update.getJobReminderLead();
         preferences.updatedAt = clock.instant();
         return toPreferences(preferences);
     }
@@ -223,6 +225,8 @@ public class MeService {
                 .weekStart(workspace.weekStart)
                 .rounding(workspace.rounding)
                 .defaultDayHours(workspace.defaultDayHours)
+                .notifyFlagDeclined(workspace.notifyFlagDeclined)
+                .employeesSeeInsights(workspace.employeesSeeInsights)
                 .memberCount(employer ? (int) repository.memberCount(workspace.id) : null)
                 .employerName(employer ? null : repository.employerName(workspace.id).orElse(null))
                 .hoursThisMonth(repository.hoursBetween(workspace.id, employer ? null : membership.id, from, to))
@@ -253,6 +257,8 @@ public class MeService {
                 .language(preferences.language)
                 .pushEnabled(preferences.pushEnabled)
                 .digestEnabled(preferences.digestEnabled)
-                .theme(preferences.theme);
+                .theme(preferences.theme)
+                .jobReminders(preferences.jobReminders)
+                .jobReminderLead(preferences.jobReminderLead);
     }
 }

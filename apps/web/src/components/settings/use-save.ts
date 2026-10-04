@@ -41,7 +41,18 @@ function useProblemToast() {
 }
 
 type MyWorkspacePart = Partial<
-  Pick<MyWorkspace, 'name' | 'colour' | 'emoji' | 'showPay' | 'currency' | 'timezone' | 'weekStart'>
+  Pick<
+    MyWorkspace,
+    | 'name'
+    | 'colour'
+    | 'emoji'
+    | 'showPay'
+    | 'currency'
+    | 'timezone'
+    | 'weekStart'
+    | 'notifyFlagDeclined'
+    | 'employeesSeeInsights'
+  >
 >;
 
 function myPart(update: WorkspaceUpdate): MyWorkspacePart {
@@ -53,6 +64,8 @@ function myPart(update: WorkspaceUpdate): MyWorkspacePart {
   if (update.currency !== undefined) part.currency = update.currency;
   if (update.timezone !== undefined) part.timezone = update.timezone;
   if (update.weekStart !== undefined) part.weekStart = update.weekStart;
+  if (update.notifyFlagDeclined !== undefined) part.notifyFlagDeclined = update.notifyFlagDeclined;
+  if (update.employeesSeeInsights !== undefined) part.employeesSeeInsights = update.employeesSeeInsights;
   return part;
 }
 

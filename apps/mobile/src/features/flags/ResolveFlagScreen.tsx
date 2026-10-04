@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { formatDate, formatHours, formatTime, parseHours } from '@klokka/core';
-import { useEntryHistory, useFlag, useResolveFlag } from '@/data/workspace';
+import { useEntries, useEntryHistory, useFlag, useResolveFlag } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
 import { toIsoDate } from '@/lib/dates';
@@ -50,21 +50,32 @@ function ResolveFlagScreenInner({ flagId, workspace }: { flagId: string } & Work
   const proposed = flag ? (flag.suggestedHours ?? flag.loggedHours) : null;
   const hoursText = typed ?? (proposed == null ? '' : formatHours(proposed, locale, { unit: false }));
   const fixHours = parseHours(hoursText);
+  // The day as it stands (CHQ-156): with several jobs, the employer changes the right job on the day page and
+  // approves the total as it stands, since a flag is about the day, not one job.
+  const day = useEntries(
+    workspace.workspaceId,
+    flag ? toIsoDate(flag.workDate) : '1970-01-01',
+    flag ? toIsoDate(flag.workDate) : '1970-01-01',
+    flag?.membershipId,
+    !!flag,
+  );
+  const entry = day.data?.[0] ?? null;
+  const jobCount = entry?.jobs.length ?? 0;
 
-  const act = async (action: 'FIX' | 'DISMISS') => {
+  const act = async (action: 'FIX' | 'DISMISS', hours: number | null = fixHours) => {
     if (!flag) return;
-    if (action === 'FIX' && fixHours === null) return;
+    if (action === 'FIX' && hours === null) return;
     try {
       await resolve.mutateAsync({
         flagId,
-        resolve: action === 'FIX' && fixHours !== null ? { action, hours: fixHours } : { action: 'DISMISS' },
+        resolve: action === 'FIX' && hours !== null ? { action, hours } : { action: 'DISMISS' },
       });
       void haptic('success');
       toast.show(
-        action === 'FIX' && fixHours !== null
+        action === 'FIX' && hours !== null
           ? t('flags.resolvedFixed', {
               before: formatHours(flag.loggedHours, locale),
-              after: formatHours(fixHours, locale),
+              after: formatHours(hours, locale),
             })
           : t('flags.resolvedDismissed', { hours: formatHours(flag.loggedHours, locale) }),
       );
@@ -142,8 +153,51 @@ function ResolveFlagScreenInner({ flagId, workspace }: { flagId: string } & Work
         </AppText>
         {history.data ? <HistoryList changes={history.data} timezone={workspace.timezone} /> : null}
       </View>
-      {open ? (
+      {open && jobCount > 1 && entry ? (
+        <View style={s.actions} testID="flag-several-jobs">
+          <AppText variant="small" tone="muted">
+            {t('flags.severalJobs', { count: jobCount })}
+          </AppText>
+          <Button
+            label={t('flags.changeJobs')}
+            icon="edit"
+            variant="secondary"
+            onPress={() =>
+              router.push({
+                pathname: '/day/[membershipId]/[date]',
+                params: { membershipId: flag.membershipId, date },
+              })
+            }
+            testID="flag-change-jobs"
+          />
+          <Button
+            label={t('flags.approveAsIs', { hours: formatHours(entry.hours, locale) })}
+            icon="check"
+            onPress={() => void act('FIX', entry.hours)}
+            loading={resolve.isPending}
+            testID="flag-approve-as-is"
+          />
+          <Button
+            label={t('flags.keepHours', { hours: formatHours(flag.loggedHours, locale) })}
+            variant="outline"
+            onPress={() => void act('DISMISS')}
+            loading={resolve.isPending}
+            hapticKind="select"
+            testID="flag-dismiss"
+          />
+          <AppText variant="caption" tone="muted" align="center" testID="flag-decline-note">
+            {workspace.notifyFlagDeclined
+              ? t('flags.declineTold', { name: first })
+              : t('flags.declineQuiet', { name: first })}
+          </AppText>
+        </View>
+      ) : open ? (
         <View style={s.actions}>
+          {jobCount === 1 && fixHours !== null ? (
+            <AppText variant="small" tone="muted">
+              {t('flags.oneJob', { hours: formatHours(fixHours, locale) })}
+            </AppText>
+          ) : null}
           <TextField
             label={t('web.flags.hoursField')}
             value={hoursText}
@@ -173,8 +227,10 @@ function ResolveFlagScreenInner({ flagId, workspace }: { flagId: string } & Work
             hapticKind="select"
             testID="flag-dismiss"
           />
-          <AppText variant="caption" tone="muted" align="center">
-            {t('flags.toldEitherWay', { name: first })}
+          <AppText variant="caption" tone="muted" align="center" testID="flag-decline-note">
+            {workspace.notifyFlagDeclined
+              ? t('flags.declineTold', { name: first })
+              : t('flags.declineQuiet', { name: first })}
           </AppText>
         </View>
       ) : null}

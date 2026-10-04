@@ -32,6 +32,9 @@ const styles = (t: Theme) =>
     line: { borderWidth: StyleSheet.hairlineWidth, borderColor: withAlpha(t.color.text, 0.16) },
     out: { opacity: 0 },
     today: { borderWidth: 2, borderColor: t.color.text },
+    // Days after today (CHQ-156): free ones dashed and faint, planned ones dashed in the accent.
+    future: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.color.border },
+    planned: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.color.accent },
     dayNumber: { position: 'absolute', top: 2, left: 4 },
     dot: { position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3 },
   });
@@ -76,7 +79,8 @@ export interface HeatMapCalendarProps {
   weekStart: WeekStart;
   days: MemberMonthDay[];
   today: IsoDate;
-  onPressDay?: (day: MemberMonthDay) => void;
+  // Every day of the month, empty and future ones too (CHQ-156).
+  onPressDay?: (date: IsoDate) => void;
   accessibilityLabel: string;
 }
 
@@ -122,21 +126,25 @@ export function HeatMapCalendar({
             const fill = isFlagged ? flagged : (fills[level] as string);
             const onFill = theme.color.text;
             const isToday = cell.date === today;
-            const label = `${cell.date}, ${hours > 0 ? formatHours(hours, locale) : t('entry.nothingYet')}${day?.flag?.status === 'OPEN' ? `, ${t('month.flag')}` : ''}`;
+            const isFuture = cell.date > today;
+            const isPlanned = isFuture && hours > 0;
+            const label = `${cell.date}, ${hours > 0 ? formatHours(hours, locale) : t('entry.nothingYet')}${isPlanned ? `, ${t('jobs.planned')}` : ''}${day?.flag?.status === 'OPEN' ? `, ${t('month.flag')}` : ''}`;
             return (
               <AppPressable
                 key={cell.date}
                 accessibilityRole={onPressDay ? 'button' : 'text'}
                 accessibilityLabel={label}
-                onPress={day && onPressDay ? () => onPressDay(day) : undefined}
-                disabled={!day || !onPressDay}
+                onPress={onPressDay ? () => onPressDay(cell.date) : undefined}
+                disabled={!onPressDay}
                 hapticKind="tick"
                 pressScale={0.94}
                 style={[
                   s.cell,
                   s.line,
-                  { backgroundColor: hours > 0 || isFlagged ? fill : 'transparent' },
-                  isToday ? s.today : null,
+                  isPlanned
+                    ? { backgroundColor: withAlpha(theme.color.accent, 0.1) }
+                    : { backgroundColor: hours > 0 || isFlagged ? fill : 'transparent' },
+                  isToday ? s.today : isPlanned ? s.planned : isFuture ? s.future : null,
                 ]}
                 testID={`cell-${cell.date}`}
               >

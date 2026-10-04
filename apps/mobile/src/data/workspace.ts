@@ -5,6 +5,7 @@ import type {
   FlagCreate,
   FlagResolve,
   FlagStatus,
+  JobWrite,
   MemberInvite,
   MemberUpdate,
   WorkspaceCreate,
@@ -34,18 +35,26 @@ export function useMembers(workspaceId: string, month?: IsoMonth) {
   });
 }
 
-export function useMember(workspaceId: string, membershipId: string, month?: IsoMonth) {
+export function useMember(workspaceId: string, membershipId: string, month?: IsoMonth, enabled = true) {
   const api = useApi();
   return useQuery({
+    enabled,
     queryKey: keys.member(workspaceId, membershipId, month),
     queryFn: () =>
       api.members.getMember(month ? { workspaceId, membershipId, month } : { workspaceId, membershipId }),
   });
 }
 
-export function useEntries(workspaceId: string, from: IsoDate, to: IsoDate, membershipId?: string) {
+export function useEntries(
+  workspaceId: string,
+  from: IsoDate,
+  to: IsoDate,
+  membershipId?: string,
+  enabled = true,
+) {
   const api = useApi();
   return useQuery({
+    enabled,
     queryKey: keys.entries(workspaceId, from, to, membershipId),
     queryFn: () =>
       api.entries.listEntries({
@@ -99,9 +108,16 @@ export function useWorkspaceInsights(workspaceId: string, month?: IsoMonth) {
   });
 }
 
-export function useMemberInsights(workspaceId: string, membershipId: string, month?: IsoMonth) {
+// `enabled` false when the employer has turned analysis off for employees (the API answers 403 then).
+export function useMemberInsights(
+  workspaceId: string,
+  membershipId: string,
+  month?: IsoMonth,
+  enabled = true,
+) {
   const api = useApi();
   return useQuery({
+    enabled,
     queryKey: keys.memberInsights(workspaceId, membershipId, month),
     queryFn: () =>
       api.insights.getMemberInsights(
@@ -258,6 +274,57 @@ export function useDeleteEntry(workspaceId: string) {
     mutationFn: ({ membershipId, date }: { membershipId: string; date: IsoDate }) =>
       api.entries.deleteEntry({ workspaceId, membershipId, date: fromIsoDate(date) }),
     onSettled: () => void invalidate(),
+  });
+}
+
+// Jobs (CHQ-156): the day's entry is the sum of its jobs, so every write refreshes the workspace.
+export function useCreateJob(workspaceId: string) {
+  const api = useApi();
+  const invalidate = useInvalidateWorkspace(workspaceId);
+  return useMutation({
+    mutationFn: ({ membershipId, date, job }: { membershipId: string; date: IsoDate; job: JobWrite }) =>
+      api.jobs.createJob({ workspaceId, membershipId, date: fromIsoDate(date), jobWrite: job }),
+    onSettled: () => void invalidate(),
+  });
+}
+
+export function useUpdateJob(workspaceId: string) {
+  const api = useApi();
+  const invalidate = useInvalidateWorkspace(workspaceId);
+  return useMutation({
+    mutationFn: ({ jobId, job }: { jobId: string; job: JobWrite }) =>
+      api.jobs.updateJob({ workspaceId, jobId, jobWrite: job }),
+    onSettled: () => void invalidate(),
+  });
+}
+
+export function useDeleteJob(workspaceId: string) {
+  const api = useApi();
+  const invalidate = useInvalidateWorkspace(workspaceId);
+  return useMutation({
+    mutationFn: (jobId: string) => api.jobs.deleteJob({ workspaceId, jobId }),
+    onSettled: () => void invalidate(),
+  });
+}
+
+// Places go through the API, which holds the Maps key (CHQ-156). `session` ties one search together.
+export function usePlaceSearch(workspaceId: string, input: string, session: string) {
+  const api = useApi();
+  const query = input.trim();
+  return useQuery({
+    queryKey: ['ws', workspaceId, 'places', 'search', query],
+    queryFn: () => api.places.autocompletePlaces({ workspaceId, input: query, session }),
+    enabled: query.length >= 2,
+    staleTime: 60_000,
+  });
+}
+
+export function useRecentPlaces(workspaceId: string, enabled = true) {
+  const api = useApi();
+  return useQuery({
+    queryKey: ['ws', workspaceId, 'places', 'recent'],
+    queryFn: () => api.places.listRecentPlaces({ workspaceId }),
+    enabled,
   });
 }
 

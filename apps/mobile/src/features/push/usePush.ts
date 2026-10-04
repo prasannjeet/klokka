@@ -22,6 +22,7 @@ export const CHANNELS = {
   hours: { id: 'hours', importance: Notifications.AndroidImportance.HIGH },
   flags: { id: 'flags', importance: Notifications.AndroidImportance.HIGH },
   workspace: { id: 'workspace', importance: Notifications.AndroidImportance.DEFAULT },
+  reminders: { id: 'reminders', importance: Notifications.AndroidImportance.HIGH },
 } as const;
 
 export async function ensureChannels(t: Translator): Promise<void> {
@@ -37,6 +38,10 @@ export async function ensureChannels(t: Translator): Promise<void> {
   await Notifications.setNotificationChannelAsync(CHANNELS.workspace.id, {
     name: t('mobile.push.channelWorkspace'),
     importance: CHANNELS.workspace.importance,
+  });
+  await Notifications.setNotificationChannelAsync(CHANNELS.reminders.id, {
+    name: t('mobile.push.channelReminders'),
+    importance: CHANNELS.reminders.importance,
   });
 }
 

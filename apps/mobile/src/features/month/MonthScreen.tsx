@@ -54,7 +54,9 @@ function MonthScreenInner({ workspace }: WorkspaceProps) {
     if (typeof params.month === 'string') setMonth(params.month);
   }, [params.month]);
   const data = useMemberMonth(workspace.workspaceId, workspace.membershipId, month);
-  const insights = useMemberInsights(workspace.workspaceId, workspace.membershipId, month);
+  // The employer may turn analysis off for employees (CHQ-156); then the API refuses insights, so none are asked.
+  const analysis = workspace.employeesSeeInsights;
+  const insights = useMemberInsights(workspace.workspaceId, workspace.membershipId, month, analysis);
   const unread = workspace.unreadNotifications;
   return (
     <Screen refreshing={data.isRefetching} onRefresh={() => void data.refetch()} testID="month-screen">
@@ -113,6 +115,7 @@ function MonthScreenInner({ workspace }: WorkspaceProps) {
           current={month === current}
           membershipId={workspace.membershipId}
           streakDays={insights.data?.streakDays}
+          analysis={analysis}
           actions={
             <Button
               label={t('month.shareMyMonth')}

@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Flag } from '@klokka/api-client';
-import { formatDate, formatHours, parseHours } from '@klokka/core';
+import { formatDate, formatHours, parseHours, type Translator } from '@klokka/core';
 import { api } from '@/lib/api';
 import { useLocale, useT } from '@/lib/i18n';
 import { problemMessage, toProblem } from '@/lib/problem';
@@ -40,12 +40,21 @@ export function useResolveFlag(ws: WorkspaceView, flag: Flag) {
                 before: formatHours(flag.loggedHours, locale),
                 after: formatHours(hours, locale),
               }),
-        body: t('flags.toldEitherWay', { name: firstName(flag.memberName) }),
+        body: declineNote(t, ws, flag, hours === null),
         icon: 'flag',
       }),
     onError: async (error) => toast({ title: problemMessage(t, await toProblem(error)), tone: 'error' }),
     onSettled: () => invalidateFigures(queryClient, ws.id),
   });
+}
+
+// Whether the employee hears about this answer: an approval always, a decline only when the workspace says so
+// (CHQ-156, Settings, Employees).
+export function declineNote(t: Translator, ws: WorkspaceView, flag: Flag, declining: boolean): string {
+  const name = firstName(flag.memberName);
+  return declining && !ws.my.notifyFlagDeclined
+    ? t('flags.declineQuiet', { name })
+    : t('flags.declineTold', { name });
 }
 
 // `inPanel`: the day panel of the Employee view (CHQ-145) already shows the day, so no link, and dismissing
@@ -55,11 +64,16 @@ export function FlagActions({
   flag,
   compact,
   inPanel,
+  jobCount = 0,
+  currentHours,
 }: {
   ws: WorkspaceView;
   flag: Flag;
   compact?: boolean;
   inPanel?: boolean;
+  // A day with several jobs is changed job by job (CHQ-156); the flag is then approved as the day stands.
+  jobCount?: number;
+  currentHours?: number;
 }) {
   const t = useT();
   const locale = useLocale();
@@ -79,16 +93,29 @@ export function FlagActions({
     resolve.mutate(parsed);
   }
 
+  const asItStands = currentHours ?? flag.loggedHours;
+
   return (
     <>
-      <button
-        className="btn btn-primary btn-sm"
-        type="button"
-        disabled={resolve.isPending}
-        onClick={() => setFixing(true)}
-      >
-        {t('flags.setTo', { hours: formatHours(target, locale) })}
-      </button>
+      {jobCount > 1 ? (
+        <button
+          className="btn btn-primary btn-sm"
+          type="button"
+          disabled={resolve.isPending}
+          onClick={() => resolve.mutate(asItStands)}
+        >
+          {t('flags.approveAsIs', { hours: formatHours(asItStands, locale) })}
+        </button>
+      ) : (
+        <button
+          className="btn btn-primary btn-sm"
+          type="button"
+          disabled={resolve.isPending}
+          onClick={() => setFixing(true)}
+        >
+          {t('flags.setTo', { hours: formatHours(target, locale) })}
+        </button>
+      )}
       {inPanel ? null : !compact ? (
         <Link className="btn btn-ghost btn-sm" href={`/w/${ws.slug}/week?d=${date}`}>
           {t('flags.openInGrid')}

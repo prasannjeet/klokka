@@ -48,6 +48,7 @@ const styles = (t: Theme) =>
     sep: { height: StyleSheet.hairlineWidth, backgroundColor: t.color.border },
     legend: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 4 },
     swatch: { width: 10, height: 10, borderRadius: 3 },
+    plannedSwatch: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.color.accent },
   });
 
 export interface MemberMonthViewProps {
@@ -65,6 +66,8 @@ export interface MemberMonthViewProps {
   actions?: ReactNode;
   membershipId: string;
   streakDays?: number | undefined;
+  // Averages, comparisons, best week and streak (CHQ-156: the employer may turn these off for employees).
+  analysis?: boolean;
 }
 
 // The month shared by "My month" (employee) and the employer's per-employee month (CHQ-121/122):
@@ -82,6 +85,7 @@ export function MemberMonthView({
   actions,
   membershipId,
   streakDays,
+  analysis = true,
 }: MemberMonthViewProps) {
   const t = useT();
   const locale = useLocale();
@@ -93,12 +97,13 @@ export function MemberMonthView({
     .filter((d) => (d.hours ?? 0) > 0 || d.flag)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const monthLabel = formatMonthName(month, locale);
-  const openDay = (day: MemberMonthDay) =>
-    router.push({
-      pathname: '/day/[membershipId]/[date]',
-      params: { membershipId, date: toIsoDate(day.date) },
-    });
+  const openDay = (date: IsoDate) =>
+    router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date } });
+  const planned = data.plannedHours ?? 0;
   const subtitleFor = (day: MemberMonthDay): string => {
+    const places = day.jobs.map((j) => j.location?.name).filter(Boolean);
+    if (day.jobs.length > 1) return [t('jobs.jobCount', { count: day.jobs.length }), ...places].join(', ');
+    if (places.length > 0 && !day.flag) return places.join(', ');
     if (day.flag?.status === 'OPEN')
       return (
         t('flags.says', { name: data.name }) +
@@ -155,20 +160,41 @@ export function MemberMonthView({
         }
         testID="month-total"
       />
+      {data.locked ? (
+        <Card style={{ backgroundColor: theme.color.warningSoft }} testID="month-locked">
+          <AppText variant="small" color={theme.color.warning}>
+            {t('jobs.monthClosed', { month: monthLabel })}
+          </AppText>
+        </Card>
+      ) : null}
       <View style={s.pills}>
-        <Pill
-          label={t('month.avgPerWorkingDayShort', { hours: formatHours(data.avgPerWorkingDay, locale) })}
-        />
-        <Pill
-          label={t('month.vsLastMonth', {
-            delta: formatHoursDelta(data.vsLastMonthHours, locale),
-            month: formatMonthName(previousMonth(month), locale, false),
-          })}
-          tone={data.vsLastMonthHours >= 0 ? 'success' : 'warning'}
-          icon={data.vsLastMonthHours >= 0 ? 'trending-up' : 'trending-down'}
-        />
+        {planned > 0 ? (
+          <Pill
+            label={t('jobs.soFarPlanned', {
+              hours: formatHours(data.totalHours - planned, locale),
+              planned: formatHours(planned, locale),
+            })}
+            tone="accent"
+            testID="month-planned"
+          />
+        ) : null}
+        {analysis ? (
+          <Pill
+            label={t('month.avgPerWorkingDayShort', { hours: formatHours(data.avgPerWorkingDay, locale) })}
+          />
+        ) : null}
+        {analysis ? (
+          <Pill
+            label={t('month.vsLastMonth', {
+              delta: formatHoursDelta(data.vsLastMonthHours, locale),
+              month: formatMonthName(previousMonth(month), locale, false),
+            })}
+            tone={data.vsLastMonthHours >= 0 ? 'success' : 'warning'}
+            icon={data.vsLastMonthHours >= 0 ? 'trending-up' : 'trending-down'}
+          />
+        ) : null}
         {data.locked ? <Pill label={t('status.monthClosed')} icon="lock" /> : null}
-        {streakDays != null && streakDays > 1 ? (
+        {analysis && streakDays != null && streakDays > 1 ? (
           <Pill label={t('insights.streakDays', { count: streakDays })} tone="accent" />
         ) : null}
       </View>
@@ -186,21 +212,23 @@ export function MemberMonthView({
             ) : null}
           </Card>
         ) : null}
-        <Card style={s.tile}>
-          <AppText variant="small" tone="muted">
-            {t('month.bestWeek')}
-          </AppText>
-          <Numeral
-            value={formatHours(data.bestWeek?.hours ?? 0, locale, { unit: false })}
-            unit={t('common.hourUnit')}
-            variant="h2"
-          />
-          {data.bestWeek ? (
-            <AppText variant="caption" tone="muted">
-              {t('month.weekLabel', { week: data.bestWeek.isoWeek })}
+        {analysis ? (
+          <Card style={s.tile} testID="month-best-week">
+            <AppText variant="small" tone="muted">
+              {t('month.bestWeek')}
             </AppText>
-          ) : null}
-        </Card>
+            <Numeral
+              value={formatHours(data.bestWeek?.hours ?? 0, locale, { unit: false })}
+              unit={t('common.hourUnit')}
+              variant="h2"
+            />
+            {data.bestWeek ? (
+              <AppText variant="caption" tone="muted">
+                {t('month.weekLabel', { week: data.bestWeek.isoWeek })}
+              </AppText>
+            ) : null}
+          </Card>
+        ) : null}
       </View>
       <Card>
         <HeatMapCalendar
@@ -227,12 +255,16 @@ export function MemberMonthView({
           <AppText variant="caption" tone="muted">
             {t('month.flag')}
           </AppText>
+          <View style={[s.swatch, s.plannedSwatch, { marginLeft: theme.space[2] }]} />
+          <AppText variant="caption" tone="muted">
+            {t('jobs.planned')}
+          </AppText>
         </View>
       </Card>
       {actions}
       <View>
         <AppText variant="eyebrow" tone="accent">
-          {t('month.daysNewestFirst', { count: daysWithHours.length })}
+          {analysis ? t('month.daysNewestFirst', { count: daysWithHours.length }) : t('jobs.jobsThisMonth')}
         </AppText>
         {daysWithHours.map((day, i) => {
           const iso = toIsoDate(day.date);
@@ -241,7 +273,7 @@ export function MemberMonthView({
               <AppPressable
                 accessibilityRole="button"
                 accessibilityLabel={formatDate(iso, locale, 'weekdayDayMonth')}
-                onPress={() => openDay(day)}
+                onPress={() => openDay(iso)}
                 pressScale={0.99}
                 style={s.dayRow}
                 testID={`month-day-${iso}`}

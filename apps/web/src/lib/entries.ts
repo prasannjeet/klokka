@@ -44,6 +44,7 @@ export function applyBatch(
         workDate: dateOf(item.workDate),
         hours: item.hours,
         note: item.note,
+        jobs: [],
         earnings: null,
         locked: false,
         createdAt: context.now,

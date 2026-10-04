@@ -37,7 +37,11 @@ export type IconName =
   | 'more'
   | 'users'
   | 'send'
-  | 'alert';
+  | 'alert'
+  | 'map-pin'
+  | 'navigation'
+  | 'crosshair'
+  | 'briefcase';
 
 export interface IconProps {
   name: IconName;
@@ -310,6 +314,34 @@ function glyph(name: IconName, c: Common) {
         <>
           <Path {...c} d="M21 3 10 14" />
           <Path {...c} d="M21 3l-7 18-4-7-7-4z" />
+        </>
+      );
+    case 'map-pin':
+      return (
+        <>
+          <Path {...c} d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z" />
+          <Circle {...c} cx="12" cy="10" r="2.5" />
+        </>
+      );
+    case 'navigation':
+      return <Path {...c} d="M3 11l18-8-8 18-2-8z" />;
+    case 'crosshair':
+      return (
+        <>
+          <Circle {...c} cx="12" cy="12" r="7" />
+          <Circle {...c} cx="12" cy="12" r="2.5" />
+          <Line {...c} x1="12" y1="2" x2="12" y2="5" />
+          <Line {...c} x1="12" y1="19" x2="12" y2="22" />
+          <Line {...c} x1="2" y1="12" x2="5" y2="12" />
+          <Line {...c} x1="19" y1="12" x2="22" y2="12" />
+        </>
+      );
+    case 'briefcase':
+      return (
+        <>
+          <Rect {...c} x="3" y="7" width="18" height="13" rx="3" />
+          <Path {...c} d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <Line {...c} x1="3" y1="13" x2="21" y2="13" />
         </>
       );
     default:

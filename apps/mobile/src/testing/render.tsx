@@ -46,6 +46,8 @@ export function fakeApi(answers: Record<string, unknown> = {}): FakeApi {
     members: group('members') as any,
     invitations: group('invitations') as any,
     entries: group('entries') as any,
+    jobs: group('jobs') as any,
+    places: group('places') as any,
     months: group('months') as any,
     insights: group('insights') as any,
     flags: group('flags') as any,
@@ -103,7 +105,14 @@ export const meFixture: Me = {
     avatarEmoji: null,
     createdAt: new Date('2026-05-12T09:30:00Z'),
   },
-  preferences: { language: 'en', pushEnabled: true, digestEnabled: false, theme: 'SYSTEM' },
+  preferences: {
+    language: 'en',
+    pushEnabled: true,
+    digestEnabled: false,
+    theme: 'SYSTEM',
+    jobReminders: true,
+    jobReminderLead: 'HOUR_1',
+  },
   workspaces: [
     {
       workspaceId: 'ws-cafe',
@@ -123,6 +132,8 @@ export const meFixture: Me = {
       memberCount: 5,
       employerName: 'Nora Lind',
       hoursThisMonth: 92.5,
+      notifyFlagDeclined: true,
+      employeesSeeInsights: true,
       unreadNotifications: 2,
     },
   ],

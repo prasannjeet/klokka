@@ -5,14 +5,19 @@ import com.prasannjeet.klokka.contract.model.Actor;
 import com.prasannjeet.klokka.contract.model.Entry;
 import com.prasannjeet.klokka.contract.model.EntryChange;
 import com.prasannjeet.klokka.contract.model.EntryFlagSummary;
+import com.prasannjeet.klokka.contract.model.Job;
+import com.prasannjeet.klokka.contract.model.JobLocation;
 import com.prasannjeet.klokka.member.MemberViews;
 import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
+import com.prasannjeet.klokka.persistence.JobEntity;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -46,7 +51,7 @@ public final class EntryViews {
     }
 
     public static Entry toEntry(Access access, HourEntryEntity e, MembershipEntity member, Names names, long changeCount,
-            EntryFlagEntity flag, boolean locked) {
+            EntryFlagEntity flag, boolean locked, List<JobEntity> jobs) {
         boolean rate = MemberViews.maySeeRate(access, member);
         Entry entry = new Entry()
                 .id(e.id)
@@ -56,6 +61,7 @@ public final class EntryViews {
                 .workDate(e.workDate)
                 .hours(e.hours)
                 .note(e.note)
+                .jobs(jobs.stream().map(EntryViews::toJob).toList())
                 .earnings(rate ? MemberViews.earnings(e.hours, member.hourlyRate) : null)
                 .hourlyRate(rate ? member.hourlyRate : null)
                 .locked(locked)
@@ -67,6 +73,23 @@ public final class EntryViews {
         if (flag != null) entry.flag(flagSummary(flag));
         return entry;
     }
+
+    public static Job toJob(JobEntity j) {
+        Job job = new Job()
+                .id(j.id)
+                .hours(j.hours)
+                .startTime(j.startTime == null ? null : j.startTime.format(HH_MM))
+                .note(j.note)
+                .createdAt(j.createdAt.atOffset(ZoneOffset.UTC))
+                .updatedAt(j.updatedAt.atOffset(ZoneOffset.UTC));
+        if (j.placeName != null) {
+            job.location(new JobLocation().placeId(j.placeId).name(j.placeName).address(j.placeAddress)
+                    .latitude(j.latitude).longitude(j.longitude));
+        }
+        return job;
+    }
+
+    public static final DateTimeFormatter HH_MM = DateTimeFormatter.ofPattern("HH:mm");
 
     public static EntryFlagSummary flagSummary(EntryFlagEntity flag) {
         return new EntryFlagSummary().id(flag.id).status(flag.status).reason(flag.reason).suggestedHours(flag.suggestedHours);

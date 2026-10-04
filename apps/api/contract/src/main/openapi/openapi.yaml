@@ -23,7 +23,10 @@ info:
       operation may also answer `401`, `403` and `500` in that shape.
     - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is.
     - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and
-      whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`).
+      whose Android `channelId` is `hours`, `flags`, `workspace` or `reminders` (the shapes are listed on `registerPushToken`).
+    - Jobs (CHQ-156): a day's entry is the roll-up of its jobs. `hours` on an entry is the sum of its jobs; each job
+      has its own hours, optional start time, location and note. Locations come from Google Maps Platform through
+      the API's `places` operations; no client ever holds a Maps key.
   license:
     name: MIT
     url: https://github.com/prasannjeet/klokka/blob/main/LICENSE
@@ -49,6 +52,10 @@ tags:
     description: The invite link flow. The lookup is public (token in the URL); accepting needs a signed-in user.
   - name: entries
     description: Hours per member per day. Written by the employer, read by the employer and by the member themselves.
+  - name: jobs
+    description: The jobs that make up a day (CHQ-156). Written by the employer; the day's entry is their sum.
+  - name: places
+    description: Job locations through Google Maps Platform, proxied by the API so no client holds the key.
   - name: months
     description: Month lock, summary and CSV export.
   - name: insights
@@ -575,7 +582,9 @@ paths:
       description: |
         Creates or replaces the entry for `(membershipId, date)`; the previous value goes to the history and the
         member is notified (coalesced per sitting). Hours are rounded by the workspace rule. `409 MONTH_LOCKED`
-        when the month is closed, `409 MEMBER_NOT_ACTIVE` for a deactivated member.
+        when the month is closed, `409 MEMBER_NOT_ACTIVE` for a deactivated member. A day with no job or one job
+        is set through its single job (its start time and location stay); a day with two or more jobs answers
+        `409 ENTRY_HAS_JOBS`, change those through the `jobs` operations.
       requestBody:
         required: true
         content:
@@ -629,7 +638,8 @@ paths:
       summary: Save a week grid in one write (employer only, D8)
       description: |
         Applies every item atomically: `hours` set means upsert, `hours` null means remove. One sitting, so each
-        affected member gets one coalesced notification. The whole batch is refused with `409 MONTH_LOCKED` if
+        affected member gets one coalesced notification. An item that sets hours on a day with two or more jobs
+        refuses the batch with `409 ENTRY_HAS_JOBS` naming `items[<index>].hours`; removing such a day is allowed. The whole batch is refused with `409 MONTH_LOCKED` if
         any item falls in a closed month, and with `400` if any item is invalid (the problem lists them).
 
         Problems name the cells: `errors[].field` is `items[<index>].<field>` for `400 VALIDATION`, and the
@@ -684,6 +694,281 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- jobs (CHQ-156)
+  /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MembershipId'
+      - $ref: '#/components/parameters/WorkDate'
+    post:
+      tags: [jobs]
+      operationId: createJob
+      summary: Add a job to a member's day (employer only)
+      description: |
+        Creates the day's entry when there is none. Any date may be used, future ones too (planned work), unless
+        its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day's jobs together
+        may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as
+        for hours (coalesced per sitting).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobWrite'
+      responses:
+        '201':
+          description: The day with every job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/jobs/{jobId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/JobId'
+    put:
+      tags: [jobs]
+      operationId: updateJob
+      summary: Replace a job (employer only)
+      description: Every field is replaced; an absent `location`, `startTime` or `note` clears it. Same rules as createJob.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobWrite'
+      responses:
+        '200':
+          description: The day with every job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+    delete:
+      tags: [jobs]
+      operationId: deleteJob
+      summary: Remove a job (employer only)
+      description: Removing the last job removes the day, exactly as deleteEntry does. `409 MONTH_LOCKED` when the month is closed.
+      responses:
+        '204':
+          description: Removed.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  # ---------------------------------------------------------------- places (CHQ-156)
+  /workspaces/{workspaceId}/places/autocomplete:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [places]
+      operationId: autocompletePlaces
+      summary: Address and place suggestions while typing (employer only)
+      description: |
+        Google Places (New) autocomplete, biased to the workspace's country. Pass the same `session` from the first
+        keystroke to the getPlace call that ends the search (Google bills a session, not each keystroke).
+        `503 MAPS_NOT_CONFIGURED` when the server has no Maps key, `502 MAPS_UNAVAILABLE` when Google fails.
+      parameters:
+        - name: input
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+            example: Kungsgatan 1
+        - $ref: '#/components/parameters/PlacesSession'
+      responses:
+        '200':
+          description: At most five suggestions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlaceSuggestion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/places/recent:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [places]
+      operationId: listRecentPlaces
+      summary: Places used on this workspace's jobs, most recent first (employer only)
+      responses:
+        '200':
+          description: At most eight distinct places.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobLocation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/places/reverse:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [places]
+      operationId: reverseGeocode
+      summary: The address at a point, for "use where I am now" (employer only)
+      parameters:
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
+      responses:
+        '200':
+          description: The nearest address.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobLocation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/places/{placeId}:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: placeId
+        in: path
+        required: true
+        description: A Google place id from autocompletePlaces.
+        schema:
+          type: string
+          maxLength: 300
+          pattern: '^[A-Za-z0-9_-]+$'
+          example: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+    get:
+      tags: [places]
+      operationId: getPlace
+      summary: A suggestion's name, address and position (employer only)
+      parameters:
+        - $ref: '#/components/parameters/PlacesSession'
+      responses:
+        '200':
+          description: The place, ready to store on a job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobLocation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/map.png:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    get:
+      tags: [places]
+      operationId: getMapImage
+      summary: A small map with a pin, for a job card (any member)
+      description: |
+        Google Maps Static API, proxied. Cached by the client for a week (`Cache-Control: private`). `503
+        MAPS_NOT_CONFIGURED` without a Maps key, `502 MAPS_UNAVAILABLE` when Google refuses (for example when the
+        Static API is not enabled); clients then show the card without a picture.
+      parameters:
+        - $ref: '#/components/parameters/Latitude'
+        - $ref: '#/components/parameters/Longitude'
+        - name: width
+          in: query
+          required: true
+          description: CSS pixels; the image is served at twice this for sharp screens.
+          schema:
+            type: integer
+            minimum: 80
+            maximum: 640
+            example: 360
+        - name: height
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 60
+            maximum: 400
+            example: 120
+        - name: dark
+          in: query
+          description: A dark map for the dark theme.
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: The map.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Problem'
 
@@ -1349,6 +1634,40 @@ components:
         type: string
         format: uuid
         example: 9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 7b6a5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+    PlacesSession:
+      name: session
+      in: query
+      description: A client-made id (UUID) tying one search's keystrokes and its final getPlace together.
+      schema:
+        type: string
+        format: uuid
+        example: 3f2e1d0c-9b8a-4f7e-8d6c-5b4a3f2e1d0c
+    Latitude:
+      name: latitude
+      in: query
+      required: true
+      schema:
+        type: number
+        minimum: -90
+        maximum: 90
+        example: 59.3346
+    Longitude:
+      name: longitude
+      in: query
+      required: true
+      schema:
+        type: number
+        minimum: -180
+        maximum: 180
+        example: 18.0632
     FlagId:
       name: flagId
       in: path
@@ -1524,6 +1843,9 @@ components:
         - INVITATION_EXPIRED
         - INVITATION_EMAIL_MISMATCH
         - FLAG_ALREADY_OPEN
+        - ENTRY_HAS_JOBS
+        - MAPS_NOT_CONFIGURED
+        - MAPS_UNAVAILABLE
         - INVALID_SIGNATURE
         - NOT_IMPLEMENTED
         - INTERNAL
@@ -1646,10 +1968,15 @@ components:
       type: string
       description: |
         HOURS_CHANGED covers added, changed and removed hours, coalesced per sitting. Employees receive
-        HOURS_CHANGED, FLAG_RESOLVED, MONTH_CLOSED and MONTH_REOPENED; employers receive INVITE_ACCEPTED and
-        ENTRY_FLAGGED.
-      enum: [HOURS_CHANGED, INVITE_ACCEPTED, ENTRY_FLAGGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED]
+        HOURS_CHANGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED and JOB_REMINDER (before a job with a start
+        time, per their preferences); employers receive INVITE_ACCEPTED and ENTRY_FLAGGED.
+      enum: [HOURS_CHANGED, INVITE_ACCEPTED, ENTRY_FLAGGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED, JOB_REMINDER]
       example: HOURS_CHANGED
+    JobReminderLead:
+      type: string
+      description: How long before a job's start time its reminder is pushed. DAY_BEFORE is 24 hours before.
+      enum: [MINUTES_15, MINUTES_30, HOUR_1, HOURS_2, DAY_BEFORE]
+      example: HOUR_1
     HealthStatus:
       type: string
       enum: [UP, DEGRADED, DOWN]
@@ -1770,7 +2097,7 @@ components:
         avatarEmoji: "🐝"
     Preferences:
       type: object
-      required: [language, pushEnabled, digestEnabled, theme]
+      required: [language, pushEnabled, digestEnabled, theme, jobReminders, jobReminderLead]
       properties:
         language:
           $ref: '#/components/schemas/Language'
@@ -1783,11 +2110,19 @@ components:
           example: false
         theme:
           $ref: '#/components/schemas/ThemePreference'
+        jobReminders:
+          type: boolean
+          description: Push a reminder before each of my jobs that has a start time (employees; on by default).
+          example: true
+        jobReminderLead:
+          $ref: '#/components/schemas/JobReminderLead'
       example:
         language: sv
         pushEnabled: true
         digestEnabled: false
         theme: SYSTEM
+        jobReminders: true
+        jobReminderLead: HOUR_1
     PreferencesUpdate:
       type: object
       properties:
@@ -1801,6 +2136,12 @@ components:
           example: false
         theme:
           $ref: '#/components/schemas/ThemePreference'
+        jobReminders:
+          type: boolean
+          description: Push a reminder before each of my jobs that has a start time (employees; on by default).
+          example: true
+        jobReminderLead:
+          $ref: '#/components/schemas/JobReminderLead'
       example:
         language: en
         digestEnabled: true
@@ -1827,7 +2168,7 @@ components:
     MyWorkspace:
       type: object
       description: A membership as the workspace switcher shows it.
-      required: [workspaceId, membershipId, name, slug, colour, emoji, role, memberStatus, showPay, currency, timezone, weekStart, rounding, defaultDayHours, hoursThisMonth, unreadNotifications]
+      required: [workspaceId, membershipId, name, slug, colour, emoji, role, memberStatus, showPay, currency, timezone, weekStart, rounding, defaultDayHours, notifyFlagDeclined, employeesSeeInsights, hoursThisMonth, unreadNotifications]
       properties:
         workspaceId:
           type: string
@@ -1870,6 +2211,14 @@ components:
           type: number
           description: The "Full day" chip and the preview of what the rounding rule makes of a typed value.
           example: 8
+        notifyFlagDeclined:
+          type: boolean
+          description: Tell the employee when the employer declines (dismisses) their flag. An approved change is always told.
+          example: true
+        employeesSeeInsights:
+          type: boolean
+          description: Employees see averages, trends and the month forecast; off, they see their hours and jobs only (getMemberInsights answers 403 to them).
+          example: true
         memberCount:
           type: [integer, 'null']
           description: Active plus invited members; for employers ("Employer, 4 people").
@@ -1900,6 +2249,8 @@ components:
         weekStart: MONDAY
         rounding: HALF
         defaultDayHours: 8
+        notifyFlagDeclined: true
+        employeesSeeInsights: true
         memberCount: null
         employerName: Nora Lind
         hoursThisMonth: 92.5
@@ -1976,7 +2327,7 @@ components:
     # ------------------------------------------------------------ workspaces
     Workspace:
       type: object
-      required: [id, name, slug, timezone, currency, weekStart, colour, emoji, showPay, rounding, defaultDayHours, createdAt, memberCount, activeMemberCount]
+      required: [id, name, slug, timezone, currency, weekStart, colour, emoji, showPay, rounding, defaultDayHours, notifyFlagDeclined, employeesSeeInsights, createdAt, memberCount, activeMemberCount]
       properties:
         id:
           type: string
@@ -2018,6 +2369,14 @@ components:
           type: number
           description: What the Full day chip fills in.
           example: 7.5
+        notifyFlagDeclined:
+          type: boolean
+          description: Tell the employee when the employer declines (dismisses) their flag. An approved change is always told.
+          example: true
+        employeesSeeInsights:
+          type: boolean
+          description: Employees see averages, trends and the month forecast; off, they see their hours and jobs only (getMemberInsights answers 403 to them).
+          example: true
         createdAt:
           type: string
           format: date-time
@@ -2048,6 +2407,8 @@ components:
         showPay: true
         rounding: HALF
         defaultDayHours: 7.5
+        notifyFlagDeclined: true
+        employeesSeeInsights: true
         createdAt: '2026-05-02T08:00:00Z'
         memberCount: 5
         activeMemberCount: 4
@@ -2138,6 +2499,14 @@ components:
           minimum: 0.5
           maximum: 24
           example: 7.5
+        notifyFlagDeclined:
+          type: boolean
+          description: Tell the employee when the employer declines (dismisses) their flag. An approved change is always told.
+          example: true
+        employeesSeeInsights:
+          type: boolean
+          description: Employees see averages, trends and the month forecast; off, they see their hours and jobs only (getMemberInsights answers 403 to them).
+          example: true
       example:
         showPay: true
         rounding: HALF
@@ -2395,7 +2764,7 @@ components:
     Entry:
       type: object
       description: One member's hours on one day. `earnings` is null unless pay is on and the caller may see the rate.
-      required: [id, workspaceId, membershipId, memberName, workDate, hours, locked, createdAt, createdBy, updatedAt, updatedBy, changeCount]
+      required: [id, workspaceId, membershipId, memberName, workDate, hours, jobs, locked, createdAt, createdBy, updatedAt, updatedBy, changeCount]
       properties:
         id:
           type: string
@@ -2424,7 +2793,13 @@ components:
         note:
           type: [string, 'null']
           maxLength: 500
+          description: The day's job notes joined with "; " (one job, its note). Kept for older clients and the CSV.
           example: Delivery day, stayed to unload.
+        jobs:
+          type: array
+          description: The day's jobs, by start time (jobs without one last), then in the order they were added.
+          items:
+            $ref: '#/components/schemas/Job'
         earnings:
           type: [number, 'null']
           example: 1073
@@ -2462,6 +2837,7 @@ components:
         workDate: '2026-09-23'
         hours: 6.5
         note: Delivery day, stayed to unload.
+        jobs: []
         earnings: 1073
         hourlyRate: 165
         locked: false
@@ -2474,6 +2850,134 @@ components:
           userId: usr_nora
           name: Nora Lind
         changeCount: 2
+    JobLocation:
+      type: object
+      description: Where a job is. `placeId` is Google's id when the place came from a search (null for a dropped point).
+      required: [name, latitude, longitude]
+      properties:
+        placeId:
+          type: [string, 'null']
+          maxLength: 300
+          example: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Café Nord
+        address:
+          type: [string, 'null']
+          maxLength: 300
+          example: Kungsgatan 12, 111 35 Stockholm
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          example: 59.3346
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          example: 18.0632
+      example:
+        placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+        name: Café Nord
+        address: Kungsgatan 12, 111 35 Stockholm
+        latitude: 59.3346
+        longitude: 18.0632
+    Job:
+      type: object
+      description: One piece of a day's work.
+      required: [id, hours, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 7b6a5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+        hours:
+          type: number
+          minimum: 0
+          maximum: 24
+          example: 4.5
+        startTime:
+          type: [string, 'null']
+          description: Local time in the workspace time zone, `HH:mm`.
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+          example: '09:00'
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          example: Opened, counter and dishes
+        location:
+          $ref: '#/components/schemas/JobLocation'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-10-01T16:40:00Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-10-01T16:40:00Z'
+      example:
+        id: 7b6a5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
+        hours: 4.5
+        startTime: '09:00'
+        note: Opened, counter and dishes
+        location:
+          placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+          name: Café Nord
+          address: Kungsgatan 12, 111 35 Stockholm
+          latitude: 59.3346
+          longitude: 18.0632
+        createdAt: '2026-10-01T16:40:00Z'
+        updatedAt: '2026-10-01T16:40:00Z'
+    JobWrite:
+      type: object
+      description: A whole job; a field left out is cleared.
+      required: [hours]
+      properties:
+        hours:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 24
+          description: Two decimals at most; rounded by the workspace rule on save.
+          example: 4.5
+        startTime:
+          type: [string, 'null']
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+          example: '09:00'
+        note:
+          type: [string, 'null']
+          maxLength: 500
+          example: Opened, counter and dishes
+        location:
+          $ref: '#/components/schemas/JobLocation'
+      example:
+        hours: 4.5
+        startTime: '09:00'
+        note: Opened, counter and dishes
+        location:
+          placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+          name: Café Nord
+          address: Kungsgatan 12, 111 35 Stockholm
+          latitude: 59.3346
+          longitude: 18.0632
+    PlaceSuggestion:
+      type: object
+      required: [placeId, primaryText]
+      properties:
+        placeId:
+          type: string
+          example: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+        primaryText:
+          type: string
+          example: Kungsgatan 12
+        secondaryText:
+          type: [string, 'null']
+          example: Norrmalm, Stockholm
+      example:
+        placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk
+        primaryText: Kungsgatan 12
+        secondaryText: Norrmalm, Stockholm
     EntryUpsert:
       type: object
       required: [hours]
@@ -2789,7 +3293,7 @@ components:
     MemberMonthDay:
       type: object
       description: One calendar day. `hours` is null on days with nothing logged.
-      required: [date, weekday, workingDay, changeCount]
+      required: [date, weekday, workingDay, changeCount, jobs]
       properties:
         date:
           type: string
@@ -2817,6 +3321,11 @@ components:
           $ref: '#/components/schemas/EntryFlagSummary'
         changeCount:
           type: integer
+        jobs:
+          type: array
+          description: The day's jobs (empty on a day with nothing), by start time (jobs without one last), then in the order they were added.
+          items:
+            $ref: '#/components/schemas/Job'
           example: 2
         updatedAt:
           type: [string, 'null']
@@ -2840,7 +3349,7 @@ components:
     MemberMonth:
       type: object
       description: The employee month view and the employer's per-employee month, one shape for both clients.
-      required: [membershipId, workspaceId, name, month, locked, currency, showPay, days, totalHours, daysWorked, workingDays, avgPerWorkingDay, lastMonthHours, vsLastMonthHours, weeks, daysWithNote, openFlags]
+      required: [membershipId, workspaceId, name, month, locked, currency, showPay, days, totalHours, plannedHours, daysWorked, workingDays, avgPerWorkingDay, lastMonthHours, vsLastMonthHours, weeks, daysWithNote, openFlags]
       properties:
         membershipId:
           type: string
@@ -2876,7 +3385,12 @@ components:
             $ref: '#/components/schemas/MemberMonthDay'
         totalHours:
           type: number
+          description: Every hour in the month, planned (future) days included.
           example: 118
+        plannedHours:
+          type: number
+          description: The part of totalHours on days after today (planned work); 0 for a past month.
+          example: 0
         daysWorked:
           type: integer
           example: 20
@@ -2885,7 +3399,7 @@ components:
           example: 22
         avgPerWorkingDay:
           type: number
-          description: totalHours divided by the working days elapsed so far (or all of them for a past month).
+          description: Hours up to today (planned days left out) divided by the working days elapsed so far (or all of them for a past month).
           example: 5.9
         lastMonthHours:
           type: number
@@ -2965,6 +3479,7 @@ components:
             changeCount: 0
             updatedAt: null
         totalHours: 118
+        plannedHours: 0
         daysWorked: 20
         workingDays: 22
         avgPerWorkingDay: 5.9

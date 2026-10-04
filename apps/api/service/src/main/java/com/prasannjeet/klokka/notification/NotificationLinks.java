@@ -15,6 +15,7 @@ public final class NotificationLinks {
             case HOURS_CHANGED -> "hours";
             case ENTRY_FLAGGED, FLAG_RESOLVED -> "flags";
             case INVITE_ACCEPTED, MONTH_CLOSED, MONTH_REOPENED -> "workspace";
+            case JOB_REMINDER -> "reminders";
         };
     }
 
@@ -25,7 +26,7 @@ public final class NotificationLinks {
             case HOURS_CHANGED -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate()
                     : link.getMonth() != null ? "/month/" + link.getMonth() : null);
             case ENTRY_FLAGGED -> link.getFlagId() == null ? ws + "/notifications" : ws + "/flags/" + link.getFlagId();
-            case FLAG_RESOLVED -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate() : null);
+            case FLAG_RESOLVED, JOB_REMINDER -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate() : null);
             case INVITE_ACCEPTED -> ws + "/employees";
             case MONTH_CLOSED, MONTH_REOPENED -> member(ws, link, link.getMonth() != null ? "/month/" + link.getMonth() : null);
         };

@@ -60,6 +60,9 @@ public final class TestData {
                 id, workspace, membership, date, hours, note, by, by);
         run("insert into hour_entry_change (id, workspace_id, entry_id, kind, hours_after, note_after, changed_by) values (?, ?, ?, 'CREATED', ?, ?, ?)",
                 UUID.randomUUID(), workspace, id, hours, note, by);
+        // Every live day has its jobs since CHQ-156; a seeded day is one job, as the V3 migration made them.
+        run("insert into job (id, workspace_id, entry_id, position, hours, note, created_by, updated_by) values (?, ?, ?, 0, ?, ?, ?, ?)",
+                UUID.randomUUID(), workspace, id, hours, note, by, by);
         return id;
     }
 

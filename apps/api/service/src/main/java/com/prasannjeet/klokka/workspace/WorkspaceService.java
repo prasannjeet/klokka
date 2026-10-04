@@ -142,6 +142,8 @@ public class WorkspaceService {
         if (update.getShowPay() != null) w.showPay = update.getShowPay();
         if (update.getRounding() != null) w.rounding = update.getRounding();
         if (update.getDefaultDayHours() != null) w.defaultDayHours = update.getDefaultDayHours();
+        if (update.getNotifyFlagDeclined() != null) w.notifyFlagDeclined = update.getNotifyFlagDeclined();
+        if (update.getEmployeesSeeInsights() != null) w.employeesSeeInsights = update.getEmployeesSeeInsights();
         return toWorkspace(a);
     }
 
@@ -161,6 +163,8 @@ public class WorkspaceService {
                 .showPay(w.showPay)
                 .rounding(w.rounding)
                 .defaultDayHours(w.defaultDayHours)
+                .notifyFlagDeclined(w.notifyFlagDeclined)
+                .employeesSeeInsights(w.employeesSeeInsights)
                 .createdAt(w.createdAt.atOffset(ZoneOffset.UTC))
                 .memberCount((int) memberships.countByStatus(id, List.of(ACTIVE, INVITED)))
                 .activeMemberCount((int) memberships.countByStatus(id, List.of(ACTIVE)))

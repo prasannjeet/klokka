@@ -180,7 +180,14 @@
     "followDevice": "Follow device",
     "light": "Light",
     "dark": "Dark",
-    "savesPerField": "Settings save one field at a time; nothing here needs a Save button."
+    "savesPerField": "Settings save one field at a time; nothing here needs a Save button.",
+    "employees": "Employees",
+    "notifyDeclined": "Tell employees when you decline a flag",
+    "notifyDeclinedOn": "They get a notification with your reply. An approved change is always shared.",
+    "notifyDeclinedOff": "A declined flag closes quietly. An approved change is always shared.",
+    "employeesSeeInsights": "Show analysis to employees",
+    "employeesSeeInsightsOn": "Averages, trends and the month forecast on their month page.",
+    "employeesSeeInsightsOff": "Employees see their hours and jobs, without averages, trends or the forecast."
   },
   "profile": {
     "title": "Profile",
@@ -316,6 +323,90 @@
     "hoursWheel": "Hours",
     "minutesWheel": "Minutes",
     "savedAs": "Saved as {hours}"
+  },
+  "jobs": {
+    "title": "Jobs",
+    "addJob": "Add a job",
+    "addJobFor": "Add a job for {name}",
+    "addAnother": "Add another job",
+    "newJobFor": "New job for {name}",
+    "editJobFor": "Job for {name}",
+    "saveJob": "Save job, {duration}",
+    "chooseTimeFirst": "Choose the time first",
+    "removeJob": "Remove job",
+    "removed": "Job removed.",
+    "saved": "Saved {duration} for {name}.",
+    "noJobs": "No jobs on this day",
+    "noJobsHint": "Add what {name} worked, or plan a job ahead. Each job has its own time, place and note.",
+    "noJobsEmployee": "Nothing on this day.",
+    "jobCount_one": "{count} job",
+    "jobCount_other": "{count} jobs",
+    "placeCount_one": "{count} place",
+    "placeCount_other": "{count} places",
+    "jobNumber": "Job {number}",
+    "location": "Location",
+    "noLocation": "No location",
+    "startsAt": "Starts at",
+    "notSet": "Not set",
+    "timeRange": "{from} to {to}",
+    "runsReminder": "Runs {from} to {to}. {name} gets a reminder before it starts.",
+    "noStartNoReminder": "No start time: {name} gets no reminder for this job.",
+    "directions": "Directions",
+    "directionsInMaps": "Directions in Google Maps",
+    "planned": "Planned",
+    "dayTotalSoFar": "{date}, day total {duration} so far",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "today": "Today",
+    "monthClosed": "{month} is closed. Unlock it to add or change jobs.",
+    "monthOpen": "Month open",
+    "freeDay": "Free day, tap to plan",
+    "worked": "Worked",
+    "soFarPlanned": "{hours} so far, {planned} planned",
+    "nextUp": "Next: {date}",
+    "tapAnyDay": "Click any day to add or change jobs, past or future.",
+    "jobsThisMonth": "Jobs this month",
+    "severalJobsCell": "A day with two or more jobs shows its total; open it to change the jobs.",
+    "onePerCellHint": "A day with one job or none: type the hours right in the cell.",
+    "futureOpen": "Future weeks are open for planning.",
+    "myDay": "My day",
+    "flagThisDay": "Something wrong? Flag this day",
+    "flagThisDayHint": "Your employer sees your flag and answers it.",
+    "removeConfirm": "Remove this job?",
+    "edit": "Edit",
+    "change": "Change",
+    "history": "History: {summary}"
+  },
+  "places": {
+    "title": "Job location",
+    "search": "Search an address or a place",
+    "useHere": "Use where I am now",
+    "useHereHint": "Asks for your location once",
+    "recent": "Recent places",
+    "results": "Results",
+    "none": "No location for this job",
+    "use": "Use {name}",
+    "saveWithout": "Save without a location",
+    "poweredBy": "Places by Google",
+    "noResults": "No places match that.",
+    "locationDenied": "Klokka may not use your location. Search for the place instead.",
+    "mapOf": "Map of {place}"
+  },
+  "reminders": {
+    "title": "Job reminders",
+    "toggle": "Remind me before a job starts",
+    "on": "On, {lead}.",
+    "off": "Off. You get no reminders before jobs.",
+    "hint": "Reminders come as a phone notification for jobs with a start time. Your employer cannot see or change this.",
+    "howEarly": "How early",
+    "default": "Default",
+    "lead": {
+      "MINUTES_15": "15 minutes before",
+      "MINUTES_30": "30 minutes before",
+      "HOUR_1": "1 hour before",
+      "HOURS_2": "2 hours before",
+      "DAY_BEFORE": "The day before, same time"
+    }
   },
   "month": {
     "title": "{name} in {month}",
@@ -479,7 +570,15 @@
     "loggedVsSays": "Logged {logged}, {name} says {suggested}",
     "resolvedFixed": "Resolved: you changed {before} to {after}.",
     "resolvedDismissed": "Resolved: you kept {hours}.",
-    "alreadyOpen": "This entry already has an open flag."
+    "alreadyOpen": "This entry already has an open flag.",
+    "declineQuiet": "{name} is not told when you decline. Change this in Settings, Employees.",
+    "declineTold": "{name} is told either way.",
+    "severalJobs": "This day has {count} jobs. Change the right one, then approve the flag as it stands.",
+    "oneJob": "This day has one job. Approving sets it to {hours}.",
+    "changeJobs": "Change the jobs",
+    "approveAsIs": "Approve, {hours} as it stands",
+    "approve": "Approve, change to {hours}",
+    "decline": "Decline, keep {hours}"
   },
   "notifications": {
     "title": "Notifications",
@@ -536,6 +635,18 @@
     "monthReopened": {
       "title": "{name} reopened {month}",
       "body": "{workspace}: entries can change again"
+    },
+    "jobReminder": {
+      "titlePlace": "Job at {place} in {lead}",
+      "title": "Job in {lead}",
+      "titlePlaceTomorrow": "Job at {place} tomorrow at {time}",
+      "titleTomorrow": "Job tomorrow at {time}",
+      "body": "{workspace}: starts {time}, {hours}.",
+      "bodyAddress": "{workspace}: starts {time}, {hours}. {address}",
+      "in15": "15 minutes",
+      "in30": "30 minutes",
+      "in60": "1 hour",
+      "in120": "2 hours"
     }
   },
   "email": {
@@ -771,6 +882,9 @@
     "INVITATION_EXPIRED": "The invitation has expired.",
     "INVITATION_EMAIL_MISMATCH": "The invitation was sent to another email address.",
     "FLAG_ALREADY_OPEN": "This entry already has an open flag.",
+    "ENTRY_HAS_JOBS": "This day has several jobs. Change them one by one.",
+    "MAPS_NOT_CONFIGURED": "Locations are not set up on this server.",
+    "MAPS_UNAVAILABLE": "Maps did not answer. Try again in a moment.",
     "NOT_IMPLEMENTED": "Not available yet.",
     "INTERNAL": "Something went wrong on our side. Try again in a moment.",
     "NETWORK": "No connection. Check your network and try again."
@@ -829,7 +943,8 @@
       "enable": "Turn on notifications",
       "channelHours": "Hours",
       "channelFlags": "Flags",
-      "channelWorkspace": "Business"
+      "channelWorkspace": "Business",
+      "channelReminders": "Job reminders"
     },
     "flags": {
       "sent": "Flag sent. {name} is notified.",
@@ -1069,7 +1184,8 @@
         "ENTRY_FLAGGED": "Entry flagged",
         "FLAG_RESOLVED": "Flag resolved",
         "MONTH_CLOSED": "Month closed",
-        "MONTH_REOPENED": "Month reopened"
+        "MONTH_REOPENED": "Month reopened",
+        "JOB_REMINDER": "Job reminders"
       },
       "health": {
         "UP": "Up",

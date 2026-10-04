@@ -1,8 +1,9 @@
 'use client';
 
 // The employee's week (CHQ-145, like the phone's week screen): one line per day with the hours, the pay
-// when it applies and the note, week by week. Not a grid: the employee reads, the employer writes. Totals
-// are sums of the visible entries (presentation); every figure a line shows comes from the entries operation.
+// when it applies, the jobs' times and places (CHQ-156) and the note, week by week. Not a grid: the employee
+// reads, the employer writes. Totals are sums of the visible entries (presentation); every figure a line
+// shows comes from the entries operation.
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
@@ -27,6 +28,7 @@ import { useWorkspace } from '@/lib/workspace';
 import { Icon } from './icons';
 import { Money } from './money';
 import { ViewHeader } from './view-header';
+import './jobs/jobs.css';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -135,6 +137,15 @@ export function EmployeeWeek() {
                     <b>{formatDate(date, locale, 'day')}</b>
                   </span>
                   <span className="what">
+                    {entry && entry.jobs.some((j) => j.location || j.startTime) ? (
+                      <span className="places">
+                        <Icon name="pin" />
+                        {entry.jobs
+                          .map((j) => [j.startTime, j.location?.name].filter(Boolean).join(' '))
+                          .filter(Boolean)
+                          .join(', ')}
+                      </span>
+                    ) : null}
                     {entry?.note ? <span className="note">{entry.note}</span> : null}
                     {date === today || flagged ? (
                       <span className="meta">

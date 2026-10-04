@@ -17,6 +17,7 @@ function day(date: string, hours: number | null, extra: Partial<MemberMonthDay> 
     entryId: hours === null ? null : `e-${date}`,
     hours,
     note: null,
+    jobs: [],
     earnings: hours === null ? null : hours * 165,
     ...(hours === null ? {} : { updatedAt: new Date('2026-09-28T13:05:00Z'), updatedBy: anna }),
     ...extra,
@@ -24,7 +25,19 @@ function day(date: string, hours: number | null, extra: Partial<MemberMonthDay> 
 }
 
 const DAYS = [
-  day('2026-09-21', 8),
+  day('2026-09-21', 8, {
+    jobs: [
+      {
+        id: 'j1',
+        hours: 5,
+        startTime: '09:00',
+        location: { placeId: 'p1', name: 'Café Nord', latitude: 59.3, longitude: 18 },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      { id: 'j2', hours: 3, createdAt: new Date(), updatedAt: new Date() },
+    ],
+  }),
   day('2026-09-22', null),
   day('2026-09-23', 6, { note: 'Delivery day', changeCount: 3 }),
   day('2026-09-24', 4, { flag: { id: 'f1', status: 'OPEN', reason: 'MORE', suggestedHours: 6 } }),
@@ -60,6 +73,9 @@ describe('DayList', () => {
     expect(within(rows[1]!).getByText(/^Changed by Anna, /)).toBeTruthy();
     expect(within(rows[1]!).getByText('edited 2 times')).toBeTruthy();
     expect(within(rows[2]!).getByText(/^Logged by Anna, /)).toBeTruthy();
+    // A day with jobs (CHQ-156) names their places and counts them.
+    expect(within(rows[2]!).getByText('Café Nord')).toBeTruthy();
+    expect(within(rows[2]!).getByText('2 jobs')).toBeTruthy();
     expect(rows[1]!.getAttribute('aria-current')).toBe('true');
     expect(screen.queryByText(/SEK|kr/)).toBeNull();
   });

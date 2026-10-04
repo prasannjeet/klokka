@@ -26,6 +26,12 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
     public static final String FAIL_INVITE_MARKER = "fail-invite@";
     // Answers after 11 s, as the real Logto can while it sends the invitation email (CHQ-148).
     public static final String SLOW_INVITE_MARKER = "slow-invite@";
+    // Google answers the static map for this latitude with 403, as it does when the Static API is not enabled.
+    public static final String MAP_REFUSED_LATITUDE = "1";
+    public static final String MAPS_KEY = "test-maps-key";
+    // The smallest valid PNG (1x1), what the fake static map answers.
+    public static final byte[] PNG = java.util.Base64.getDecoder().decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=");
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private HttpServer server;
@@ -49,6 +55,9 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         config.put("quarkus.oidc-client.token-path", base + "/oidc/token");
         config.put("quarkus.rest-client.logto.url", base + "/api");
         config.put("quarkus.rest-client.expo.url", base + "/expo");
+        config.put("quarkus.rest-client.google-places.url", base + "/google-places");
+        config.put("quarkus.rest-client.google-maps.url", base + "/google-maps");
+        config.put("klokka.maps.api-key", MAPS_KEY);
         config.put("klokka.logto.endpoint", base);
         config.put("klokka.logto.webhook-signing-key", SIGNING_KEY);
         config.put("test.fake.base-url", base);
@@ -76,6 +85,8 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         state.put("invitationStatusUpdates", new ArrayList<Map<String, Object>>());
         state.put("deletedInvitations", new ArrayList<String>());
         state.put("pushSends", new ArrayList<List<Map<String, Object>>>());
+        state.put("placesRequests", new ArrayList<Map<String, Object>>());
+        state.put("mapsRequests", new ArrayList<String>());
         state.put("receiptRequests", new ArrayList<List<String>>());
         state.put("listOrganizationsCalls", 0);
         state.put("updatedUsers", new ArrayList<Map<String, Object>>());
@@ -109,6 +120,8 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
             } else if (path.startsWith("/api/")) {
                 this.<String>list("managementAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 management(exchange, method, path.substring(4), body);
+            } else if (path.startsWith("/google-places/") || path.startsWith("/google-maps/")) {
+                google(exchange, method, path, exchange.getRequestURI().getQuery(), body);
             } else if (path.startsWith("/expo/")) {
                 this.<String>list("expoAuthorizations").add(exchange.getRequestHeaders().getFirst("Authorization"));
                 expo(exchange, path.substring(5), body);
@@ -229,6 +242,53 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
             respond(exchange, 200, JSON.writeValueAsString(Map.of("data", data)));
         } else {
             respond(exchange, 404, "{\"message\":\"fake expo has no " + path + "\"}");
+        }
+    }
+
+    // Google Places (New) and the classic Maps hosts, as much as PlaceService uses (CHQ-156).
+    @SuppressWarnings("unchecked")
+    private void google(HttpExchange exchange, String method, String path, String query, byte[] body) throws IOException {
+        String headerKey = exchange.getRequestHeaders().getFirst("X-Goog-Api-Key");
+        if (path.equals("/google-places/v1/places:autocomplete") && method.equals("POST")) {
+            Map<String, Object> request = JSON.readValue(body, Map.class);
+            request.put("key", headerKey);
+            this.<Map<String, Object>>list("placesRequests").add(request);
+            respond(exchange, 200, JSON.writeValueAsString(Map.of("suggestions", List.of(
+                    Map.of("placePrediction", Map.of("placeId", "place-kungsgatan-12", "text", Map.of("text", "Kungsgatan 12, Stockholm"),
+                            "structuredFormat", Map.of("mainText", Map.of("text", "Kungsgatan 12"), "secondaryText", Map.of("text", "Stockholm")))),
+                    Map.of("placePrediction", Map.of("placeId", "place-kungsgatan-44", "text", Map.of("text", "Kungsgatan 44, Stockholm")))))));
+        } else if (path.startsWith("/google-places/v1/places/") && method.equals("GET")) {
+            String id = path.substring("/google-places/v1/places/".length());
+            this.<Map<String, Object>>list("placesRequests").add(Map.of("details", id, "key", String.valueOf(headerKey),
+                    "fieldMask", String.valueOf(exchange.getRequestHeaders().getFirst("X-Goog-FieldMask")), "query", String.valueOf(query)));
+            if (id.equals("missing")) {
+                respond(exchange, 404, "{\"error\":{\"status\":\"NOT_FOUND\"}}");
+                return;
+            }
+            respond(exchange, 200, JSON.writeValueAsString(Map.of("id", id, "displayName", Map.of("text", "Café Nord"),
+                    "formattedAddress", "Kungsgatan 12, 111 35 Stockholm", "location", Map.of("latitude", 59.334591, "longitude", 18.063240))));
+        } else if (path.equals("/google-maps/maps/api/geocode/json")) {
+            this.<String>list("mapsRequests").add("geocode?" + query);
+            respond(exchange, 200, JSON.writeValueAsString(Map.of("status", "OK", "results", List.of(Map.of(
+                    "place_id", "place-hornsgatan-40", "formatted_address", "Hornsgatan 40, 118 20 Stockholm")))));
+        } else if (path.equals("/google-maps/maps/api/staticmap")) {
+            this.<String>list("mapsRequests").add("staticmap?" + query);
+            if (query != null && query.contains("center=" + MAP_REFUSED_LATITUDE + ",")) {
+                byte[] text = "This API is not activated on your API project.".getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Content-Type", "text/plain");
+                exchange.sendResponseHeaders(403, text.length);
+                try (OutputStream out = exchange.getResponseBody()) {
+                    out.write(text);
+                }
+                return;
+            }
+            exchange.getResponseHeaders().add("Content-Type", "image/png");
+            exchange.sendResponseHeaders(200, PNG.length);
+            try (OutputStream out = exchange.getResponseBody()) {
+                out.write(PNG);
+            }
+        } else {
+            respond(exchange, 404, "{\"message\":\"fake google has no " + path + "\"}");
         }
     }
 

@@ -11,11 +11,13 @@ import {
   FlagsApi,
   InsightsApi,
   InvitationsApi,
+  JobsApi,
   MeApi,
   MembersApi,
   MonthsApi,
   NotificationsApi,
   OperatorApi,
+  PlacesApi,
   WebhooksApi,
   WorkspacesApi,
   type ConfigurationParameters,
@@ -44,6 +46,8 @@ export interface KlokkaApi {
   members: MembersApi;
   invitations: InvitationsApi;
   entries: EntriesApi;
+  jobs: JobsApi;
+  places: PlacesApi;
   months: MonthsApi;
   insights: InsightsApi;
   flags: FlagsApi;
@@ -68,6 +72,8 @@ export function createApi(options: CreateApiOptions): KlokkaApi {
     members: new MembersApi(configuration),
     invitations: new InvitationsApi(configuration),
     entries: new EntriesApi(configuration),
+    jobs: new JobsApi(configuration),
+    places: new PlacesApi(configuration),
     months: new MonthsApi(configuration),
     insights: new InsightsApi(configuration),
     flags: new FlagsApi(configuration),

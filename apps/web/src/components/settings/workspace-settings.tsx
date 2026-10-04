@@ -286,6 +286,44 @@ function SettingsGroups({ ws, details }: { ws: WorkspaceView; details: Workspace
         </div>
       </section>
 
+      <section className="card sgroup" aria-labelledby="s-employees">
+        <h2 id="s-employees">{t('settings.employees')}</h2>
+        <div className="srow">
+          <div>
+            <b className="t t-line">
+              {t('settings.notifyDeclined')}
+              <SavedMark show={savedRow === 'declined'} />
+            </b>
+          </div>
+          <Switch
+            checked={details.notifyFlagDeclined}
+            onChange={(on) => void save({ notifyFlagDeclined: on }, { row: 'declined' })}
+            label={t('settings.notifyDeclined')}
+            hint={
+              details.notifyFlagDeclined ? t('settings.notifyDeclinedOn') : t('settings.notifyDeclinedOff')
+            }
+          />
+        </div>
+        <div className="srow">
+          <div>
+            <b className="t t-line">
+              {t('settings.employeesSeeInsights')}
+              <SavedMark show={savedRow === 'insights'} />
+            </b>
+          </div>
+          <Switch
+            checked={details.employeesSeeInsights}
+            onChange={(on) => void save({ employeesSeeInsights: on }, { row: 'insights' })}
+            label={t('settings.employeesSeeInsights')}
+            hint={
+              details.employeesSeeInsights
+                ? t('settings.employeesSeeInsightsOn')
+                : t('settings.employeesSeeInsightsOff')
+            }
+          />
+        </div>
+      </section>
+
       <section className="card sgroup" aria-labelledby="s-pay">
         <h2 id="s-pay">{t('settings.pay')}</h2>
         <div className="srow">

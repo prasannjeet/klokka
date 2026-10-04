@@ -30,6 +30,7 @@ import {
   type GridAction,
   type GridState,
 } from '@/lib/week-grid';
+import '@/components/jobs/jobs.css';
 
 export interface GridRow {
   id: string;
@@ -53,6 +54,8 @@ export function WeekGrid({
   onSelect,
   dispatch,
   rounding,
+  jobCount,
+  onOpenDay,
 }: {
   rows: readonly GridRow[];
   dates: readonly IsoDate[];
@@ -68,6 +71,9 @@ export function WeekGrid({
   onSelect: (key: string) => void;
   dispatch: Dispatch<GridAction>;
   rounding: Rounding;
+  // A day with two or more jobs is changed job by job (CHQ-156): its cell shows the total and opens the day.
+  jobCount: (key: string) => number;
+  onOpenDay: (membershipId: string, date: IsoDate) => void;
 }) {
   const t = useT();
   const locale = useLocale();
@@ -139,6 +145,32 @@ export function WeekGrid({
             {dates.map((d, c) => {
               const key = cellKey(row.id, d);
               const value = effective(state, key);
+              const jobs = jobCount(key);
+              if (jobs > 1) {
+                return (
+                  <div key={d} className={d > today ? 'cell multi future' : 'cell multi'} role="gridcell">
+                    <button
+                      type="button"
+                      aria-label={[
+                        t('web.week.cellLabel', {
+                          name: firstName(row.name),
+                          date: formatDate(d, locale, 'weekdayDayMonth'),
+                        }),
+                        formatHours(value.hours ?? 0, locale),
+                        t('jobs.jobCount', { count: jobs }),
+                        flagged(key) ? t('web.week.flagged') : '',
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                      onClick={() => onOpenDay(row.id, d)}
+                      data-testid={`multi-${key}`}
+                    >
+                      <b>{formatHours(value.hours ?? 0, locale, { unit: false })}</b>
+                      <small>{t('jobs.jobCount', { count: jobs })}</small>
+                    </button>
+                  </div>
+                );
+              }
               const locked = isLocked(key);
               const text = state.text[key];
               const shown =

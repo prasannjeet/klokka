@@ -99,11 +99,18 @@ export function useWorkspaceInsights(workspaceId: string, month: IsoMonth) {
   });
 }
 
-export function useMemberInsights(workspaceId: string, membershipId: string, month: IsoMonth) {
+// `enabled` false when the employer has turned analysis off for employees (CHQ-156): the API would answer 403.
+export function useMemberInsights(
+  workspaceId: string,
+  membershipId: string,
+  month: IsoMonth,
+  enabled = true,
+) {
   return useQuery({
     queryKey: keys.memberInsights(workspaceId, membershipId, month),
     queryFn: () => api.insights.getMemberInsights({ workspaceId, membershipId, month }),
     placeholderData: keepPreviousData,
+    enabled,
   });
 }
 

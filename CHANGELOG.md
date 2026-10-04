@@ -2,6 +2,24 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.2.0, 2026-10-04
+
+### Added
+- Jobs: a day holds one or more jobs, each with hours and minutes, an optional start time, an optional location and a
+  note. The day's total is the sum of its jobs. Existing days became one job each (CHQ-156).
+- Any day can be filled in, past, today or future (planned work), unless its month is closed; on the phone every
+  calendar day opens the day page, on the web every day of the month page does (CHQ-156).
+- Job locations through Google Maps: search, recent places, "use where I am now", a small map on the job card and
+  directions in Google Maps. The Maps key stays on the server (CHQ-156).
+- Job reminders for employees, before each job with a start time: on by default, 1 hour before, or 15 min, 30 min,
+  2 hours or the day before, or off, in Profile (CHQ-156).
+- Settings, Employees: tell employees when a flag is declined (on by default), and show analysis to employees (on
+  by default) (CHQ-156).
+
+### Changed
+- Averages and forecasts count days up to today only; planned days show as planned (CHQ-156).
+- A day with two or more jobs is changed job by job; the web week grid shows its total and opens the day (CHQ-156).
+
 ## 1.1.3, 2026-10-04
 
 ### Changed

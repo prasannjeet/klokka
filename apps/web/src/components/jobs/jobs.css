@@ -1,0 +1,393 @@
+/* Jobs, places and planned days (CHQ-156) on top of the shared vocabulary in globals.css. Tokens only. */
+
+/* ---- calendar: a free future day is dashed, planned work dashed in the accent colour ---- */
+.cal .d.future {
+  box-shadow: none;
+  border: 1.5px dashed var(--border);
+}
+.cal .d.planned {
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1.5px dashed var(--accent);
+}
+.cal-legend .planneddot {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+.cal-legend .planneddot i {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1.5px dashed var(--accent);
+}
+
+/* ---- a day's jobs ---- */
+.day-jobs {
+  display: grid;
+  gap: 10px;
+}
+.day-jobs .add-job {
+  justify-self: start;
+  border: 1.5px dashed var(--border);
+}
+.job-card {
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.job-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 360 / 110;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+.job-body {
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+.job-top {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.job-where {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.job-where b {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.job-where span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.job-hours {
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  font-stretch: var(--font-display-stretch);
+  font-variation-settings: var(--font-display-variation);
+  font-size: calc(18px * var(--font-display-scale));
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.job-note {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.job-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.job-acts .danger {
+  color: var(--danger);
+}
+.lock-banner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  color: var(--text);
+  font-size: 13.5px;
+}
+.lock-banner .icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  color: var(--warning);
+}
+
+/* ---- the job dialog: wider than the other dialogs on a desktop, a sheet on a phone ---- */
+.dlg:has(.job-form) {
+  width: min(calc(100% - 2 * var(--gutter)), 860px);
+}
+.job-form-cols {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+.job-form-col {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+.job-form .chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ---- hour and minute wheels (rows 40 px, five showing, the middle one is the value) ---- */
+.wheels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-card);
+  background: var(--surface-2);
+  border: var(--card-border);
+}
+.wheels-band {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: calc(6px + 80px);
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--secondary);
+  pointer-events: none;
+}
+.wheel {
+  position: relative;
+}
+.wheel-scroll {
+  position: relative;
+  z-index: 1;
+  height: 200px;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  border-radius: var(--radius-md);
+  mask-image: linear-gradient(transparent, var(--text) 30%, var(--text) 70%, transparent);
+}
+.wheel-scroll::-webkit-scrollbar {
+  display: none;
+}
+.wheel-scroll:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.witem {
+  display: flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: 0.55;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 40px;
+  font-variant-numeric: tabular-nums;
+  transition:
+    color var(--dur-fast),
+    opacity var(--dur-fast),
+    font-size var(--dur-fast);
+}
+.witem.near {
+  opacity: 0.85;
+  font-size: 20px;
+}
+.witem.on {
+  opacity: 1;
+  color: var(--text);
+  font-size: 26px;
+}
+.wheel-unit {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  top: 80px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .witem {
+    transition: none;
+  }
+}
+
+/* ---- the place: search, suggestions, recent places, the chosen one with its map ---- */
+.loc-pick,
+.loc-chosen {
+  display: grid;
+  gap: 8px;
+}
+.loc-search {
+  position: relative;
+}
+.loc-search .icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  translate: 0 -50%;
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  pointer-events: none;
+}
+.loc-search .input {
+  width: 100%;
+  padding-left: 38px;
+}
+.loc-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  display: grid;
+  gap: 2px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  max-height: 260px;
+  overflow: auto;
+}
+.loc-list li,
+.loc-opt {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.loc-list li.on,
+.loc-list li:hover,
+.loc-opt:hover {
+  background: var(--surface);
+}
+.loc-opt:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.loc-list .icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--primary);
+}
+.loc-list span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.loc-list small {
+  color: var(--text-muted);
+  font-size: 12.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.loc-head {
+  padding: 8px 10px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.loc-credit {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: right;
+}
+.loc-chosen .job-map {
+  border-radius: var(--radius-md);
+}
+.loc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.loc-row > div {
+  flex: 1 1 160px;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.loc-row span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.loc-row > .icon {
+  color: var(--primary);
+}
+
+/* ---- the week grid: a day with several jobs shows its total and opens the day ---- */
+.wg .cell.multi {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}
+.wg .cell.multi button {
+  width: 100%;
+  height: 58px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  display: grid;
+  place-content: center;
+  gap: 2px;
+  cursor: pointer;
+  border-radius: var(--cell-radius);
+  font: inherit;
+}
+.wg .cell.multi b {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.wg .cell.multi small {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.wg .cell.multi button:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--focus);
+}
+.wg-hint {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---- day lists: the places of a day's jobs, planned hours ---- */
+.daylist .what .places {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13.5px;
+  overflow-wrap: anywhere;
+}
+.daylist .what .places .icon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: var(--primary);
+}
+.daylist .h.planned {
+  color: var(--accent);
+}
+.jobs-month {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}

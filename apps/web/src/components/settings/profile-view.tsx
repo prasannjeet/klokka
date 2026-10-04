@@ -17,6 +17,7 @@ import { ChoiceGroup } from '../choice-group';
 import { Icon } from '../icons';
 import { roleLine } from '../shell/role-line';
 import { ViewHeader } from '../view-header';
+import { JobReminderPrefs } from './job-reminder-prefs';
 import { NotificationPrefs } from './notification-prefs';
 import { SavedMark } from './saved-mark';
 import { usePreferenceSave, useProfileSave, useSavedRow } from './use-save';
@@ -209,6 +210,12 @@ export function ProfileView() {
       <div style={{ marginTop: 16 }}>
         <NotificationPrefs employer={ws.isEmployer} />
       </div>
+
+      {ws.isEmployer ? null : (
+        <div style={{ marginTop: 16 }}>
+          <JobReminderPrefs />
+        </div>
+      )}
 
       <section className="card sgroup" aria-labelledby="pf-ws-h" style={{ marginTop: 16 }}>
         <h2 id="pf-ws-h">{t('profile.workspaces')}</h2>

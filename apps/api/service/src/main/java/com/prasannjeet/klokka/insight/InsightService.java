@@ -1,6 +1,7 @@
 package com.prasannjeet.klokka.insight;
 
 import static com.prasannjeet.klokka.contract.model.MemberStatus.ACTIVE;
+import static com.prasannjeet.klokka.error.KlokkaException.forbidden;
 
 import com.prasannjeet.klokka.auth.Access;
 import com.prasannjeet.klokka.auth.WorkspaceAccess;
@@ -26,6 +27,8 @@ import com.prasannjeet.klokka.month.Months;
 import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.FlagRepository;
+import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRepository;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
@@ -73,6 +76,9 @@ public class InsightService {
     MonthLockRepository locks;
 
     @Inject
+    JobRepository jobs;
+
+    @Inject
     MonthService months;
 
     @Inject
@@ -93,17 +99,23 @@ public class InsightService {
         for (HourEntryEntity e : rows) byDate.put(e.workDate, e);
         Map<UUID, Long> counts = entries.changeCounts(id, rows.stream().map(r -> r.id).toList());
         Map<UUID, EntryFlagEntity> flagged = flags.latestPerEntry(id, rows.stream().map(r -> r.id).toList());
+        Map<UUID, List<JobEntity>> dayJobs = jobs.listForEntries(id, rows.stream().map(r -> r.id).toList());
         EntryViews.Names names = new EntryViews.Names(memberships, a);
 
         List<MemberMonthDay> days = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
+        // Planned work (days after today) is in the total but not in the averages (CHQ-156).
+        BigDecimal planned = BigDecimal.ZERO;
         int daysWorked = 0;
         int daysWithNote = 0;
         for (LocalDate d = ym.atDay(1); !d.isAfter(ym.atEndOfMonth()); d = d.plusDays(1)) {
             HourEntryEntity e = byDate.get(d);
-            MemberMonthDay day = new MemberMonthDay().date(d).weekday(weekday(d)).workingDay(Months.workingDay(d)).changeCount(0);
+            MemberMonthDay day = new MemberMonthDay().date(d).weekday(weekday(d)).workingDay(Months.workingDay(d)).changeCount(0)
+                    .jobs(new ArrayList<>());
             if (e != null) {
                 total = total.add(e.hours);
+                if (d.isAfter(today)) planned = planned.add(e.hours);
+                day.jobs(dayJobs.getOrDefault(e.id, List.of()).stream().map(EntryViews::toJob).toList());
                 daysWorked++;
                 if (e.note != null) daysWithNote++;
                 day.entryId(e.id).hours(e.hours).note(e.note)
@@ -131,11 +143,12 @@ public class InsightService {
                 .hourlyRate(rate ? m.hourlyRate : null)
                 .days(days)
                 .totalHours(total)
+                .plannedHours(planned)
                 .daysWorked(daysWorked)
                 .workingDays(Months.workingDays(ym))
-                .avgPerWorkingDay(divide(total, elapsed))
+                .avgPerWorkingDay(divide(total.subtract(planned), elapsed))
                 .lastMonthHours(lastTotal)
-                .vsLastMonthHours(total.subtract(lastTotal))
+                .vsLastMonthHours(total.subtract(planned).subtract(lastTotal))
                 .bestWeek(best(weeks))
                 .weeks(weeks)
                 .daysWithNote(daysWithNote)
@@ -154,7 +167,9 @@ public class InsightService {
         LocalDate from = ym.atDay(1);
         LocalDate to = ym.atEndOfMonth();
 
-        Map<LocalDate, BigDecimal> perDay = entries.hoursPerDay(id, null, from, to);
+        // Hours up to today only: planned days (CHQ-156) would inflate the averages and the projection.
+        LocalDate until = asOf.isBefore(to) ? asOf : to;
+        Map<LocalDate, BigDecimal> perDay = entries.hoursPerDay(id, null, from, until);
         BigDecimal total = sum(perDay.values());
         int workingDays = Months.workingDays(ym);
         int elapsed = Months.elapsedWorkingDays(ym, asOf);
@@ -170,7 +185,7 @@ public class InsightService {
                 : total.add(divide(total, elapsed).multiply(BigDecimal.valueOf(workingDays - elapsed))).setScale(2, RoundingMode.HALF_UP);
 
         List<MembershipEntity> all = memberships.listMembers(id);
-        Map<UUID, BigDecimal> perMember = entries.hoursPerMember(id, from, to);
+        Map<UUID, BigDecimal> perMember = entries.hoursPerMember(id, from, until);
         long activeMembers = all.stream().filter(m -> m.status == ACTIVE && m.role == Role.EMPLOYEE).count();
         List<MemberShare> shares = new ArrayList<>();
         BigDecimal labourCost = BigDecimal.ZERO;
@@ -256,12 +271,16 @@ public class InsightService {
         Access a = access.employerOrSelf(workspaceId, membershipId);
         MembershipEntity m = access.target(a, membershipId);
         WorkspaceEntity w = a.workspace();
+        if (!a.employer() && !w.employeesSeeInsights) {
+            throw forbidden("The employer has turned off analysis for employees.");
+        }
         WorkspaceId id = a.workspaceId();
         YearMonth ym = Months.parseOrCurrent(month, w, clock);
         LocalDate today = Months.today(w, clock);
         LocalDate asOf = Months.asOf(ym, today);
         boolean rate = MemberViews.maySeeRate(a, m);
-        Map<LocalDate, BigDecimal> perDay = entries.hoursPerDay(id, m.id, ym.atDay(1), ym.atEndOfMonth());
+        LocalDate until = asOf.isBefore(ym.atEndOfMonth()) ? asOf : ym.atEndOfMonth();
+        Map<LocalDate, BigDecimal> perDay = entries.hoursPerDay(id, m.id, ym.atDay(1), until);
         BigDecimal total = sum(perDay.values());
         YearMonth last = ym.minusMonths(1);
         BigDecimal lastTotal = sum(entries.hoursPerDay(id, m.id, last.atDay(1), last.atEndOfMonth()).values());
@@ -320,7 +339,7 @@ public class InsightService {
         BigDecimal sum = BigDecimal.ZERO;
         for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) {
             BigDecimal h = perDay.getOrDefault(d, BigDecimal.ZERO);
-            sum = sum.add(h);
+            if (!d.isAfter(today)) sum = sum.add(h);
             days.add(new CurrentWeekDay().date(d).hours(h));
         }
         return new CurrentWeek()

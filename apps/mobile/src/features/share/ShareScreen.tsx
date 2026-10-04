@@ -146,22 +146,27 @@ function ShareScreenInner({
                 {t('share.days')}
               </AppText>
             </View>
-            <View style={s.fact}>
-              <AppText variant="h3" color={CARD.text}>
-                {formatHours(data.data.avgPerWorkingDay, locale)}
-              </AppText>
-              <AppText variant="small" color={CARD.text}>
-                {t('share.aDay')}
-              </AppText>
-            </View>
-            <View style={s.fact}>
-              <AppText variant="h3" color={CARD.text}>
-                {formatHours(data.data.bestWeek?.hours ?? 0, locale)}
-              </AppText>
-              <AppText variant="small" color={CARD.text}>
-                {t('share.bestWeek')}
-              </AppText>
-            </View>
+            {/* Averages and the best week are analysis, which the employer may turn off (CHQ-156). */}
+            {workspace.employeesSeeInsights ? (
+              <>
+                <View style={s.fact}>
+                  <AppText variant="h3" color={CARD.text}>
+                    {formatHours(data.data.avgPerWorkingDay, locale)}
+                  </AppText>
+                  <AppText variant="small" color={CARD.text}>
+                    {t('share.aDay')}
+                  </AppText>
+                </View>
+                <View style={s.fact}>
+                  <AppText variant="h3" color={CARD.text}>
+                    {formatHours(data.data.bestWeek?.hours ?? 0, locale)}
+                  </AppText>
+                  <AppText variant="small" color={CARD.text}>
+                    {t('share.bestWeek')}
+                  </AppText>
+                </View>
+              </>
+            ) : null}
           </View>
           <View style={s.foot}>
             <AppText variant="small" weight={600} color={CARD.text}>

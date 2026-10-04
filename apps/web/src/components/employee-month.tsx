@@ -16,6 +16,7 @@ import {
   type IsoDate,
 } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
+import { formatDuration, PLAN_AHEAD_MONTHS, placesOf } from '@/lib/jobs';
 import { useMemberInsights, useMemberMonth, useWorkspaceDetails } from '@/lib/queries';
 import { isoOf, monthIn, todayIn } from '@/lib/time';
 import { useMonthParam } from '@/lib/use-month-param';
@@ -28,10 +29,12 @@ import { EntryHistory } from './entry-history';
 import { FlagDialog } from './flag-dialog';
 import { FlowNumber } from './flow-number';
 import { Icon } from './icons';
+import { DayJobs } from './jobs/day-jobs';
 import { Money } from './money';
 import { MonthNav } from './month-nav';
 import { ShareCard } from './share-card';
 import { ViewHeader } from './view-header';
+import './jobs/jobs.css';
 
 export function EmployeeMonth() {
   const t = useT();
@@ -40,8 +43,11 @@ export function EmployeeMonth() {
   const details = useWorkspaceDetails(ws.id);
   const current = monthIn(ws.timezone);
   const today = todayIn(ws.timezone);
-  const [month, setMonth] = useMonthParam(current);
-  const insights = useMemberInsights(ws.id, ws.membershipId, month);
+  const latest = addMonths(current, PLAN_AHEAD_MONTHS);
+  const [month, setMonth] = useMonthParam(current, latest);
+  // The employer may turn analysis off for employees (CHQ-156): then no insights call, hours and jobs only.
+  const showInsights = ws.my.employeesSeeInsights;
+  const insights = useMemberInsights(ws.id, ws.membershipId, month, showInsights);
   const memberMonth = useMemberMonth(ws.id, ws.membershipId, month);
   // ?day=2026-09-29 (a line of the week view) opens that day, when it belongs to the month shown.
   const dayParam = useSearchParams().get('day');
@@ -49,7 +55,7 @@ export function EmployeeMonth() {
     dayParam && dayParam.slice(0, 7) === month && /^\d{4}-\d{2}-\d{2}$/.test(dayParam) ? dayParam : null,
   );
 
-  const mi = insights.data;
+  const mi = showInsights ? insights.data : undefined;
   const mm = memberMonth.data;
   const monthName = formatMonthName(month, locale, false);
   const employer = ws.my.employerName ? firstName(ws.my.employerName) : '';
@@ -71,11 +77,13 @@ export function EmployeeMonth() {
         sub={`${ws.my.name}. ${employer ? t('month.subtitleMine', { name: employer }) : ''}`}
         actions={
           <>
-            <MonthNav month={month} current={current} onChange={setMonth} />
-            <a className="btn btn-secondary" href="#share-card">
-              <Icon name="share" />
-              {t('month.shareMyMonth')}
-            </a>
+            <MonthNav month={month} current={current} latest={latest} onChange={setMonth} />
+            {showInsights ? (
+              <a className="btn btn-secondary" href="#share-card">
+                <Icon name="share" />
+                {t('month.shareMyMonth')}
+              </a>
+            ) : null}
           </>
         }
       />
@@ -174,6 +182,32 @@ export function EmployeeMonth() {
         </div>
       ) : null}
 
+      {!showInsights && mm ? (
+        <div className="hgrid me-top">
+          <div className="me-hero">
+            <span className="lbl">
+              {month === current
+                ? t('month.hoursInSoFar', { month: monthName })
+                : t('month.hoursIn', { month: monthName })}
+            </span>
+            <div className="val">
+              <span className="num">{formatDuration(mm.totalHours - mm.plannedHours, t)}</span>
+            </div>
+            {mm.plannedHours > 0 ? (
+              <div className="deltas">
+                <span className="muted">
+                  {t('jobs.soFarPlanned', {
+                    hours: formatDuration(mm.totalHours - mm.plannedHours, t),
+                    planned: formatDuration(mm.plannedHours, t),
+                  })}
+                </span>
+              </div>
+            ) : null}
+          </div>
+          <JobsThisMonth days={mm.days} today={today} onSelect={setPicked} />
+        </div>
+      ) : null}
+
       {mm ? (
         <div className="twocol" style={{ marginTop: 16 }}>
           <div className="card pad">
@@ -235,11 +269,11 @@ function DayDetail({
       {day?.hours != null ? (
         <>
           <div className="big">
-            <span className="num">{formatHours(day.hours, locale, { unit: false })}</span>
-            <small>{t('common.hourUnit')}</small>
+            <span className="num">{formatDuration(day.hours, t)}</span>
             <Money amount={day.earnings} currency={ws.currency} showPay={ws.showPay} />
           </div>
-          {day.note ? (
+          <DayJobs ws={ws} date={date} jobs={day.jobs} dayTotal={day.hours} />
+          {day.jobs.length === 0 && day.note ? (
             <div className="note-row">
               <Icon name="note" />
               <div>
@@ -293,6 +327,56 @@ function DayDetail({
         </>
       ) : (
         <p className="empty-day">{t('entry.nothingYet')}</p>
+      )}
+    </div>
+  );
+}
+
+// When analysis is off: the month's days with jobs, newest first, each opening its day (CHQ-156).
+function JobsThisMonth({
+  days,
+  today,
+  onSelect,
+}: {
+  days: readonly MemberMonthDay[];
+  today: IsoDate;
+  onSelect: (date: IsoDate) => void;
+}) {
+  const t = useT();
+  const locale = useLocale();
+  const rows = days.filter((d) => d.hours != null).sort((a, b) => (isoOf(a.date) < isoOf(b.date) ? 1 : -1));
+  return (
+    <div className="card jobs-month">
+      <h2 className="lbl">{t('jobs.jobsThisMonth')}</h2>
+      {rows.length === 0 ? (
+        <p className="muted">{t('entry.nothingYet')}</p>
+      ) : (
+        <ol className="daylist">
+          {rows.map((day) => {
+            const date = isoOf(day.date);
+            const planned = date > today;
+            return (
+              <li key={date}>
+                <button type="button" className="row" onClick={() => onSelect(date)}>
+                  <span className="when" aria-hidden="true">
+                    {formatDate(date, locale, 'weekdayDay')}
+                  </span>
+                  <span className="what">
+                    <span className="note">
+                      {placesOf(day.jobs).join(', ') || t('jobs.jobCount', { count: day.jobs.length })}
+                    </span>
+                    {planned ? (
+                      <span className="meta">
+                        <span>{t('jobs.planned')}</span>
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className={planned ? 'h planned' : 'h'}>{formatDuration(day.hours ?? 0, t)}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
       )}
     </div>
   );

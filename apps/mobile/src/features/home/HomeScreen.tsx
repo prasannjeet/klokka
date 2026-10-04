@@ -17,7 +17,8 @@ import { todayIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, EmptyState, Icon, Pill, PressableCard, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
-import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
+import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
+import { dayActionFor } from '@/features/jobs/dayAction';
 import { PushPrompt } from '@/features/push/PushPrompt';
 
 const styles = (t: Theme) =>
@@ -88,7 +89,7 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
   const entries = useEntries(workspace.workspaceId, addDays(today, -1), today);
   const insights = useWorkspaceInsights(workspace.workspaceId);
   const flags = useFlags(workspace.workspaceId, 'OPEN');
-  const sheet = useRef<AddHoursSheetHandle>(null);
+  const sheet = useRef<JobSheetHandle>(null);
   const people: Member[] = (members.data ?? []).filter(
     (m) => m.role === 'EMPLOYEE' && m.status !== 'DEACTIVATED',
   );
@@ -97,13 +98,21 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
   const stripHours = (date: IsoDate) => currentWeek?.days.find((d) => toIsoDate(d.date) === date)?.hours ?? 0;
 
   const openFor = (member: Member) => {
-    const existing = entryFor(entries.data, member.id, today) ?? null;
+    const action = dayActionFor(entryFor(entries.data, member.id, today));
+    if (action.kind === 'day') {
+      router.push({
+        pathname: '/day/[membershipId]/[date]',
+        params: { membershipId: member.id, date: today },
+      });
+      return;
+    }
     const yesterday = entryFor(entries.data, member.id, addDays(today, -1));
     sheet.current?.open({
       membershipId: member.id,
       memberName: member.displayName,
       date: today,
-      existing,
+      job: action.job,
+      dayHours: action.dayHours,
       yesterdayHours: yesterday?.hours ?? null,
       rounding: settings.data?.rounding ?? 'NONE',
       defaultDayHours: settings.data?.defaultDayHours ?? 8,
@@ -325,7 +334,7 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
           </Card>
         ) : null}
       </Screen>
-      <AddHoursSheet ref={sheet} workspace={workspace} />
+      <JobSheet ref={sheet} workspace={workspace} />
     </>
   );
 }

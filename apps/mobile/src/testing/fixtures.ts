@@ -1,6 +1,7 @@
 import type {
   Entry,
   Flag,
+  Job,
   Me,
   Member,
   MemberInsights,
@@ -39,6 +40,8 @@ export const workspaceFixture: Workspace = {
   activeMemberCount: 4,
   myRole: 'EMPLOYER',
   myMembershipId: 'mem-nora',
+  notifyFlagDeclined: true,
+  employeesSeeInsights: true,
 };
 
 const base = {
@@ -105,6 +108,26 @@ export const membersFixture: Member[] = [
   },
 ];
 
+export function jobFixture(id: string, hours: number, extra: Partial<Job> = {}): Job {
+  return {
+    id,
+    hours,
+    startTime: null,
+    note: null,
+    createdAt: at('2026-09-24T16:00:00Z'),
+    updatedAt: at('2026-09-24T16:00:00Z'),
+    ...extra,
+  };
+}
+
+export const cafeLocation = {
+  placeId: 'place-cafe',
+  name: 'Café Nord',
+  address: 'Kungsgatan 12, Stockholm',
+  latitude: 59.3346,
+  longitude: 18.0632,
+};
+
 export function entryFixture(
   membershipId: string,
   date: string,
@@ -119,6 +142,7 @@ export function entryFixture(
     workDate: d(date),
     hours,
     note: null,
+    jobs: [jobFixture(`job-${membershipId}-${date}`, hours, extra.note ? { note: extra.note } : {})],
     earnings: hours * 165,
     locked: false,
     createdAt: at(`${date}T16:00:00Z`),
@@ -184,11 +208,13 @@ export const memberMonthFixture: MemberMonth = {
         ? { flag: { id: 'flag-1', status: 'OPEN' as const, reason: 'MORE' as const, suggestedHours: 4 } }
         : {}),
       changeCount: hours ? (day === 23 ? 2 : 1) : 0,
+      jobs: hours ? [jobFixture(`job-mem-maria-${iso}`, hours)] : [],
       updatedAt: hours ? at(`${iso}T13:50:00Z`) : null,
       ...(hours ? { updatedBy: nora } : {}),
     };
   }),
   totalHours: 92.5,
+  plannedHours: 0,
   daysWorked: 21,
   workingDays: 22,
   avgPerWorkingDay: 4.6,
@@ -329,7 +355,14 @@ export const employerMeFixture: Me = {
     avatarEmoji: null,
     createdAt: at('2026-05-01T08:00:00Z'),
   },
-  preferences: { language: 'en', pushEnabled: true, digestEnabled: false, theme: 'SYSTEM' },
+  preferences: {
+    language: 'en',
+    pushEnabled: true,
+    digestEnabled: false,
+    theme: 'SYSTEM',
+    jobReminders: true,
+    jobReminderLead: 'HOUR_1',
+  },
   workspaces: [
     {
       workspaceId: WS,
@@ -349,6 +382,8 @@ export const employerMeFixture: Me = {
       memberCount: 4,
       employerName: 'Nora Lind',
       hoursThisMonth: 335.5,
+      notifyFlagDeclined: true,
+      employeesSeeInsights: true,
       unreadNotifications: 1,
     },
   ],

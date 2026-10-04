@@ -202,11 +202,14 @@ export const sv = {
   "entry.sheetTitle": "{name}, i dag",
   "entry.todayLoggedAt": "I dag, loggad {time}",
   "errors.CONFLICT": "Någon ändrade det här samtidigt. Ladda om och försök igen.",
+  "errors.ENTRY_HAS_JOBS": "Den här dagen har flera jobb. Ändra dem ett i taget.",
   "errors.FLAG_ALREADY_OPEN": "Den här posten har redan en öppen flagga.",
   "errors.FORBIDDEN": "Det kan du inte göra i det här företaget.",
   "errors.INTERNAL": "Något gick fel hos oss. Försök igen om en stund.",
   "errors.INVITATION_EMAIL_MISMATCH": "Inbjudan skickades till en annan e-postadress.",
   "errors.INVITATION_EXPIRED": "Inbjudan har gått ut.",
+  "errors.MAPS_NOT_CONFIGURED": "Platser är inte inställda på den här servern.",
+  "errors.MAPS_UNAVAILABLE": "Kartan svarade inte. Försök igen om en stund.",
   "errors.MEMBER_NOT_ACTIVE": "Den här personen är inte aktiv i företaget.",
   "errors.MONTH_LOCKED": "Den här månaden är stängd. Lås upp den först.",
   "errors.NETWORK": "Ingen uppkoppling. Kontrollera nätverket och försök igen.",
@@ -215,7 +218,13 @@ export const sv = {
   "errors.UNAUTHENTICATED": "Din session har gått ut. Logga in igen.",
   "errors.VALIDATION": "Något i formuläret stämmer inte. Kontrollera de markerade fälten.",
   "flags.alreadyOpen": "Den här posten har redan en öppen flagga.",
+  "flags.approve": "Godkänn, ändra till {hours}",
+  "flags.approveAsIs": "Godkänn, {hours} som det är",
+  "flags.changeJobs": "Ändra jobben",
   "flags.changeTo": "Ändra till {hours}",
+  "flags.decline": "Avslå, behåll {hours}",
+  "flags.declineQuiet": "{name} får inget besked när du avslår. Ändra det i Inställningar, Anställda.",
+  "flags.declineTold": "{name} får besked i båda fallen.",
   "flags.entrySays": "h, posten säger {hours}",
   "flags.fixAndTell": "Rätta och berätta för {name}",
   "flags.fixHint": "{name}s post ändras från {before} till {after}, flaggan markeras som åtgärdad och {name} får veta det. Ändringen sparas i postens historik.",
@@ -230,6 +239,7 @@ export const sv = {
   "flags.loggedVsSays": "Loggat {logged}, {name} säger {suggested}",
   "flags.message": "Meddelande",
   "flags.messagePlaceholder": "Jag stannade till stängning, 4 h inte 2.",
+  "flags.oneJob": "Den här dagen har ett jobb. Godkänner du sätts det till {hours}.",
   "flags.openFlags_one": "{count} öppen flagga",
   "flags.openFlags_other": "{count} öppna flaggor",
   "flags.openInGrid": "Öppna i rutnätet",
@@ -247,6 +257,7 @@ export const sv = {
   "flags.sendFlag": "Skicka flagga",
   "flags.sendFlagHint": "{name} får en notis och kan rätta eller avfärda den. Du får veta det oavsett.",
   "flags.setTo": "Sätt till {hours}",
+  "flags.severalJobs": "Den här dagen har {count} jobb. Ändra rätt jobb och godkänn sedan flaggan som den är.",
   "flags.sheetHint": "Loggat {hours}. Berätta för {name} vad det borde vara.",
   "flags.suggests": "{name} föreslår",
   "flags.title": "Flagga",
@@ -294,6 +305,57 @@ export const sv = {
   "invitation.wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
   "invitation.youHaveBeenInvited": "Du har bjudits in av {workspace}",
   "invitation.yourEmail": "Din e-post",
+  "jobs.addAnother": "Lägg till ett jobb till",
+  "jobs.addJob": "Lägg till ett jobb",
+  "jobs.addJobFor": "Lägg till ett jobb för {name}",
+  "jobs.change": "Byt",
+  "jobs.chooseTimeFirst": "Välj tiden först",
+  "jobs.dayTotalSoFar": "{date}, dagens summa hittills {duration}",
+  "jobs.directions": "Vägbeskrivning",
+  "jobs.directionsInMaps": "Vägbeskrivning i Google Maps",
+  "jobs.edit": "Ändra",
+  "jobs.editJobFor": "Jobb för {name}",
+  "jobs.flagThisDay": "Stämmer något inte? Flagga dagen",
+  "jobs.flagThisDayHint": "Din arbetsgivare ser flaggan och svarar på den.",
+  "jobs.freeDay": "Ledig dag, tryck för att planera",
+  "jobs.futureOpen": "Kommande veckor går att planera.",
+  "jobs.history": "Historik: {summary}",
+  "jobs.jobCount_one": "{count} jobb",
+  "jobs.jobCount_other": "{count} jobb",
+  "jobs.jobNumber": "Jobb {number}",
+  "jobs.jobsThisMonth": "Jobb den här månaden",
+  "jobs.location": "Plats",
+  "jobs.monthClosed": "{month} är stängd. Lås upp den för att lägga till eller ändra jobb.",
+  "jobs.monthOpen": "Månaden är öppen",
+  "jobs.myDay": "Min dag",
+  "jobs.newJobFor": "Nytt jobb för {name}",
+  "jobs.nextDay": "Nästa dag",
+  "jobs.nextUp": "Nästa: {date}",
+  "jobs.noJobs": "Inga jobb den här dagen",
+  "jobs.noJobsEmployee": "Inget den här dagen.",
+  "jobs.noJobsHint": "Lägg till vad {name} jobbade, eller planera ett jobb i förväg. Varje jobb har egen tid, plats och anteckning.",
+  "jobs.noLocation": "Ingen plats",
+  "jobs.noStartNoReminder": "Ingen starttid: {name} får ingen påminnelse för det här jobbet.",
+  "jobs.notSet": "Inte satt",
+  "jobs.onePerCellHint": "En dag med ett jobb eller inget: skriv timmarna direkt i rutan.",
+  "jobs.placeCount_one": "{count} plats",
+  "jobs.placeCount_other": "{count} platser",
+  "jobs.planned": "Planerat",
+  "jobs.previousDay": "Föregående dag",
+  "jobs.removeConfirm": "Ta bort jobbet?",
+  "jobs.removeJob": "Ta bort jobbet",
+  "jobs.removed": "Jobbet är borttaget.",
+  "jobs.runsReminder": "Pågår {from} till {to}. {name} får en påminnelse innan det börjar.",
+  "jobs.saveJob": "Spara jobbet, {duration}",
+  "jobs.saved": "Sparade {duration} för {name}.",
+  "jobs.severalJobsCell": "En dag med två jobb eller fler visar summan; öppna den för att ändra jobben.",
+  "jobs.soFarPlanned": "{hours} hittills, {planned} planerat",
+  "jobs.startsAt": "Börjar",
+  "jobs.tapAnyDay": "Klicka på en dag för att lägga till eller ändra jobb, bakåt eller framåt.",
+  "jobs.timeRange": "{from} till {to}",
+  "jobs.title": "Jobb",
+  "jobs.today": "I dag",
+  "jobs.worked": "Arbetat",
   "mobile.auth.signInFailed": "Inloggningen gick inte igenom. Försök igen.",
   "mobile.chooseWorkspace.hint_one": "Du tillhör {count} företag. Byt när som helst från Profil.",
   "mobile.chooseWorkspace.hint_other": "Du tillhör {count} företag. Byt när som helst från Profil.",
@@ -335,6 +397,7 @@ export const sv = {
   "mobile.push.bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
   "mobile.push.channelFlags": "Flaggor",
   "mobile.push.channelHours": "Timmar",
+  "mobile.push.channelReminders": "Jobbpåminnelser",
   "mobile.push.channelWorkspace": "Företag",
   "mobile.push.enable": "Slå på notiser",
   "mobile.push.title": "Få veta direkt när dina timmar ändras",
@@ -454,6 +517,16 @@ export const sv = {
   "notifications.hours.reverted": "{name} ändrade dina timmar och ändrade tillbaka",
   "notifications.inviteAccepted.body": "{workspace}: {name} är nu anställd",
   "notifications.inviteAccepted.title": "{name} accepterade din inbjudan",
+  "notifications.jobReminder.body": "{workspace}: börjar {time}, {hours}.",
+  "notifications.jobReminder.bodyAddress": "{workspace}: börjar {time}, {hours}. {address}",
+  "notifications.jobReminder.in120": "2 timmar",
+  "notifications.jobReminder.in15": "15 minuter",
+  "notifications.jobReminder.in30": "30 minuter",
+  "notifications.jobReminder.in60": "1 timme",
+  "notifications.jobReminder.title": "Jobb om {lead}",
+  "notifications.jobReminder.titlePlace": "Jobb på {place} om {lead}",
+  "notifications.jobReminder.titlePlaceTomorrow": "Jobb på {place} i morgon kl. {time}",
+  "notifications.jobReminder.titleTomorrow": "Jobb i morgon kl. {time}",
   "notifications.markAllRead": "Markera alla som lästa",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -587,6 +660,19 @@ export const sv = {
   "overview.weekdayDistribution": "Fördelning per veckodag",
   "overview.weekdaysLeft_one": "{count} vardag",
   "overview.weekdaysLeft_other": "{count} vardagar",
+  "places.locationDenied": "Klokka får inte använda din plats. Sök efter platsen i stället.",
+  "places.mapOf": "Karta över {place}",
+  "places.noResults": "Inga platser matchar.",
+  "places.none": "Ingen plats för det här jobbet",
+  "places.poweredBy": "Platser från Google",
+  "places.recent": "Senaste platser",
+  "places.results": "Resultat",
+  "places.saveWithout": "Spara utan plats",
+  "places.search": "Sök en adress eller en plats",
+  "places.title": "Jobbets plats",
+  "places.use": "Använd {name}",
+  "places.useHere": "Använd där jag är nu",
+  "places.useHereHint": "Frågar efter din plats en gång",
   "profile.avatar": "Avatar",
   "profile.avatarHint": "Ett foto eller en emoji. Din arbetsgivare ser den bredvid ditt namn.",
   "profile.editProfile": "Redigera profil",
@@ -609,6 +695,18 @@ export const sv = {
   "profile.uploadPhoto": "Ladda upp foto",
   "profile.uploadPhotoHint": "JPG eller PNG, beskuret kvadratiskt.",
   "profile.workspaces": "Företag",
+  "reminders.default": "Standard",
+  "reminders.hint": "Påminnelser kommer som en notis i telefonen för jobb med starttid. Din arbetsgivare kan inte se eller ändra det här.",
+  "reminders.howEarly": "Hur tidigt",
+  "reminders.lead.DAY_BEFORE": "Dagen innan, samma tid",
+  "reminders.lead.HOURS_2": "2 timmar innan",
+  "reminders.lead.HOUR_1": "1 timme innan",
+  "reminders.lead.MINUTES_15": "15 minuter innan",
+  "reminders.lead.MINUTES_30": "30 minuter innan",
+  "reminders.off": "Av. Du får inga påminnelser före jobb.",
+  "reminders.on": "På, {lead}.",
+  "reminders.title": "Jobbpåminnelser",
+  "reminders.toggle": "Påminn mig innan ett jobb börjar",
   "role.employee": "Anställd",
   "role.employeeAtWorkspaces_one": "Anställd på {count} företag",
   "role.employeeAtWorkspaces_other": "Anställd på {count} företag",
@@ -627,6 +725,10 @@ export const sv = {
   "settings.defaultDayLengthHint": "Det som knappen Hel dag fyller i.",
   "settings.defaultDayLengthLabel": "Standardlängd på en dag i timmar",
   "settings.digestTo": "Till {email}",
+  "settings.employees": "Anställda",
+  "settings.employeesSeeInsights": "Visa analys för anställda",
+  "settings.employeesSeeInsightsOff": "Anställda ser sina timmar och jobb, utan snitt, trender eller prognos.",
+  "settings.employeesSeeInsightsOn": "Snitt, trender och månadsprognos på deras månadssida.",
   "settings.english": "English",
   "settings.followDevice": "Följ enheten",
   "settings.fullDay": "Hel dag",
@@ -637,6 +739,9 @@ export const sv = {
   "settings.languageHint": "Appen och varje notis, även push när telefonen är låst.",
   "settings.light": "Ljust",
   "settings.notifications": "Notiser",
+  "settings.notifyDeclined": "Berätta för anställda när du avslår en flagga",
+  "settings.notifyDeclinedOff": "En avslagen flagga stängs i tysthet. En godkänd ändring berättas alltid.",
+  "settings.notifyDeclinedOn": "De får en notis med ditt svar. En godkänd ändring berättas alltid.",
   "settings.pay": "Lön",
   "settings.push": "Push",
   "settings.pushDevice": "Android-appen, inloggad på det här kontot",
@@ -814,6 +919,7 @@ export const sv = {
   "web.operator.kind.FLAG_RESOLVED": "Flagga löst",
   "web.operator.kind.HOURS_CHANGED": "Timmar tillagda eller ändrade",
   "web.operator.kind.INVITE_ACCEPTED": "Inbjudan accepterad",
+  "web.operator.kind.JOB_REMINDER": "Jobbpåminnelser",
   "web.operator.kind.MONTH_CLOSED": "Månad stängd",
   "web.operator.kind.MONTH_REOPENED": "Månad öppnad igen",
   "web.operator.navigation": "Operatörsnavigering",
@@ -1160,11 +1266,14 @@ export const en = {
   "entry.sheetTitle": "{name}, today",
   "entry.todayLoggedAt": "Today, logged {time}",
   "errors.CONFLICT": "Someone changed this at the same time. Reload and try again.",
+  "errors.ENTRY_HAS_JOBS": "This day has several jobs. Change them one by one.",
   "errors.FLAG_ALREADY_OPEN": "This entry already has an open flag.",
   "errors.FORBIDDEN": "You cannot do that in this business.",
   "errors.INTERNAL": "Something went wrong on our side. Try again in a moment.",
   "errors.INVITATION_EMAIL_MISMATCH": "The invitation was sent to another email address.",
   "errors.INVITATION_EXPIRED": "The invitation has expired.",
+  "errors.MAPS_NOT_CONFIGURED": "Locations are not set up on this server.",
+  "errors.MAPS_UNAVAILABLE": "Maps did not answer. Try again in a moment.",
   "errors.MEMBER_NOT_ACTIVE": "This person is not active in the business.",
   "errors.MONTH_LOCKED": "This month is closed. Unlock it first.",
   "errors.NETWORK": "No connection. Check your network and try again.",
@@ -1173,7 +1282,13 @@ export const en = {
   "errors.UNAUTHENTICATED": "Your session has ended. Sign in again.",
   "errors.VALIDATION": "Something in the form is not right. Check the highlighted fields.",
   "flags.alreadyOpen": "This entry already has an open flag.",
+  "flags.approve": "Approve, change to {hours}",
+  "flags.approveAsIs": "Approve, {hours} as it stands",
+  "flags.changeJobs": "Change the jobs",
   "flags.changeTo": "Change to {hours}",
+  "flags.decline": "Decline, keep {hours}",
+  "flags.declineQuiet": "{name} is not told when you decline. Change this in Settings, Employees.",
+  "flags.declineTold": "{name} is told either way.",
   "flags.entrySays": "h, the entry says {hours}",
   "flags.fixAndTell": "Fix and tell {name}",
   "flags.fixHint": "{name}'s entry changes from {before} to {after}, the flag is marked as fixed and {name} is told. The change is kept in the entry's history.",
@@ -1188,6 +1303,7 @@ export const en = {
   "flags.loggedVsSays": "Logged {logged}, {name} says {suggested}",
   "flags.message": "Message",
   "flags.messagePlaceholder": "I stayed until closing, 4 h not 2.",
+  "flags.oneJob": "This day has one job. Approving sets it to {hours}.",
   "flags.openFlags_one": "{count} open flag",
   "flags.openFlags_other": "{count} open flags",
   "flags.openInGrid": "Open in the grid",
@@ -1205,6 +1321,7 @@ export const en = {
   "flags.sendFlag": "Send flag",
   "flags.sendFlagHint": "{name} gets a notification and can fix or dismiss it. You are told either way.",
   "flags.setTo": "Set to {hours}",
+  "flags.severalJobs": "This day has {count} jobs. Change the right one, then approve the flag as it stands.",
   "flags.sheetHint": "Logged {hours}. Tell {name} what it should be.",
   "flags.suggests": "{name} suggests",
   "flags.title": "Flag",
@@ -1252,6 +1369,57 @@ export const en = {
   "invitation.wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
   "invitation.youHaveBeenInvited": "You have been invited by {workspace}",
   "invitation.yourEmail": "Your email",
+  "jobs.addAnother": "Add another job",
+  "jobs.addJob": "Add a job",
+  "jobs.addJobFor": "Add a job for {name}",
+  "jobs.change": "Change",
+  "jobs.chooseTimeFirst": "Choose the time first",
+  "jobs.dayTotalSoFar": "{date}, day total {duration} so far",
+  "jobs.directions": "Directions",
+  "jobs.directionsInMaps": "Directions in Google Maps",
+  "jobs.edit": "Edit",
+  "jobs.editJobFor": "Job for {name}",
+  "jobs.flagThisDay": "Something wrong? Flag this day",
+  "jobs.flagThisDayHint": "Your employer sees your flag and answers it.",
+  "jobs.freeDay": "Free day, tap to plan",
+  "jobs.futureOpen": "Future weeks are open for planning.",
+  "jobs.history": "History: {summary}",
+  "jobs.jobCount_one": "{count} job",
+  "jobs.jobCount_other": "{count} jobs",
+  "jobs.jobNumber": "Job {number}",
+  "jobs.jobsThisMonth": "Jobs this month",
+  "jobs.location": "Location",
+  "jobs.monthClosed": "{month} is closed. Unlock it to add or change jobs.",
+  "jobs.monthOpen": "Month open",
+  "jobs.myDay": "My day",
+  "jobs.newJobFor": "New job for {name}",
+  "jobs.nextDay": "Next day",
+  "jobs.nextUp": "Next: {date}",
+  "jobs.noJobs": "No jobs on this day",
+  "jobs.noJobsEmployee": "Nothing on this day.",
+  "jobs.noJobsHint": "Add what {name} worked, or plan a job ahead. Each job has its own time, place and note.",
+  "jobs.noLocation": "No location",
+  "jobs.noStartNoReminder": "No start time: {name} gets no reminder for this job.",
+  "jobs.notSet": "Not set",
+  "jobs.onePerCellHint": "A day with one job or none: type the hours right in the cell.",
+  "jobs.placeCount_one": "{count} place",
+  "jobs.placeCount_other": "{count} places",
+  "jobs.planned": "Planned",
+  "jobs.previousDay": "Previous day",
+  "jobs.removeConfirm": "Remove this job?",
+  "jobs.removeJob": "Remove job",
+  "jobs.removed": "Job removed.",
+  "jobs.runsReminder": "Runs {from} to {to}. {name} gets a reminder before it starts.",
+  "jobs.saveJob": "Save job, {duration}",
+  "jobs.saved": "Saved {duration} for {name}.",
+  "jobs.severalJobsCell": "A day with two or more jobs shows its total; open it to change the jobs.",
+  "jobs.soFarPlanned": "{hours} so far, {planned} planned",
+  "jobs.startsAt": "Starts at",
+  "jobs.tapAnyDay": "Click any day to add or change jobs, past or future.",
+  "jobs.timeRange": "{from} to {to}",
+  "jobs.title": "Jobs",
+  "jobs.today": "Today",
+  "jobs.worked": "Worked",
   "mobile.auth.signInFailed": "Sign-in did not go through. Try again.",
   "mobile.chooseWorkspace.hint_one": "You belong to {count} business. Switch any time from Profile.",
   "mobile.chooseWorkspace.hint_other": "You belong to {count} businesses. Switch any time from Profile.",
@@ -1293,6 +1461,7 @@ export const en = {
   "mobile.push.bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
   "mobile.push.channelFlags": "Flags",
   "mobile.push.channelHours": "Hours",
+  "mobile.push.channelReminders": "Job reminders",
   "mobile.push.channelWorkspace": "Business",
   "mobile.push.enable": "Turn on notifications",
   "mobile.push.title": "Know the moment your hours change",
@@ -1412,6 +1581,16 @@ export const en = {
   "notifications.hours.reverted": "{name} changed your hours and put them back",
   "notifications.inviteAccepted.body": "{workspace}: {name} is now an employee",
   "notifications.inviteAccepted.title": "{name} accepted your invitation",
+  "notifications.jobReminder.body": "{workspace}: starts {time}, {hours}.",
+  "notifications.jobReminder.bodyAddress": "{workspace}: starts {time}, {hours}. {address}",
+  "notifications.jobReminder.in120": "2 hours",
+  "notifications.jobReminder.in15": "15 minutes",
+  "notifications.jobReminder.in30": "30 minutes",
+  "notifications.jobReminder.in60": "1 hour",
+  "notifications.jobReminder.title": "Job in {lead}",
+  "notifications.jobReminder.titlePlace": "Job at {place} in {lead}",
+  "notifications.jobReminder.titlePlaceTomorrow": "Job at {place} tomorrow at {time}",
+  "notifications.jobReminder.titleTomorrow": "Job tomorrow at {time}",
   "notifications.markAllRead": "Mark all as read",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -1545,6 +1724,19 @@ export const en = {
   "overview.weekdayDistribution": "Weekday distribution",
   "overview.weekdaysLeft_one": "{count} weekday",
   "overview.weekdaysLeft_other": "{count} weekdays",
+  "places.locationDenied": "Klokka may not use your location. Search for the place instead.",
+  "places.mapOf": "Map of {place}",
+  "places.noResults": "No places match that.",
+  "places.none": "No location for this job",
+  "places.poweredBy": "Places by Google",
+  "places.recent": "Recent places",
+  "places.results": "Results",
+  "places.saveWithout": "Save without a location",
+  "places.search": "Search an address or a place",
+  "places.title": "Job location",
+  "places.use": "Use {name}",
+  "places.useHere": "Use where I am now",
+  "places.useHereHint": "Asks for your location once",
   "profile.avatar": "Avatar",
   "profile.avatarHint": "A photo or an emoji. Your employer sees it next to your name.",
   "profile.editProfile": "Edit profile",
@@ -1567,6 +1759,18 @@ export const en = {
   "profile.uploadPhoto": "Upload photo",
   "profile.uploadPhotoHint": "JPG or PNG, cropped square.",
   "profile.workspaces": "Businesses",
+  "reminders.default": "Default",
+  "reminders.hint": "Reminders come as a phone notification for jobs with a start time. Your employer cannot see or change this.",
+  "reminders.howEarly": "How early",
+  "reminders.lead.DAY_BEFORE": "The day before, same time",
+  "reminders.lead.HOURS_2": "2 hours before",
+  "reminders.lead.HOUR_1": "1 hour before",
+  "reminders.lead.MINUTES_15": "15 minutes before",
+  "reminders.lead.MINUTES_30": "30 minutes before",
+  "reminders.off": "Off. You get no reminders before jobs.",
+  "reminders.on": "On, {lead}.",
+  "reminders.title": "Job reminders",
+  "reminders.toggle": "Remind me before a job starts",
   "role.employee": "Employee",
   "role.employeeAtWorkspaces_one": "Employee at {count} business",
   "role.employeeAtWorkspaces_other": "Employee at {count} businesses",
@@ -1585,6 +1789,10 @@ export const en = {
   "settings.defaultDayLengthHint": "What the Full day chip fills in.",
   "settings.defaultDayLengthLabel": "Default day length in hours",
   "settings.digestTo": "To {email}",
+  "settings.employees": "Employees",
+  "settings.employeesSeeInsights": "Show analysis to employees",
+  "settings.employeesSeeInsightsOff": "Employees see their hours and jobs, without averages, trends or the forecast.",
+  "settings.employeesSeeInsightsOn": "Averages, trends and the month forecast on their month page.",
   "settings.english": "English",
   "settings.followDevice": "Follow device",
   "settings.fullDay": "Full day",
@@ -1595,6 +1803,9 @@ export const en = {
   "settings.languageHint": "The app and every notification, including push while your phone is locked.",
   "settings.light": "Light",
   "settings.notifications": "Notifications",
+  "settings.notifyDeclined": "Tell employees when you decline a flag",
+  "settings.notifyDeclinedOff": "A declined flag closes quietly. An approved change is always shared.",
+  "settings.notifyDeclinedOn": "They get a notification with your reply. An approved change is always shared.",
   "settings.pay": "Pay",
   "settings.push": "Push",
   "settings.pushDevice": "Android app, signed in on this account",
@@ -1772,6 +1983,7 @@ export const en = {
   "web.operator.kind.FLAG_RESOLVED": "Flag resolved",
   "web.operator.kind.HOURS_CHANGED": "Hours added or changed",
   "web.operator.kind.INVITE_ACCEPTED": "Invitation accepted",
+  "web.operator.kind.JOB_REMINDER": "Job reminders",
   "web.operator.kind.MONTH_CLOSED": "Month closed",
   "web.operator.kind.MONTH_REOPENED": "Month reopened",
   "web.operator.navigation": "Operator navigation",
@@ -2115,11 +2327,14 @@ export type MessageParams = {
   "entry.sheetTitle": { name: string | number };
   "entry.todayLoggedAt": { time: string | number };
   "errors.CONFLICT": Record<never, never>;
+  "errors.ENTRY_HAS_JOBS": Record<never, never>;
   "errors.FLAG_ALREADY_OPEN": Record<never, never>;
   "errors.FORBIDDEN": Record<never, never>;
   "errors.INTERNAL": Record<never, never>;
   "errors.INVITATION_EMAIL_MISMATCH": Record<never, never>;
   "errors.INVITATION_EXPIRED": Record<never, never>;
+  "errors.MAPS_NOT_CONFIGURED": Record<never, never>;
+  "errors.MAPS_UNAVAILABLE": Record<never, never>;
   "errors.MEMBER_NOT_ACTIVE": Record<never, never>;
   "errors.MONTH_LOCKED": Record<never, never>;
   "errors.NETWORK": Record<never, never>;
@@ -2128,7 +2343,13 @@ export type MessageParams = {
   "errors.UNAUTHENTICATED": Record<never, never>;
   "errors.VALIDATION": Record<never, never>;
   "flags.alreadyOpen": Record<never, never>;
+  "flags.approve": { hours: string | number };
+  "flags.approveAsIs": { hours: string | number };
+  "flags.changeJobs": Record<never, never>;
   "flags.changeTo": { hours: string | number };
+  "flags.decline": { hours: string | number };
+  "flags.declineQuiet": { name: string | number };
+  "flags.declineTold": { name: string | number };
   "flags.entrySays": { hours: string | number };
   "flags.fixAndTell": { name: string | number };
   "flags.fixHint": { after: string | number; before: string | number; name: string | number };
@@ -2143,6 +2364,7 @@ export type MessageParams = {
   "flags.loggedVsSays": { logged: string | number; name: string | number; suggested: string | number };
   "flags.message": Record<never, never>;
   "flags.messagePlaceholder": Record<never, never>;
+  "flags.oneJob": { hours: string | number };
   "flags.openFlags": { count: string | number };
   "flags.openInGrid": Record<never, never>;
   "flags.raised": { when: string | number };
@@ -2159,6 +2381,7 @@ export type MessageParams = {
   "flags.sendFlag": Record<never, never>;
   "flags.sendFlagHint": { name: string | number };
   "flags.setTo": { hours: string | number };
+  "flags.severalJobs": { count: string | number };
   "flags.sheetHint": { hours: string | number; name: string | number };
   "flags.suggests": { name: string | number };
   "flags.title": Record<never, never>;
@@ -2205,6 +2428,55 @@ export type MessageParams = {
   "invitation.wrongAccount": { email: string | number };
   "invitation.youHaveBeenInvited": { workspace: string | number };
   "invitation.yourEmail": Record<never, never>;
+  "jobs.addAnother": Record<never, never>;
+  "jobs.addJob": Record<never, never>;
+  "jobs.addJobFor": { name: string | number };
+  "jobs.change": Record<never, never>;
+  "jobs.chooseTimeFirst": Record<never, never>;
+  "jobs.dayTotalSoFar": { date: string | number; duration: string | number };
+  "jobs.directions": Record<never, never>;
+  "jobs.directionsInMaps": Record<never, never>;
+  "jobs.edit": Record<never, never>;
+  "jobs.editJobFor": { name: string | number };
+  "jobs.flagThisDay": Record<never, never>;
+  "jobs.flagThisDayHint": Record<never, never>;
+  "jobs.freeDay": Record<never, never>;
+  "jobs.futureOpen": Record<never, never>;
+  "jobs.history": { summary: string | number };
+  "jobs.jobCount": { count: string | number };
+  "jobs.jobNumber": { number: string | number };
+  "jobs.jobsThisMonth": Record<never, never>;
+  "jobs.location": Record<never, never>;
+  "jobs.monthClosed": { month: string | number };
+  "jobs.monthOpen": Record<never, never>;
+  "jobs.myDay": Record<never, never>;
+  "jobs.newJobFor": { name: string | number };
+  "jobs.nextDay": Record<never, never>;
+  "jobs.nextUp": { date: string | number };
+  "jobs.noJobs": Record<never, never>;
+  "jobs.noJobsEmployee": Record<never, never>;
+  "jobs.noJobsHint": { name: string | number };
+  "jobs.noLocation": Record<never, never>;
+  "jobs.noStartNoReminder": { name: string | number };
+  "jobs.notSet": Record<never, never>;
+  "jobs.onePerCellHint": Record<never, never>;
+  "jobs.placeCount": { count: string | number };
+  "jobs.planned": Record<never, never>;
+  "jobs.previousDay": Record<never, never>;
+  "jobs.removeConfirm": Record<never, never>;
+  "jobs.removeJob": Record<never, never>;
+  "jobs.removed": Record<never, never>;
+  "jobs.runsReminder": { from: string | number; name: string | number; to: string | number };
+  "jobs.saveJob": { duration: string | number };
+  "jobs.saved": { duration: string | number; name: string | number };
+  "jobs.severalJobsCell": Record<never, never>;
+  "jobs.soFarPlanned": { hours: string | number; planned: string | number };
+  "jobs.startsAt": Record<never, never>;
+  "jobs.tapAnyDay": Record<never, never>;
+  "jobs.timeRange": { from: string | number; to: string | number };
+  "jobs.title": Record<never, never>;
+  "jobs.today": Record<never, never>;
+  "jobs.worked": Record<never, never>;
   "mobile.auth.signInFailed": Record<never, never>;
   "mobile.chooseWorkspace.hint": { count: string | number };
   "mobile.chooseWorkspace.rolesHint": Record<never, never>;
@@ -2245,6 +2517,7 @@ export type MessageParams = {
   "mobile.push.bodyEmployer": Record<never, never>;
   "mobile.push.channelFlags": Record<never, never>;
   "mobile.push.channelHours": Record<never, never>;
+  "mobile.push.channelReminders": Record<never, never>;
   "mobile.push.channelWorkspace": Record<never, never>;
   "mobile.push.enable": Record<never, never>;
   "mobile.push.title": Record<never, never>;
@@ -2358,6 +2631,16 @@ export type MessageParams = {
   "notifications.hours.reverted": { name: string | number };
   "notifications.inviteAccepted.body": { name: string | number; workspace: string | number };
   "notifications.inviteAccepted.title": { name: string | number };
+  "notifications.jobReminder.body": { hours: string | number; time: string | number; workspace: string | number };
+  "notifications.jobReminder.bodyAddress": { address: string | number; hours: string | number; time: string | number; workspace: string | number };
+  "notifications.jobReminder.in120": Record<never, never>;
+  "notifications.jobReminder.in15": Record<never, never>;
+  "notifications.jobReminder.in30": Record<never, never>;
+  "notifications.jobReminder.in60": Record<never, never>;
+  "notifications.jobReminder.title": { lead: string | number };
+  "notifications.jobReminder.titlePlace": { lead: string | number; place: string | number };
+  "notifications.jobReminder.titlePlaceTomorrow": { place: string | number; time: string | number };
+  "notifications.jobReminder.titleTomorrow": { time: string | number };
   "notifications.markAllRead": Record<never, never>;
   "notifications.monthClosed.body": { hours: string | number; money: string | number; workspace: string | number };
   "notifications.monthClosed.bodyHoursOnly": { hours: string | number; workspace: string | number };
@@ -2487,6 +2770,19 @@ export type MessageParams = {
   "overview.weekByWeek": Record<never, never>;
   "overview.weekdayDistribution": Record<never, never>;
   "overview.weekdaysLeft": { count: string | number };
+  "places.locationDenied": Record<never, never>;
+  "places.mapOf": { place: string | number };
+  "places.noResults": Record<never, never>;
+  "places.none": Record<never, never>;
+  "places.poweredBy": Record<never, never>;
+  "places.recent": Record<never, never>;
+  "places.results": Record<never, never>;
+  "places.saveWithout": Record<never, never>;
+  "places.search": Record<never, never>;
+  "places.title": Record<never, never>;
+  "places.use": { name: string | number };
+  "places.useHere": Record<never, never>;
+  "places.useHereHint": Record<never, never>;
   "profile.avatar": Record<never, never>;
   "profile.avatarHint": Record<never, never>;
   "profile.editProfile": Record<never, never>;
@@ -2509,6 +2805,18 @@ export type MessageParams = {
   "profile.uploadPhoto": Record<never, never>;
   "profile.uploadPhotoHint": Record<never, never>;
   "profile.workspaces": Record<never, never>;
+  "reminders.default": Record<never, never>;
+  "reminders.hint": Record<never, never>;
+  "reminders.howEarly": Record<never, never>;
+  "reminders.lead.DAY_BEFORE": Record<never, never>;
+  "reminders.lead.HOURS_2": Record<never, never>;
+  "reminders.lead.HOUR_1": Record<never, never>;
+  "reminders.lead.MINUTES_15": Record<never, never>;
+  "reminders.lead.MINUTES_30": Record<never, never>;
+  "reminders.off": Record<never, never>;
+  "reminders.on": { lead: string | number };
+  "reminders.title": Record<never, never>;
+  "reminders.toggle": Record<never, never>;
   "role.employee": Record<never, never>;
   "role.employeeAtWorkspaces": { count: string | number };
   "role.employeeLoggedBy": { name: string | number };
@@ -2525,6 +2833,10 @@ export type MessageParams = {
   "settings.defaultDayLengthHint": Record<never, never>;
   "settings.defaultDayLengthLabel": Record<never, never>;
   "settings.digestTo": { email: string | number };
+  "settings.employees": Record<never, never>;
+  "settings.employeesSeeInsights": Record<never, never>;
+  "settings.employeesSeeInsightsOff": Record<never, never>;
+  "settings.employeesSeeInsightsOn": Record<never, never>;
   "settings.english": Record<never, never>;
   "settings.followDevice": Record<never, never>;
   "settings.fullDay": Record<never, never>;
@@ -2535,6 +2847,9 @@ export type MessageParams = {
   "settings.languageHint": Record<never, never>;
   "settings.light": Record<never, never>;
   "settings.notifications": Record<never, never>;
+  "settings.notifyDeclined": Record<never, never>;
+  "settings.notifyDeclinedOff": Record<never, never>;
+  "settings.notifyDeclinedOn": Record<never, never>;
   "settings.pay": Record<never, never>;
   "settings.push": Record<never, never>;
   "settings.pushDevice": Record<never, never>;
@@ -2710,6 +3025,7 @@ export type MessageParams = {
   "web.operator.kind.FLAG_RESOLVED": Record<never, never>;
   "web.operator.kind.HOURS_CHANGED": Record<never, never>;
   "web.operator.kind.INVITE_ACCEPTED": Record<never, never>;
+  "web.operator.kind.JOB_REMINDER": Record<never, never>;
   "web.operator.kind.MONTH_CLOSED": Record<never, never>;
   "web.operator.kind.MONTH_REOPENED": Record<never, never>;
   "web.operator.navigation": Record<never, never>;
@@ -2860,6 +3176,8 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "entry.editedTimes",
   "flags.openFlags",
   "insights.streakDays",
+  "jobs.jobCount",
+  "jobs.placeCount",
   "mobile.chooseWorkspace.hint",
   "month.daysNewestFirst",
   "month.workingDays",

@@ -132,6 +132,9 @@ export function WeekView() {
     (key: string) => lockedMonths.has(monthOf(splitKey(key).date)) || entryByKey.get(key)?.locked === true,
     [lockedMonths, entryByKey],
   );
+  // A day with several jobs is not typed into (CHQ-156): chips, fill and the note leave it alone too.
+  const jobCount = useCallback((key: string) => entryByKey.get(key)?.jobs.length ?? 0, [entryByKey]);
+  const isFixed = useCallback((key: string) => isLocked(key) || jobCount(key) > 1, [isLocked, jobCount]);
 
   // Leaving the page with unsaved edits asks first (the browser's own dialog).
   useEffect(() => {
@@ -225,7 +228,7 @@ export function WeekView() {
       toast({ title: t('web.week.selectFirst'), body: t('web.week.selectFirstBody'), icon: 'info' });
       return null;
     }
-    if (isLocked(selected)) return null;
+    if (isFixed(selected)) return null;
     return selected;
   }
 
@@ -251,7 +254,7 @@ export function WeekView() {
   function fillWeek() {
     const key = needSelection();
     if (!key) return;
-    const targets = fillKeys(state, splitKey(key).membershipId, dates).filter((k) => !isLocked(k));
+    const targets = fillKeys(state, splitKey(key).membershipId, dates).filter((k) => !isFixed(k));
     if (targets.length === 0) {
       toast({ title: t('week.fillWeek'), body: t('web.week.nothingToFill'), icon: 'info' });
     } else {
@@ -280,7 +283,7 @@ export function WeekView() {
   const selectedNote = selected ? effective(state, selected).note : null;
   const lockedMonth = months.find((m) => lockedMonths.has(m));
   const allLocked = dates.every((d) => lockedMonths.has(monthOf(d)));
-  const chipsDisabled = allLocked || (selected !== null && isLocked(selected));
+  const chipsDisabled = allLocked || (selected !== null && isFixed(selected));
   const invalid = hasInvalid(state);
   const week = isoWeek(dates[weekStart === 'MONDAY' ? 0 : 1] as IsoDate).week;
   const dirtyPeople = [...new Set(dirty.map((k) => splitKey(k).membershipId))];
@@ -427,8 +430,15 @@ export function WeekView() {
             onSelect={setSelected}
             dispatch={dispatch}
             rounding={rounding}
+            jobCount={jobCount}
+            onOpenDay={(membershipId, date) =>
+              router.push(`/w/${ws.slug}/month?member=${membershipId}&month=${monthOf(date)}&day=${date}`)
+            }
           />
         )}
+        {(entries.data ?? []).some((e) => e.jobs.length > 1) ? (
+          <p className="wg-hint">{t('jobs.severalJobsCell')}</p>
+        ) : null}
 
         {noteOpen && selectedInfo ? (
           <div className="notebox">

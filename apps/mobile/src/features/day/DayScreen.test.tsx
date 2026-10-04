@@ -1,7 +1,16 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { DayScreen } from './DayScreen';
 import { fakeApi, meFixture, renderApp } from '@/testing/render';
-import { employerMeFixture, entryFixture, flagFixture, workspaceFixture } from '@/testing/fixtures';
+import {
+  cafeLocation,
+  employerMeFixture,
+  entryFixture,
+  flagFixture,
+  jobFixture,
+  memberMonthFixture,
+  membersFixture,
+  workspaceFixture,
+} from '@/testing/fixtures';
 import { routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
 
@@ -38,11 +47,13 @@ describe('DayScreen', () => {
       listEntries: [entry],
       getEntryHistory: history,
       getWorkspace: workspaceFixture,
+      getMemberMonth: memberMonthFixture,
       raiseFlag: {},
     });
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
-    expect(await screen.findByText('6.5')).toBeTruthy();
+    expect((await screen.findAllByText('6 h 30 min')).length).toBe(2);
     expect(screen.getByText('Edited once')).toBeTruthy();
+    expect(screen.getByText('My day')).toBeTruthy();
     expect(screen.getByText('"Delivery day, stayed to unload."')).toBeTruthy();
     expect(screen.getByText('Nora Lind changed 6 h to 6.5 h')).toBeTruthy();
     expect(screen.getByText('Nora Lind logged 6 h')).toBeTruthy();
@@ -60,18 +71,98 @@ describe('DayScreen', () => {
     );
   });
 
-  it('employer: the edit button opens the sheet pre-filled with the entry', async () => {
+  it('employer: a job card shows its place and time, and Edit opens the sheet with the job', async () => {
+    const withPlace = entryFixture('mem-maria', '2026-09-23', 6.5, {
+      jobs: [
+        jobFixture('job-1', 4.5, { startTime: '09:00', location: cafeLocation, note: 'Counter' }),
+        jobFixture('job-2', 2),
+      ],
+    });
     const api = fakeApi({
       getMe: employerMeFixture,
-      listEntries: [entry],
+      getMember: membersFixture[0],
+      listEntries: [withPlace],
       getEntryHistory: history,
       getWorkspace: workspaceFixture,
+      getMemberMonth: memberMonthFixture,
+      deleteJob: undefined,
     });
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
-    await screen.findByText('6.5');
-    await fireEvent.press(screen.getByTestId('day-edit'));
-    expect(await screen.findByText('Save 6 h 30 min for Maria Lind')).toBeTruthy();
-    expect(screen.getByTestId('remove-hours')).toBeTruthy();
+    expect(await screen.findByText('6 h 30 min')).toBeTruthy();
+    expect(screen.getByText('2 jobs')).toBeTruthy();
+    expect(screen.getByText('1 place')).toBeTruthy();
+    expect(screen.getByText('09:00 to 13:30, Kungsgatan 12, Stockholm')).toBeTruthy();
+    expect(screen.getByTestId('job-directions-job-1')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('job-edit-job-1'));
+    expect(await screen.findByText('Job for Maria Lind')).toBeTruthy();
+    expect(screen.getByText('Save job, 4 h 30 min')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('remove-job'));
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'deleteJob')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        jobId: 'job-1',
+      }),
+    );
+  });
+
+  it('employer: an empty future day offers a job; the sheet sets a start time and a searched place', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      listEntries: [],
+      getWorkspace: workspaceFixture,
+      getMemberMonth: { ...memberMonthFixture, month: '2026-10', locked: false, days: [] },
+      getMember: membersFixture[0],
+      listRecentPlaces: [],
+      autocompletePlaces: [
+        { placeId: 'place-k12', primaryText: 'Kungsgatan 12', secondaryText: 'Stockholm' },
+      ],
+      getPlace: cafeLocation,
+      createJob: () => entryFixture('mem-maria', '2026-10-07', 4),
+    });
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
+    expect(await screen.findByText('No jobs on this day')).toBeTruthy();
+    await fireEvent.press(await screen.findByTestId('day-add-job'));
+    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
+    expect(screen.getByText('No start time: Maria gets no reminder for this job.')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('job-start'));
+    await fireEvent.press(screen.getByTestId('wheel-start-hours-9'));
+    await fireEvent.press(screen.getByTestId('start-done'));
+    await fireEvent.press(screen.getByTestId('job-location'));
+    await fireEvent.changeText(screen.getByTestId('place-search'), 'Kungs');
+    await fireEvent.press(await screen.findByTestId('place-place-k12', {}, { timeout: 2000 }));
+    expect(await screen.findByText('Use Café Nord')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('place-use'));
+
+    await fireEvent.press(await screen.findByTestId('wheel-hours-4'));
+    expect(screen.getByText('Runs 09:00 to 13:00. Maria gets a reminder before it starts.')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('save-job'));
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
+    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
+      workspaceId: 'ws-cafe',
+      membershipId: 'mem-maria',
+      jobWrite: { hours: 4, startTime: '09:00', note: null, location: cafeLocation },
+    });
+    const session = (api.calls.find((c) => c.op === 'autocompletePlaces')?.args[0] as { session: string })
+      .session;
+    expect(api.calls.find((c) => c.op === 'getPlace')?.args[0]).toEqual({
+      workspaceId: 'ws-cafe',
+      placeId: 'place-k12',
+      session,
+    });
+  });
+
+  it('employer: a closed month offers no new job', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      listEntries: [],
+      getWorkspace: workspaceFixture,
+      getMemberMonth: { ...memberMonthFixture, locked: true },
+      getMember: membersFixture[0],
+    });
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-20" />, { api });
+    expect(await screen.findByTestId('day-locked')).toBeTruthy();
+    expect(screen.queryByTestId('day-add-job')).toBeNull();
   });
 
   it('employer: an open flag shows as a card with the reason, the suggestion and the message, and opens the resolve screen (CHQ-145)', async () => {
@@ -81,9 +172,11 @@ describe('DayScreen', () => {
     });
     const api = fakeApi({
       getMe: employerMeFixture,
+      getMember: membersFixture[0],
       listEntries: [flagged],
       getEntryHistory: [],
       getWorkspace: workspaceFixture,
+      getMemberMonth: memberMonthFixture,
       getFlag: flagFixture,
     });
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-17" />, { api });

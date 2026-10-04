@@ -18,7 +18,8 @@ import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, Header, Icon, Pill, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
-import { AddHoursSheet, type AddHoursSheetHandle } from '@/features/entry/AddHoursSheet';
+import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
+import { dayActionFor } from '@/features/jobs/dayAction';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -119,7 +120,7 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
   );
   const [pageIndex, setPageIndex] = useState(0);
   const list = useRef<FlatList<Member>>(null);
-  const sheet = useRef<AddHoursSheetHandle>(null);
+  const sheet = useRef<JobSheetHandle>(null);
   const pageWidth = width - theme.space[4] * 2;
 
   const openDay = (member: Member, date: IsoDate) => {
@@ -127,13 +128,18 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
       router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId: member.id, date } });
       return;
     }
-    const existing = entryFor(range.data, member.id, date) ?? null;
+    const action = dayActionFor(entryFor(range.data, member.id, date));
+    if (action.kind === 'day') {
+      router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId: member.id, date } });
+      return;
+    }
     const yesterday = entryFor(range.data, member.id, addDays(date, -1));
     sheet.current?.open({
       membershipId: member.id,
       memberName: member.displayName,
       date,
-      existing,
+      job: action.job,
+      dayHours: action.dayHours,
       yesterdayHours: yesterday?.hours ?? null,
       rounding: settings.data?.rounding ?? 'NONE',
       defaultDayHours: settings.data?.defaultDayHours ?? 8,
@@ -254,13 +260,20 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
                   {week.map((date, i) => {
                     const entry = weekEntries[i];
                     const isToday = date === today;
-                    const subtitle = entry?.note
-                      ? entry.note
-                      : isToday
-                        ? t('common.today')
-                        : entry && entry.changeCount > 0
-                          ? t('week.edited')
-                          : undefined;
+                    const jobs = entry?.jobs ?? [];
+                    const places = jobs.map((j) => j.location?.name).filter(Boolean);
+                    const subtitle =
+                      jobs.length > 1
+                        ? [t('jobs.jobCount', { count: jobs.length }), ...places].join(', ')
+                        : places.length > 0
+                          ? places.join(', ')
+                          : entry?.note
+                            ? entry.note
+                            : isToday
+                              ? t('common.today')
+                              : entry && entry.changeCount > 0
+                                ? t('week.edited')
+                                : undefined;
                     return (
                       <View key={date}>
                         <AppPressable
@@ -331,7 +344,7 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
           {employer ? t('week.swipeHint') : t('month.notesVisibleHint')}
         </AppText>
       </Screen>
-      {employer ? <AddHoursSheet ref={sheet} workspace={workspace} /> : null}
+      {employer ? <JobSheet ref={sheet} workspace={workspace} /> : null}
     </>
   );
 }

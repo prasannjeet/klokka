@@ -122,6 +122,14 @@ const config: ExpoConfig = {
     'expo-localization',
     'expo-sharing',
     'expo-image',
+    // "Use where I am now" on a job's location (CHQ-156): asked once, in context, foreground only.
+    [
+      'expo-location',
+      {
+        locationWhenInUsePermission: 'Klokka uses your location once, to fill in where a job is.',
+        isAndroidBackgroundLocationEnabled: false,
+      },
+    ],
     './plugins/withReleaseSigning.js',
   ],
   extra: {

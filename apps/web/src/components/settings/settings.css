@@ -40,3 +40,8 @@
   font-size: 18px;
   color: inherit;
 }
+/* Five reminder choices (CHQ-156) wrap into rows instead of squeezing into one. */
+.settings-seg.wrap {
+  grid-auto-flow: row;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}

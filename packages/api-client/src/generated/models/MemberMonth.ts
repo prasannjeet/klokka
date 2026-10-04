@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Klokka API
- * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`). 
+ * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags`, `workspace` or `reminders` (the shapes are listed on `registerPushToken`). - Jobs (CHQ-156): a day\'s entry is the roll-up of its jobs. `hours` on an entry is the sum of its jobs; each job   has its own hours, optional start time, location and note. Locations come from Google Maps Platform through   the API\'s `places` operations; no client ever holds a Maps key. 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -71,9 +71,13 @@ export interface MemberMonth {
      */
     days: Array<MemberMonthDay>;
     /**
-     * 
+     * Every hour in the month, planned (future) days included.
      */
     totalHours: number;
+    /**
+     * The part of totalHours on days after today (planned work); 0 for a past month.
+     */
+    plannedHours: number;
     /**
      * 
      */
@@ -83,7 +87,7 @@ export interface MemberMonth {
      */
     workingDays: number;
     /**
-     * totalHours divided by the working days elapsed so far (or all of them for a past month).
+     * Hours up to today (planned days left out) divided by the working days elapsed so far (or all of them for a past month).
      */
     avgPerWorkingDay: number;
     /**
@@ -129,6 +133,7 @@ export function instanceOfMemberMonth(value: object): value is MemberMonth {
     if (!('showPay' in value) || value['showPay'] === undefined) return false;
     if (!('days' in value) || value['days'] === undefined) return false;
     if (!('totalHours' in value) || value['totalHours'] === undefined) return false;
+    if (!('plannedHours' in value) || value['plannedHours'] === undefined) return false;
     if (!('daysWorked' in value) || value['daysWorked'] === undefined) return false;
     if (!('workingDays' in value) || value['workingDays'] === undefined) return false;
     if (!('avgPerWorkingDay' in value) || value['avgPerWorkingDay'] === undefined) return false;
@@ -160,6 +165,7 @@ export function MemberMonthFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'hourlyRate': json['hourlyRate'] === undefined ? undefined : json['hourlyRate'] === null ? null : json['hourlyRate'],
         'days': ((json['days'] as Array<any>).map(MemberMonthDayFromJSON)),
         'totalHours': json['totalHours'],
+        'plannedHours': json['plannedHours'],
         'daysWorked': json['daysWorked'],
         'workingDays': json['workingDays'],
         'avgPerWorkingDay': json['avgPerWorkingDay'],
@@ -194,6 +200,7 @@ export function MemberMonthToJSONTyped(value?: MemberMonth | null, ignoreDiscrim
         'hourlyRate': value['hourlyRate'],
         'days': ((value['days'] as Array<any>).map(MemberMonthDayToJSON)),
         'totalHours': value['totalHours'],
+        'plannedHours': value['plannedHours'],
         'daysWorked': value['daysWorked'],
         'workingDays': value['workingDays'],
         'avgPerWorkingDay': value['avgPerWorkingDay'],

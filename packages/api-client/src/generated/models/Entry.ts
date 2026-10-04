@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Klokka API
- * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`). 
+ * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags`, `workspace` or `reminders` (the shapes are listed on `registerPushToken`). - Jobs (CHQ-156): a day\'s entry is the roll-up of its jobs. `hours` on an entry is the sum of its jobs; each job   has its own hours, optional start time, location and note. Locations come from Google Maps Platform through   the API\'s `places` operations; no client ever holds a Maps key. 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -27,6 +27,13 @@ import {
     EntryFlagSummaryToJSON,
     EntryFlagSummaryToJSONTyped,
 } from './EntryFlagSummary';
+import type { Job } from './Job';
+import {
+    JobFromJSON,
+    JobFromJSONTyped,
+    JobToJSON,
+    JobToJSONTyped,
+} from './Job';
 
 /**
  * One member's hours on one day. `earnings` is null unless pay is on and the caller may see the rate.
@@ -59,9 +66,13 @@ export interface Entry {
      */
     hours: number;
     /**
-     * 
+     * The day's job notes joined with "; " (one job, its note). Kept for older clients and the CSV.
      */
     note?: string | null;
+    /**
+     * The day's jobs, by start time (jobs without one last), then in the order they were added.
+     */
+    jobs: Array<Job>;
     /**
      * 
      */
@@ -110,6 +121,7 @@ export function instanceOfEntry(value: object): value is Entry {
     if (!('memberName' in value) || value['memberName'] === undefined) return false;
     if (!('workDate' in value) || value['workDate'] === undefined) return false;
     if (!('hours' in value) || value['hours'] === undefined) return false;
+    if (!('jobs' in value) || value['jobs'] === undefined) return false;
     if (!('locked' in value) || value['locked'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     if (!('createdBy' in value) || value['createdBy'] === undefined) return false;
@@ -136,6 +148,7 @@ export function EntryFromJSONTyped(json: any, ignoreDiscriminator: boolean): Ent
         'workDate': (json['workDate'] == null ? json['workDate'] : parseDate(json['workDate'])),
         'hours': json['hours'],
         'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
+        'jobs': ((json['jobs'] as Array<any>).map(JobFromJSON)),
         'earnings': json['earnings'] === undefined ? undefined : json['earnings'] === null ? null : json['earnings'],
         'hourlyRate': json['hourlyRate'] === undefined ? undefined : json['hourlyRate'] === null ? null : json['hourlyRate'],
         'locked': json['locked'],
@@ -166,6 +179,7 @@ export function EntryToJSONTyped(value?: Entry | null, ignoreDiscriminator: bool
         'workDate': value['workDate'] == null ? value['workDate'] : serializeDate(value['workDate']),
         'hours': value['hours'],
         'note': value['note'],
+        'jobs': ((value['jobs'] as Array<any>).map(JobToJSON)),
         'earnings': value['earnings'],
         'hourlyRate': value['hourlyRate'],
         'locked': value['locked'],

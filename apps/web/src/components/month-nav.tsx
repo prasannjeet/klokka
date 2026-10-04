@@ -4,19 +4,21 @@ import { addMonths, compareDates, formatMonth, type IsoMonth } from '@klokka/cor
 import { useLocale, useT } from '@/lib/i18n';
 import { Icon } from './icons';
 
-// Previous / next month; the future is not a place to go.
+// Previous / next month; the future is not a place to go, except up to `latest` where work can be planned.
 export function MonthNav({
   month,
   current,
+  latest = current,
   onChange,
 }: {
   month: IsoMonth;
   current: IsoMonth;
+  latest?: IsoMonth;
   onChange: (month: IsoMonth) => void;
 }) {
   const t = useT();
   const locale = useLocale();
-  const atCurrent = compareDates(month, current) >= 0;
+  const atCurrent = compareDates(month, latest) >= 0;
   return (
     <div className="mnav" role="group" aria-label={t('nav.month')}>
       <button

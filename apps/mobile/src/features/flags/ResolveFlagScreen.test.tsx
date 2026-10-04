@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { ResolveFlagScreen } from './ResolveFlagScreen';
 import { fakeApi, renderApp } from '@/testing/render';
-import { employerMeFixture, flagFixture } from '@/testing/fixtures';
+import { employerMeFixture, entryFixture, flagFixture, jobFixture } from '@/testing/fixtures';
 import { routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
 
@@ -35,6 +35,7 @@ describe('ResolveFlagScreen (employer)', () => {
       getMe: employerMeFixture,
       getFlag: flagFixture,
       getEntryHistory: history,
+      listEntries: [],
       resolveFlag: { ...flagFixture, status: 'FIXED' },
     });
     await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
@@ -58,6 +59,7 @@ describe('ResolveFlagScreen (employer)', () => {
       getMe: employerMeFixture,
       getFlag: flagFixture,
       getEntryHistory: history,
+      listEntries: [],
       resolveFlag: { ...flagFixture, status: 'DISMISSED' },
     });
     await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
@@ -91,6 +93,7 @@ describe('ResolveFlagScreen without a suggestion (CHQ-145)', () => {
       getMe: employerMeFixture,
       getFlag: bare,
       getEntryHistory: history,
+      listEntries: [],
       resolveFlag: { ...bare, status: 'FIXED' },
     });
     await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
@@ -119,6 +122,7 @@ describe('ResolveFlagScreen without a suggestion (CHQ-145)', () => {
       getMe: employerMeFixture,
       getFlag: bare,
       getEntryHistory: history,
+      listEntries: [],
       resolveFlag: { ...bare, status: 'FIXED' },
     });
     await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
@@ -130,6 +134,48 @@ describe('ResolveFlagScreen without a suggestion (CHQ-145)', () => {
         workspaceId: 'ws-cafe',
         flagId: 'flag-1',
         flagResolve: { action: 'FIX', hours: 0 },
+      }),
+    );
+  });
+});
+
+describe('ResolveFlagScreen on a day with several jobs (CHQ-156)', () => {
+  beforeEach(() => {
+    useAppStore.getState().setActiveWorkspace('ws-cafe');
+    routerState.backs = 0;
+    routerState.pushes.length = 0;
+  });
+
+  it('opens the day to change the right job and approves the day as it stands; a quiet decline says so', async () => {
+    const api = fakeApi({
+      getMe: {
+        ...employerMeFixture,
+        workspaces: employerMeFixture.workspaces.map((w) => ({ ...w, notifyFlagDeclined: false })),
+      },
+      getFlag: flagFixture,
+      getEntryHistory: history,
+      listEntries: [
+        entryFixture('mem-maria', '2026-09-17', 5, { jobs: [jobFixture('j1', 3), jobFixture('j2', 2)] }),
+      ],
+      resolveFlag: { ...flagFixture, status: 'FIXED' },
+    });
+    await renderApp(<ResolveFlagScreen flagId="flag-1" />, { api });
+    expect(await screen.findByTestId('flag-several-jobs')).toBeTruthy();
+    expect(screen.queryByTestId('flag-hours')).toBeNull();
+    expect(
+      screen.getByText('Maria is not told when you decline. Change this in Settings, Employees.'),
+    ).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('flag-change-jobs'));
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/day/[membershipId]/[date]',
+      params: { membershipId: 'mem-maria', date: '2026-09-17' },
+    });
+    await fireEvent.press(screen.getByTestId('flag-approve-as-is'));
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'resolveFlag')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        flagId: 'flag-1',
+        flagResolve: { action: 'FIX', hours: 5 },
       }),
     );
   });

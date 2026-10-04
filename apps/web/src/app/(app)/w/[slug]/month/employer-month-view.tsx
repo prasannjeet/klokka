@@ -17,6 +17,7 @@ import { MonthLockButton } from '@/components/month-lock';
 import { MonthNav } from '@/components/month-nav';
 import { ViewHeader } from '@/components/view-header';
 import { formatDay } from '@/lib/format';
+import { formatDuration, PLAN_AHEAD_MONTHS } from '@/lib/jobs';
 import { useLocale, useT } from '@/lib/i18n';
 import { useMemberMonth, useMembers, useMonthStatus, useWorkspaceDetails } from '@/lib/queries';
 import { isoOf, monthIn, todayIn } from '@/lib/time';
@@ -34,7 +35,8 @@ export function EmployerMonthView() {
   const details = useWorkspaceDetails(ws.id);
   const current = monthIn(ws.timezone);
   const today = todayIn(ws.timezone);
-  const [month, setMonth] = useMonthParam(current);
+  const latest = addMonths(current, PLAN_AHEAD_MONTHS);
+  const [month, setMonth] = useMonthParam(current, latest);
   const members = useMembers(ws.id, month);
   const people = (members.data ?? []).filter(
     (m) => m.role === 'EMPLOYEE' && (m.status !== 'DEACTIVATED' || m.month.hours > 0),
@@ -43,7 +45,11 @@ export function EmployerMonthView() {
   const person = people.find((p) => p.id === chosen) ?? people[0] ?? null;
   const memberMonth = useMemberMonth(ws.id, person?.id ?? null, month);
   const status = useMonthStatus(ws.id, month);
-  const [picked, setPicked] = useState<IsoDate | null>(null);
+  // ?day=2026-10-07 (a cell of the week grid with several jobs) opens that day.
+  const dayParam = search.get('day');
+  const [picked, setPicked] = useState<IsoDate | null>(
+    dayParam && /^\d{4}-\d{2}-\d{2}$/.test(dayParam) ? dayParam : null,
+  );
 
   const mm = memberMonth.data;
   // The day in the panel: the one picked in this month, else the newest open flag, else the newest day.
@@ -92,7 +98,7 @@ export function EmployerMonthView() {
                 ))}
               </select>
             ) : null}
-            <MonthNav month={month} current={current} onChange={setMonth} />
+            <MonthNav month={month} current={current} latest={latest} onChange={setMonth} />
             <MonthLockButton ws={ws} month={month} />
             {person ? (
               <CsvButton
@@ -123,6 +129,14 @@ export function EmployerMonthView() {
                 {formatHours(mm.totalHours, locale, { unit: false })}
                 <small> {t('common.hourUnit')}</small>
               </div>
+              {mm.plannedHours > 0 ? (
+                <span className="delta muted">
+                  {t('jobs.soFarPlanned', {
+                    hours: formatDuration(mm.totalHours - mm.plannedHours, t),
+                    planned: formatDuration(mm.plannedHours, t),
+                  })}
+                </span>
+              ) : null}
               <HoursDelta delta={mm.vsLastMonthHours}>
                 {(d) =>
                   `${t('month.vsLastMonth', { delta: d, month: lastMonthName })} ${t('web.month.lastMonthHours', { hours: formatHours(mm.lastMonthHours, locale) })}`
@@ -202,6 +216,16 @@ export function EmployerMonthView() {
                 date={selectedDay}
                 personName={person?.displayName ?? ''}
                 currency={mm.currency}
+                {...(person
+                  ? {
+                      editing: {
+                        membershipId: person.id,
+                        rounding: details.data?.rounding ?? ws.my.rounding,
+                        defaultDayHours: details.data?.defaultDayHours ?? ws.my.defaultDayHours,
+                        locked: mm.locked,
+                      },
+                    }
+                  : {})}
               />
             </div>
             <div className="card" style={{ overflow: 'hidden' }}>

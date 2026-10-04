@@ -75,12 +75,40 @@ public class NotificationTexts {
                 yield new Rendered(t(lang, Text.MONTH_CLOSED_TITLE, Map.of("name", name, "month", month)), body,
                         t(lang, Text.MONTH_CLOSED_HINT, Map.of()));
             }
+            case JOB_REMINDER -> jobReminder(payload, lang, where);
             case MONTH_REOPENED -> {
                 String month = Formats.month(YearMonth.parse(str(payload, "month")), lang);
                 yield new Rendered(t(lang, Text.MONTH_REOPENED_TITLE, Map.of("name", name, "month", month)),
                         t(lang, Text.MONTH_REOPENED_BODY, Map.of("workspace", where)), null);
             }
         };
+    }
+
+    // "Job at Café Nord in 1 hour" / "Job tomorrow at 09:00", then where, when and how long (CHQ-156).
+    private Rendered jobReminder(Map<String, Object> payload, Language lang, String where) {
+        String place = strOrNull(payload, "placeName");
+        String time = str(payload, "startTime");
+        String lead = str(payload, "lead");
+        String title;
+        if ("DAY_BEFORE".equals(lead)) {
+            title = place == null ? t(lang, Text.JOB_REMINDER_TITLE_TOMORROW, Map.of("time", time))
+                    : t(lang, Text.JOB_REMINDER_TITLE_PLACE_TOMORROW, Map.of("place", place, "time", time));
+        } else {
+            String in = t(lang, switch (lead) {
+                case "MINUTES_15" -> Text.JOB_REMINDER_IN_15;
+                case "MINUTES_30" -> Text.JOB_REMINDER_IN_30;
+                case "HOURS_2" -> Text.JOB_REMINDER_IN_120;
+                default -> Text.JOB_REMINDER_IN_60;
+            }, Map.of());
+            title = place == null ? t(lang, Text.JOB_REMINDER_TITLE, Map.of("lead", in))
+                    : t(lang, Text.JOB_REMINDER_TITLE_PLACE, Map.of("place", place, "lead", in));
+        }
+        String hoursText = hours(decimal(payload.get("hours")), lang, catalogue);
+        String address = strOrNull(payload, "placeAddress");
+        String body = address == null
+                ? t(lang, Text.JOB_REMINDER_BODY, Map.of("workspace", where, "time", time, "hours", hoursText))
+                : t(lang, Text.JOB_REMINDER_BODY_ADDRESS, Map.of("workspace", where, "time", time, "hours", hoursText, "address", address));
+        return new Rendered(title, body, strOrNull(payload, "note"));
     }
 
     // Days listed one by one up to this many; more become a range with the total.

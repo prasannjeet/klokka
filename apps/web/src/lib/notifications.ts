@@ -8,6 +8,7 @@ import type { IconName } from '@/components/icons';
 import { api } from './api';
 import { meKey } from './me';
 import { keys } from './queries';
+import { isoOf } from './time';
 
 const PAGE = 20;
 
@@ -94,6 +95,7 @@ export const KIND_ICON: Record<NotificationKind, IconName> = {
   FLAG_RESOLVED: 'flag',
   MONTH_CLOSED: 'lock',
   MONTH_REOPENED: 'unlock',
+  JOB_REMINDER: 'clock',
 };
 
 // Where a notification leads inside the workspace.
@@ -106,6 +108,11 @@ export function notificationHref(n: Notification, slug: string, employer: boolea
       .filter(Boolean)
       .join('&');
     return `${base}/month${params ? `?${params}` : ''}`;
+  }
+  // A notification about one day (a job reminder, a flag answer) opens that day in the month.
+  if (n.link.date) {
+    const day = isoOf(n.link.date);
+    return `${base}?month=${day.slice(0, 7)}&day=${day}`;
   }
   return month ? `${base}?${month}` : base;
 }

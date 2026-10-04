@@ -10,7 +10,7 @@ import { useFlags } from '@/lib/queries';
 import { isoOf } from '@/lib/time';
 import { firstName } from '@/lib/visual';
 import type { WorkspaceView } from '@/lib/workspace';
-import { FlagActions } from './flag-resolve';
+import { declineNote, FlagActions } from './flag-resolve';
 import { Icon } from './icons';
 
 export function OpenFlags({ ws }: { ws: WorkspaceView }) {
@@ -69,6 +69,7 @@ function FlagCard({ ws, flag }: { ws: WorkspaceView; flag: Flag }) {
       <div className="fa">
         <FlagActions ws={ws} flag={flag} />
       </div>
+      <p className="muted small">{declineNote(t, ws, flag, true)}</p>
     </div>
   );
 }

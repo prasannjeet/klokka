@@ -23,7 +23,7 @@ import { WorkspaceRow } from '@/features/workspaces/WorkspaceRow';
 import { useSignOut } from '@/features/shell/useSignOut';
 import { enterApp } from '@/features/shell/enterApp';
 import { WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
-import { AppPreferenceRows, NotificationPreferenceRows } from './PreferenceRows';
+import { AppPreferenceRows, JobReminderRows, NotificationPreferenceRows } from './PreferenceRows';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -132,6 +132,15 @@ export function ProfileScreen() {
             {t('settings.notifications')}
           </AppText>
           <NotificationPreferenceRows employer={workspace?.role === 'EMPLOYER'} />
+        </Card>
+        <Card>
+          <AppText variant="eyebrow" tone="accent">
+            {t('reminders.title')}
+          </AppText>
+          <JobReminderRows />
+          <AppText variant="caption" tone="muted">
+            {t('reminders.hint')}
+          </AppText>
         </Card>
         <Card>
           <AppText variant="eyebrow" tone="accent">

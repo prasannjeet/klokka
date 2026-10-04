@@ -153,6 +153,22 @@ public class NotificationService {
         immediate(recipientUserId, workspace, NotificationKind.MONTH_REOPENED, payload);
     }
 
+    // Pushed now (the reminder sweep decided it is due); not coalesced, one row per job and start.
+    public void jobReminder(WorkspaceEntity workspace, String recipientUserId, UUID membershipId, UUID entryId, LocalDate date,
+            String startTime, BigDecimal hours, String placeName, String placeAddress, String note, String lead) {
+        Map<String, Object> payload = base(workspace, "");
+        payload.put("membershipId", membershipId.toString());
+        payload.put("entryId", entryId.toString());
+        payload.put("date", date.toString());
+        payload.put("startTime", startTime);
+        payload.put("hours", hours);
+        payload.put("placeName", placeName);
+        payload.put("placeAddress", placeAddress);
+        payload.put("note", note);
+        payload.put("lead", lead);
+        immediate(recipientUserId, workspace, NotificationKind.JOB_REMINDER, payload);
+    }
+
     // ---- the centre
 
     @Transactional

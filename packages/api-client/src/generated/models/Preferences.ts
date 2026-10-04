@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Klokka API
- * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags` or `workspace` (the shapes are listed on `registerPushToken`). 
+ * The ONE contract between the Klokka API and its two clients (web and mobile). Every byte that crosses the boundary is defined here first; the Quarkus server interfaces and the typescript-fetch client are generated from this file (docs/DECISIONS.md D13). docs/CONTRACT.md is the plain-language index.  Conventions - Dates are ISO 8601 (`2026-09-27`), months are `yyyy-MM`, timestamps are RFC 3339 in UTC. - Hours are numbers with at most two decimals (`22.5`), 0 to 24. Money is a number in the workspace   currency\'s major unit with two decimals (`3825.00`); money fields are `null` whenever the workspace has   `showPay` off or the caller may not see the rate. - Ids are UUIDs, except the Logto user id (`usr_...`) which is a string. - Authorization: one Logto access token per user (audience = the Klokka API resource). Which workspaces a   user belongs to, and with which role, is decided by the API\'s own `membership` table, never by token   claims (D1). Operator routes require the global Logto role `platform-admin` (`roles` claim). - Language: every localized string in a response (notification titles, problem messages) uses the language   stored in the user\'s preferences. The public invitation lookup takes a `lang` query instead. - Errors are RFC 9457 `application/problem+json` with a stable machine `code` (ProblemCode). Every   operation may also answer `401`, `403` and `500` in that shape. - Totals, trends and projections are computed by the API (D9); both clients render these numbers as is. - Push: every notification is also an Expo push message whose `data.url` is an allowlisted app path and   whose Android `channelId` is `hours`, `flags`, `workspace` or `reminders` (the shapes are listed on `registerPushToken`). - Jobs (CHQ-156): a day\'s entry is the roll-up of its jobs. `hours` on an entry is the sum of its jobs; each job   has its own hours, optional start time, location and note. Locations come from Google Maps Platform through   the API\'s `places` operations; no client ever holds a Maps key. 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -27,6 +27,13 @@ import {
     LanguageToJSON,
     LanguageToJSONTyped,
 } from './Language';
+import type { JobReminderLead } from './JobReminderLead';
+import {
+    JobReminderLeadFromJSON,
+    JobReminderLeadFromJSONTyped,
+    JobReminderLeadToJSON,
+    JobReminderLeadToJSONTyped,
+} from './JobReminderLead';
 
 /**
  * 
@@ -50,6 +57,14 @@ export interface Preferences {
      * 
      */
     theme: ThemePreference;
+    /**
+     * Push a reminder before each of my jobs that has a start time (employees; on by default).
+     */
+    jobReminders: boolean;
+    /**
+     * 
+     */
+    jobReminderLead: JobReminderLead;
 }
 
 
@@ -62,6 +77,8 @@ export function instanceOfPreferences(value: object): value is Preferences {
     if (!('pushEnabled' in value) || value['pushEnabled'] === undefined) return false;
     if (!('digestEnabled' in value) || value['digestEnabled'] === undefined) return false;
     if (!('theme' in value) || value['theme'] === undefined) return false;
+    if (!('jobReminders' in value) || value['jobReminders'] === undefined) return false;
+    if (!('jobReminderLead' in value) || value['jobReminderLead'] === undefined) return false;
     return true;
 }
 
@@ -79,6 +96,8 @@ export function PreferencesFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'pushEnabled': json['pushEnabled'],
         'digestEnabled': json['digestEnabled'],
         'theme': ThemePreferenceFromJSON(json['theme']),
+        'jobReminders': json['jobReminders'],
+        'jobReminderLead': JobReminderLeadFromJSON(json['jobReminderLead']),
     };
 }
 
@@ -97,6 +116,8 @@ export function PreferencesToJSONTyped(value?: Preferences | null, ignoreDiscrim
         'pushEnabled': value['pushEnabled'],
         'digestEnabled': value['digestEnabled'],
         'theme': ThemePreferenceToJSON(value['theme']),
+        'jobReminders': value['jobReminders'],
+        'jobReminderLead': JobReminderLeadToJSON(value['jobReminderLead']),
     };
 }
 

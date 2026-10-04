@@ -51,6 +51,29 @@ describe('MonthScreen (employee, my month)', () => {
     expect(screen.queryByText('Intjänat')).toBeNull();
     expect(screen.getByText('Bästa veckan')).toBeTruthy();
   });
+  it('without analysis (the employer turned it off) asks for no insights and lists the jobs instead', async () => {
+    const api = fakeApi({
+      getMe: {
+        ...meFixture,
+        workspaces: meFixture.workspaces.map((w) => ({ ...w, employeesSeeInsights: false })),
+      },
+      getMemberMonth: { ...memberMonthFixture, plannedHours: 4 },
+      getMemberInsights: memberInsightsFixture,
+    });
+    await renderApp(<MonthScreen />, { api });
+    expect(await screen.findByText('92.5')).toBeTruthy();
+    expect(screen.getByText('Jobs this month')).toBeTruthy();
+    expect(screen.getByText('88.5 h so far, 4 h planned')).toBeTruthy();
+    expect(screen.queryByText('4.6 h per working day')).toBeNull();
+    expect(screen.queryByTestId('month-best-week')).toBeNull();
+    expect(api.calls.some((c) => c.op === 'getMemberInsights')).toBe(false);
+    // Every day opens, an empty future one too.
+    await fireEvent.press(screen.getByTestId('cell-2026-09-29'));
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/day/[membershipId]/[date]',
+      params: { membershipId: 'mem-maria', date: '2026-09-29' },
+    });
+  });
 });
 
 describe('intensityOf', () => {

@@ -13,7 +13,7 @@ describe('WeekScreen', () => {
   });
   afterEach(() => jest.useRealTimers());
 
-  it('employer: one person per page with the week total, a tap opens the add sheet for that day', async () => {
+  it('employer: one person per page with the week total, a tap opens the job sheet for that day', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
       listMembers: membersFixture,
@@ -27,7 +27,7 @@ describe('WeekScreen', () => {
     expect(screen.getByTestId('week-page-mem-jonas')).toBeTruthy();
     expect(screen.getAllByText('Week total').length).toBeGreaterThan(0);
     await fireEvent.press(screen.getByTestId('day-mem-maria-2026-09-22'));
-    expect(await screen.findByText('Maria Lind, Tue 22')).toBeTruthy();
+    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('week-prev'));
     expect(await screen.findByText('Week 38')).toBeTruthy();
     expect(screen.getByText('This week')).toBeTruthy();

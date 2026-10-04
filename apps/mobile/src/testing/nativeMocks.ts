@@ -277,3 +277,20 @@ export function expoRouterModule() {
     useFocusEffect: (effect: () => void | (() => void)) => React.useEffect(effect, [effect]),
   };
 }
+
+// "Use where I am now" (CHQ-156): permission granted and a fixed point on Hornsgatan, Stockholm.
+export const locationState = { granted: true };
+export function locationModule() {
+  return {
+    Accuracy: { Balanced: 3 },
+    requestForegroundPermissionsAsync: async () => ({ status: locationState.granted ? 'granted' : 'denied' }),
+    getCurrentPositionAsync: async () => ({ coords: { latitude: 59.31721, longitude: 18.06302 } }),
+  };
+}
+
+let uuidCounter = 0;
+export function cryptoModule() {
+  return {
+    randomUUID: () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`,
+  };
+}

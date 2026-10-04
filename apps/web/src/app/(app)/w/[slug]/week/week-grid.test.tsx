@@ -20,7 +20,17 @@ const DATES = [
 const ROWS: GridRow[] = [{ id: 'm1', name: 'Maria Lind', emoji: null, rate: 170 }];
 const ENTRIES: EntryLike[] = [{ membershipId: 'm1', workDate: '2026-09-23', hours: 6.5, note: null }];
 
-function Harness({ rounding, showPay = false }: { rounding: Rounding; showPay?: boolean }) {
+function Harness({
+  rounding,
+  showPay = false,
+  jobs = () => 1,
+  onOpenDay = () => {},
+}: {
+  rounding: Rounding;
+  showPay?: boolean;
+  jobs?: (key: string) => number;
+  onOpenDay?: (membershipId: string, date: string) => void;
+}) {
   const [state, dispatch] = useReducer(
     gridReducer,
     gridReducer(initialGrid, { type: 'load', entries: ENTRIES }),
@@ -42,6 +52,8 @@ function Harness({ rounding, showPay = false }: { rounding: Rounding; showPay?: 
       onSelect={() => {}}
       dispatch={dispatch}
       rounding={rounding}
+      jobCount={jobs}
+      onOpenDay={onOpenDay}
     />
   );
 }
@@ -94,5 +106,27 @@ describe('week grid display', () => {
     renderGrid('en', 'NONE', true);
     expect(screen.getByText(/per hour/)).toBeTruthy();
     expect(document.querySelectorAll('.money').length).toBeGreaterThan(0);
+  });
+});
+
+describe('week grid with jobs (CHQ-156)', () => {
+  it('shows a day with several jobs as its total, not an input, and opens that day', () => {
+    const opened: string[] = [];
+    render(
+      <LocaleProvider initial="en">
+        <Harness
+          rounding="NONE"
+          jobs={(key) => (key === 'm1|2026-09-23' ? 2 : 0)}
+          onOpenDay={(m, d) => opened.push(`${m} ${d}`)}
+        />
+      </LocaleProvider>,
+    );
+    // Six inputs for the other days; the multi-job day is a button.
+    expect(screen.getAllByRole('textbox')).toHaveLength(6);
+    const multi = screen.getByTestId('multi-m1|2026-09-23');
+    expect(multi.textContent).toContain('6.5');
+    expect(multi.textContent).toContain('2 jobs');
+    act(() => fireEvent.click(multi));
+    expect(opened).toEqual(['m1 2026-09-23']);
   });
 });

@@ -2,7 +2,8 @@
 
 // The month as a heat-map (CHQ-123, mockups "Calendar"): a 7-column CSS grid of real buttons, one per day,
 // coloured by how full the day is. Every day says its hours in its accessible name; notes and flags are
-// marked. Days outside the month keep the grid square but are hidden.
+// marked. Days outside the month keep the grid square but are hidden. Every day opens, future ones too; a
+// future day with hours is planned work (CHQ-156) and drawn dashed.
 import type { MemberMonthDay, WeekStart } from '@klokka/api-client';
 import {
   formatDate,
@@ -17,6 +18,7 @@ import {
 import { heatLevel } from '@/lib/heat';
 import { useLocale, useT } from '@/lib/i18n';
 import { isoOf } from '@/lib/time';
+import './jobs/jobs.css';
 
 export function CalendarHeatmap({
   month,
@@ -60,6 +62,7 @@ export function CalendarHeatmap({
               'd',
               day.date === today ? 'today' : '',
               future && hours === null ? 'future' : '',
+              future && hours !== null ? 'planned' : '',
               flag ? 'flag' : '',
               info?.note ? 'note' : '',
             ]
@@ -68,6 +71,8 @@ export function CalendarHeatmap({
             const name = [
               formatDate(day.date, locale, 'weekdayDayMonth'),
               hours !== null ? formatHours(hours, locale) : t('entry.nothingYet'),
+              future && hours !== null ? t('jobs.planned') : '',
+              info && info.jobs.length > 1 ? t('jobs.jobCount', { count: info.jobs.length }) : '',
               info?.note ? t('web.week.noteLabel', { note: info.note }) : '',
               flag ? t('web.week.flagged') : '',
             ]
@@ -105,6 +110,10 @@ export function CalendarHeatmap({
         <span className="flagdot">
           <i />
           {t('month.flag')}
+        </span>
+        <span className="planneddot">
+          <i />
+          {t('jobs.planned')}
         </span>
       </div>
     </>

@@ -6,11 +6,13 @@
 import type { MemberMonthDay } from '@klokka/api-client';
 import { formatDate, formatHours, formatWeekday, isoWeekdayIndex, type IsoDate } from '@klokka/core';
 import { formatDayTime } from '@/lib/format';
+import { placesOf } from '@/lib/jobs';
 import { useLocale, useT } from '@/lib/i18n';
 import { isoOf } from '@/lib/time';
 import { firstName } from '@/lib/visual';
 import { Icon } from './icons';
 import { Money } from './money';
+import './jobs/jobs.css';
 
 export function DayList({
   days,
@@ -61,9 +63,16 @@ export function DayList({
                 <b>{formatDate(date, locale, 'day')}</b>
               </span>
               <span className="what">
+                {placesOf(day.jobs).length > 0 ? (
+                  <span className="places">
+                    <Icon name="pin" />
+                    {placesOf(day.jobs).join(', ')}
+                  </span>
+                ) : null}
                 {day.note ? <span className="note">{day.note}</span> : null}
                 <span className="meta">
                   {who ? <span>{who}</span> : null}
+                  {day.jobs.length > 1 ? <span>{t('jobs.jobCount', { count: day.jobs.length })}</span> : null}
                   {edits > 0 ? <span>{t('web.month.editedTimes', { count: edits })}</span> : null}
                   {flagged ? (
                     <span className="pill bad">

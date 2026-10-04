@@ -55,6 +55,37 @@ describe('SettingsScreen (employer)', () => {
   });
 });
 
+describe('SettingsScreen employees section (CHQ-156)', () => {
+  beforeEach(() => useAppStore.getState().setActiveWorkspace('ws-cafe'));
+
+  it("saves the decline notice and the employees' analysis switches, each with its hint", async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getWorkspace: workspaceFixture,
+      updateWorkspace: { ...workspaceFixture, notifyFlagDeclined: false },
+    });
+    await renderApp(<SettingsScreen />, { api });
+    expect(await screen.findByText('Tell employees when you decline a flag')).toBeTruthy();
+    expect(
+      screen.getByText('They get a notification with your reply. An approved change is always shared.'),
+    ).toBeTruthy();
+    await fireEvent(screen.getByTestId('notify-declined'), 'valueChange', false);
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'updateWorkspace')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        workspaceUpdate: { notifyFlagDeclined: false },
+      }),
+    );
+    await fireEvent(screen.getByTestId('employees-see-insights'), 'valueChange', false);
+    await waitFor(() =>
+      expect(api.calls.filter((c) => c.op === 'updateWorkspace').at(-1)?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        workspaceUpdate: { employeesSeeInsights: false },
+      }),
+    );
+  });
+});
+
 describe('cityOf', () => {
   it('reads the city from an IANA zone', () => {
     expect(cityOf('Europe/Stockholm')).toBe('Stockholm');

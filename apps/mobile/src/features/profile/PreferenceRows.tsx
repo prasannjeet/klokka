@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { Language, ThemePreference } from '@klokka/api-client';
+import type { JobReminderLead, Language, ThemePreference } from '@klokka/api-client';
 import { useMe, useUpdatePreferences } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useAppStore } from '@/store/appStore';
@@ -122,6 +122,63 @@ export function AppPreferenceRows() {
           update.mutate({ theme: value }, { onError: () => toast.show(t('errors.INTERNAL'), 'danger') });
         }}
         testID="appearance-sheet"
+      />
+    </>
+  );
+}
+
+const LEADS: JobReminderLead[] = ['MINUTES_15', 'MINUTES_30', 'HOUR_1', 'HOURS_2', 'DAY_BEFORE'];
+
+// Job reminders (CHQ-156): a push before each job with a start time, on by default an hour before. The
+// person's own setting; the employer never sees it.
+export function JobReminderRows() {
+  const t = useT();
+  const toast = useToast();
+  const { data: me } = useMe();
+  const update = useUpdatePreferences();
+  const leadSheet = useRef<SheetHandle>(null);
+  const on = me?.preferences.jobReminders ?? true;
+  const lead: JobReminderLead = me?.preferences.jobReminderLead ?? 'HOUR_1';
+  const leadLabel = (value: JobReminderLead) => t(`reminders.lead.${value}`);
+  const save = (patch: { jobReminders?: boolean; jobReminderLead?: JobReminderLead }) =>
+    update.mutate(patch, { onError: () => toast.show(t('errors.INTERNAL'), 'danger') });
+  return (
+    <>
+      <Row
+        title={t('reminders.toggle')}
+        subtitle={on ? t('reminders.on', { lead: leadLabel(lead).toLocaleLowerCase() }) : t('reminders.off')}
+        trailing={
+          <AppSwitch
+            value={on}
+            onValueChange={(v) => save({ jobReminders: v })}
+            accessibilityLabel={t('reminders.toggle')}
+            testID="pref-reminders"
+          />
+        }
+      />
+      {on ? (
+        <>
+          <Separator />
+          <Row
+            title={t('reminders.howEarly')}
+            value={leadLabel(lead)}
+            onPress={() => leadSheet.current?.present()}
+            testID="pref-reminder-lead"
+          />
+        </>
+      ) : null}
+      <OptionSheet<JobReminderLead>
+        ref={leadSheet}
+        title={t('reminders.howEarly')}
+        subtitle={t('reminders.hint')}
+        closeLabel={t('common.close')}
+        value={lead}
+        options={LEADS.map((value) => ({
+          value,
+          label: value === 'HOUR_1' ? `${leadLabel(value)} (${t('reminders.default')})` : leadLabel(value),
+        }))}
+        onChange={(value) => save({ jobReminderLead: value })}
+        testID="reminder-lead-sheet"
       />
     </>
   );

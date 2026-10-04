@@ -3,6 +3,7 @@ package com.prasannjeet.klokka.entry;
 import static com.prasannjeet.klokka.error.KlokkaException.forbidden;
 import static com.prasannjeet.klokka.error.KlokkaException.notFound;
 import static com.prasannjeet.klokka.error.KlokkaException.validation;
+import static com.prasannjeet.klokka.error.ProblemCode.ENTRY_HAS_JOBS;
 import static com.prasannjeet.klokka.error.ProblemCode.MONTH_LOCKED;
 import static com.prasannjeet.klokka.error.ProblemCode.VALIDATION;
 
@@ -25,6 +26,8 @@ import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.FlagRepository;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
+import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRepository;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
 import com.prasannjeet.klokka.persistence.MonthLockRepository;
@@ -66,6 +69,9 @@ public class EntryService {
 
     @Inject
     MonthLockRepository locks;
+
+    @Inject
+    JobRepository jobs;
 
     @Inject
     KlokkaConfig config;
@@ -138,6 +144,17 @@ public class EntryService {
         if (!closed.isEmpty()) {
             throw new KlokkaException(MONTH_LOCKED, "The batch touches a closed month. Unlock it to change entries.", closed, null);
         }
+        // A day with several jobs is changed job by job (CHQ-156); removing it whole is still allowed.
+        List<FieldError> multi = new ArrayList<>();
+        for (int i = 0; i < items.size(); i++) {
+            EntryBatchItem item = items.get(i);
+            if (rounded.get(i) != null && !writer.dayLevelWritable(a, item.getMembershipId(), item.getWorkDate())) {
+                multi.add(new FieldError().field("items[" + i + "].hours").message("this day has several jobs"));
+            }
+        }
+        if (!multi.isEmpty()) {
+            throw new KlokkaException(ENTRY_HAS_JOBS, "The batch sets hours on days with several jobs; change those job by job.", multi, null);
+        }
 
         List<Entry> saved = new ArrayList<>();
         List<EntryKey> removed = new ArrayList<>();
@@ -187,6 +204,7 @@ public class EntryService {
         List<UUID> ids = rows.stream().map(r -> r.id).toList();
         Map<UUID, Long> counts = entries.changeCounts(id, ids);
         Map<UUID, EntryFlagEntity> flagged = flags.latestPerEntry(id, ids);
+        Map<UUID, List<JobEntity>> dayJobs = jobs.listForEntries(id, ids);
         LocalDate min = rows.stream().map(r -> r.workDate).min(LocalDate::compareTo).orElseThrow();
         LocalDate max = rows.stream().map(r -> r.workDate).max(LocalDate::compareTo).orElseThrow();
         Set<LocalDate> lockedMonths = new HashSet<>(locks.lockedMonthsBetween(id, min, max));
@@ -197,7 +215,8 @@ public class EntryService {
             MembershipEntity member = members.computeIfAbsent(row.membershipId,
                     mid -> memberships.findMember(id, mid).orElseThrow(() -> notFound("Member " + mid)));
             boolean locked = lockedMonths.contains(row.workDate.withDayOfMonth(1));
-            out.add(EntryViews.toEntry(a, row, member, names, counts.getOrDefault(row.id, 0L), flagged.get(row.id), locked));
+            out.add(EntryViews.toEntry(a, row, member, names, counts.getOrDefault(row.id, 0L), flagged.get(row.id), locked,
+                    dayJobs.getOrDefault(row.id, List.of())));
         }
         return out;
     }
