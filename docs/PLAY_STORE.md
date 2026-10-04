@@ -7,9 +7,12 @@ account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play
 
 - Play Console: the owner's Google login.
 - API: the Firebase service account `firebase-adminsdk-fbsvc@klokka-64f3a.iam.gserviceaccount.com`
-  (`.agents/local-credentials/firebase-service-account.json`; GitHub secret `PLAY_SERVICE_ACCOUNT_JSON`). It can
-  release every app on the developer account, so every command names Klokka's package or runs from `apps/mobile`,
-  where `fastlane/Appfile` pins it.
+  (`.agents/local-credentials/firebase-service-account.json`; GitHub secret `PLAY_SERVICE_ACCOUNT_JSON`). It has
+  **Admin on Klokka only** (app-level) and no account-wide permission (2026-10-04). With only the release, view and
+  store-presence permissions, Play let it read and stage edits but refused every commit that changed the listing
+  ("The caller does not have permission"); Admin on the app fixed it. Every command still names Klokka's package or
+  runs from `apps/mobile`, where `fastlane/Appfile` pins it. Run fastlane from the main checkout: the Appfile's key
+  path is relative and worktrees have no credentials folder.
 - CLI: `fastlane` (Homebrew), run from `apps/mobile`. Check the key: `fastlane run validate_play_store_json_key`.
 
 ## Switches (GitHub repository variables)
