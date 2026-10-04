@@ -3,11 +3,11 @@ package com.prasannjeet.klokka.notification;
 import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.entry.EntryViews;
 import com.prasannjeet.klokka.persistence.WorkspaceEntity;
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
@@ -42,18 +42,27 @@ public class JobReminderJob {
         if (sent > 0) LOG.infof("job reminders: %d sent", sent);
     }
 
-    @Transactional
+    // Each reminder in its own transaction: one bad row is logged and skipped, the others still go out.
     public int sweep() {
         Instant now = clock.instant();
-        List<JobReminderRepository.Due> due = reminders.due(now, config.reminders().grace(), config.reminders().batchSize());
+        List<JobReminderRepository.Due> due = QuarkusTransaction.requiringNew()
+                .call(() -> reminders.due(now, config.reminders().grace(), config.reminders().batchSize()));
         int sent = 0;
         for (JobReminderRepository.Due d : due) {
-            if (!reminders.markSent(d.workspaceId(), d.jobId(), d.startsAt(), now)) continue;
-            WorkspaceEntity workspace = em.find(WorkspaceEntity.class, d.workspaceId());
-            notifications.jobReminder(workspace, d.userId(), d.membershipId(), d.entryId(), d.date(),
-                    d.startTime().format(EntryViews.HH_MM), d.hours(), d.placeName(), d.placeAddress(), d.note(), d.lead());
-            sent++;
+            try {
+                if (QuarkusTransaction.requiringNew().call(() -> send(d, now))) sent++;
+            } catch (RuntimeException e) {
+                LOG.errorf(e, "job reminder for job %s failed", d.jobId());
+            }
         }
         return sent;
+    }
+
+    private boolean send(JobReminderRepository.Due d, Instant now) {
+        if (!reminders.markSent(d.workspaceId(), d.jobId(), d.startsAt(), now)) return false;
+        WorkspaceEntity workspace = em.find(WorkspaceEntity.class, d.workspaceId());
+        notifications.jobReminder(workspace, d.userId(), d.membershipId(), d.entryId(), d.date(),
+                d.startTime().format(EntryViews.HH_MM), d.hours(), d.placeName(), d.placeAddress(), d.note(), d.lead());
+        return true;
     }
 }

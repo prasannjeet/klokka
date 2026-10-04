@@ -100,12 +100,15 @@ function JobForm({
   const t = useT();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const [time, setTime] = useState(() => splitHours(job?.hours ?? 0, rounding));
+  const [initial] = useState(() => splitHours(job?.hours ?? 0, rounding));
+  const [time, setTime] = useState(initial);
   const [startTime, setStartTime] = useState(job?.startTime ?? '');
   const [note, setNote] = useState(job?.note ?? '');
   const [location, setLocation] = useState<JobLocation | null>(job?.location ?? null);
   const [error, setError] = useState<string | null>(null);
-  const hours = joinHours(time.hours, time.minutes);
+  // An untouched time keeps the stored hours exactly (whole minutes would turn 7.01 into 7.02 on a note edit).
+  const untouched = job != null && time.hours === initial.hours && time.minutes === initial.minutes;
+  const hours = untouched ? job.hours : joinHours(time.hours, time.minutes);
   const duration = formatDuration(hours, t);
 
   const save = useMutation({

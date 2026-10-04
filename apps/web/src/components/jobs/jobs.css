@@ -107,8 +107,10 @@
 }
 
 /* ---- the job dialog: wider than the other dialogs on a desktop, a sheet on a phone ---- */
-.dlg:has(.job-form) {
-  width: min(calc(100% - 2 * var(--gutter)), 860px);
+@media (min-width: 720px) {
+  .dlg:has(.job-form) {
+    width: min(calc(100% - 2 * var(--gutter)), 860px);
+  }
 }
 .job-form-cols {
   display: grid;

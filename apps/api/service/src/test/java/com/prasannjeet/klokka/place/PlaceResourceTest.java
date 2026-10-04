@@ -84,9 +84,11 @@ class PlaceResourceTest {
     @Test
     @TestSecurity(user = MARIA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
-    void anEmployeeSeesTheMapCachedButCannotSearch() {
+    void anEmployeeSeesTheMapOfAJobPlaceCachedButNoOtherPointAndCannotSearch() {
         // A fresh point per run: the map cache lives on disk across runs.
         String lat = String.format(java.util.Locale.ROOT, "59.%05d", new java.util.Random().nextInt(100000));
+        java.util.UUID entry = data.entry(ws, maria, java.time.LocalDate.parse("2026-09-24"), new java.math.BigDecimal("2"), null, NORA);
+        data.run("update job set place_name = 'Café Nord', latitude = ?, longitude = 18.06324 where entry_id = ?", new java.math.BigDecimal(lat), entry);
         String url = "/v1/workspaces/" + ws + "/map.png?latitude=" + lat + "&longitude=18.06324&width=360&height=120&dark=true";
         byte[] png = given().when().get(url).then().statusCode(200).contentType("image/png")
                 .header("Cache-Control", "private, max-age=604800, immutable").extract().asByteArray();
@@ -94,11 +96,22 @@ class PlaceResourceTest {
         given().when().get(url).then().statusCode(200);
         List<String> maps = Fake.list("mapsRequests");
         assertThat(maps).hasSize(1);
-        assertThat(maps.get(0)).contains("center=" + new java.math.BigDecimal(lat).stripTrailingZeros().toPlainString() + ",18.06324").contains("scale=2").contains("key=" + FakeServers.MAPS_KEY);
+        assertThat(maps.get(0)).contains("center=" + new java.math.BigDecimal(lat).stripTrailingZeros().toPlainString() + ",18.06324")
+                .contains("scale=2").contains("key=" + FakeServers.MAPS_KEY);
 
+        // Any other point is not the employee's to look at (each would be a billable Google call).
+        given().when().get("/v1/workspaces/" + ws + "/map.png?latitude=59.1&longitude=18.06324&width=360&height=120").then().statusCode(403);
+        given().when().get("/v1/workspaces/" + ws + "/places/autocomplete?input=Kungsg").then().statusCode(403);
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void googleRefusingTheMapIsATypedProblemAndTheKeyNeverReachesTheLog() {
         // Google refusing (Static API not enabled) is a typed problem, not a broken image.
         given().when().get("/v1/workspaces/" + ws + "/map.png?latitude=" + FakeServers.MAP_REFUSED_LATITUDE + "&longitude=18&width=360&height=120")
                 .then().statusCode(502).body("code", is("MAPS_UNAVAILABLE"));
-        given().when().get("/v1/workspaces/" + ws + "/places/autocomplete?input=Kungsg").then().statusCode(403);
+        assertThat(PlaceService.scrub("GET /maps/api/staticmap?center=1,2&key=AIzaSecret&size=3 timed out"))
+                .isEqualTo("GET /maps/api/staticmap?center=1,2&key=***&size=3 timed out");
     }
 }

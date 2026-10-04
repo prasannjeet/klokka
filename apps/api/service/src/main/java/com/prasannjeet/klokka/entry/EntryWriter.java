@@ -98,7 +98,7 @@ public class EntryWriter {
         Instant now = clock.instant();
         String actor = access.userId();
         String cleanNote = clean(note);
-        Optional<HourEntryEntity> live = entries.findLive(access.workspaceId(), target.id, date);
+        Optional<HourEntryEntity> live = entries.findLiveForUpdate(access.workspaceId(), target.id, date);
 
         if (hours == null) {
             if (live.isEmpty()) return new Outcome(null, false);
@@ -149,7 +149,7 @@ public class EntryWriter {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(date));
         Instant now = clock.instant();
-        Optional<HourEntryEntity> live = entries.findLive(access.workspaceId(), target.id, date);
+        Optional<HourEntryEntity> live = entries.findLiveForUpdate(access.workspaceId(), target.id, date);
         if (live.isEmpty()) {
             requireDayTotal(input.hours());
             HourEntryEntity entry = newEntry(access, target, date, input.hours(), clean(input.note()), now);
@@ -163,6 +163,10 @@ public class EntryWriter {
         if (dayJobs.size() >= config.entries().jobsPerDayMax()) {
             throw validation("hours", "a day holds at most " + config.entries().jobsPerDayMax() + " jobs");
         }
+        // A day written without jobs (only possible with rows from before V3) keeps its hours as a first job.
+        if (dayJobs.isEmpty() && entry.hours.signum() > 0) {
+            newJob(access, entry, new JobInput(entry.hours, null, entry.note, null), now);
+        }
         newJob(access, entry, input, now);
         return settle(access, target, entry, now);
     }
@@ -170,6 +174,7 @@ public class EntryWriter {
     public Outcome updateJob(Access access, MembershipEntity target, HourEntryEntity entry, JobEntity job, JobInput input) {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(entry.workDate));
+        entries.lockEntry(access.workspaceId(), entry);
         Instant now = clock.instant();
         apply(job, input);
         job.updatedAt = now;
@@ -181,6 +186,7 @@ public class EntryWriter {
     public Outcome deleteJob(Access access, MembershipEntity target, HourEntryEntity entry, JobEntity job) {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(entry.workDate));
+        entries.lockEntry(access.workspaceId(), entry);
         Instant now = clock.instant();
         jobs.deleteJob(access.workspaceId(), job);
         if (jobs.listForEntry(access.workspaceId(), entry.id).isEmpty()) {

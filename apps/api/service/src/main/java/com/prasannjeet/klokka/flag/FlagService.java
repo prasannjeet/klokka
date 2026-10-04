@@ -124,7 +124,9 @@ public class FlagService {
         BigDecimal before = entry.hours;
         if (body.getAction() == FlagResolutionAction.FIX) {
             if (body.getHours() == null) throw validation("hours", "is required for FIX");
-            BigDecimal hours = HoursRounding.apply(body.getHours(), a.workspace().rounding, "hours");
+            // "Approve as it stands" sends the day's total; it is kept as is, even if the rounding rule changed since.
+            BigDecimal hours = body.getHours().compareTo(entry.hours) == 0 ? entry.hours
+                    : HoursRounding.apply(body.getHours(), a.workspace().rounding, "hours");
             EntryWriter.Outcome outcome = writer.write(a, member, entry.workDate, hours, entry.note, false);
             entry = outcome.entry();
             flag.status = FlagStatus.FIXED;

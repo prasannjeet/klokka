@@ -126,6 +126,8 @@ export const JobSheet = forwardRef<
   const [target, setTarget] = useState<JobSheetTarget | null>(null);
   const [panel, setPanel] = useState<Panel>('job');
   const [time, setTime] = useState({ hours: 0, minutes: 0 });
+  // The time the sheet opened with: an untouched time keeps the job's stored hours exactly.
+  const [initial, setInitial] = useState({ hours: 0, minutes: 0 });
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<JobLocation | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
@@ -136,7 +138,9 @@ export const JobSheet = forwardRef<
     open: (next) => {
       setTarget(next);
       setPanel('job');
-      setTime(splitHours(next.job?.hours ?? 0, next.rounding));
+      const opened = splitHours(next.job?.hours ?? 0, next.rounding);
+      setTime(opened);
+      setInitial(opened);
       setNote(next.job?.note ?? '');
       setLocation(next.job?.location ?? null);
       setStartTime(next.job?.startTime ?? null);
@@ -151,7 +155,11 @@ export const JobSheet = forwardRef<
   const editing = !!target.job;
   const minutes = minuteOptions(target.rounding);
   const setHours = (value: number) => setTime(splitHours(value, target.rounding));
-  const rounded = roundHours(joinHours(time.hours, time.minutes), target.rounding);
+  const untouched = target.job != null && time.hours === initial.hours && time.minutes === initial.minutes;
+  const rounded =
+    untouched && target.job
+      ? target.job.hours
+      : roundHours(joinHours(time.hours, time.minutes), target.rounding);
   const canSave = rounded > 0;
   const durationLabel = formatDuration(rounded, t);
   const dateLabel = formatDate(target.date, locale, 'long');

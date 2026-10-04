@@ -1,5 +1,6 @@
 package com.prasannjeet.klokka.place;
 
+import static com.prasannjeet.klokka.error.KlokkaException.forbidden;
 import static com.prasannjeet.klokka.error.KlokkaException.notFound;
 import static com.prasannjeet.klokka.error.ProblemCode.MAPS_NOT_CONFIGURED;
 import static com.prasannjeet.klokka.error.ProblemCode.MAPS_UNAVAILABLE;
@@ -18,6 +19,7 @@ import com.prasannjeet.klokka.persistence.JobEntity;
 import com.prasannjeet.klokka.persistence.JobRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import io.quarkus.narayana.jta.QuarkusTransaction;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
@@ -89,14 +91,14 @@ public class PlaceService {
 
     private final Path cacheDir = Path.of(System.getProperty("java.io.tmpdir"), "klokka-maps");
 
-    @Transactional
+    // No method here holds a transaction (or a pooled connection) while Google answers: the access check and the
+    // language lookup run in a short one of their own, the Google call after it.
     public List<PlaceSuggestion> autocomplete(UUID workspaceId, String input, UUID session) {
-        Access a = access.employer(workspaceId);
+        Caller c = employer(workspaceId);
         String key = key();
-        ObjectNode body = mapper.createObjectNode().put("input", input.trim())
-                .put("languageCode", me.languageOf(a.userId()).toString());
+        ObjectNode body = mapper.createObjectNode().put("input", input.trim()).put("languageCode", c.language());
         if (session != null) body.put("sessionToken", session.toString());
-        if (a.workspace().country != null) body.putArray("includedRegionCodes").add(a.workspace().country.toLowerCase());
+        if (c.country() != null) body.putArray("includedRegionCodes").add(c.country().toLowerCase());
         JsonNode response = call(() -> places.autocomplete(key, body), "autocomplete");
         List<PlaceSuggestion> out = new ArrayList<>();
         for (JsonNode s : response.path("suggestions")) {
@@ -110,12 +112,11 @@ public class PlaceService {
         return out;
     }
 
-    @Transactional
     public JobLocation place(UUID workspaceId, String placeId, UUID session) {
-        Access a = access.employer(workspaceId);
+        Caller c = employer(workspaceId);
         String key = key();
         JsonNode p = call(() -> places.details(key, DETAILS_FIELDS, placeId, session == null ? null : session.toString(),
-                me.languageOf(a.userId()).toString()), "details");
+                c.language()), "details");
         JsonNode location = p.path("location");
         if (location.isMissingNode()) throw notFound("Place " + placeId);
         String address = p.path("formattedAddress").asText(null);
@@ -125,15 +126,15 @@ public class PlaceService {
                 .longitude(coordinate(location.path("longitude").decimalValue()));
     }
 
-    @Transactional
     public JobLocation reverse(UUID workspaceId, BigDecimal latitude, BigDecimal longitude) {
-        Access a = access.employer(workspaceId);
+        Caller c = employer(workspaceId);
         String key = key();
         JsonNode response = call(() -> maps.reverse(latitude.toPlainString() + "," + longitude.toPlainString(),
-                me.languageOf(a.userId()).toString(), key), "geocode");
+                c.language(), key), "geocode");
         if (!"OK".equals(response.path("status").asText())) {
             if ("ZERO_RESULTS".equals(response.path("status").asText())) throw notFound("An address at that point");
-            throw unavailable("geocode answered " + response.path("status").asText(), null);
+            LOG.warn("maps: geocode answered " + response.path("status").asText());
+            throw unavailable("geocode", null);
         }
         JsonNode first = response.path("results").path(0);
         String address = first.path("formatted_address").asText();
@@ -148,9 +149,15 @@ public class PlaceService {
         return jobs.recentPlaces(a.workspaceId(), config.maps().recentPlaces()).stream().map(PlaceService::location).toList();
     }
 
-    @Transactional
+    // The employer may preview any point (choosing a place); an employee only a place on one of the workspace's
+    // jobs, so an account cannot turn the proxy into free Static Maps calls.
     public File mapImage(UUID workspaceId, BigDecimal latitude, BigDecimal longitude, int width, int height, boolean dark) {
-        access.member(workspaceId);
+        QuarkusTransaction.requiringNew().run(() -> {
+            Access a = access.member(workspaceId);
+            if (!a.employer() && !jobs.hasPlaceAt(a.workspaceId(), latitude, longitude)) {
+                throw forbidden("Maps are shown for the places of this workspace's jobs.");
+            }
+        });
         String key = key();
         String center = coordinate(latitude).toPlainString() + "," + coordinate(longitude).toPlainString();
         Path file = cacheDir.resolve(hash(center + "|" + width + "x" + height + "|" + dark) + ".png");
@@ -160,13 +167,13 @@ public class PlaceService {
             response = maps.staticMap(center, MAP_ZOOM, width + "x" + height, MAP_SCALE, MARKER + center,
                     dark ? DARK_STYLE : LIGHT_STYLE, key);
         } catch (ProcessingException | WebApplicationException e) {
-            throw unavailable("static map call failed", e);
+            throw unavailable("static map", e);
         }
         try (response) {
             if (response.getStatus() != 200) {
                 String reason = response.hasEntity() ? response.readEntity(String.class) : "";
-                throw unavailable("static map answered HTTP " + response.getStatus() + ": "
-                        + reason.substring(0, Math.min(200, reason.length())), null);
+                LOG.warn("maps: static map answered HTTP " + response.getStatus() + ": " + scrub(reason.substring(0, Math.min(200, reason.length()))));
+                throw unavailable("static map", null);
             }
             byte[] png = response.readEntity(byte[].class);
             return store(file, png).toFile();
@@ -186,17 +193,32 @@ public class PlaceService {
         try {
             return request.get();
         } catch (WebApplicationException e) {
-            int status = e.getResponse().getStatus();
-            if (status == 404) throw notFound("That place");
-            throw unavailable("Google " + what + " answered HTTP " + status, e);
+            if (e.getResponse().getStatus() == 404) throw notFound("That place");
+            throw unavailable("Google " + what, e);
         } catch (ProcessingException e) {
-            throw unavailable("Google " + what + " did not answer", e);
+            throw unavailable("Google " + what, e);
         }
     }
 
-    private static KlokkaException unavailable(String detail, Throwable cause) {
-        LOG.warn("maps: " + detail, cause);
-        return new KlokkaException(MAPS_UNAVAILABLE, "Maps did not answer. Try again in a moment.", cause);
+    // The classic Maps hosts take the key in the URL, and a client exception's message can carry that URL: the log
+    // line gets the exception type and a scrubbed message, never the cause's stack.
+    private static KlokkaException unavailable(String what, Throwable cause) {
+        String reason = cause == null ? "" : cause.getClass().getSimpleName() + ": " + scrub(String.valueOf(cause.getMessage()));
+        LOG.warn("maps: " + what + " failed. " + reason);
+        return new KlokkaException(MAPS_UNAVAILABLE, "Maps did not answer. Try again in a moment.");
+    }
+
+    static String scrub(String message) {
+        return message.replaceAll("key=[^&\\s'\"]+", "key=***");
+    }
+
+    private record Caller(String language, String country) {}
+
+    private Caller employer(UUID workspaceId) {
+        return QuarkusTransaction.requiringNew().call(() -> {
+            Access a = access.employer(workspaceId);
+            return new Caller(me.languageOf(a.userId()).toString(), a.workspace().country);
+        });
     }
 
     // Five decimals is about a metre: the precision stored and the key the map cache uses.

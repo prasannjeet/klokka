@@ -5,6 +5,7 @@ import com.prasannjeet.klokka.domain.WorkspaceId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +21,19 @@ public class EntryRepository implements PanacheRepositoryBase<HourEntryEntity, U
     public Optional<HourEntryEntity> findLive(WorkspaceId workspaceId, UUID membershipId, LocalDate date) {
         return find("workspaceId = ?1 and membershipId = ?2 and workDate = ?3 and deletedAt is null",
                 workspaceId.value(), membershipId, date).firstResultOptional();
+    }
+
+    // The live day, row-locked until the transaction ends: two job writes on one day queue up, so the day's
+    // total is always computed from every committed job (CHQ-156).
+    public Optional<HourEntryEntity> findLiveForUpdate(WorkspaceId workspaceId, UUID membershipId, LocalDate date) {
+        return find("workspaceId = ?1 and membershipId = ?2 and workDate = ?3 and deletedAt is null",
+                workspaceId.value(), membershipId, date).withLock(LockModeType.PESSIMISTIC_WRITE).firstResultOptional();
+    }
+
+    public void lockEntry(WorkspaceId workspaceId, HourEntryEntity entry) {
+        requireWorkspace(workspaceId, entry.workspaceId);
+        getEntityManager().lock(entry, LockModeType.PESSIMISTIC_WRITE);
+        getEntityManager().refresh(entry);
     }
 
     public Optional<HourEntryEntity> findEntry(WorkspaceId workspaceId, UUID entryId) {

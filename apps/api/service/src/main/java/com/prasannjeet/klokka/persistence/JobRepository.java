@@ -73,6 +73,13 @@ public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
         return out;
     }
 
+    // A job of this workspace at this point (to five decimals, what the map proxy uses).
+    public boolean hasPlaceAt(WorkspaceId workspaceId, java.math.BigDecimal latitude, java.math.BigDecimal longitude) {
+        java.math.BigDecimal tolerance = new java.math.BigDecimal("0.000006");
+        return count("workspaceId = ?1 and latitude between ?2 and ?3 and longitude between ?4 and ?5", workspaceId.value(),
+                latitude.subtract(tolerance), latitude.add(tolerance), longitude.subtract(tolerance), longitude.add(tolerance)) > 0;
+    }
+
     private static void requireWorkspace(WorkspaceId workspaceId, UUID rowWorkspaceId) {
         if (!workspaceId.value().equals(rowWorkspaceId)) {
             throw new IllegalArgumentException("row is not in workspace " + workspaceId);
