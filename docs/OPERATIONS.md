@@ -33,7 +33,8 @@ All apps are Coolify `dockerimage` apps: 512 MB, `--init`, health checks on `127
 calls the API over the Docker network at `http://klokka-api:8080/v1` (the API app's network alias `klokka-api`),
 never through the public domain. Push notifications: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase
 `klokka-64f3a`, package `se.klokka.app` for both environments (one phone holds one of the two APKs; D19). The old
-package `com.prasannjeet.klokka` stays registered in Firebase and Expo so older installs keep their push.
+package `com.prasannjeet.klokka` stays registered in Firebase and Expo so older installs keep their push, but it must be
+uninstalled before the new app signs in (both own the `klokka://` redirect).
 
 ## 2. Where the credentials are
 

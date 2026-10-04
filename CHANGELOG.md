@@ -11,8 +11,8 @@ All notable changes to Klokka. The format follows Keep a Changelog; versions fol
 - Google Play: the release builds an AAB next to the APK and can put it on Play's internal track (CHQ-153).
 
 ### Changed
-- The Android app is now `se.klokka.app`. Phones with the earlier app install the new one once and can uninstall the
-  old one (CHQ-153).
+- The Android app is now `se.klokka.app`. Uninstall the earlier Klokka app first, then install the new one: both
+  answer the same sign-in link, so with both installed signing in fails (CHQ-153).
 - Release builds no longer ask for permissions Klokka never used (screen overlay, storage, fingerprint) (CHQ-153).
 
 ## 1.2.0, 2026-10-04

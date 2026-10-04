@@ -37,9 +37,8 @@ Google's PEPK tool; the same key is the upload key. The APK on klokka.se and the
 
 ## Console answers (App content and Store settings)
 
-Answer exactly this; every line is checked against the privacy page (`apps/landing/src/lib/i18n/pages/privacy.ts`).
-**Before submitting, the privacy page must also name job places and Google Maps** (CHQ-156 added both; the page does
-not list them yet), or the Data safety answers below and the page disagree.
+Answer exactly this; every line is checked against the privacy page (`apps/landing/src/lib/i18n/pages/privacy.ts`),
+which names job places, device location and Google Maps Platform since CHQ-153. Change both together.
 
 | Form | Answer |
 |---|---|

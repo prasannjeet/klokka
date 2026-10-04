@@ -39,7 +39,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'automatic',
   backgroundColor: NIGHT,
   android: {
-    // Fixed forever (docs/DECISIONS.md D12); matches the Firebase Android app.
+    // Fixed forever once on Google Play (docs/DECISIONS.md D19); matches the Firebase Android app.
     package: 'se.klokka.app',
     versionCode: 9,
     adaptiveIcon: {

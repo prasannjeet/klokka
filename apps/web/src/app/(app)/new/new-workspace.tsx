@@ -10,6 +10,7 @@ import { useState, useSyncExternalStore, type CSSProperties, type FormEvent } fr
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
 import { BrandPanel } from '@/components/brand-panel';
+import { DeleteAccountDialog } from '@/components/settings/delete-account-dialog';
 import { Icon } from '@/components/icons';
 import { useToast } from '@/components/toast';
 import {
@@ -40,6 +41,7 @@ export function NewWorkspace() {
   const t = useT();
   const locale = useLocale();
   const me = useMe();
+  const [deleting, setDeleting] = useState(false);
   const router = useRouter();
   const toast = useToast();
   const queryClient = useQueryClient();
@@ -235,6 +237,16 @@ export function NewWorkspace() {
               </button>
             </div>
           </form>
+          {first ? (
+            // Someone with no business never reaches Profile, so deleting the account is offered here too (CHQ-157).
+            <div className="form-actions" style={{ marginTop: 24 }}>
+              <button className="btn btn-sm btn-ghost" type="button" onClick={() => setDeleting(true)}>
+                <Icon name="trash" />
+                {t('account.delete.title')}
+              </button>
+            </div>
+          ) : null}
+          <DeleteAccountDialog me={me} open={deleting} onClose={() => setDeleting(false)} />
         </div>
       </main>
     </div>

@@ -172,8 +172,9 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
 ## D19. Android package `se.klokka.app` and Google Play (owner, 2026-10-04, CHQ-153)
 
 - **Package `se.klokka.app`** replaces `com.prasannjeet.klokka` before the first Play upload, after which it can never
-  change. The owner owns klokka.se; Kulram's app is `se.kulram.app`. Phones with the old package keep a separate,
-  working app until they uninstall it; the switch costs one reinstall for the handful of sideloaded users.
+  change. The owner owns klokka.se; Kulram's app is `se.kulram.app`. The old app must be uninstalled before the
+  new one signs in: both register the `klokka://` sign-in redirect, so with both installed Android offers two
+  identical apps and the sign-in fails. The switch costs one reinstall for the handful of sideloaded users.
 - Firebase `klokka-64f3a` holds both Android apps and `google-services.json` lists both clients, so builds of
   either package work. Expo (EAS) has FCM V1 credentials for both, with the same service-account key.
 - **Signing:** Play App Signing with our existing release key (uploaded once with Google's PEPK tool), which is

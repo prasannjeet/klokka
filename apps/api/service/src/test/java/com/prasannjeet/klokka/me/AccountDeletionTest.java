@@ -14,7 +14,9 @@ import io.quarkus.test.security.oidc.OidcSecurity;
 import jakarta.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +39,25 @@ class AccountDeletionTest {
     }
 
     @Test
+    void everyTableThatHangsOffAWorkspaceIsInTheDeleteList() {
+        // Foreign keys without ON DELETE CASCADE, read from the catalogue: a table whose key points (directly or through
+        // another such table) at workspace must be named in WORKSPACE_CHILDREN, or deleting a workspace fails on it.
+        List<List<Object>> keys = data().query("select tc.table_name, ccu.table_name from information_schema.table_constraints tc "
+                + "join information_schema.referential_constraints rc on rc.constraint_name = tc.constraint_name "
+                + "join information_schema.constraint_column_usage ccu on ccu.constraint_name = tc.constraint_name "
+                + "where tc.constraint_type = 'FOREIGN KEY' and rc.delete_rule <> 'CASCADE' and tc.table_schema = current_schema()");
+        Set<String> reached = new HashSet<>(Set.of("workspace"));
+        for (int round = 0; round < 10; round++) {
+            for (List<Object> key : keys) {
+                if (reached.contains(String.valueOf(key.get(1)))) reached.add(String.valueOf(key.get(0)));
+            }
+        }
+        assertThat(reached).contains("hour_entry", "membership", "email_send");
+        String statements = String.join("\n", AccountDeletionRepository.WORKSPACE_CHILDREN);
+        assertThat(reached.stream().filter(table -> !statements.contains(" " + table + " "))).isEmpty();
+    }
+
+    @Test
     @TestSecurity(user = "usr_del_emp")
     @OidcSecurity(claims = {@Claim(key = "sub", value = "usr_del_emp")})
     void anEmployeeLeavesTheirHoursWithTheEmployerAndEverythingElseGoes() {
@@ -56,6 +77,10 @@ class AccountDeletionTest {
                 UUID.randomUUID(), worked);
         d.run("insert into email_send (id, kind, recipient, status, logto_user_id) values (?, 'OTHER', 'emp@del.example', 'SENT', 'usr_del_emp')",
                 UUID.randomUUID());
+        // An invitation is logged against the membership, before the person had an account.
+        UUID invitation = UUID.randomUUID();
+        d.run("insert into email_send (id, kind, recipient, status, membership_id) values (?, 'INVITATION', 'emp-old@del.example', 'SENT', ?)",
+                invitation, withHours);
 
         given().when().delete("/v1/me").then().statusCode(204);
 
@@ -70,6 +95,8 @@ class AccountDeletionTest {
         assertThat(d.count("select count(*) from notification where logto_user_id = 'usr_del_emp'")).isZero();
         assertThat(d.count("select count(*) from email_send where logto_user_id = 'usr_del_emp' and recipient = 'deleted@deleted.invalid'"))
                 .isEqualTo(1);
+        assertThat(d.count("select count(*) from email_send where id = ? and recipient = 'deleted@deleted.invalid'", invitation)).isEqualTo(1);
+        assertThat(d.count("select count(*) from email_send where recipient = 'emp@del.example'")).isZero();
         assertThat(Fake.<String>list("deletedUsers")).containsExactly("usr_del_emp");
         assertThat(Fake.<String>list("deletedOrganizations")).isEmpty();
         // Positive control: the employer and both workspaces are untouched.
@@ -114,7 +141,8 @@ class AccountDeletionTest {
             assertThat(d.count("select count(*) from " + table + " where workspace_id = ?", ws)).as(table).isZero();
         }
         assertThat(d.count("select count(*) from workspace where id = ?", ws)).isZero();
-        assertThat(d.count("select count(*) from email_send where id = ? and workspace_id is null", mail)).isEqualTo(1);
+        assertThat(d.count("select count(*) from email_send where id = ? and workspace_id is null and recipient = 'deleted@deleted.invalid'", mail))
+                .isEqualTo(1);
         assertThat(d.count("select count(*) from app_user where logto_user_id = 'usr_del_owner'")).isZero();
         assertThat(Fake.<String>list("deletedOrganizations")).containsExactly("org_" + slug);
         assertThat(Fake.<String>list("deletedUsers")).containsExactly("usr_del_owner");

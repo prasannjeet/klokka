@@ -19,8 +19,10 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
     public record Counts(int workspacesDeleted, int membershipsDeactivated, int membershipsRemoved) {}
 
     // Children of a workspace, deleted before it in this order. A table added later with a foreign key to one of
-    // these (or to workspace) belongs here too; AccountDeletionTest seeds every table and fails on a missing one.
-    private static final List<String> WORKSPACE_CHILDREN = List.of(
+    // these (or to workspace) belongs here too; AccountDeletionTest reads the foreign keys from the catalogue and
+    // fails on a table this list does not name. The mail log keeps its rows (the monthly quota counts them) but
+    // loses the addresses.
+    static final List<String> WORKSPACE_CHILDREN = List.of(
             "delete from job_reminder where workspace_id = :w",
             "delete from job where workspace_id = :w",
             "delete from entry_flag where workspace_id = :w",
@@ -28,7 +30,7 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
             "delete from hour_entry where workspace_id = :w",
             "delete from month_lock where workspace_id = :w",
             "delete from notification where workspace_id = :w",
-            "update email_send set workspace_id = null where workspace_id = :w",
+            "update email_send set workspace_id = null, recipient = 'deleted@deleted.invalid' where workspace_id = :w",
             "delete from membership where workspace_id = :w",
             "delete from workspace where id = :w");
 
@@ -52,6 +54,10 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
         for (Object[] row : memberships) {
             WorkspaceId workspaceId = WorkspaceId.of((UUID) row[0]);
             UUID membershipId = (UUID) row[1];
+            // Invitations are logged against the membership, not the user, so they are scrubbed by membership.
+            em().createNativeQuery("update email_send set recipient = 'deleted@deleted.invalid' where membership_id = :m")
+                    .setParameter("m", membershipId)
+                    .executeUpdate();
             if ("EMPLOYER".equals(row[2])) {
                 deleteWorkspace(workspaceId);
                 workspaces++;
@@ -73,8 +79,9 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
                 removed++;
             }
         }
-        // The monthly mail quota counts these rows, so they stay; only the address goes.
-        em().createNativeQuery("update email_send set recipient = 'deleted@deleted.invalid' where logto_user_id = :u")
+        // The monthly mail quota counts these rows, so they stay; only the address goes, wherever it was logged.
+        em().createNativeQuery("update email_send set recipient = 'deleted@deleted.invalid' where logto_user_id = :u "
+                        + "or recipient = (select email from app_user where logto_user_id = :u)")
                 .setParameter("u", userId)
                 .executeUpdate();
         // Cascades to user_preference, notification, push_token and digest_run.

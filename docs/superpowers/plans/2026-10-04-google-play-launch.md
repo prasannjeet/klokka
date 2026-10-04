@@ -403,7 +403,8 @@ docs/PLAY_STORE.md`.
   (`f7t6h4recxky32cx06iknx2x`; then the IndexNow step in `docs/RELEASING.md`, the new page is in the sitemap).
 - [ ] Production checks (read-only): `https://klokka.se/radera-konto` and `/en/delete-account` load and are
   indexable; the prod APK at `prod/klokka-latest.apk` reports `se.klokka.app` (`aapt2 dump badging`).
-- [ ] Tell the existing app users (the owner knows them) to install the new APK and uninstall the old "Klokka".
+- [ ] Tell the existing app users (the owner knows them) to uninstall the old "Klokka" **first**, then install the new
+  one: both own the `klokka://` sign-in redirect, so with both installed sign-in fails (review finding).
 
 ## Phase E: first Play upload and signing (owner gates O6 to O8)
 

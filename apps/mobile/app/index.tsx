@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Redirect, useRouter } from 'expo-router';
 import { useAuth } from '@/auth';
@@ -6,7 +6,8 @@ import { useActiveWorkspace } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useAppStore } from '@/store/appStore';
 import { useTheme } from '@/theme';
-import { AppText, Button, EmptyState, Screen, Wordmark } from '@/ui';
+import { AppText, Button, EmptyState, Screen, Wordmark, type SheetHandle } from '@/ui';
+import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 
 // The first screen after sign-in decides where the app goes: the tabs of the active workspace, the
@@ -20,6 +21,7 @@ export default function Index() {
   const { workspace, me, isLoading } = useActiveWorkspace();
   const setUserId = useAppStore((s) => s.setUserId);
   const signOut = useSignOut();
+  const deleteSheet = useRef<SheetHandle>(null);
 
   useEffect(() => {
     if (me) setUserId(me.user.id);
@@ -44,6 +46,15 @@ export default function Index() {
           onPress={() => router.push('/create-workspace')}
         />
         <Button label={t('common.signOut')} variant="ghost" onPress={() => void signOut()} />
+        {/* No business means no Settings or Profile tab, so deleting the account is offered here too (CHQ-157). */}
+        <Button
+          label={t('account.delete.title')}
+          variant="ghost"
+          icon="trash"
+          onPress={() => deleteSheet.current?.present()}
+          testID="no-workspaces-delete-account"
+        />
+        <DeleteAccountSheet ref={deleteSheet} />
       </Screen>
     );
   }

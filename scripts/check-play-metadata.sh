@@ -2,6 +2,8 @@
 # Google Play listing gate (docs/PLAY_STORE.md): every text file in both languages, within Play's limits, and the
 # same business-model rule as the landing (free to use, never prices, tiers or seats; apps/landing/test/pages.test.ts).
 set -euo pipefail
+# wc -m counts characters only in a UTF-8 locale (in C it counts bytes, and å, ä, ö count twice).
+export LC_ALL=C.UTF-8
 cd "$(dirname "$0")/../apps/mobile/fastlane/metadata/android"
 
 fail=0
