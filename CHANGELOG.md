@@ -2,7 +2,7 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
-## 1.3.0 (unreleased)
+## 1.3.0, 2026-10-04
 
 ### Added
 - Delete your own account, in the Android app (Settings or Profile), in the web app (Profile) and explained on
