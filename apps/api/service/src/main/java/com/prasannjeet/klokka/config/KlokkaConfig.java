@@ -44,6 +44,20 @@ public interface KlokkaConfig {
 
     Reminders reminders();
 
+    Recurrence recurrence();
+
+    interface Recurrence {
+        @WithDefault("500")
+        @Min(1)
+        @Max(5000)
+        int maxJobs();
+
+        @WithDefault("10")
+        @Min(1)
+        @Max(10)
+        int maxYears();
+    }
+
     // Opt-in test switches; mapped here because every klokka.* key must be known (unknown keys fail the boot).
     It it();
 

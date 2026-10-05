@@ -4,6 +4,7 @@ import { useT } from '@/i18n/LocaleProvider';
 import { formatDuration } from '@/lib/duration';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Icon } from '@/ui';
+import { RecurrenceSummary } from './RecurrenceSummary';
 import { MapImage, directionsUrl } from './MapImage';
 
 const styles = (t: Theme) =>
@@ -85,6 +86,7 @@ export function JobCard({
             {formatDuration(job.hours, t)}
           </AppText>
         </View>
+        {job.recurrence ? <RecurrenceSummary series={job.recurrence} /> : null}
         {job.note ? <AppText>{`"${job.note}"`}</AppText> : null}
         {location || onEdit ? (
           <View style={s.actions}>

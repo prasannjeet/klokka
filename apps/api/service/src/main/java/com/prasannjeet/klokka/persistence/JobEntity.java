@@ -3,6 +3,8 @@ package com.prasannjeet.klokka.persistence;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,6 +25,10 @@ public class JobEntity {
 
     @Column(name = "entry_id", nullable = false)
     public UUID entryId;
+
+    @ManyToOne
+    @JoinColumn(name = "recurrence_id")
+    public JobRecurrenceEntity recurrence;
 
     @Column(nullable = false)
     public int position;

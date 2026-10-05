@@ -136,6 +136,11 @@ What else to look at when something is off: the API's log (section 7), Coolify's
 the Coolify API and waits for health (`docs/DEPLOYMENT.md`). By hand from this host: `./deploy-staging.sh
 api|web|landing|all`.
 
+**Recurring jobs (CHQ-159).** Flyway V4 adds `job_recurrence` and an optional series foreign key on
+`job`; existing jobs keep working. API limits are `KLOKKA_RECURRENCE_MAX_JOBS` (default 500, range 1 to
+5000) and `KLOKKA_RECURRENCE_MAX_YEARS` (default 10, range 1 to 10). The API validates them on startup.
+Finite occurrences are created atomically, using existing totals, locks, history and reminder scheduling.
+
 **Production** is two steps, by design:
 
 1. `./release.sh patch` (or `minor`, `major`, `x.y.z`) on a clean, pushed `main`. The `v*` tag builds

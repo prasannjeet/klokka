@@ -5,6 +5,7 @@ import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,6 +14,11 @@ import java.util.UUID;
 // a membership is only ever found together with its workspace, never by id alone.
 @ApplicationScoped
 public class MembershipRepository implements PanacheRepositoryBase<MembershipEntity, UUID> {
+
+    public void lockMember(WorkspaceId workspaceId, UUID id) {
+        find("workspaceId = ?1 and id = ?2", workspaceId.value(), id)
+                .withLock(LockModeType.PESSIMISTIC_WRITE).firstResult();
+    }
 
     public List<MembershipEntity> listMembers(WorkspaceId workspaceId) {
         return list("workspaceId = ?1 order by role, displayName", workspaceId.value());

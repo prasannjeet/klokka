@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { JobLocation, PlaceSuggestion } from '@klokka/api-client';
 import { api } from '@/lib/api';
+import { requestId } from '@/lib/request-id';
 import { useT } from '@/lib/i18n';
 import { problemMessage, toProblem } from '@/lib/problem';
 import { Icon } from '../icons';
@@ -19,7 +20,7 @@ const MIN_CHARS = 2;
 export const placesKey = (workspaceId: string) => ['places', workspaceId] as const;
 
 function newSession(): string {
-  return crypto.randomUUID();
+  return requestId();
 }
 
 export function LocationPicker({

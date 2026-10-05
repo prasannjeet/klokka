@@ -28,7 +28,7 @@ class SchemaMigrationTest {
 
     @Test
     void theBaselineIsAppliedAndNothingIsPending() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("3");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
         assertThat(flyway.info().pending()).isEmpty();
     }
 
@@ -37,7 +37,7 @@ class SchemaMigrationTest {
         List<String> tables = query("select table_name from information_schema.tables "
                 + "where table_schema = 'public' and table_type = 'BASE TABLE' order by table_name");
         assertThat(tables).contains("app_user", "user_preference", "workspace", "membership", "hour_entry",
-                "hour_entry_change", "job", "job_reminder", "entry_flag", "month_lock", "notification", "push_token", "push_delivery",
+                "hour_entry_change", "job", "job_recurrence", "job_reminder", "entry_flag", "month_lock", "notification", "push_token", "push_delivery",
                 "digest_run", "email_send", "webhook_event");
     }
 
@@ -47,6 +47,9 @@ class SchemaMigrationTest {
                 + "where contype = 'f' and conrelid = 'hour_entry'::regclass");
         assertThat(entryConstraints)
                 .contains("FOREIGN KEY (workspace_id, membership_id) REFERENCES membership(workspace_id, id)");
+        List<String> seriesConstraints = query("select pg_get_constraintdef(oid) from pg_constraint "
+                + "where contype = 'f' and conrelid = 'job'::regclass");
+        assertThat(seriesConstraints).contains("FOREIGN KEY (workspace_id, recurrence_id) REFERENCES job_recurrence(workspace_id, id)");
         List<String> flagConstraints = query("select pg_get_constraintdef(oid) from pg_constraint "
                 + "where contype = 'f' and conrelid = 'entry_flag'::regclass");
         assertThat(flagConstraints)

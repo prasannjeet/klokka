@@ -3,6 +3,7 @@ package com.prasannjeet.klokka.persistence;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,6 +14,12 @@ import java.util.UUID;
 // The jobs of a workspace's days (CHQ-156), always inside one workspace (ArchitectureTest).
 @ApplicationScoped
 public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
+
+    public List<JobEntity> seriesFrom(WorkspaceId workspaceId, UUID seriesId, LocalDate date) {
+        return list("select j from JobEntity j join HourEntryEntity e on j.entryId = e.id and j.workspaceId = e.workspaceId "
+                + "where j.workspaceId = ?1 and j.recurrence.id = ?2 and e.workDate >= ?3 order by e.workDate, j.id",
+                workspaceId.value(), seriesId, date);
+    }
 
     // Display order: by start time (jobs without one last), then the order they were added.
     private static final String ORDER = "order by startTime nulls last, position, createdAt";

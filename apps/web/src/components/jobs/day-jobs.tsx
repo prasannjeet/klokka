@@ -10,6 +10,7 @@ import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
 import { problemMessage, toProblem } from '@/lib/problem';
 import { invalidateFigures } from '@/lib/queries';
+import { todayIn } from '@/lib/time';
 import { firstName } from '@/lib/visual';
 import type { WorkspaceView } from '@/lib/workspace';
 import { Dialog } from '../dialog';
@@ -45,10 +46,11 @@ export function DayJobs({
   const queryClient = useQueryClient();
   const [dialog, setDialog] = useState<{ job: Job | null } | null>(null);
   const [removing, setRemoving] = useState<Job | null>(null);
+  const [removeScope, setRemoveScope] = useState<'ONLY_THIS' | 'THIS_AND_FUTURE'>('ONLY_THIS');
   const writable = editing !== undefined && !editing.locked;
 
   const remove = useMutation({
-    mutationFn: (job: Job) => api.jobs.deleteJob({ workspaceId: ws.id, jobId: job.id }),
+    mutationFn: (job: Job) => api.jobs.deleteJob({ workspaceId: ws.id, jobId: job.id, scope: removeScope }),
     onSuccess: () => toast({ title: t('jobs.removed'), icon: 'check' }),
     onError: async (e) => toast({ title: problemMessage(t, await toProblem(e)), tone: 'error' }),
     onSettled: () => {
@@ -65,7 +67,15 @@ export function DayJobs({
           workspaceId={ws.id}
           job={job}
           busy={remove.isPending}
-          {...(writable ? { onEdit: () => setDialog({ job }), onRemove: () => setRemoving(job) } : {})}
+          {...(writable
+            ? {
+                onEdit: () => setDialog({ job }),
+                onRemove: () => {
+                  setRemoveScope('ONLY_THIS');
+                  setRemoving(job);
+                },
+              }
+            : {})}
         />
       ))}
       {writable ? (
@@ -96,6 +106,25 @@ export function DayJobs({
         />
       ) : null}
       <Dialog open={removing !== null} onClose={() => setRemoving(null)} title={t('jobs.removeConfirm')}>
+        {removing?.recurrence ? (
+          <div className="field">
+            <label htmlFor="remove-job-scope">{t('recurrence.removeScope')}</label>
+            <select
+              id="remove-job-scope"
+              className="input"
+              value={removeScope}
+              onChange={(e) => setRemoveScope(e.target.value as typeof removeScope)}
+            >
+              <option value="ONLY_THIS">{t('recurrence.only')}</option>
+              {date >= todayIn(ws.timezone) ? (
+                <option value="THIS_AND_FUTURE">{t('recurrence.stop')}</option>
+              ) : null}
+            </select>
+            <span className="hint">
+              {t(removeScope === 'THIS_AND_FUTURE' ? 'recurrence.confirmStop' : 'recurrence.scopeHint')}
+            </span>
+          </div>
+        ) : null}
         <div className="dlg-actions">
           <button className="btn btn-ghost" type="button" onClick={() => setRemoving(null)}>
             {t('common.cancel')}

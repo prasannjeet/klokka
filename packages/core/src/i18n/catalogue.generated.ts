@@ -705,6 +705,52 @@ export const sv = {
   "profile.uploadPhoto": "Ladda upp foto",
   "profile.uploadPhotoHint": "JPG eller PNG, beskuret kvadratiskt.",
   "profile.workspaces": "Företag",
+  "recurrence.chooseDate": "Välj slutdatum",
+  "recurrence.confirmStop": "Återstående jobb i serien stoppas. Tidigare jobb och annat arbete finns kvar.",
+  "recurrence.dateHint": "Slutdatumet inkluderar den dagen. Använd ÅÅÅÅ-MM-DD.",
+  "recurrence.day": "Dag",
+  "recurrence.endDate": "Slutdatum",
+  "recurrence.ends": "Slutar (obligatoriskt)",
+  "recurrence.every": "Varje",
+  "recurrence.future": "Detta och kommande jobb",
+  "recurrence.intervalHint": "Välj 1 för varje vecka/månad eller ett större antal för ett eget intervall.",
+  "recurrence.lastDay": "Månadens sista dag",
+  "recurrence.month": "Månad",
+  "recurrence.monthly": "Månadsvis",
+  "recurrence.monthlyDay": "Datum varje månad",
+  "recurrence.monthlyLastSummary": "Varje {period}, sista dagen",
+  "recurrence.monthlySummary": "Varje {period}, dag {day}",
+  "recurrence.monthsCount": "Antal månader",
+  "recurrence.months_one": "{count} månad",
+  "recurrence.months_other": "{count} månader",
+  "recurrence.once": "Upprepas inte",
+  "recurrence.only": "Bara detta jobb",
+  "recurrence.pastHint": "Återkommande jobb börjar idag eller senare. Tidigare jobb kan bara ändras ett i taget.",
+  "recurrence.periodCount": "Antal veckor/månader",
+  "recurrence.periodHint": "Räknar kalenderveckor/månader från första datumet, även om jobben upprepas mer sällan.",
+  "recurrence.preview": "Nästa datum",
+  "recurrence.previewTotal": "{count} jobb. Sista jobbet: {date}.",
+  "recurrence.removeScope": "Vilka jobb ska tas bort?",
+  "recurrence.requiredEnd": "Välj ett slutdatum eller ange antal veckor/månader.",
+  "recurrence.sameDate": "Samma datum varje månad",
+  "recurrence.save": "Spara återkommande jobb",
+  "recurrence.saved": "Återkommande jobb sparade.",
+  "recurrence.schedule": "Återkommande schema",
+  "recurrence.scope": "Vilka jobb ska ändras?",
+  "recurrence.scopeHint": "Tidigare jobb ändras inte. Stängda månader kan inte ändras.",
+  "recurrence.shortMonths": "Kortare månader använder sin sista dag.",
+  "recurrence.stop": "Stoppa detta och kommande jobb",
+  "recurrence.stopped": "Upprepningen har stoppats",
+  "recurrence.title": "Upprepa",
+  "recurrence.until": "Slutar {date}",
+  "recurrence.useDate": "Använd detta datum",
+  "recurrence.weekdays": "Upprepa på",
+  "recurrence.weekly": "Veckovis",
+  "recurrence.weeklySummary": "Varje {period}: {days}",
+  "recurrence.weeksCount": "Antal veckor",
+  "recurrence.weeks_one": "{count} vecka",
+  "recurrence.weeks_other": "{count} veckor",
+  "recurrence.year": "År",
   "reminders.default": "Standard",
   "reminders.hint": "Påminnelser kommer som en notis i telefonen för jobb med starttid. Din arbetsgivare kan inte se eller ändra det här.",
   "reminders.howEarly": "Hur tidigt",
@@ -1779,6 +1825,52 @@ export const en = {
   "profile.uploadPhoto": "Upload photo",
   "profile.uploadPhotoHint": "JPG or PNG, cropped square.",
   "profile.workspaces": "Businesses",
+  "recurrence.chooseDate": "Choose end date",
+  "recurrence.confirmStop": "This stops the remaining jobs in the series. Earlier jobs and other work stay visible.",
+  "recurrence.dateHint": "The end date includes that day. Use YYYY-MM-DD.",
+  "recurrence.day": "Day",
+  "recurrence.endDate": "End date",
+  "recurrence.ends": "Ends (required)",
+  "recurrence.every": "Every",
+  "recurrence.future": "This and future jobs",
+  "recurrence.intervalHint": "Choose 1 for every week/month, or a larger number for a custom interval.",
+  "recurrence.lastDay": "Last day of the month",
+  "recurrence.month": "Month",
+  "recurrence.monthly": "Monthly",
+  "recurrence.monthlyDay": "Monthly date",
+  "recurrence.monthlyLastSummary": "Every {period}, last day",
+  "recurrence.monthlySummary": "Every {period}, day {day}",
+  "recurrence.monthsCount": "Number of months",
+  "recurrence.months_one": "{count} month",
+  "recurrence.months_other": "{count} months",
+  "recurrence.once": "Does not repeat",
+  "recurrence.only": "Only this job",
+  "recurrence.pastHint": "Recurring jobs start today or later. Past jobs can only be changed individually.",
+  "recurrence.periodCount": "Number of weeks/months",
+  "recurrence.periodHint": "Counts calendar weeks/months from the first date, even when jobs repeat less often.",
+  "recurrence.preview": "Next dates",
+  "recurrence.previewTotal": "{count} jobs. Last job: {date}.",
+  "recurrence.removeScope": "Remove which jobs?",
+  "recurrence.requiredEnd": "Choose an end date or enter a number of weeks/months.",
+  "recurrence.sameDate": "Same date each month",
+  "recurrence.save": "Save recurring job",
+  "recurrence.saved": "Recurring jobs saved.",
+  "recurrence.schedule": "Repeat schedule",
+  "recurrence.scope": "Change which jobs?",
+  "recurrence.scopeHint": "Earlier jobs stay unchanged. Closed months cannot be changed.",
+  "recurrence.shortMonths": "Shorter months use their last day.",
+  "recurrence.stop": "Stop this and future jobs",
+  "recurrence.stopped": "Repeat stopped",
+  "recurrence.title": "Repeat",
+  "recurrence.until": "Ends {date}",
+  "recurrence.useDate": "Use this date",
+  "recurrence.weekdays": "Repeat on",
+  "recurrence.weekly": "Weekly",
+  "recurrence.weeklySummary": "Every {period}: {days}",
+  "recurrence.weeksCount": "Number of weeks",
+  "recurrence.weeks_one": "{count} week",
+  "recurrence.weeks_other": "{count} weeks",
+  "recurrence.year": "Year",
   "reminders.default": "Default",
   "reminders.hint": "Reminders come as a phone notification for jobs with a start time. Your employer cannot see or change this.",
   "reminders.howEarly": "How early",
@@ -2834,6 +2926,50 @@ export type MessageParams = {
   "profile.uploadPhoto": Record<never, never>;
   "profile.uploadPhotoHint": Record<never, never>;
   "profile.workspaces": Record<never, never>;
+  "recurrence.chooseDate": Record<never, never>;
+  "recurrence.confirmStop": Record<never, never>;
+  "recurrence.dateHint": Record<never, never>;
+  "recurrence.day": Record<never, never>;
+  "recurrence.endDate": Record<never, never>;
+  "recurrence.ends": Record<never, never>;
+  "recurrence.every": Record<never, never>;
+  "recurrence.future": Record<never, never>;
+  "recurrence.intervalHint": Record<never, never>;
+  "recurrence.lastDay": Record<never, never>;
+  "recurrence.month": Record<never, never>;
+  "recurrence.monthly": Record<never, never>;
+  "recurrence.monthlyDay": Record<never, never>;
+  "recurrence.monthlyLastSummary": { period: string | number };
+  "recurrence.monthlySummary": { day: string | number; period: string | number };
+  "recurrence.monthsCount": Record<never, never>;
+  "recurrence.months": { count: string | number };
+  "recurrence.once": Record<never, never>;
+  "recurrence.only": Record<never, never>;
+  "recurrence.pastHint": Record<never, never>;
+  "recurrence.periodCount": Record<never, never>;
+  "recurrence.periodHint": Record<never, never>;
+  "recurrence.preview": Record<never, never>;
+  "recurrence.previewTotal": { count: string | number; date: string | number };
+  "recurrence.removeScope": Record<never, never>;
+  "recurrence.requiredEnd": Record<never, never>;
+  "recurrence.sameDate": Record<never, never>;
+  "recurrence.save": Record<never, never>;
+  "recurrence.saved": Record<never, never>;
+  "recurrence.schedule": Record<never, never>;
+  "recurrence.scope": Record<never, never>;
+  "recurrence.scopeHint": Record<never, never>;
+  "recurrence.shortMonths": Record<never, never>;
+  "recurrence.stop": Record<never, never>;
+  "recurrence.stopped": Record<never, never>;
+  "recurrence.title": Record<never, never>;
+  "recurrence.until": { date: string | number };
+  "recurrence.useDate": Record<never, never>;
+  "recurrence.weekdays": Record<never, never>;
+  "recurrence.weekly": Record<never, never>;
+  "recurrence.weeklySummary": { days: string | number; period: string | number };
+  "recurrence.weeksCount": Record<never, never>;
+  "recurrence.weeks": { count: string | number };
+  "recurrence.year": Record<never, never>;
   "reminders.default": Record<never, never>;
   "reminders.hint": Record<never, never>;
   "reminders.howEarly": Record<never, never>;
@@ -3219,6 +3355,8 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "operator.invitations.resent",
   "overview.nothingLoggedDays",
   "overview.weekdaysLeft",
+  "recurrence.months",
+  "recurrence.weeks",
   "role.employeeAtWorkspaces",
   "role.employerPeople",
   "web.month.daysWithHours",

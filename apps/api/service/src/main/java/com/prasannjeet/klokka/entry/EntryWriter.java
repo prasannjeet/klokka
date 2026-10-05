@@ -17,6 +17,7 @@ import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
 import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceEntity;
 import com.prasannjeet.klokka.persistence.JobRepository;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MonthLockRepository;
@@ -146,6 +147,10 @@ public class EntryWriter {
 
     // Adds a job to the member's day, creating the day when there is none.
     public Outcome createJob(Access access, MembershipEntity target, LocalDate date, JobInput input) {
+        return createJob(access, target, date, input, null);
+    }
+
+    public Outcome createJob(Access access, MembershipEntity target, LocalDate date, JobInput input, JobRecurrenceEntity series) {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(date));
         Instant now = clock.instant();
@@ -153,7 +158,7 @@ public class EntryWriter {
         if (live.isEmpty()) {
             requireDayTotal(input.hours());
             HourEntryEntity entry = newEntry(access, target, date, input.hours(), clean(input.note()), now);
-            newJob(access, entry, input, now);
+            newJob(access, entry, input, now).recurrence = series;
             history(access, entry, EntryChangeKind.CREATED, null, entry.hours, null, entry.note, access.userId(), now);
             notifyChange(access, target, date, null, entry.hours, entry.note);
             return new Outcome(entry, true);
@@ -167,7 +172,7 @@ public class EntryWriter {
         if (dayJobs.isEmpty() && entry.hours.signum() > 0) {
             newJob(access, entry, new JobInput(entry.hours, null, entry.note, null), now);
         }
-        newJob(access, entry, input, now);
+        newJob(access, entry, input, now).recurrence = series;
         return settle(access, target, entry, now);
     }
 
@@ -257,7 +262,7 @@ public class EntryWriter {
         return entry;
     }
 
-    private void newJob(Access access, HourEntryEntity entry, JobInput input, Instant now) {
+    private JobEntity newJob(Access access, HourEntryEntity entry, JobInput input, Instant now) {
         JobEntity job = new JobEntity();
         job.id = UUID.randomUUID();
         job.workspaceId = entry.workspaceId;
@@ -269,6 +274,7 @@ public class EntryWriter {
         job.updatedBy = access.userId();
         job.updatedAt = now;
         jobs.persistJob(access.workspaceId(), job);
+        return job;
     }
 
     private static void apply(JobEntity job, JobInput input) {

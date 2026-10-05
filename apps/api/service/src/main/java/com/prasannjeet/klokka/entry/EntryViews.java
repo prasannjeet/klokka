@@ -86,6 +86,7 @@ public final class EntryViews {
             job.location(new JobLocation().placeId(j.placeId).name(j.placeName).address(j.placeAddress)
                     .latitude(j.latitude).longitude(j.longitude));
         }
+        if (j.recurrence != null) job.recurrence(j.recurrence.view());
         return job;
     }
 

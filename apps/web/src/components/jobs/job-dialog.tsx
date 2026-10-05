@@ -5,14 +5,15 @@
 // note. Saving writes the job; the API keeps the day the sum of its jobs.
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Job, JobLocation, Rounding } from '@klokka/api-client';
+import type { Job, JobLocation, Rounding, JobRecurrenceRule } from '@klokka/api-client';
 import { formatDate, joinHours, minuteOptions, splitHours, type IsoDate } from '@klokka/core';
 import { api } from '@/lib/api';
+import { requestId as newRequestId } from '@/lib/request-id';
 import { useLocale, useT } from '@/lib/i18n';
 import { endTime, formatDuration } from '@/lib/jobs';
 import { problemMessage, toProblem } from '@/lib/problem';
 import { invalidateFigures } from '@/lib/queries';
-import { dateOf } from '@/lib/time';
+import { dateOf, todayIn } from '@/lib/time';
 import { firstName } from '@/lib/visual';
 import type { WorkspaceView } from '@/lib/workspace';
 import { Dialog } from '../dialog';
@@ -20,6 +21,8 @@ import { Icon } from '../icons';
 import { useToast } from '../toast';
 import { LocationPicker, placesKey } from './location-picker';
 import { TimeWheels } from './time-wheels';
+import { RecurrenceEditor } from './recurrence-editor';
+import { RecurrenceSummary } from './recurrence-summary';
 
 const QUICK = [0.5, 1, 2, 4] as const;
 
@@ -105,6 +108,10 @@ function JobForm({
   const [startTime, setStartTime] = useState(job?.startTime ?? '');
   const [note, setNote] = useState(job?.note ?? '');
   const [location, setLocation] = useState<JobLocation | null>(job?.location ?? null);
+  const [recurrence, setRecurrence] = useState<JobRecurrenceRule | undefined>();
+  const [recurrenceReady, setRecurrenceReady] = useState(true);
+  const [requestId] = useState(() => newRequestId());
+  const [scope, setScope] = useState<'ONLY_THIS' | 'THIS_AND_FUTURE'>('ONLY_THIS');
   const [error, setError] = useState<string | null>(null);
   // An untouched time keeps the stored hours exactly (whole minutes would turn 7.01 into 7.02 on a note edit).
   const untouched = job != null && time.hours === initial.hours && time.minutes === initial.minutes;
@@ -120,11 +127,19 @@ function JobForm({
         ...(location ? { location } : {}),
       };
       return job
-        ? api.jobs.updateJob({ workspaceId: ws.id, jobId: job.id, jobWrite })
-        : api.jobs.createJob({ workspaceId: ws.id, membershipId, date: dateOf(date), jobWrite });
+        ? api.jobs.updateJob({ workspaceId: ws.id, jobId: job.id, jobWrite, scope })
+        : api.jobs.createJob({
+            workspaceId: ws.id,
+            membershipId,
+            date: dateOf(date),
+            jobWrite: { ...jobWrite, ...(recurrence ? { recurrence, requestId } : {}) },
+          });
     },
     onSuccess: () => {
-      toast({ title: t('jobs.saved', { duration, name }), icon: 'check' });
+      toast({
+        title: recurrence ? t('recurrence.saved') : t('jobs.saved', { duration, name }),
+        icon: 'check',
+      });
       onClose();
     },
     onError: async (e) => setError(problemMessage(t, await toProblem(e))),
@@ -136,7 +151,7 @@ function JobForm({
 
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (hours <= 0) return;
+    if (hours <= 0 || !recurrenceReady) return;
     setError(null);
     save.mutate();
   }
@@ -212,6 +227,34 @@ function JobForm({
           </div>
         </div>
       </div>
+      {job?.recurrence ? (
+        <>
+          <RecurrenceSummary series={job.recurrence} />
+          <div className="field">
+            <label htmlFor="job-scope">{t('recurrence.scope')}</label>
+            <select
+              id="job-scope"
+              className="input"
+              value={scope}
+              onChange={(e) => setScope(e.target.value as typeof scope)}
+            >
+              <option value="ONLY_THIS">{t('recurrence.only')}</option>
+              {date >= todayIn(ws.timezone) ? (
+                <option value="THIS_AND_FUTURE">{t('recurrence.future')}</option>
+              ) : null}
+            </select>
+            <span className="hint">{t('recurrence.scopeHint')}</span>
+          </div>
+        </>
+      ) : !job && date >= todayIn(ws.timezone) ? (
+        <RecurrenceEditor
+          workspaceId={ws.id}
+          date={date}
+          value={recurrence}
+          onChange={setRecurrence}
+          onReady={setRecurrenceReady}
+        />
+      ) : null}
       {error ? (
         <p className="err" role="alert">
           {error}
@@ -221,9 +264,17 @@ function JobForm({
         <button className="btn btn-ghost" type="button" onClick={onClose}>
           {t('common.cancel')}
         </button>
-        <button className="btn btn-primary" type="submit" disabled={hours <= 0 || save.isPending}>
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={hours <= 0 || !recurrenceReady || save.isPending}
+        >
           <Icon name="check" />
-          {hours > 0 ? t('jobs.saveJob', { duration }) : t('jobs.chooseTimeFirst')}
+          {hours > 0
+            ? recurrence
+              ? t('recurrence.save')
+              : t('jobs.saveJob', { duration })
+            : t('jobs.chooseTimeFirst')}
         </button>
       </div>
     </form>

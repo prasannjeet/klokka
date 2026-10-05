@@ -39,6 +39,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `listEntries` | `GET /workspaces/{workspaceId}/entries?from&to&membershipId` | member (employees: own only) | week grid, mobile Week and Home cards |
 | `upsertEntry` | `PUT /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | week grid single cell (a day with 2+ jobs answers `409 ENTRY_HAS_JOBS`) |
 | `deleteEntry` | `DELETE /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | clear a day |
+| `previewJobRecurrence` | `POST /workspaces/{workspaceId}/jobs/recurrence-preview` | employer | recurring job editor: first dates, count, last date and finite end |
 | `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job sheet and dialog, any day (CHQ-156) |
 | `updateJob` | `PUT /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog |
 | `deleteJob` | `DELETE /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog "Remove" |
@@ -122,3 +123,19 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
   `/v1`; the old prefix stays until every shipped mobile version has moved.
 - Removing or renaming anything is a major bump; making a required field optional is minor; making an optional
   field required is breaking.
+
+## Recurring jobs (CHQ-159)
+
+`JobWrite.recurrence` on creation requires a retry-safe `requestId` and exactly one finite end: `endDate`
+(inclusive) or `periodCount` (calendar weeks/months from the first date, regardless of repeat interval).
+Weekly schedules choose weekdays and an interval of 1 to 12 weeks. Monthly schedules repeat the original
+day, clamping shorter months without drift, or the last day; intervals are 1 to 12 months. The API previews
+the first four `{ date }` objects and materializes all occurrences atomically, up to 500 jobs/10 years by default.
+Starts must be today or later in the workspace time zone. Employees read them through the normal entries
+and month operations. Future hours remain planned in the existing read models.
+
+`updateJob` and `deleteJob` accept `scope=ONLY_THIS` (default) or `THIS_AND_FUTURE`. Future scope requires
+a recurring job dated today or later. Editing replaces job details across remaining occurrences, keeping
+the schedule; stopping deletes that range and marks the series stopped. Earlier and unrelated jobs remain.
+A locked month or invalid daily total rolls back the whole change. Schedule metadata describes the original
+finite series, including when individual occurrences have been removed.

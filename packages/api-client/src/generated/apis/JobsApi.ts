@@ -19,6 +19,21 @@ import {
     EntryToJSON,
 } from '../models/Entry';
 import {
+    type JobChangeScope,
+    JobChangeScopeFromJSON,
+    JobChangeScopeToJSON,
+} from '../models/JobChangeScope';
+import {
+    type JobRecurrencePreview,
+    JobRecurrencePreviewFromJSON,
+    JobRecurrencePreviewToJSON,
+} from '../models/JobRecurrencePreview';
+import {
+    type JobRecurrencePreviewRequest,
+    JobRecurrencePreviewRequestFromJSON,
+    JobRecurrencePreviewRequestToJSON,
+} from '../models/JobRecurrencePreviewRequest';
+import {
     type JobWrite,
     JobWriteFromJSON,
     JobWriteToJSON,
@@ -57,6 +72,21 @@ export interface DeleteJobRequest {
      * 
      */
     jobId: string;
+    /**
+     * 
+     */
+    scope?: JobChangeScope;
+}
+
+export interface PreviewJobRecurrenceRequest {
+    /**
+     * 
+     */
+    workspaceId: string;
+    /**
+     * 
+     */
+    jobRecurrencePreviewRequest: JobRecurrencePreviewRequest;
 }
 
 export interface UpdateJobRequest {
@@ -72,6 +102,10 @@ export interface UpdateJobRequest {
      * 
      */
     jobWrite: JobWrite;
+    /**
+     * 
+     */
+    scope?: JobChangeScope;
 }
 
 /**
@@ -145,7 +179,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). 
+     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
      * Add a job to a member\'s day (employer only)
      */
     async createJobRaw(requestParameters: CreateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Entry>> {
@@ -156,7 +190,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). 
+     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
      * Add a job to a member\'s day (employer only)
      */
     async createJob(requestParameters: CreateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Entry> {
@@ -184,6 +218,10 @@ export class JobsApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['scope'] != null) {
+            queryParameters['scope'] = requestParameters['scope'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         if (this.configuration && this.configuration.accessToken) {
@@ -208,7 +246,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Removing the last job removes the day, exactly as deleteEntry does. `409 MONTH_LOCKED` when the month is closed.
+     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
      * Remove a job (employer only)
      */
     async deleteJobRaw(requestParameters: DeleteJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -219,11 +257,76 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Removing the last job removes the day, exactly as deleteEntry does. `409 MONTH_LOCKED` when the month is closed.
+     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
      * Remove a job (employer only)
      */
     async deleteJob(requestParameters: DeleteJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteJobRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Creates request options for previewJobRecurrence without sending the request
+     */
+    async previewJobRecurrenceRequestOpts(requestParameters: PreviewJobRecurrenceRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['workspaceId'] == null) {
+            throw new runtime.RequiredError(
+                'workspaceId',
+                'Required parameter "workspaceId" was null or undefined when calling previewJobRecurrence().'
+            );
+        }
+
+        if (requestParameters['jobRecurrencePreviewRequest'] == null) {
+            throw new runtime.RequiredError(
+                'jobRecurrencePreviewRequest',
+                'Required parameter "jobRecurrencePreviewRequest" was null or undefined when calling previewJobRecurrence().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/workspaces/{workspaceId}/jobs/recurrence-preview`;
+        urlPath = urlPath.replace('{workspaceId}', encodeURIComponent(String(requestParameters['workspaceId'])));
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: JobRecurrencePreviewRequestToJSON(requestParameters['jobRecurrencePreviewRequest']),
+        };
+    }
+
+    /**
+     * Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
+     * Preview a bounded recurring schedule (employer only)
+     */
+    async previewJobRecurrenceRaw(requestParameters: PreviewJobRecurrenceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobRecurrencePreview>> {
+        const requestOptions = await this.previewJobRecurrenceRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobRecurrencePreviewFromJSON(jsonValue));
+    }
+
+    /**
+     * Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
+     * Preview a bounded recurring schedule (employer only)
+     */
+    async previewJobRecurrence(requestParameters: PreviewJobRecurrenceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobRecurrencePreview> {
+        const response = await this.previewJobRecurrenceRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -253,6 +356,10 @@ export class JobsApi extends runtime.BaseAPI {
 
         const queryParameters: any = {};
 
+        if (requestParameters['scope'] != null) {
+            queryParameters['scope'] = requestParameters['scope'];
+        }
+
         const headerParameters: runtime.HTTPHeaders = {};
 
         headerParameters['Content-Type'] = 'application/json';
@@ -280,7 +387,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. Same rules as createJob.
+     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
      * Replace a job (employer only)
      */
     async updateJobRaw(requestParameters: UpdateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Entry>> {
@@ -291,7 +398,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. Same rules as createJob.
+     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
      * Replace a job (employer only)
      */
     async updateJob(requestParameters: UpdateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Entry> {

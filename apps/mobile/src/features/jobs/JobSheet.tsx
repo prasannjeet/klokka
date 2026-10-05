@@ -1,6 +1,15 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import type { Entry, Job, JobLocation, JobWrite, MyWorkspace, Rounding } from '@klokka/api-client';
+import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import type {
+  Entry,
+  Job,
+  JobLocation,
+  JobWrite,
+  MyWorkspace,
+  Rounding,
+  JobRecurrenceRule,
+  JobChangeScope,
+} from '@klokka/api-client';
 import {
   QUICK_CHIPS,
   formatDate,
@@ -29,6 +38,10 @@ import {
   useToast,
   type SheetHandle,
 } from '@/ui';
+import * as Crypto from 'expo-crypto';
+import { todayIn } from '@/lib/dates';
+import { RecurrenceEditor } from './RecurrenceEditor';
+import { RecurrenceSummary } from './RecurrenceSummary';
 import { endTime } from './JobCard';
 import { LocationPicker } from './LocationPicker';
 
@@ -105,7 +118,7 @@ const styles = (t: Theme) =>
     back: { flexDirection: 'row', alignItems: 'center', gap: t.space[1], minHeight: t.tapMin },
   });
 
-type Panel = 'job' | 'location' | 'start';
+type Panel = 'job' | 'location' | 'start' | 'repeat' | 'scope';
 
 // A job on a member's day (CHQ-156, design screen 4): where and when it starts side by side, the hour and
 // minute wheels (CHQ-155; minutes follow the workspace rounding), quick picks, a note, and a button that says
@@ -117,6 +130,7 @@ export const JobSheet = forwardRef<
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
+  const { height } = useWindowDimensions();
   const s = useThemedStyles(styles);
   const toast = useToast();
   const sheet = useRef<SheetHandle>(null);
@@ -132,6 +146,10 @@ export const JobSheet = forwardRef<
   const [location, setLocation] = useState<JobLocation | null>(null);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [draftStart, setDraftStart] = useState({ hours: 8, minutes: 0 });
+  const [recurrence, setRecurrence] = useState<JobRecurrenceRule | undefined>();
+  const [recurrenceReady, setRecurrenceReady] = useState(true);
+  const [requestId, setRequestId] = useState(() => Crypto.randomUUID());
+  const [scopeAction, setScopeAction] = useState<'save' | 'remove'>('save');
   const [error, setError] = useState<string | null>(null);
 
   useImperativeHandle(ref, () => ({
@@ -145,6 +163,9 @@ export const JobSheet = forwardRef<
       setLocation(next.job?.location ?? null);
       setStartTime(next.job?.startTime ?? null);
       setError(null);
+      setRecurrence(undefined);
+      setRecurrenceReady(true);
+      setRequestId(Crypto.randomUUID());
       sheet.current?.present();
     },
     dismiss: () => sheet.current?.dismiss(),
@@ -160,7 +181,7 @@ export const JobSheet = forwardRef<
     untouched && target.job
       ? target.job.hours
       : roundHours(joinHours(time.hours, time.minutes), target.rounding);
-  const canSave = rounded > 0;
+  const canSave = rounded > 0 && recurrenceReady;
   const durationLabel = formatDuration(rounded, t);
   const dateLabel = formatDate(target.date, locale, 'long');
   const subtitle =
@@ -169,20 +190,26 @@ export const JobSheet = forwardRef<
       : dateLabel;
   const firstName = target.memberName.split(' ')[0] ?? target.memberName;
 
-  const save = async () => {
+  const save = async (scope: JobChangeScope = 'ONLY_THIS') => {
+    if (!canSave) return;
     setError(null);
     const job: JobWrite = {
       hours: rounded,
       startTime,
       note: note.trim() === '' ? null : note.trim(),
       ...(location ? { location } : {}),
+      ...(!target.job && recurrence ? { recurrence, requestId } : {}),
     };
     try {
       const entry = target.job
-        ? await update.mutateAsync({ jobId: target.job.id, job })
+        ? await update.mutateAsync({ jobId: target.job.id, job, ...(target.job.recurrence ? { scope } : {}) })
         : await create.mutateAsync({ membershipId: target.membershipId, date: target.date, job });
       void haptic('success');
-      toast.show(t('jobs.saved', { duration: durationLabel, name: target.memberName }));
+      toast.show(
+        recurrence
+          ? t('recurrence.saved')
+          : t('jobs.saved', { duration: durationLabel, name: target.memberName }),
+      );
       onSaved?.(entry);
       sheet.current?.dismiss();
     } catch (e) {
@@ -191,11 +218,11 @@ export const JobSheet = forwardRef<
     }
   };
 
-  const clear = async () => {
+  const clear = async (scope: JobChangeScope = 'ONLY_THIS') => {
     if (!target.job) return;
     setError(null);
     try {
-      await remove.mutateAsync(target.job.id);
+      await remove.mutateAsync(target.job.recurrence ? { jobId: target.job.id, scope } : target.job.id);
       toast.show(t('jobs.removed'));
       sheet.current?.dismiss();
     } catch (e) {
@@ -238,7 +265,51 @@ export const JobSheet = forwardRef<
       onDismiss={() => setTarget(null)}
       testID="job-sheet"
     >
-      {panel === 'location' ? (
+      {panel === 'repeat' ? (
+        <ScrollView
+          style={{ maxHeight: height - theme.space[9] * 4 }}
+          contentContainerStyle={{ gap: theme.space[3] }}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+        >
+          {backRow}
+          <RecurrenceEditor
+            workspaceId={workspace.workspaceId}
+            date={target.date}
+            value={recurrence}
+            onChange={setRecurrence}
+            onReady={setRecurrenceReady}
+            onDone={() => setPanel('job')}
+          />
+        </ScrollView>
+      ) : panel === 'scope' ? (
+        <View style={{ gap: theme.space[3] }}>
+          {backRow}
+          <AppText weight={600}>
+            {t(scopeAction === 'save' ? 'recurrence.scope' : 'recurrence.removeScope')}
+          </AppText>
+          <AppText variant="small" tone="muted">
+            {t(scopeAction === 'save' ? 'recurrence.scopeHint' : 'recurrence.confirmStop')}
+          </AppText>
+          {(['ONLY_THIS', 'THIS_AND_FUTURE'] as const)
+            .filter((scope) => scope === 'ONLY_THIS' || target.date >= todayIn(workspace.timezone))
+            .map((scope) => (
+              <Button
+                key={scope}
+                label={t(scope === 'ONLY_THIS' ? 'recurrence.only' : 'recurrence.future')}
+                variant={scope === 'ONLY_THIS' ? 'primary' : 'secondary'}
+                onPress={() => void (scopeAction === 'save' ? save(scope) : clear(scope))}
+                loading={update.isPending || remove.isPending}
+                testID={`scope-${scope}`}
+              />
+            ))}
+          {error ? (
+            <AppText tone="danger" accessibilityLiveRegion="polite">
+              {error}
+            </AppText>
+          ) : null}
+        </View>
+      ) : panel === 'location' ? (
         <View style={{ gap: theme.space[2] }}>
           {backRow}
           <LocationPicker
@@ -295,7 +366,12 @@ export const JobSheet = forwardRef<
           />
         </View>
       ) : (
-        <View style={{ gap: theme.space[4] }}>
+        <ScrollView
+          style={{ maxHeight: height - theme.space[9] * 4 }}
+          contentContainerStyle={{ gap: theme.space[4] }}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled
+        >
           <View style={s.tiles}>
             <AppPressable
               accessibilityRole="button"
@@ -404,6 +480,23 @@ export const JobSheet = forwardRef<
               />
             ) : null}
           </ScrollView>
+          {target.job?.recurrence ? (
+            <RecurrenceSummary series={target.job.recurrence} />
+          ) : !editing && target.date >= todayIn(workspace.timezone) ? (
+            <Button
+              label={t(
+                recurrence
+                  ? recurrence.frequency === 'WEEKLY'
+                    ? 'recurrence.weekly'
+                    : 'recurrence.monthly'
+                  : 'recurrence.title',
+              )}
+              variant="secondary"
+              icon="refresh"
+              onPress={() => setPanel('repeat')}
+              testID="job-repeat"
+            />
+          ) : null}
           <TextField
             label={t('week.noteOptional')}
             placeholder={t('week.notePlaceholder')}
@@ -422,8 +515,19 @@ export const JobSheet = forwardRef<
           ) : null}
           <View style={s.actions}>
             <Button
-              label={canSave ? t('jobs.saveJob', { duration: durationLabel }) : t('jobs.chooseTimeFirst')}
-              onPress={() => void save()}
+              label={
+                rounded > 0
+                  ? recurrence
+                    ? t('recurrence.save')
+                    : t('jobs.saveJob', { duration: durationLabel })
+                  : t('jobs.chooseTimeFirst')
+              }
+              onPress={() => {
+                if (target.job?.recurrence) {
+                  setScopeAction('save');
+                  setPanel('scope');
+                } else void save();
+              }}
               disabled={!canSave}
               loading={create.isPending || update.isPending}
               testID="save-job"
@@ -432,14 +536,19 @@ export const JobSheet = forwardRef<
               <Button
                 label={t('jobs.removeJob')}
                 variant="ghost"
-                onPress={() => void clear()}
+                onPress={() => {
+                  if (target.job?.recurrence) {
+                    setScopeAction('remove');
+                    setPanel('scope');
+                  } else void clear();
+                }}
                 loading={remove.isPending}
                 hapticKind="warning"
                 testID="remove-job"
               />
             ) : null}
           </View>
-        </View>
+        </ScrollView>
       )}
     </AppSheet>
   );

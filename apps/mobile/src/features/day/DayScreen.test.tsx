@@ -188,3 +188,86 @@ describe('DayScreen', () => {
     expect(routerState.pushes.at(-1)).toEqual({ pathname: '/flag/[flagId]', params: { flagId: 'flag-1' } });
   });
 });
+
+describe('recurring jobs', () => {
+  beforeEach(() => useAppStore.getState().setActiveWorkspace('ws-cafe'));
+  it('creates only after the required end preview and sends the finite schedule and retry key', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      listEntries: [],
+      getWorkspace: workspaceFixture,
+      getMemberMonth: { ...memberMonthFixture, month: '2026-10', locked: false, days: [] },
+      getMember: membersFixture[0],
+      previewJobRecurrence: {
+        dates: [{ date: new Date(2026, 9, 7) }],
+        occurrenceCount: 4,
+        lastDate: new Date(2026, 9, 28),
+        endDate: new Date(2026, 10, 3),
+      },
+      createJob: () => entryFixture('mem-maria', '2026-10-07', 4),
+    });
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
+    await fireEvent.press(await screen.findByTestId('day-add-job'));
+    await fireEvent.press(screen.getByTestId('wheel-hours-4'));
+    await fireEvent.press(screen.getByTestId('job-repeat'));
+    await fireEvent.press(screen.getByTestId('repeat-WEEKLY'));
+    expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled).toBe(true);
+    await fireEvent.press(screen.getByTestId('repeat-end-mode-count'));
+    await fireEvent.changeText(screen.getByTestId('repeat-count'), '4');
+    await waitFor(() =>
+      expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled === true).toBe(false),
+    );
+    await fireEvent.press(screen.getByTestId('repeat-done'));
+    await fireEvent.press(screen.getByTestId('save-job'));
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
+    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
+      jobWrite: {
+        hours: 4,
+        requestId: expect.any(String),
+        recurrence: { frequency: 'WEEKLY', interval: 1, weekdays: new Set(['WEDNESDAY']), periodCount: 4 },
+      },
+    });
+  });
+  it('shows the recurring job and sends future scope only after the employer chooses it', async () => {
+    const series = {
+      id: 'series-1',
+      firstDate: new Date(2026, 9, 7),
+      endDate: new Date(2026, 10, 3),
+      lastDate: new Date(2026, 9, 28),
+      occurrenceCount: 4,
+      stopped: false,
+      recurrence: {
+        frequency: 'WEEKLY' as const,
+        interval: 1,
+        weekdays: new Set(['WEDNESDAY' as const]),
+        periodCount: 4,
+      },
+    };
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getMember: membersFixture[0],
+      listEntries: [
+        entryFixture('mem-maria', '2026-10-07', 4, {
+          jobs: [jobFixture('job-repeat', 4, { recurrence: series })],
+        }),
+      ],
+      getEntryHistory: [],
+      getWorkspace: workspaceFixture,
+      getMemberMonth: { ...memberMonthFixture, locked: false },
+      deleteJob: undefined,
+    });
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
+    expect(await screen.findByText('Every 1 week: Wed')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('job-edit-job-repeat'));
+    await fireEvent.press(screen.getByTestId('remove-job'));
+    expect(api.calls.some((c) => c.op === 'deleteJob')).toBe(false);
+    await fireEvent.press(screen.getByTestId('scope-THIS_AND_FUTURE'));
+    await waitFor(() =>
+      expect(api.calls.find((c) => c.op === 'deleteJob')?.args[0]).toEqual({
+        workspaceId: 'ws-cafe',
+        jobId: 'job-repeat',
+        scope: 'THIS_AND_FUTURE',
+      }),
+    );
+  });
+});

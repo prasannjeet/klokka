@@ -20,9 +20,16 @@ import {
     JobLocationToJSON,
     JobLocationToJSONTyped,
 } from './JobLocation';
+import type { JobRecurrence } from './JobRecurrence';
+import {
+    JobRecurrenceFromJSON,
+    JobRecurrenceFromJSONTyped,
+    JobRecurrenceToJSON,
+    JobRecurrenceToJSONTyped,
+} from './JobRecurrence';
 
 /**
- * One piece of a day's work.
+ * One piece of a day's work, optionally an occurrence of a recurring series.
  * @export
  * @interface Job
  */
@@ -35,6 +42,10 @@ export interface Job {
      * 
      */
     hours: number;
+    /**
+     * 
+     */
+    recurrence?: JobRecurrence;
     /**
      * Local time in the workspace time zone, `HH:mm`.
      */
@@ -80,6 +91,7 @@ export function JobFromJSONTyped(json: any, ignoreDiscriminator: boolean): Job {
         
         'id': json['id'],
         'hours': json['hours'],
+        'recurrence': json['recurrence'] == null ? undefined : JobRecurrenceFromJSON(json['recurrence']),
         'startTime': json['startTime'] === undefined ? undefined : json['startTime'] === null ? null : json['startTime'],
         'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
         'location': json['location'] == null ? undefined : JobLocationFromJSON(json['location']),
@@ -101,6 +113,7 @@ export function JobToJSONTyped(value?: Job | null, ignoreDiscriminator: boolean 
         
         'id': value['id'],
         'hours': value['hours'],
+        'recurrence': JobRecurrenceToJSON(value['recurrence']),
         'startTime': value['startTime'],
         'note': value['note'],
         'location': JobLocationToJSON(value['location']),

@@ -6,6 +6,7 @@ import type { Job } from '@klokka/api-client';
 import { useT } from '@/lib/i18n';
 import { directionsUrl, formatDuration, timeRange } from '@/lib/jobs';
 import { Icon } from '../icons';
+import { RecurrenceSummary } from './recurrence-summary';
 import { MapImage } from './map-image';
 
 export function JobCard({
@@ -37,6 +38,7 @@ export function JobCard({
           </div>
           <span className="job-hours">{formatDuration(job.hours, t)}</span>
         </div>
+        {job.recurrence ? <RecurrenceSummary series={job.recurrence} /> : null}
         {job.note ? <q className="job-note">{job.note}</q> : null}
         {place || onEdit || onRemove ? (
           <div className="job-acts">

@@ -6,6 +6,7 @@ import type {
   FlagResolve,
   FlagStatus,
   JobWrite,
+  JobChangeScope,
   MemberInvite,
   MemberUpdate,
   WorkspaceCreate,
@@ -292,8 +293,8 @@ export function useUpdateJob(workspaceId: string) {
   const api = useApi();
   const invalidate = useInvalidateWorkspace(workspaceId);
   return useMutation({
-    mutationFn: ({ jobId, job }: { jobId: string; job: JobWrite }) =>
-      api.jobs.updateJob({ workspaceId, jobId, jobWrite: job }),
+    mutationFn: ({ jobId, job, scope }: { jobId: string; job: JobWrite; scope?: JobChangeScope }) =>
+      api.jobs.updateJob({ workspaceId, jobId, jobWrite: job, scope }),
     onSettled: () => void invalidate(),
   });
 }
@@ -302,7 +303,8 @@ export function useDeleteJob(workspaceId: string) {
   const api = useApi();
   const invalidate = useInvalidateWorkspace(workspaceId);
   return useMutation({
-    mutationFn: (jobId: string) => api.jobs.deleteJob({ workspaceId, jobId }),
+    mutationFn: (target: string | { jobId: string; scope: JobChangeScope }) =>
+      api.jobs.deleteJob({ workspaceId, ...(typeof target === 'string' ? { jobId: target } : target) }),
     onSettled: () => void invalidate(),
   });
 }

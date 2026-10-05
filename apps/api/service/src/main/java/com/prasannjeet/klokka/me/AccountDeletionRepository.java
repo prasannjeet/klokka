@@ -25,6 +25,7 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
     static final List<String> WORKSPACE_CHILDREN = List.of(
             "delete from job_reminder where workspace_id = :w",
             "delete from job where workspace_id = :w",
+            "delete from job_recurrence where workspace_id = :w",
             "delete from entry_flag where workspace_id = :w",
             "delete from hour_entry_change where workspace_id = :w",
             "delete from hour_entry where workspace_id = :w",

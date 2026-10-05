@@ -716,7 +716,39 @@ paths:
         default:
           $ref: '#/components/responses/Problem'
 
-  # ---------------------------------------------------------------- jobs (CHQ-156)
+  # ---------------------------------------------------------------- jobs (CHQ-156, CHQ-159)
+  /workspaces/{workspaceId}/jobs/recurrence-preview:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+    post:
+      tags: [jobs]
+      operationId: previewJobRecurrence
+      summary: Preview a bounded recurring schedule (employer only)
+      description: Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRecurrencePreviewRequest'
+      responses:
+        '200':
+          description: Exact total, last job date, resolved end and first four dates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobRecurrencePreview'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Problem'
+
   /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs:
     parameters:
       - $ref: '#/components/parameters/WorkspaceId'
@@ -730,7 +762,9 @@ paths:
         Creates the day's entry when there is none. Any date may be used, future ones too (planned work), unless
         its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day's jobs together
         may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as
-        for hours (coalesced per sitting).
+        for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically,
+        without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today
+        or later in the business time zone. A closed month or any day limit refuses the whole series.
       requestBody:
         required: true
         content:
@@ -765,7 +799,9 @@ paths:
       tags: [jobs]
       operationId: updateJob
       summary: Replace a job (employer only)
-      description: Every field is replaced; an absent `location`, `startTime` or `note` clears it. Same rules as createJob.
+      description: Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
+      parameters:
+        - $ref: '#/components/parameters/JobChangeScope'
       requestBody:
         required: true
         content:
@@ -795,7 +831,9 @@ paths:
       tags: [jobs]
       operationId: deleteJob
       summary: Remove a job (employer only)
-      description: Removing the last job removes the day, exactly as deleteEntry does. `409 MONTH_LOCKED` when the month is closed.
+      description: Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
+      parameters:
+        - $ref: '#/components/parameters/JobChangeScope'
       responses:
         '204':
           description: Removed.
@@ -1629,6 +1667,12 @@ components:
         the API rejects with 401).
 
   parameters:
+    JobChangeScope:
+      name: scope
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/JobChangeScope'
     WorkspaceId:
       name: workspaceId
       in: path
@@ -2903,9 +2947,99 @@ components:
         address: Kungsgatan 12, 111 35 Stockholm
         latitude: 59.3346
         longitude: 18.0632
+    JobRecurrenceRule:
+      type: object
+      description: A finite schedule. Supply exactly one of endDate or periodCount; unlimited schedules are invalid.
+      required: [frequency, interval]
+      properties:
+        frequency:
+          type: string
+          enum: [WEEKLY, MONTHLY]
+        interval:
+          type: integer
+          minimum: 1
+          maximum: 12
+        weekdays:
+          type: array
+          uniqueItems: true
+          maxItems: 7
+          description: Required and nonempty for WEEKLY, absent for MONTHLY. Week intervals are anchored to the Monday of the first date's week.
+          items:
+            $ref: '#/components/schemas/Weekday'
+        lastDayOfMonth:
+          type: boolean
+          description: MONTHLY only; otherwise use the first date's day of month, clamped in shorter months.
+        endDate:
+          type: string
+          format: date
+          description: Inclusive, not before the first date. Mutually exclusive with periodCount.
+        periodCount:
+          type: integer
+          minimum: 1
+          maximum: 120
+          description: Number of calendar weeks or months starting on the first date. Upper boundary is exclusive. Mutually exclusive with endDate.
+    JobRecurrencePreviewRequest:
+      type: object
+      required: [firstDate, recurrence]
+      properties:
+        firstDate:
+          type: string
+          format: date
+        recurrence:
+          $ref: '#/components/schemas/JobRecurrenceRule'
+    JobRecurrencePreview:
+      type: object
+      required: [dates, occurrenceCount, lastDate, endDate]
+      properties:
+        dates:
+          type: array
+          maxItems: 4
+          items:
+            $ref: '#/components/schemas/JobRecurrencePreviewDate'
+        occurrenceCount:
+          type: integer
+        lastDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    JobRecurrencePreviewDate:
+      type: object
+      required: [date]
+      properties:
+        date:
+          type: string
+          format: date
+    JobRecurrence:
+      type: object
+      required: [id, firstDate, recurrence, occurrenceCount, lastDate, endDate, stopped]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstDate:
+          type: string
+          format: date
+        recurrence:
+          $ref: '#/components/schemas/JobRecurrenceRule'
+        occurrenceCount:
+          type: integer
+        lastDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        stopped:
+          type: boolean
+    JobChangeScope:
+      type: string
+      enum: [ONLY_THIS, THIS_AND_FUTURE]
+      default: ONLY_THIS
     Job:
       type: object
-      description: One piece of a day's work.
+      description: One piece of a day's work, optionally an occurrence of a recurring series.
       required: [id, hours, createdAt, updatedAt]
       properties:
         id:
@@ -2917,6 +3051,8 @@ components:
           minimum: 0
           maximum: 24
           example: 4.5
+        recurrence:
+          $ref: '#/components/schemas/JobRecurrence'
         startTime:
           type: [string, 'null']
           description: Local time in the workspace time zone, `HH:mm`.
@@ -2960,6 +3096,12 @@ components:
           maximum: 24
           description: Two decimals at most; rounded by the workspace rule on save.
           example: 4.5
+        recurrence:
+          $ref: '#/components/schemas/JobRecurrenceRule'
+        requestId:
+          type: string
+          format: uuid
+          description: Required with recurrence on creation; reuse unchanged for retries. Not accepted without recurrence.
         startTime:
           type: [string, 'null']
           pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'

@@ -12,14 +12,7 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
-import type { JobLocation } from './JobLocation';
-import {
-    JobLocationFromJSON,
-    JobLocationFromJSONTyped,
-    JobLocationToJSON,
-    JobLocationToJSONTyped,
-} from './JobLocation';
+import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
 import type { JobRecurrenceRule } from './JobRecurrenceRule';
 import {
     JobRecurrenceRuleFromJSON,
@@ -29,81 +22,58 @@ import {
 } from './JobRecurrenceRule';
 
 /**
- * A whole job; a field left out is cleared.
+ * 
  * @export
- * @interface JobWrite
+ * @interface JobRecurrencePreviewRequest
  */
-export interface JobWrite {
-    /**
-     * Two decimals at most; rounded by the workspace rule on save.
-     */
-    hours: number;
+export interface JobRecurrencePreviewRequest {
     /**
      * 
      */
-    recurrence?: JobRecurrenceRule;
-    /**
-     * Required with recurrence on creation; reuse unchanged for retries. Not accepted without recurrence.
-     */
-    requestId?: string;
+    firstDate: Date;
     /**
      * 
      */
-    startTime?: string | null;
-    /**
-     * 
-     */
-    note?: string | null;
-    /**
-     * 
-     */
-    location?: JobLocation;
+    recurrence: JobRecurrenceRule;
 }
 
 /**
- * Check if a given object implements the JobWrite interface.
+ * Check if a given object implements the JobRecurrencePreviewRequest interface.
  */
-export function instanceOfJobWrite(value: object): value is JobWrite {
-    if (!('hours' in value) || value['hours'] === undefined) return false;
+export function instanceOfJobRecurrencePreviewRequest(value: object): value is JobRecurrencePreviewRequest {
+    if (!('firstDate' in value) || value['firstDate'] === undefined) return false;
+    if (!('recurrence' in value) || value['recurrence'] === undefined) return false;
     return true;
 }
 
-export function JobWriteFromJSON(json: any): JobWrite {
-    return JobWriteFromJSONTyped(json, false);
+export function JobRecurrencePreviewRequestFromJSON(json: any): JobRecurrencePreviewRequest {
+    return JobRecurrencePreviewRequestFromJSONTyped(json, false);
 }
 
-export function JobWriteFromJSONTyped(json: any, ignoreDiscriminator: boolean): JobWrite {
+export function JobRecurrencePreviewRequestFromJSONTyped(json: any, ignoreDiscriminator: boolean): JobRecurrencePreviewRequest {
     if (json == null) {
         return json;
     }
     return {
         
-        'hours': json['hours'],
-        'recurrence': json['recurrence'] == null ? undefined : JobRecurrenceRuleFromJSON(json['recurrence']),
-        'requestId': json['requestId'] == null ? undefined : json['requestId'],
-        'startTime': json['startTime'] === undefined ? undefined : json['startTime'] === null ? null : json['startTime'],
-        'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
-        'location': json['location'] == null ? undefined : JobLocationFromJSON(json['location']),
+        'firstDate': (json['firstDate'] == null ? json['firstDate'] : parseDate(json['firstDate'])),
+        'recurrence': JobRecurrenceRuleFromJSON(json['recurrence']),
     };
 }
 
-export function JobWriteToJSON(json: any): JobWrite {
-    return JobWriteToJSONTyped(json, false);
+export function JobRecurrencePreviewRequestToJSON(json: any): JobRecurrencePreviewRequest {
+    return JobRecurrencePreviewRequestToJSONTyped(json, false);
 }
 
-export function JobWriteToJSONTyped(value?: JobWrite | null, ignoreDiscriminator: boolean = false): any {
+export function JobRecurrencePreviewRequestToJSONTyped(value?: JobRecurrencePreviewRequest | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
-        'hours': value['hours'],
+        'firstDate': value['firstDate'] == null ? value['firstDate'] : serializeDate(value['firstDate']),
         'recurrence': JobRecurrenceRuleToJSON(value['recurrence']),
-        'requestId': value['requestId'],
-        'startTime': value['startTime'],
-        'note': value['note'],
-        'location': JobLocationToJSON(value['location']),
     };
 }
 
