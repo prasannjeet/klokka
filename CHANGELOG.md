@@ -2,6 +2,16 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.4.0, 2026-10-05
+
+### Added
+- Recurring employee jobs on web and Android: weekly or monthly, custom intervals, weekday selection and
+  month-end dates. Every series requires an end date or a number of calendar weeks/months (CHQ-159).
+- Preview upcoming dates, total jobs and the last occurrence before saving. Employees see the recurring jobs
+  in their existing day, week and month views (CHQ-159).
+- Edit or remove only one job or that job and future occurrences, preserving earlier work and closed-month
+  locks. Series creation is bounded, atomic and retry-safe (CHQ-159).
+
 ## 1.3.0, 2026-10-04
 
 ### Added

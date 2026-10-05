@@ -1,0 +1,1 @@
+Add recurring employee jobs weekly or monthly, with an end date or a fixed number of weeks/months. Preview dates before saving. Edit or remove one job or this and future jobs.

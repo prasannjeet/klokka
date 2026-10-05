@@ -1,0 +1,1 @@
+Lägg till återkommande jobb för anställda varje vecka eller månad, med slutdatum eller ett bestämt antal veckor/månader. Förhandsgranska datum innan du sparar. Ändra eller ta bort ett jobb eller detta och kommande jobb.
