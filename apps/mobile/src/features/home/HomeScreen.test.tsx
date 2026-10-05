@@ -48,6 +48,7 @@ describe('HomeScreen (employer, today)', () => {
     expect(screen.getByText('Week 39, 101 h so far.')).toBeTruthy();
     expect(screen.getByText(/3 of 4 logged today\./)).toBeTruthy();
     expect(screen.getByText('1 open flag')).toBeTruthy();
+    expect(screen.getByText('Nora Lind, employer')).toBeTruthy();
     expect(screen.getByText('Café Nord')).toBeTruthy();
   });
 

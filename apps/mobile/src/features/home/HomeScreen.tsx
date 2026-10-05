@@ -12,6 +12,7 @@ import {
   useWorkspace,
   useWorkspaceInsights,
 } from '@/data/workspace';
+import { useMe } from '@/data/me';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
@@ -89,6 +90,8 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
   const entries = useEntries(workspace.workspaceId, addDays(today, -1), today);
   const insights = useWorkspaceInsights(workspace.workspaceId);
   const flags = useFlags(workspace.workspaceId, 'OPEN');
+  // The employer's own name: the workspace's employerName is only filled in for employees (the contract).
+  const ownName = useMe().data?.user.name.trim() ?? '';
   const sheet = useRef<JobSheetHandle>(null);
   const people: Member[] = (members.data ?? []).filter(
     (m) => m.role === 'EMPLOYEE' && m.status !== 'DEACTIVATED',
@@ -133,7 +136,7 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
               {workspace.name}
             </AppText>
             <AppText variant="small" tone="muted" numberOfLines={1}>
-              {t('mobile.home.employerLine', { name: workspace.employerName ?? '' })}
+              {ownName ? t('mobile.home.employerLine', { name: ownName }) : t('role.employer')}
             </AppText>
           </View>
           <AppPressable
