@@ -55,7 +55,6 @@ export function RecurrenceEditor({
   useEffect(() => onReady(ready), [ready, onReady]);
   useEffect(() => {
     if (preview.error) void toProblem(preview.error).then((p) => setError(problemMessage(t, p)));
-    else setError(null);
   }, [preview.error, t]);
   const weekly = value?.frequency === 'WEEKLY';
   const set = (next: JobRecurrenceRule) => onChange(next);
