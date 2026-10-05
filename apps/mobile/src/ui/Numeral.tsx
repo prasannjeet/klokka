@@ -30,7 +30,16 @@ export function Numeral({
       accessibilityLabel={accessibilityLabel ?? `${value} ${unit ?? ''}`.trim()}
       testID={testID}
     >
-      <AppText variant={role} color={color ?? theme.color.text}>
+      {/* One line, shrunk by the platform when the card is too narrow: an amount like "SEK 25,822.50" must never
+          break in the middle of the number. */}
+      <AppText
+        variant={role}
+        color={color ?? theme.color.text}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.6}
+        style={styles.value}
+      >
         {value}
       </AppText>
       {unit ? (
@@ -44,5 +53,6 @@ export function Numeral({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'baseline', gap: 4 },
+  value: { flexShrink: 1 },
   unit: { paddingBottom: 2 },
 });
