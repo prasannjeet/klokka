@@ -3,6 +3,11 @@
 Klokka is on Google Play as `se.klokka.app` (`docs/DECISIONS.md` D19) under the CleanHQ developer account, a personal
 account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play-launch.md` (CHQ-153).
 
+**Current release (2026-10-05):** v1.4.0, versionCode 11, is `completed` on internal testing and a `draft` on
+closed testing (`alpha`). Public promotion is rejected while the app is in its initial draft state. The owner
+must complete Play Console setup/review and the closed-test/production-access steps before public rollout.
+[Release verification](releases/1.4.0.md).
+
 ## Access
 
 - Play Console: the owner's Google login.
@@ -27,8 +32,12 @@ account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play
 | What | Command |
 |---|---|
 | Upload the listing (texts, images, screenshots) | `fastlane supply --skip_upload_aab --skip_upload_apk --skip_upload_changelogs` |
-| Internal to closed testing | `fastlane supply --track internal --track_promote_to alpha --release_status completed --skip_upload_metadata --skip_upload_images --skip_upload_screenshots --skip_upload_changelogs` |
+| Internal to closed testing | `fastlane supply --track internal --track_promote_to alpha --track_promote_release_status completed --skip_upload_metadata --skip_upload_images --skip_upload_screenshots --skip_upload_changelogs` |
 | Internal to production | the same with `--track_promote_to production` |
+
+When promoting an existing bundle, use `--track_promote_release_status`; `--release_status` applies only to
+new APK/AAB uploads. To prepare a closed-testing draft before the app's first review, promote internal to
+`alpha` with `--track_promote_release_status draft` and select the intended `--version_code`.
 
 Play never takes an older versionCode back. A bad release is fixed by a new one; a staged rollout in progress can be
 halted in the Console.
@@ -65,3 +74,11 @@ Production needs a closed test with at least 12 testers opted in for 14 days in 
 tester list (the API takes groups for closed tracks), recruit about 15 so a drop-out does not reset the clock, and
 keep the build installed and used. The production application then asks what was tested and what changed; answer
 from CHANGELOG.md.
+
+## Concurrent uploads and checks
+
+Run one Play operation at a time. Even reading tracks requires an API edit: creating another edit with the same
+service account invalidates the uploader's active edit. Wait for the release workflow and any fastlane command to
+finish before inspecting tracks. Console changes also invalidate an active API edit. An expired upload edit leaves
+the current release unchanged; rerun the failed release job after the competing operation ends.
+[Google's concurrency rules](https://developers.google.com/android-publisher/concurrency-considerations).

@@ -4,7 +4,7 @@ Implemented on the API, desktop/responsive web and Expo Android app, using the e
 job cards, hour wheels, dialogs and native sheet. English and Swedish copy share the catalogue.
 
 Builds: API/Android `95aba4c`, web `1bde10f` (the web-only lint correction). Both CI deployments are verified
-on staging; production and Play are unchanged.
+on staging. After owner acceptance, [v1.4.0 was deployed to production](releases/1.4.0.md).
 
 ## Try it
 
