@@ -92,11 +92,16 @@ export function TrendLine({
       .x((d) => d.x)
       .y((d) => d.y)
       .curve(curveMonotoneX);
-    const tickValues = [0, max / 2, max];
+    const label = (v: number) => formatHours(Math.round(v), locale, { unit: false });
+    // The middle tick rounds to whole hours; at a low max (1 h, or an empty trend clamped to 1) it reads the same as
+    // an end, so it is left out rather than shown twice under one key (CHQ-168).
+    const tickValues = [0, max / 2, max].filter(
+      (v, i, all) => i !== 1 || (label(v) !== label(all[0]!) && label(v) !== label(all[2]!)),
+    );
     return {
       path: gen(coords) ?? '',
       coords,
-      ticks: tickValues.map((v) => ({ y: y(v), label: formatHours(Math.round(v), locale, { unit: false }) })),
+      ticks: tickValues.map((v) => ({ y: y(v), label: label(v) })),
     };
   }, [height, locale, padding.bottom, padding.left, padding.right, padding.top, points, width]);
   return (
