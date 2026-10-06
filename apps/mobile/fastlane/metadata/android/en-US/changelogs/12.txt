@@ -1,0 +1,1 @@
+A calmer, clearer look with the same colours. Fixed rows and labels overlapping on some phones. The job sheet groups place, start time and repeat in one list, and repeat settings use simple choices and steppers.

@@ -2,7 +2,7 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
-## Unreleased
+## 1.5.0, 2026-10-06
 
 ### Changed
 - A calmer, more professional look on web and Android with the same colours: Inter headings, smaller type,
