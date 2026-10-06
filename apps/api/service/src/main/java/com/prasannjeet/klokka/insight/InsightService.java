@@ -28,6 +28,8 @@ import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.FlagRepository;
 import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceRepository;
 import com.prasannjeet.klokka.persistence.JobRepository;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
@@ -79,6 +81,9 @@ public class InsightService {
     JobRepository jobs;
 
     @Inject
+    JobRecurrenceRepository recurrences;
+
+    @Inject
     MonthService months;
 
     @Inject
@@ -100,6 +105,7 @@ public class InsightService {
         Map<UUID, Long> counts = entries.changeCounts(id, rows.stream().map(r -> r.id).toList());
         Map<UUID, EntryFlagEntity> flagged = flags.latestPerEntry(id, rows.stream().map(r -> r.id).toList());
         Map<UUID, List<JobEntity>> dayJobs = jobs.listForEntries(id, rows.stream().map(r -> r.id).toList());
+        Map<UUID, JobRecurrenceEntity> series = recurrences.byIds(id, EntryViews.seriesIds(dayJobs.values()));
         EntryViews.Names names = new EntryViews.Names(memberships, a);
 
         List<MemberMonthDay> days = new ArrayList<>();
@@ -115,7 +121,7 @@ public class InsightService {
             if (e != null) {
                 total = total.add(e.hours);
                 if (d.isAfter(today)) planned = planned.add(e.hours);
-                day.jobs(dayJobs.getOrDefault(e.id, List.of()).stream().map(EntryViews::toJob).toList());
+                day.jobs(dayJobs.getOrDefault(e.id, List.of()).stream().map(j -> EntryViews.toJob(j, series)).toList());
                 daysWorked++;
                 if (e.note != null) daysWithNote++;
                 day.entryId(e.id).hours(e.hours).note(e.note)

@@ -1,17 +1,23 @@
 package com.prasannjeet.klokka.persistence;
 
+import static com.prasannjeet.klokka.contract.model.JobRecurrenceRule.FrequencyEnum.MONTHLY;
+
 import com.prasannjeet.klokka.contract.model.JobRecurrence;
 import com.prasannjeet.klokka.contract.model.JobRecurrenceRule;
+import com.prasannjeet.klokka.contract.model.JobRecurrenceRule.FrequencyEnum;
 import com.prasannjeet.klokka.contract.model.Weekday;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "job_recurrence")
@@ -28,11 +34,15 @@ public class JobRecurrenceEntity {
     public LocalDate firstDate;
     @Column(name = "end_date", nullable = false)
     public LocalDate endDate;
-    @Column(nullable = false)
-    public String frequency;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    public FrequencyEnum frequency;
     @Column(name = "repeat_interval", nullable = false)
     public int interval;
-    public String weekdays;
+    // Monday first; empty or null for MONTHLY (NULL in the column).
+    @Convert(converter = WeekdaysConverter.class)
+    @Column(length = 100)
+    public Set<Weekday> weekdays = EnumSet.noneOf(Weekday.class);
     @Column(name = "last_day_of_month", nullable = false)
     public boolean lastDayOfMonth;
     @Column(name = "period_count")
@@ -42,8 +52,9 @@ public class JobRecurrenceEntity {
     @Column(name = "last_date", nullable = false)
     public LocalDate lastDate;
     public boolean stopped;
-    @Column(name = "request_payload", nullable = false, columnDefinition = "text")
-    public String requestPayload;
+    // SHA-256 hex of the canonical request (JobRequestHash); NULL on series created before V5.
+    @Column(name = "request_hash", length = 64)
+    public String requestHash;
     @Column(name = "first_entry_id")
     public UUID firstEntryId;
     @Column(name = "created_by", nullable = false)
@@ -53,9 +64,9 @@ public class JobRecurrenceEntity {
 
     public JobRecurrence view() {
         JobRecurrenceRule rule = new JobRecurrenceRule()
-                .frequency(JobRecurrenceRule.FrequencyEnum.fromValue(frequency)).interval(interval);
-        if (weekdays != null) rule.weekdays(Arrays.stream(weekdays.split(",")).map(Weekday::fromValue).collect(Collectors.toSet()));
-        if (frequency.equals("MONTHLY")) rule.lastDayOfMonth(lastDayOfMonth);
+                .frequency(frequency).interval(interval);
+        if (weekdays != null && !weekdays.isEmpty()) rule.weekdays(EnumSet.copyOf(weekdays));
+        if (frequency == MONTHLY) rule.lastDayOfMonth(lastDayOfMonth);
         if (periodCount == null) rule.endDate(endDate);
         else rule.periodCount(periodCount);
         return new JobRecurrence().id(id).firstDate(firstDate).recurrence(rule).endDate(endDate)

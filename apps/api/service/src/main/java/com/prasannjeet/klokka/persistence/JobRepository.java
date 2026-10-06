@@ -17,7 +17,7 @@ public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
 
     public List<JobEntity> seriesFrom(WorkspaceId workspaceId, UUID seriesId, LocalDate date) {
         return list("select j from JobEntity j join HourEntryEntity e on j.entryId = e.id and j.workspaceId = e.workspaceId "
-                + "where j.workspaceId = ?1 and j.recurrence.id = ?2 and e.workDate >= ?3 order by e.workDate, j.id",
+                + "where j.workspaceId = ?1 and j.recurrenceId = ?2 and e.workDate >= ?3 order by e.workDate, j.id",
                 workspaceId.value(), seriesId, date);
     }
 

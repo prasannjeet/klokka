@@ -27,6 +27,8 @@ import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.FlagRepository;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
 import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceRepository;
 import com.prasannjeet.klokka.persistence.JobRepository;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
@@ -72,6 +74,9 @@ public class EntryService {
 
     @Inject
     JobRepository jobs;
+
+    @Inject
+    JobRecurrenceRepository recurrences;
 
     @Inject
     KlokkaConfig config;
@@ -205,6 +210,7 @@ public class EntryService {
         Map<UUID, Long> counts = entries.changeCounts(id, ids);
         Map<UUID, EntryFlagEntity> flagged = flags.latestPerEntry(id, ids);
         Map<UUID, List<JobEntity>> dayJobs = jobs.listForEntries(id, ids);
+        Map<UUID, JobRecurrenceEntity> series = recurrences.byIds(id, EntryViews.seriesIds(dayJobs.values()));
         LocalDate min = rows.stream().map(r -> r.workDate).min(LocalDate::compareTo).orElseThrow();
         LocalDate max = rows.stream().map(r -> r.workDate).max(LocalDate::compareTo).orElseThrow();
         Set<LocalDate> lockedMonths = new HashSet<>(locks.lockedMonthsBetween(id, min, max));
@@ -216,7 +222,7 @@ public class EntryService {
                     mid -> memberships.findMember(id, mid).orElseThrow(() -> notFound("Member " + mid)));
             boolean locked = lockedMonths.contains(row.workDate.withDayOfMonth(1));
             out.add(EntryViews.toEntry(a, row, member, names, counts.getOrDefault(row.id, 0L), flagged.get(row.id), locked,
-                    dayJobs.getOrDefault(row.id, List.of())));
+                    dayJobs.getOrDefault(row.id, List.of()), series));
         }
         return out;
     }

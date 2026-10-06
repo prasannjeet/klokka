@@ -12,14 +12,19 @@ import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
 import com.prasannjeet.klokka.persistence.JobEntity;
+import com.prasannjeet.klokka.persistence.JobRecurrenceEntity;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.function.Function;
 
 // Entities to contract shapes, with names looked up once per request through a small cache.
@@ -51,7 +56,7 @@ public final class EntryViews {
     }
 
     public static Entry toEntry(Access access, HourEntryEntity e, MembershipEntity member, Names names, long changeCount,
-            EntryFlagEntity flag, boolean locked, List<JobEntity> jobs) {
+            EntryFlagEntity flag, boolean locked, List<JobEntity> jobs, Map<UUID, JobRecurrenceEntity> series) {
         boolean rate = MemberViews.maySeeRate(access, member);
         Entry entry = new Entry()
                 .id(e.id)
@@ -61,7 +66,7 @@ public final class EntryViews {
                 .workDate(e.workDate)
                 .hours(e.hours)
                 .note(e.note)
-                .jobs(jobs.stream().map(EntryViews::toJob).toList())
+                .jobs(jobs.stream().map(j -> toJob(j, series)).toList())
                 .earnings(rate ? MemberViews.earnings(e.hours, member.hourlyRate) : null)
                 .hourlyRate(rate ? member.hourlyRate : null)
                 .locked(locked)
@@ -74,7 +79,14 @@ public final class EntryViews {
         return entry;
     }
 
-    public static Job toJob(JobEntity j) {
+    // The series ids the given days' jobs belong to, for one JobRecurrenceRepository.byIds call.
+    public static Set<UUID> seriesIds(Collection<List<JobEntity>> dayJobs) {
+        return dayJobs.stream().flatMap(List::stream).map(j -> j.recurrenceId).filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    // `series` holds every series a job here belongs to (the composite FK keeps it in the job's workspace).
+    public static Job toJob(JobEntity j, Map<UUID, JobRecurrenceEntity> series) {
         Job job = new Job()
                 .id(j.id)
                 .hours(j.hours)
@@ -86,7 +98,11 @@ public final class EntryViews {
             job.location(new JobLocation().placeId(j.placeId).name(j.placeName).address(j.placeAddress)
                     .latitude(j.latitude).longitude(j.longitude));
         }
-        if (j.recurrence != null) job.recurrence(j.recurrence.view());
+        if (j.recurrenceId != null) {
+            JobRecurrenceEntity row = series.get(j.recurrenceId);
+            if (row == null) throw new IllegalStateException("series " + j.recurrenceId + " of job " + j.id + " not loaded");
+            job.recurrence(row.view());
+        }
         return job;
     }
 

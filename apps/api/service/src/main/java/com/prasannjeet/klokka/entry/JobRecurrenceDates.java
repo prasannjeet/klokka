@@ -20,9 +20,12 @@ import java.util.Set;
 
 @ApplicationScoped
 public class JobRecurrenceDates {
+    // The contract's JobRecurrencePreview.dates maxItems.
+    static final int PREVIEW_DATES = 4;
+
     public record Schedule(List<LocalDate> dates, LocalDate endDate) {
         public JobRecurrencePreview preview() {
-            return new JobRecurrencePreview().dates(dates.stream().limit(4).map(d -> new JobRecurrencePreviewDate().date(d)).toList())
+            return new JobRecurrencePreview().dates(dates.stream().limit(PREVIEW_DATES).map(d -> new JobRecurrencePreviewDate().date(d)).toList())
                     .occurrenceCount(dates.size()).lastDate(dates.getLast()).endDate(endDate);
         }
     }
@@ -30,11 +33,11 @@ public class JobRecurrenceDates {
     @Inject
     KlokkaConfig config;
 
+    // Interval (1 to 12) and periodCount (1 to 120) are bounded by the contract's bean validation on every caller's body.
     public Schedule calculate(LocalDate first, JobRecurrenceRule rule) {
         if (first == null) throw validation("firstDate", "is required");
         if (rule == null || rule.getFrequency() == null) throw validation("recurrence.frequency", "is required");
-        Integer interval = rule.getInterval();
-        if (interval == null || interval < 1 || interval > 12) throw validation("recurrence.interval", "must be 1 to 12");
+        int interval = rule.getInterval();
         boolean weekly = rule.getFrequency() == JobRecurrenceRule.FrequencyEnum.WEEKLY;
         Set<Weekday> days = rule.getWeekdays();
         if (weekly && (days == null || days.isEmpty() || days.contains(null))) {
@@ -48,7 +51,6 @@ public class JobRecurrenceDates {
         LocalDate end = rule.getEndDate();
         if (rule.getPeriodCount() != null) {
             int count = rule.getPeriodCount();
-            if (count < 1 || count > 120) throw validation("recurrence.periodCount", "must be 1 to 120");
             end = (weekly ? first.plusWeeks(count) : first.plusMonths(count)).minusDays(1);
         }
         if (end.isBefore(first)) throw validation("recurrence.endDate", "must be on or after the first date");

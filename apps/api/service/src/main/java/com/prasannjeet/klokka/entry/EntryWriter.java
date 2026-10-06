@@ -147,18 +147,33 @@ public class EntryWriter {
 
     // Adds a job to the member's day, creating the day when there is none.
     public Outcome createJob(Access access, MembershipEntity target, LocalDate date, JobInput input) {
-        return createJob(access, target, date, input, null);
-    }
-
-    public Outcome createJob(Access access, MembershipEntity target, LocalDate date, JobInput input, JobRecurrenceEntity series) {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(date));
+        return insertJob(access, target, date, input, null);
+    }
+
+    // A series' jobs (CHQ-159), dates in order: the member and each distinct month are checked once, before the
+    // first write. Returns the first date's entry.
+    public HourEntryEntity createSeriesJobs(Access access, MembershipEntity target, List<LocalDate> dates, JobInput input,
+            JobRecurrenceEntity series) {
+        requireWritable(target);
+        for (YearMonth month : dates.stream().map(YearMonth::from).distinct().toList()) requireUnlocked(access, month);
+        HourEntryEntity first = null;
+        for (LocalDate date : dates) {
+            HourEntryEntity entry = insertJob(access, target, date, input, series.id).entry();
+            if (first == null) first = entry;
+        }
+        if (first == null) throw new IllegalArgumentException("a series has at least one date");
+        return first;
+    }
+
+    private Outcome insertJob(Access access, MembershipEntity target, LocalDate date, JobInput input, UUID seriesId) {
         Instant now = clock.instant();
         Optional<HourEntryEntity> live = entries.findLiveForUpdate(access.workspaceId(), target.id, date);
         if (live.isEmpty()) {
             requireDayTotal(input.hours());
             HourEntryEntity entry = newEntry(access, target, date, input.hours(), clean(input.note()), now);
-            newJob(access, entry, input, now).recurrence = series;
+            newJob(access, entry, input, now).recurrenceId = seriesId;
             history(access, entry, EntryChangeKind.CREATED, null, entry.hours, null, entry.note, access.userId(), now);
             notifyChange(access, target, date, null, entry.hours, entry.note);
             return new Outcome(entry, true);
@@ -172,7 +187,7 @@ public class EntryWriter {
         if (dayJobs.isEmpty() && entry.hours.signum() > 0) {
             newJob(access, entry, new JobInput(entry.hours, null, entry.note, null), now);
         }
-        newJob(access, entry, input, now).recurrence = series;
+        newJob(access, entry, input, now).recurrenceId = seriesId;
         return settle(access, target, entry, now);
     }
 

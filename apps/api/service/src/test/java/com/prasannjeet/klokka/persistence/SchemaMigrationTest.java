@@ -28,7 +28,7 @@ class SchemaMigrationTest {
 
     @Test
     void theBaselineIsAppliedAndNothingIsPending() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("4");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("5");
         assertThat(flyway.info().pending()).isEmpty();
     }
 
@@ -50,6 +50,9 @@ class SchemaMigrationTest {
         List<String> seriesConstraints = query("select pg_get_constraintdef(oid) from pg_constraint "
                 + "where contype = 'f' and conrelid = 'job'::regclass");
         assertThat(seriesConstraints).contains("FOREIGN KEY (workspace_id, recurrence_id) REFERENCES job_recurrence(workspace_id, id)");
+        List<String> seriesColumns = query("select column_name from information_schema.columns "
+                + "where table_name = 'job_recurrence' order by ordinal_position");
+        assertThat(seriesColumns).contains("request_hash", "request_payload");
         List<String> flagConstraints = query("select pg_get_constraintdef(oid) from pg_constraint "
                 + "where contype = 'f' and conrelid = 'entry_flag'::regclass");
         assertThat(flagConstraints)

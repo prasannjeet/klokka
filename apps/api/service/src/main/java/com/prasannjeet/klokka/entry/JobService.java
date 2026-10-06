@@ -25,9 +25,9 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,26 +101,26 @@ public class JobService {
         HourEntryEntity entry = liveEntry(a, job);
         MembershipEntity target = access.target(a, entry.membershipId);
         List<JobEntity> affected = affected(a, job, entry, scope);
-        if (scope == JobChangeScope.THIS_AND_FUTURE && job.recurrence != null) {
-            job.recurrence.stopped = true;
-        }
+        if (scope == JobChangeScope.THIS_AND_FUTURE) recurrences.lockSeries(a.workspaceId(), job.recurrenceId).stopped = true;
         for (JobEntity occurrence : affected) writer.deleteJob(a, target, liveEntry(a, occurrence), occurrence);
     }
 
     private Entry createSeries(Access a, MembershipEntity target, LocalDate first, JobWrite body) {
         if (body.getRequestId() == null) throw validation("requestId", "required for recurring jobs");
-        // Canonical weekday order keeps retry keys valid across process restarts and JSON array order.
+        // Canonical weekday order (Monday first) keeps the request hash independent of the JSON array's order.
         if (body.getRecurrence().getWeekdays() != null) {
             body.getRecurrence().weekdays(body.getRecurrence().getWeekdays().stream()
-                    .sorted(Comparator.nullsFirst(Comparator.comparing(Weekday::toString)))
+                    .sorted(Comparator.nullsFirst(Comparator.<Weekday>naturalOrder()))
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
+        String requestHash = JobRequestHash.of(body);
         // Serialize retries for this employee before checking the caller's idempotency key.
         memberships.lockMember(a.workspaceId(), target.id);
         JobRecurrenceEntity existing = recurrences.findRequest(a.workspaceId(), body.getRequestId()).orElse(null);
         if (existing != null) {
+            // A series from before V5 has no hash: its replay is refused rather than guessed to match.
             if (!existing.membershipId.equals(target.id) || !existing.firstDate.equals(first)
-                    || !existing.requestPayload.equals(body.toString())) throw validation("requestId", "already used for a different request");
+                    || !requestHash.equals(existing.requestHash)) throw validation("requestId", "already used for a different request");
             HourEntryEntity entry = entries.findEntry(a.workspaceId(), existing.firstEntryId).orElseThrow(() -> notFound("Original entry"));
             return entryService.view(a, entry, target);
         }
@@ -128,8 +128,6 @@ public class JobService {
         JobRecurrenceDates.Schedule schedule = recurrenceDates.calculate(first, body.getRecurrence());
         EntryWriter.JobInput values = input(a, body);
         // A later error rolls back the entire transaction, including history and notifications.
-        writer.requireWritable(target);
-        for (LocalDate date : schedule.dates()) writer.requireUnlocked(a, YearMonth.from(date));
         JobRecurrenceEntity series = new JobRecurrenceEntity();
         series.id = UUID.randomUUID();
         series.requestId = body.getRequestId();
@@ -137,32 +135,29 @@ public class JobService {
         series.membershipId = target.id;
         series.firstDate = first;
         series.endDate = schedule.endDate();
-        series.frequency = body.getRecurrence().getFrequency().toString();
+        series.frequency = body.getRecurrence().getFrequency();
         series.interval = body.getRecurrence().getInterval();
-        series.weekdays = body.getRecurrence().getWeekdays() == null || body.getRecurrence().getWeekdays().isEmpty() ? null
-                : body.getRecurrence().getWeekdays().stream().map(Object::toString).collect(Collectors.joining(","));
+        series.weekdays = body.getRecurrence().getWeekdays() == null || body.getRecurrence().getWeekdays().isEmpty()
+                ? EnumSet.noneOf(Weekday.class) : EnumSet.copyOf(body.getRecurrence().getWeekdays());
         series.lastDayOfMonth = Boolean.TRUE.equals(body.getRecurrence().getLastDayOfMonth());
         series.periodCount = body.getRecurrence().getPeriodCount();
         series.occurrenceCount = schedule.dates().size();
         series.lastDate = schedule.dates().getLast();
-        series.requestPayload = body.toString();
+        series.requestHash = requestHash;
         series.createdBy = a.userId();
         series.createdAt = clock.instant();
         recurrences.persistSeries(a.workspaceId(), series);
-        HourEntryEntity firstEntry = null;
-        for (LocalDate date : schedule.dates()) {
-            EntryWriter.Outcome saved = writer.createJob(a, target, date, values, series);
-            if (firstEntry == null) { firstEntry = saved.entry(); series.firstEntryId = firstEntry.id; }
-        }
+        HourEntryEntity firstEntry = writer.createSeriesJobs(a, target, schedule.dates(), values, series);
+        series.firstEntryId = firstEntry.id;
         return entryService.view(a, firstEntry, target);
     }
 
     private List<JobEntity> affected(Access a, JobEntity job, HourEntryEntity entry, JobChangeScope scope) {
-        if (job.recurrence != null) recurrences.lockSeries(a.workspaceId(), job.recurrence.id);
+        if (job.recurrenceId != null) recurrences.lockSeries(a.workspaceId(), job.recurrenceId);
         if (scope != JobChangeScope.THIS_AND_FUTURE) return List.of(job);
-        if (job.recurrence == null) throw validation("scope", "this job is not recurring");
+        if (job.recurrenceId == null) throw validation("scope", "this job is not recurring");
         if (entry.workDate.isBefore(today(a))) throw validation("scope", "past jobs may only be changed individually");
-        return jobs.seriesFrom(a.workspaceId(), job.recurrence.id, entry.workDate);
+        return jobs.seriesFrom(a.workspaceId(), job.recurrenceId, entry.workDate);
     }
 
     private LocalDate today(Access a) {
