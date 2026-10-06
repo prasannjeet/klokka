@@ -41,10 +41,13 @@ export function MapImage({
   const query = `latitude=${location.latitude}&longitude=${location.longitude}&width=${MAP_WIDTH}&height=${height}&dark=${theme.mode === 'dark'}`;
   return (
     <Image
-      source={{
-        uri: `${appConfig().apiBaseUrl}/workspaces/${workspaceId}/map.png?${query}`,
-        headers: { Authorization: `Bearer ${token}` },
-      }}
+      // An array: React Native's Android Image forwards headers only from an array source (CHQ-163).
+      source={[
+        {
+          uri: `${appConfig().apiBaseUrl}/workspaces/${workspaceId}/map.png?${query}`,
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      ]}
       style={[styles.map, { height, backgroundColor: theme.color.surface2 }, style]}
       resizeMode="cover"
       onError={() => setFailed(true)}
