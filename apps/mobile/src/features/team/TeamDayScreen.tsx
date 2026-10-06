@@ -57,7 +57,7 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
   const today = todayIn(workspace.timezone);
   const list = (entries.data ?? []).filter((e) => e.hours > 0 || e.jobs.length > 0);
   const total = sumHours(list.map((e) => e.hours));
-  const flagged = list.filter((e) => e.flag?.status === 'OPEN');
+  const flagged = (entries.data ?? []).filter((e) => e.flag?.status === 'OPEN');
   const go = (next: IsoDate, step: DayStep) =>
     router.replace({ pathname: '/team-day/[date]', params: { date: next, step } });
 
@@ -133,7 +133,10 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
               >
                 <Avatar name={e.memberName} size={32} />
                 <AppText variant="small" weight={600} tabular>
-                  {`${e.memberName.split(' ')[0]}, ${formatHours(e.hours, locale)}`}
+                  {t('team.dayTotalFor', {
+                    name: e.memberName.split(' ')[0] ?? e.memberName,
+                    hours: formatHours(e.hours, locale),
+                  })}
                 </AppText>
               </AppPressable>
             ))}

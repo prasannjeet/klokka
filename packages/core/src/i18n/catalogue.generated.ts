@@ -860,6 +860,7 @@ export const sv = {
   "team.allInsights": "Alla insikter",
   "team.byPerson": "{month} per person",
   "team.calendarLabel": "Teamets timmar per datum i {month}",
+  "team.calendarSubtitle": "Hela teamet, {hours} i {month}",
   "team.day": "Dag",
   "team.dayTotalFor": "{name}, {hours}",
   "team.invite": "Bjud in någon",
@@ -870,12 +871,11 @@ export const sv = {
   "team.noJobsDay": "Inga jobb den här dagen.",
   "team.noJobsToday": "Inga jobb i dag.",
   "team.nothingToday": "Inget i dag, {week} den här veckan",
-  "team.openDay": "Öppna {date}",
+  "team.peopleSubtitle": "{workspace}, {people}",
   "team.previousMonth": "Föregående månad",
   "team.statusDone": "Klart",
   "team.statusLater": "Senare",
   "team.statusNow": "Pågår",
-  "team.today": "I dag",
   "team.todayAndWeek": "{today} i dag, {week} den här veckan",
   "team.todaysJobs": "Dagens jobb",
   "team.view": "Visa",
@@ -2012,6 +2012,7 @@ export const en = {
   "team.allInsights": "All insights",
   "team.byPerson": "{month} by person",
   "team.calendarLabel": "Team hours per date in {month}",
+  "team.calendarSubtitle": "Whole team, {hours} in {month}",
   "team.day": "Day",
   "team.dayTotalFor": "{name}, {hours}",
   "team.invite": "Invite someone",
@@ -2022,12 +2023,11 @@ export const en = {
   "team.noJobsDay": "No jobs on this day.",
   "team.noJobsToday": "No jobs today.",
   "team.nothingToday": "Nothing today, {week} this week",
-  "team.openDay": "Open {date}",
+  "team.peopleSubtitle": "{workspace}, {people}",
   "team.previousMonth": "Previous month",
   "team.statusDone": "Done",
   "team.statusLater": "Later",
   "team.statusNow": "Now",
-  "team.today": "Today",
   "team.todayAndWeek": "{today} today, {week} this week",
   "team.todaysJobs": "Today's jobs",
   "team.view": "View",
@@ -3140,6 +3140,7 @@ export type MessageParams = {
   "team.allInsights": Record<never, never>;
   "team.byPerson": { month: string | number };
   "team.calendarLabel": { month: string | number };
+  "team.calendarSubtitle": { hours: string | number; month: string | number };
   "team.day": Record<never, never>;
   "team.dayTotalFor": { hours: string | number; name: string | number };
   "team.invite": Record<never, never>;
@@ -3150,12 +3151,11 @@ export type MessageParams = {
   "team.noJobsDay": Record<never, never>;
   "team.noJobsToday": Record<never, never>;
   "team.nothingToday": { week: string | number };
-  "team.openDay": { date: string | number };
+  "team.peopleSubtitle": { people: string | number; workspace: string | number };
   "team.previousMonth": Record<never, never>;
   "team.statusDone": Record<never, never>;
   "team.statusLater": Record<never, never>;
   "team.statusNow": Record<never, never>;
-  "team.today": Record<never, never>;
   "team.todayAndWeek": { today: string | number; week: string | number };
   "team.todaysJobs": Record<never, never>;
   "team.view": Record<never, never>;

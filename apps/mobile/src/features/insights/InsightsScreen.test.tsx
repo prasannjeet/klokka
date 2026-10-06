@@ -1,7 +1,8 @@
-import { screen } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 import { InsightsScreen } from './InsightsScreen';
 import { fakeApi, renderApp } from '@/testing/render';
 import { employerMeFixture, insightsFixture } from '@/testing/fixtures';
+import { routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
 
 describe('InsightsScreen', () => {
@@ -39,5 +40,13 @@ describe('InsightsScreen', () => {
     });
     await screen.findByText('335.5');
     expect(screen.queryByText('Labour cost')).toBeNull();
+  });
+
+  it('opens the team Calendar from the nothing-logged tile, the Week tab being hidden for the employer (CHQ-171)', async () => {
+    await renderApp(<InsightsScreen />, {
+      api: fakeApi({ getMe: employerMeFixture, getWorkspaceInsights: insightsFixture }),
+    });
+    await fireEvent.press(await screen.findByTestId('nothing-logged'));
+    expect(routerState.pushes.at(-1)).toBe('/(tabs)/calendar');
   });
 });

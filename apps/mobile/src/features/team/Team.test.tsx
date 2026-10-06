@@ -53,6 +53,10 @@ describe('TeamCalendarScreen (CHQ-171)', () => {
     expect(screen.getByText('Maria')).toBeTruthy();
     expect(screen.getByText('Jonas')).toBeTruthy();
     expect(screen.queryByText('Ayla')).toBeNull();
+    // A screen reader hears who worked the date, not only the dots.
+    expect(screen.getByTestId('cell-2026-09-24').props.accessibilityLabel).toMatch(
+      /^2026-09-24, Maria, Jonas, 12 h/,
+    );
     await fireEvent.press(screen.getByTestId('cell-2026-09-24'));
     expect(routerState.pushes.at(-1)).toEqual({
       pathname: '/team-day/[date]',

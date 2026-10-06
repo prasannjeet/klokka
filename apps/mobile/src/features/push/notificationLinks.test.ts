@@ -51,6 +51,11 @@ describe('targetForLink', () => {
       workspaceId: ws,
       href: `/day/${mem}/2026-09-23`,
     });
+    // Insights left the tab bar for a pushed page (CHQ-171).
+    expect(targetForLink({ workspaceId: ws, month: '2026-09' }, 'EMPLOYER', null)).toEqual({
+      workspaceId: ws,
+      href: '/insights?month=2026-09',
+    });
     expect(targetForLink({}, 'EMPLOYEE', null)).toBeNull();
   });
 });

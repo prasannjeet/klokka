@@ -43,8 +43,9 @@ export function CalendarHeatmap({
   selected: IsoDate | null;
   onSelect: (date: IsoDate) => void;
   label: string;
-  // Small dots along the bottom of a day, one colour each (the team calendar's people).
-  markers?: (date: IsoDate) => readonly string[];
+  // Small dots along the bottom of a day, one per person who worked it (the team calendar); the names go into
+  // the day's accessible name.
+  markers?: (date: IsoDate) => readonly { colour: string; name: string }[];
 }) {
   const t = useT();
   const locale = useLocale();
@@ -75,8 +76,10 @@ export function CalendarHeatmap({
             ]
               .filter(Boolean)
               .join(' ');
+            const people = markers?.(day.date) ?? [];
             const name = [
               formatDate(day.date, locale, 'weekdayDayMonth'),
+              ...people.map((p) => p.name),
               hours !== null ? formatHours(hours, locale) : t('entry.nothingYet'),
               future && hours !== null ? t('jobs.planned') : '',
               info?.jobs && info.jobs.length > 1 ? t('jobs.jobCount', { count: info.jobs.length }) : '',
@@ -101,13 +104,11 @@ export function CalendarHeatmap({
                 <span className="h" aria-hidden="true">
                   {hours !== null ? formatHours(hours, locale, { unit: false }) : ''}
                 </span>
-                {markers?.(day.date).length ? (
+                {people.length > 0 ? (
                   <span className="dots" aria-hidden="true">
-                    {markers(day.date)
-                      .slice(0, 4)
-                      .map((colour, i) => (
-                        <i key={i} style={{ background: colour }} />
-                      ))}
+                    {people.slice(0, 4).map((p, i) => (
+                      <i key={i} style={{ background: p.colour }} />
+                    ))}
                   </span>
                 ) : null}
               </button>

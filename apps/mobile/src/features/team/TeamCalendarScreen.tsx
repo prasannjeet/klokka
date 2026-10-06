@@ -41,9 +41,12 @@ function TeamCalendarScreenInner({ workspace }: WorkspaceProps) {
   const data = summary.data;
   // One colour per person, in the summary's member order (the chart order, never used for text).
   const colourOf = useMemo(() => {
-    const colours = new Map<string, string>();
+    const colours = new Map<string, { colour: string; name: string }>();
     (data?.members ?? []).forEach((m, i) =>
-      colours.set(m.membershipId, theme.color[theme.chartOrder[i % theme.chartOrder.length] as 'chart1']),
+      colours.set(m.membershipId, {
+        colour: theme.color[theme.chartOrder[i % theme.chartOrder.length] as 'chart1'],
+        name: m.name.split(' ')[0] ?? m.name,
+      }),
     );
     return colours;
   }, [data?.members, theme]);
@@ -100,7 +103,10 @@ function TeamCalendarScreenInner({ workspace }: WorkspaceProps) {
             today={todayIn(workspace.timezone)}
             onPressDay={(date) => router.push({ pathname: '/team-day/[date]', params: { date } })}
             markers={(date) =>
-              (byDate.get(date)?.membershipIds ?? []).map((id) => colourOf.get(id) ?? theme.color.textMuted)
+              (byDate.get(date)?.membershipIds ?? []).flatMap((id) => {
+                const person = colourOf.get(id);
+                return person ? [person] : [];
+              })
             }
             accessibilityLabel={t('team.calendarLabel', { month: monthName })}
           />
@@ -109,7 +115,7 @@ function TeamCalendarScreenInner({ workspace }: WorkspaceProps) {
               .filter((m) => m.hours > 0)
               .map((m) => (
                 <View key={m.membershipId} style={s.legendItem}>
-                  <View style={[s.dot, { backgroundColor: colourOf.get(m.membershipId) }]} />
+                  <View style={[s.dot, { backgroundColor: colourOf.get(m.membershipId)?.colour }]} />
                   <AppText variant="caption" tone="muted">
                     {m.name.split(' ')[0]}
                   </AppText>

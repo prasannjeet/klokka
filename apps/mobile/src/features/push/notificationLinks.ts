@@ -63,8 +63,7 @@ export function targetForLink(
   if (link.month)
     return {
       workspaceId,
-      href:
-        role === 'EMPLOYER' ? `/(tabs)/insights?month=${link.month}` : `/(tabs)/month?month=${link.month}`,
+      href: role === 'EMPLOYER' ? `/insights?month=${link.month}` : `/(tabs)/month?month=${link.month}`,
     };
   if (link.membershipId && role === 'EMPLOYER') return { workspaceId, href: `/member/${link.membershipId}` };
   if (workspaceId) return { workspaceId, href: '/' };

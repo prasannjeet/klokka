@@ -47,6 +47,7 @@ export function TeamCalendarView() {
   const entries = useEntries(ws.id, selected, selected);
   const worked = (entries.data ?? []).filter((e) => e.hours > 0 || e.jobs.length > 0);
   const colourOf = new Map((data?.members ?? []).map((m, i) => [m.membershipId, COLOURS[i % 4] as string]));
+  const nameOf = new Map((data?.members ?? []).map((m) => [m.membershipId, m.name]));
   const byDate = new Map((data?.days ?? []).map((d) => [isoOf(d.date), d]));
   const busiest = Math.max(1, ...(data?.days ?? []).map((d) => d.hours));
   const monthName = formatMonthName(month, locale, false);
@@ -64,7 +65,7 @@ export function TeamCalendarView() {
         title={t('nav.calendar')}
         sub={
           data
-            ? `${t('team.wholeTeam')}, ${t('team.monthHours', { hours: formatHours(data.totalHours, locale), month: monthName })}`
+            ? t('team.calendarSubtitle', { hours: formatHours(data.totalHours, locale), month: monthName })
             : t('team.wholeTeam')
         }
         actions={
@@ -87,7 +88,12 @@ export function TeamCalendarView() {
             selected={selected}
             onSelect={select}
             label={t('team.calendarLabel', { month: monthName })}
-            markers={(date) => (byDate.get(date)?.membershipIds ?? []).map((id) => colourOf.get(id) ?? '')}
+            markers={(date) =>
+              (byDate.get(date)?.membershipIds ?? []).map((id) => ({
+                colour: colourOf.get(id) ?? '',
+                name: firstName(nameOf.get(id) ?? ''),
+              }))
+            }
           />
           {data ? (
             <div className="chips" style={{ marginTop: 12 }}>

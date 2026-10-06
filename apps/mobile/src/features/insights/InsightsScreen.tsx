@@ -206,7 +206,7 @@ function InsightsScreenInner({ workspace }: WorkspaceProps) {
               </Card>
             ) : null}
             <AppPressable
-              onPress={() => router.push('/(tabs)/week')}
+              onPress={() => router.navigate('/(tabs)/calendar')}
               accessibilityRole="button"
               accessibilityLabel={t('overview.nothingLoggedDays', { count: data.nothingLoggedDays.length })}
               style={s.tile}

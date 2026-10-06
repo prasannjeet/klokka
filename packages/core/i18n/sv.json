@@ -1341,14 +1341,12 @@
     "statusDone": "Klart",
     "statusNow": "Pågår",
     "statusLater": "Senare",
-    "today": "I dag",
     "weekSoFar": "Veckan hittills",
     "workingToday": "Jobbar i dag",
     "workingTodayValue": "{logged} av {total}",
     "monthSoFar": "{month} hittills",
     "byPerson": "{month} per person",
     "allInsights": "Alla insikter",
-    "openDay": "Öppna {date}",
     "dayTotalFor": "{name}, {hours}",
     "previousMonth": "Föregående månad",
     "nextMonth": "Nästa månad",
@@ -1358,6 +1356,8 @@
     "day": "Dag",
     "week": "Vecka",
     "month": "Månad",
-    "invite": "Bjud in någon"
+    "invite": "Bjud in någon",
+    "peopleSubtitle": "{workspace}, {people}",
+    "calendarSubtitle": "Hela teamet, {hours} i {month}"
   }
 }

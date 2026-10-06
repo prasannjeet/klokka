@@ -38,8 +38,9 @@ export function EmployerMonthView() {
   const latest = addMonths(current, PLAN_AHEAD_MONTHS);
   const [month, setMonth] = useMonthParam(current, latest);
   const members = useMembers(ws.id, month);
-  const people = (members.data ?? []).filter(
-    (m) => m.role === 'EMPLOYEE' && (m.status !== 'DEACTIVATED' || m.month.hours > 0),
+  // Employees, and an employer who logged hours this month (the team calendar links to anyone who worked).
+  const people = (members.data ?? []).filter((m) =>
+    m.role === 'EMPLOYEE' ? m.status !== 'DEACTIVATED' || m.month.hours > 0 : m.month.hours > 0,
   );
   const chosen = search.get('member');
   const person = people.find((p) => p.id === chosen) ?? people[0] ?? null;

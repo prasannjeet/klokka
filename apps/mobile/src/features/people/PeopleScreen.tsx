@@ -99,7 +99,10 @@ function PeopleScreenInner({ workspace }: WorkspaceProps) {
       >
         <Header
           title={t('nav.people')}
-          subtitle={`${workspace.name}, ${t('common.people', { count: people.length })}`}
+          subtitle={t('team.peopleSubtitle', {
+            workspace: workspace.name,
+            people: t('common.people', { count: people.length }),
+          })}
           trailing={
             <AppPressable
               accessibilityRole="button"

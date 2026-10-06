@@ -89,8 +89,9 @@ export interface HeatMapCalendarProps {
   today: IsoDate;
   // Every day of the month, empty and future ones too (CHQ-156).
   onPressDay?: (date: IsoDate) => void;
-  // Small dots along the bottom of a cell, one colour each (the team calendar's people).
-  markers?: (date: IsoDate) => readonly string[];
+  // Small dots along the bottom of a cell, one per person who worked it (the team calendar); the names go
+  // into the cell's label.
+  markers?: (date: IsoDate) => readonly { colour: string; name: string }[];
   accessibilityLabel: string;
 }
 
@@ -139,7 +140,8 @@ export function HeatMapCalendar({
             const isToday = cell.date === today;
             const isFuture = cell.date > today;
             const isPlanned = isFuture && hours > 0;
-            const label = `${cell.date}, ${hours > 0 ? formatHours(hours, locale) : t('entry.nothingYet')}${isPlanned ? `, ${t('jobs.planned')}` : ''}${day?.flag?.status === 'OPEN' ? `, ${t('month.flag')}` : ''}`;
+            const people = markers?.(cell.date) ?? [];
+            const label = `${cell.date}, ${people.length > 0 ? `${people.map((p) => p.name).join(', ')}, ` : ''}${hours > 0 ? formatHours(hours, locale) : t('entry.nothingYet')}${isPlanned ? `, ${t('jobs.planned')}` : ''}${day?.flag?.status === 'OPEN' ? `, ${t('month.flag')}` : ''}`;
             return (
               <AppPressable
                 key={cell.date}
@@ -172,13 +174,11 @@ export function HeatMapCalendar({
                   </AppText>
                 ) : null}
                 {isFlagged ? <View style={[s.dot, { backgroundColor: theme.color.danger }]} /> : null}
-                {markers?.(cell.date).length ? (
+                {people.length > 0 ? (
                   <View style={s.markers}>
-                    {markers(cell.date)
-                      .slice(0, 4)
-                      .map((colour, i) => (
-                        <View key={i} style={[s.marker, { backgroundColor: colour }]} />
-                      ))}
+                    {people.slice(0, 4).map((p, i) => (
+                      <View key={i} style={[s.marker, { backgroundColor: p.colour }]} />
+                    ))}
                   </View>
                 ) : null}
               </AppPressable>

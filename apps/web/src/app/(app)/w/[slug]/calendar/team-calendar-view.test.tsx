@@ -139,7 +139,7 @@ describe('TeamCalendarView', () => {
 
   it('picks another date from the calendar', async () => {
     renderView();
-    fireEvent.click(await screen.findByRole('button', { name: /^Friday 25 September, 12 h/ }));
+    fireEvent.click(await screen.findByRole('button', { name: /^Friday 25 September, Maria, Jonas, 12 h/ }));
     await waitFor(() =>
       expect(calls.replace).toHaveBeenCalledWith('/w/kafe-nord/calendar?month=2026-09&day=2026-09-25', {
         scroll: false,

@@ -1341,14 +1341,12 @@
     "statusDone": "Done",
     "statusNow": "Now",
     "statusLater": "Later",
-    "today": "Today",
     "weekSoFar": "This week so far",
     "workingToday": "Working today",
     "workingTodayValue": "{logged} of {total}",
     "monthSoFar": "{month} so far",
     "byPerson": "{month} by person",
     "allInsights": "All insights",
-    "openDay": "Open {date}",
     "dayTotalFor": "{name}, {hours}",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -1358,6 +1356,8 @@
     "day": "Day",
     "week": "Week",
     "month": "Month",
-    "invite": "Invite someone"
+    "invite": "Invite someone",
+    "peopleSubtitle": "{workspace}, {people}",
+    "calendarSubtitle": "Whole team, {hours} in {month}"
   }
 }
