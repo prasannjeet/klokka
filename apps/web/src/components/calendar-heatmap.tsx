@@ -20,6 +20,10 @@ import { useLocale, useT } from '@/lib/i18n';
 import { isoOf } from '@/lib/time';
 import './jobs/jobs.css';
 
+// A member's day, or the team's (CHQ-171): the date and its hours, and for a member the note, jobs and flag.
+export type HeatDay = Pick<MemberMonthDay, 'date' | 'hours'> &
+  Partial<Pick<MemberMonthDay, 'note' | 'jobs' | 'flag'>>;
+
 export function CalendarHeatmap({
   month,
   days,
@@ -29,15 +33,18 @@ export function CalendarHeatmap({
   selected,
   onSelect,
   label,
+  markers,
 }: {
   month: IsoMonth;
-  days: readonly MemberMonthDay[];
+  days: readonly HeatDay[];
   weekStart: WeekStart;
   dayLength: number;
   today: IsoDate;
   selected: IsoDate | null;
   onSelect: (date: IsoDate) => void;
   label: string;
+  // Small dots along the bottom of a day, one colour each (the team calendar's people).
+  markers?: (date: IsoDate) => readonly string[];
 }) {
   const t = useT();
   const locale = useLocale();
@@ -72,7 +79,7 @@ export function CalendarHeatmap({
               formatDate(day.date, locale, 'weekdayDayMonth'),
               hours !== null ? formatHours(hours, locale) : t('entry.nothingYet'),
               future && hours !== null ? t('jobs.planned') : '',
-              info && info.jobs.length > 1 ? t('jobs.jobCount', { count: info.jobs.length }) : '',
+              info?.jobs && info.jobs.length > 1 ? t('jobs.jobCount', { count: info.jobs.length }) : '',
               info?.note ? t('web.week.noteLabel', { note: info.note }) : '',
               flag ? t('web.week.flagged') : '',
             ]
@@ -94,6 +101,15 @@ export function CalendarHeatmap({
                 <span className="h" aria-hidden="true">
                   {hours !== null ? formatHours(hours, locale, { unit: false }) : ''}
                 </span>
+                {markers?.(day.date).length ? (
+                  <span className="dots" aria-hidden="true">
+                    {markers(day.date)
+                      .slice(0, 4)
+                      .map((colour, i) => (
+                        <i key={i} style={{ background: colour }} />
+                      ))}
+                  </span>
+                ) : null}
               </button>
             );
           }),

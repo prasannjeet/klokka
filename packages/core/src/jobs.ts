@@ -1,12 +1,11 @@
-import type { Job } from '@klokka/api-client';
-import type { IsoDate } from '@klokka/core';
+import type { IsoDate } from './month.ts';
 
 export type JobStatus = 'done' | 'now' | 'later';
 
-// Where a job stands against the workspace clock (CHQ-171, Home and the team day): before its start it is
-// later, inside its hours now, after them done. A job without a start time has no status on its own day.
+// Where a job stands against the workspace clock (CHQ-171, the team's jobs on both clients): before its start
+// it is later, inside its hours now, after them done. A job without a start time has no status on its own day.
 export function jobStatus(
-  job: Pick<Job, 'startTime' | 'hours'>,
+  job: { startTime?: string | null; hours: number },
   date: IsoDate,
   today: IsoDate,
   minutesNow: number,

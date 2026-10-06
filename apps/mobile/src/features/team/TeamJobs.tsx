@@ -1,10 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import type { Entry, Job } from '@klokka/api-client';
-import type { IsoDate } from '@klokka/core';
+import { jobStatus, type IsoDate } from '@klokka/core';
 import { minutesNowIn, todayIn } from '@/lib/dates';
 import { useThemedStyles, type Theme } from '@/theme';
 import { JobCard } from '@/features/jobs/JobCard';
-import { jobStatus } from '@/features/jobs/jobStatus';
 
 const styles = (t: Theme) => StyleSheet.create({ list: { gap: t.space[3] } });
 

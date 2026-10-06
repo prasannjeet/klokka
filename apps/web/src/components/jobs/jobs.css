@@ -21,6 +21,20 @@
   border: 1.5px dashed var(--accent);
 }
 
+/* ---- the team calendar (CHQ-171): a dot per person who worked the day ---- */
+.cal .d .dots {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: flex;
+  gap: 2px;
+}
+.cal .d .dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
 /* ---- a day's jobs ---- */
 .day-jobs {
   display: grid;
@@ -436,4 +450,17 @@
 .recurrence-summary small {
   display: block;
   color: var(--text-muted);
+}
+
+/* ---- the team's jobs (CHQ-171): who does the job and where it stands ---- */
+.job-who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.job-who > span:first-of-type {
+  flex: 1;
+  min-width: 0;
 }

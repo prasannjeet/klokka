@@ -24,7 +24,8 @@ export function workspaceNav(slug: string, employer: boolean): NavItem[] {
       { href: base, label: 'nav.overview', tab: 'nav.overview', icon: 'home', exact: true },
       { href: `${base}/week`, label: 'nav.weekGrid', tab: 'nav.week', icon: 'grid' },
       { href: `${base}/employees`, label: 'nav.employees', tab: 'nav.people', icon: 'users' },
-      { href: `${base}/month`, label: 'nav.employeeView', tab: 'nav.month', icon: 'calendar' },
+      { href: `${base}/month`, label: 'nav.employeeView', tab: 'nav.month', icon: 'user' },
+      { href: `${base}/calendar`, label: 'nav.calendar', tab: 'nav.calendar', icon: 'calendar' },
       notifications,
       { href: `${base}/settings`, label: 'nav.settings', tab: 'nav.settings', icon: 'settings' },
     ];
@@ -37,9 +38,10 @@ export function workspaceNav(slug: string, employer: boolean): NavItem[] {
   ];
 }
 
-// The phone tab bar carries five at most; the employer's notifications live in the top bar bell.
+// The phone tab bar carries five at most: the employer's notifications live in the top bar bell, and the
+// Employee view is one tap from the week grid (CHQ-171 gave its tab to the team Calendar).
 export function tabNav(items: NavItem[], employer: boolean): NavItem[] {
-  return employer ? items.filter((i) => i.icon !== 'bell') : items;
+  return employer ? items.filter((i) => i.icon !== 'bell' && i.label !== 'nav.employeeView') : items;
 }
 
 export function isActive(item: NavItem, pathname: string): boolean {

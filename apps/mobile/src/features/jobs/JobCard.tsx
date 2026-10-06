@@ -4,8 +4,7 @@ import { useT } from '@/i18n/LocaleProvider';
 import { formatDuration } from '@/lib/duration';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Icon, Pill, type PillTone } from '@/ui';
-import type { MessageKey } from '@klokka/core';
-import type { JobStatus } from './jobStatus';
+import type { JobStatus, MessageKey } from '@klokka/core';
 import { RecurrenceSummary } from './RecurrenceSummary';
 import { MapImage, directionsUrl } from './MapImage';
 

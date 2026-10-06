@@ -3,7 +3,8 @@
 // The employer's overview (CHQ-124 insights, CHQ-126 nothing-logged nudge; mockup "Overview"): the month's
 // hours against the same point last month, the projection, per person, week by week, weekday distribution,
 // busiest day, average per person and day, labour cost when pay is on, open flags and the latest
-// notifications. Every figure is the API's read model (D9); the browser only draws it.
+// notifications, and today's jobs across the team (CHQ-171). Every figure is the API's read model (D9); the
+// browser only draws it.
 import Link from 'next/link';
 import { useState } from 'react';
 import type { WorkspaceInsights } from '@klokka/api-client';
@@ -22,7 +23,7 @@ import {
 } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
 import { useNotifications } from '@/lib/notifications';
-import { useWorkspaceDetails, useWorkspaceInsights } from '@/lib/queries';
+import { useEntries, useWorkspaceDetails, useWorkspaceInsights } from '@/lib/queries';
 import { isoOf, monthIn, todayIn } from '@/lib/time';
 import { useMonthParam } from '@/lib/use-month-param';
 import { firstName } from '@/lib/visual';
@@ -35,6 +36,7 @@ import { Money } from './money';
 import { MonthNav } from './month-nav';
 import { NotificationItem } from './notification-item';
 import { OpenFlags } from './open-flags';
+import { TeamJobs } from './team-jobs';
 import { ViewHeader } from './view-header';
 
 const BAR_COLOURS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)'];
@@ -49,6 +51,7 @@ export function EmployerOverview() {
   const [month, setMonth] = useMonthParam(current);
   const insights = useWorkspaceInsights(ws.id, month);
   const recent = useNotifications(ws.id, false, 4);
+  const todays = useEntries(ws.id, today, today);
   const [now] = useState(() => new Date());
   const data = insights.data;
   const lastMonthName = formatMonthName(addMonths(month, -1), locale, false);
@@ -192,6 +195,21 @@ export function EmployerOverview() {
               ) : null}
             </div>
             <div className="stack">
+              {month === current ? (
+                <div className="card pad" data-testid="todays-jobs">
+                  <div className="card-head">
+                    <h2>{t('team.todaysJobs')}</h2>
+                    <Link className="btn btn-sm btn-ghost" href={`/w/${ws.slug}/calendar`}>
+                      {t('nav.calendar')}
+                    </Link>
+                  </div>
+                  {todays.data && todays.data.every((e) => e.jobs.length === 0) ? (
+                    <p className="muted small">{t('team.noJobsToday')}</p>
+                  ) : (
+                    <TeamJobs entries={todays.data ?? []} date={today} />
+                  )}
+                </div>
+              ) : null}
               <OpenFlags ws={ws} />
               <div className="card pad">
                 <div className="card-head">
