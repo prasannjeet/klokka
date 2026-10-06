@@ -1,0 +1,1 @@
+Välj jobbets plats på en karta i helskärm: sök, välj ett resultat och flytta kartan för att justera nålen. Den lilla kartan på jobbkorten laddas nu.

@@ -1,0 +1,1 @@
+Choose a job's place on a full-screen map: search, pick a result and move the map to adjust the pin. The small map on job cards now loads.

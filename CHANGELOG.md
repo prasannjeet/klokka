@@ -2,6 +2,17 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.0, 2026-10-06
+
+### Added
+- Android: choosing a job's place opens a full-screen map (Google Maps; Apple Maps on iOS). Search, pick a result,
+  then move the map to adjust the pin, and confirm with "Use this place". The screen no longer jumps while typing
+  (CHQ-163).
+
+### Fixed
+- Android: the small map on job cards and in the job sheet now loads (the request lost its sign-in on Android)
+  (CHQ-163).
+
 ## 1.5.0, 2026-10-06
 
 ### Changed
