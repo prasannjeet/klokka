@@ -1,5 +1,5 @@
 import { tokens } from '@klokka/tokens';
-import { createTheme, luminance, withAlpha } from './theme';
+import { createTheme, fontFamily, luminance, withAlpha } from './theme';
 import { resolveMode } from './ThemeProvider';
 
 describe('theme', () => {
@@ -8,9 +8,10 @@ describe('theme', () => {
     expect(createTheme('light').color).toEqual(tokens.color.light);
   });
 
-  it('scales display roles by the Unbounded factor and keeps body roles as-is', () => {
+  it('sets headings in the body face at the app scale (CHQ-162) and keeps body roles as-is', () => {
     const t = createTheme('dark');
-    expect(t.text('h1').fontSize).toBe(Math.round(tokens.type.native.h1 * tokens.font.displayScale));
+    expect(t.text('h1').fontSize).toBe(tokens.type.native.h1);
+    expect(t.text('h1')).toMatchObject(fontFamily('body', tokens.app.font.displayWeight));
     expect(t.text('body').fontSize).toBe(tokens.type.native.body);
     expect(t.text('eyebrow').textTransform).toBe('uppercase');
   });

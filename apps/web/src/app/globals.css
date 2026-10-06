@@ -25,6 +25,17 @@
   --font-display: var(--font-unbounded), 'Inter', system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* the wordmark stays Unbounded at its brand weight on every surface (CHQ-162) */
+  --font-brand: var(--font-unbounded), 'Inter', system-ui, sans-serif;
+  --font-brand-weight: 800;
+  /* big numbers and other fixed display sizes, which the type scale does not cover */
+  --display-fixed-scale: var(--font-display-scale);
+}
+/* The product opts into the calmer app surface (<html data-surface="app">, CHQ-162): Inter headings. */
+:root[data-surface='app'] {
+  --font-display: var(--font-inter), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* the fixed sizes keep the factor they had with Unbounded, so Inter numbers come out a step smaller */
+  --display-fixed-scale: 0.8;
 }
 
 @layer base {
@@ -52,6 +63,10 @@
     z-index: -1;
     pointer-events: none;
     background: var(--bg-image);
+  }
+  /* App screens are flat (CHQ-162); the mesh stays on the sign-in, join and new-workspace pages. */
+  body:has(.app)::before {
+    content: none;
   }
   ::selection {
     background: var(--primary);
@@ -210,10 +225,8 @@
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    font-family: var(--font-display);
-    font-weight: var(--font-display-weight);
-    font-stretch: var(--font-display-stretch);
-    font-variation-settings: var(--font-display-variation);
+    font-family: var(--font-brand);
+    font-weight: var(--font-brand-weight);
     font-size: 22px;
     letter-spacing: -0.02em;
     padding: 4px 8px;
@@ -232,7 +245,7 @@
     text-transform: uppercase;
     color: var(--text-muted);
     padding: 3px 7px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-chip);
     border: 1px solid var(--border);
     margin-left: 2px;
     font-stretch: 100%;
@@ -565,7 +578,7 @@
   }
   .topbar .ws-btn {
     padding: 3px 8px 3px 3px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-control);
     gap: 8px;
     min-height: 40px;
     width: auto;
@@ -684,7 +697,7 @@
     }
   }
   .view {
-    animation: rise var(--dur-slow) var(--ease-enter) both;
+    animation: fadeIn var(--dur-slow) var(--ease-out) both;
     min-width: 0;
   }
   .vh {
@@ -800,7 +813,6 @@
   .btn-primary {
     background: var(--primary);
     color: var(--on-primary);
-    box-shadow: var(--shadow-glow);
   }
   .btn-primary:hover {
     filter: brightness(1.06);
@@ -856,7 +868,7 @@
     align-items: center;
     gap: 6px;
     padding: 3px 9px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-chip);
     background: var(--surface-2);
     font-size: 12.5px;
     font-weight: 600;
@@ -905,7 +917,7 @@
     min-height: 36px;
     padding: 0 13px;
     border: 0;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-chip);
     background: var(--surface-2);
     font-weight: 600;
     font-size: 14px;
@@ -936,8 +948,8 @@
   .chip.on,
   .chip[aria-pressed='true'],
   .chip[aria-selected='true'] {
-    background: var(--primary);
-    color: var(--on-primary);
+    background: var(--secondary);
+    color: var(--on-secondary);
   }
   .chip:disabled {
     opacity: 0.45;
@@ -979,6 +991,20 @@
     box-shadow: var(--shadow-sm);
     min-width: 0;
   }
+  /* A list (notifications, recent): one surface with dividers instead of a card per row (CHQ-162). */
+  .hgrid.list {
+    gap: 0;
+    background: var(--surface);
+    border: var(--card-border);
+  }
+  .hgrid.list > * {
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+  .hgrid.list > * + * {
+    border-top: var(--card-border);
+  }
   .tiles {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -999,7 +1025,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(26px, 3.2vw, 40px) * var(--font-display-scale));
+    font-size: calc(clamp(26px, 3.2vw, 40px) * var(--display-fixed-scale));
     line-height: 1;
     letter-spacing: -0.03em;
     margin-top: auto;
@@ -1034,7 +1060,7 @@
     grid-column: span 2;
   }
   .tile.pop-in {
-    animation: pop var(--dur-base) var(--ease-enter) both;
+    animation: fadeIn var(--dur-base) var(--ease-out) both;
   }
 
   /* ---- charts: bars, columns, legend (Recharts draws the rest) ---- */
@@ -1470,7 +1496,7 @@
     transition: transform var(--dur-base) var(--ease-enter);
   }
   .switch[aria-checked='true'] .track {
-    background: var(--primary);
+    background: var(--secondary);
   }
   .switch[aria-checked='true'] .track::after {
     transform: translateX(20px);
@@ -1858,7 +1884,7 @@
     font-weight: 600;
     vertical-align: baseline;
     font-variant-numeric: tabular-nums;
-    animation: pop var(--dur-base) var(--ease-enter) both;
+    animation: fadeIn var(--dur-base) var(--ease-out) both;
   }
   .money.blk {
     display: block;
@@ -2121,7 +2147,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(20px * var(--font-display-scale));
+    font-size: calc(20px * var(--display-fixed-scale));
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -2162,7 +2188,7 @@
     list-style: none;
     border-left: 2px solid var(--border);
     color: var(--text-muted);
-    animation: rise var(--dur-base) var(--ease-out) both;
+    animation: fadeIn var(--dur-base) var(--ease-out) both;
   }
   .hist li b {
     color: var(--text);
@@ -2204,8 +2230,8 @@
     height: 18px;
   }
   .nitem.unread .t-app {
-    background: var(--primary);
-    color: var(--on-primary);
+    background: var(--secondary);
+    color: var(--on-secondary);
   }
   .nitem .ttl {
     display: block;
@@ -2312,7 +2338,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(30px * var(--font-display-scale));
+    font-size: calc(30px * var(--display-fixed-scale));
     letter-spacing: -0.03em;
     line-height: 1;
   }
@@ -2671,7 +2697,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(30px, 3.6vw, 44px) * var(--font-display-scale));
+    font-size: calc(clamp(30px, 3.6vw, 44px) * var(--display-fixed-scale));
     line-height: 1;
     letter-spacing: -0.03em;
     display: flex;
@@ -2780,7 +2806,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(60px, 8vw, 112px) * var(--font-display-scale));
+    font-size: calc(clamp(60px, 8vw, 112px) * var(--display-fixed-scale));
     line-height: 0.92;
     letter-spacing: -0.045em;
     display: flex;
@@ -2789,7 +2815,7 @@
     gap: 0 12px;
   }
   .me-hero .val {
-    font-size: calc(clamp(64px, 9vw, 128px) * var(--font-display-scale));
+    font-size: calc(clamp(64px, 9vw, 128px) * var(--display-fixed-scale));
     line-height: 0.9;
   }
   .ov-hero .val small,
@@ -2899,7 +2925,7 @@
     font-size: 11px;
   }
   .people .chip[aria-pressed='true'] .av {
-    box-shadow: 0 0 0 2px var(--on-primary);
+    box-shadow: 0 0 0 2px var(--on-secondary);
   }
   .em-stats {
     display: grid;
@@ -2947,7 +2973,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(24px, 2.6vw, 32px) * var(--font-display-scale));
+    font-size: calc(clamp(24px, 2.6vw, 32px) * var(--display-fixed-scale));
     line-height: 1;
     letter-spacing: -0.03em;
     margin-top: auto;
@@ -2991,7 +3017,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(44px, 5vw, 64px) * var(--font-display-scale));
+    font-size: calc(clamp(44px, 5vw, 64px) * var(--display-fixed-scale));
     line-height: 0.95;
     letter-spacing: -0.04em;
     display: flex;
@@ -3135,7 +3161,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(56px, 22cqw, 150px) * var(--font-display-scale));
+    font-size: calc(clamp(56px, 22cqw, 150px) * var(--display-fixed-scale));
     line-height: 0.85;
     letter-spacing: -0.05em;
     color: var(--ws-color, var(--primary));
@@ -3152,7 +3178,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(18px, 5cqw, 36px) * var(--font-display-scale));
+    font-size: calc(clamp(18px, 5cqw, 36px) * var(--display-fixed-scale));
     letter-spacing: -0.02em;
     margin-top: 0.3em;
   }
@@ -3348,7 +3374,7 @@
     padding: 16px 18px;
   }
   .stat-strip .tile .val {
-    font-size: calc(clamp(26px, 2.8vw, 36px) * var(--font-display-scale));
+    font-size: calc(clamp(26px, 2.8vw, 36px) * var(--display-fixed-scale));
   }
   .stat-strip .tile .lbl {
     font-size: 12.5px;
@@ -3365,7 +3391,7 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     padding: 4px 8px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-chip);
     background: var(--secondary);
     color: var(--on-secondary);
   }
@@ -3383,7 +3409,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(52px, 7vw, 92px) * var(--font-display-scale));
+    font-size: calc(clamp(52px, 7vw, 92px) * var(--display-fixed-scale));
     line-height: 0.92;
     letter-spacing: -0.045em;
     display: flex;
@@ -3481,7 +3507,7 @@
     font-weight: var(--font-display-weight);
     font-stretch: var(--font-display-stretch);
     font-variation-settings: var(--font-display-variation);
-    font-size: calc(clamp(28px, 3vw, 38px) * var(--font-display-scale));
+    font-size: calc(clamp(28px, 3vw, 38px) * var(--display-fixed-scale));
     line-height: 1;
     letter-spacing: -0.03em;
     margin-top: 4px;
@@ -3598,7 +3624,7 @@
     max-width: 520px;
   }
   .brand h1 {
-    font-size: calc(clamp(2rem, 4.4vw, 3.75rem) * var(--font-display-scale));
+    font-size: calc(clamp(2rem, 4.4vw, 3.75rem) * var(--display-fixed-scale));
     line-height: var(--font-display-leading);
     letter-spacing: var(--font-display-tracking);
   }
@@ -3701,7 +3727,7 @@
     display: inline-flex;
     margin-top: 4px;
     padding: 3px 8px;
-    border-radius: var(--radius-pill);
+    border-radius: var(--radius-chip);
     background: var(--surface-2);
     color: var(--text);
     font-size: 11.5px;
@@ -3851,6 +3877,11 @@
     transform: none;
   }
 }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
 @keyframes fadeOut {
   to {
     opacity: 0;
@@ -3971,7 +4002,7 @@
 
 @layer components {
   textarea.input {
-    border-radius: var(--radius-lg);
+    border-radius: min(var(--radius-control), var(--radius-lg));
   }
   /* Segments with long labels (Swedish runs 20 to 30 % longer) stack on narrow phones. */
   @media (max-width: 479px) {

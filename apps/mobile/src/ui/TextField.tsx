@@ -21,12 +21,13 @@ export interface FieldProps {
 const styles = (t: Theme) =>
   StyleSheet.create({
     field: { gap: t.space[2] },
+    label: { paddingHorizontal: t.space[1] },
     input: {
-      minHeight: 52,
-      borderRadius: t.radius.md,
-      borderWidth: 1.5,
+      minHeight: 48,
+      borderRadius: t.radius.control,
+      borderWidth: 1,
       borderColor: t.color.border,
-      backgroundColor: t.color.surface2,
+      backgroundColor: t.color.surface,
       paddingHorizontal: t.space[4],
       paddingVertical: t.space[3],
       color: t.color.text,
@@ -42,7 +43,7 @@ export function Field({ label, hint, error, children, style }: FieldProps) {
   const s = useThemedStyles(styles);
   return (
     <View style={[s.field, style]}>
-      <AppText variant="small" weight={600}>
+      <AppText variant="small" weight={600} tone="muted" style={s.label}>
         {label}
       </AppText>
       {children}

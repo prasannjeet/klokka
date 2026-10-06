@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import type { Member } from '@klokka/api-client';
@@ -75,7 +74,6 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
   const members = useMembers(workspace.workspaceId, month);
   const resend = useResendInvitation(workspace.workspaceId);
   const sheet = useRef<SheetHandle>(null);
-  const reduced = useReducedMotion();
   const list = (members.data ?? []).filter((m) => m.role === 'EMPLOYEE');
 
   const onResend = async (member: Member) => {
@@ -114,11 +112,8 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
         {members.data && list.length === 0 ? (
           <EmptyState icon="users" title={t('employees.addEmployeeShortHint')} />
         ) : null}
-        {list.map((member, i) => (
-          <Animated.View
-            key={member.id}
-            entering={reduced ? undefined : FadeInUp.delay(i * 60).duration(theme.motion.duration.base)}
-          >
+        {list.map((member) => (
+          <View key={member.id}>
             <PressableCard
               onPress={() =>
                 router.push({ pathname: '/member/[membershipId]', params: { membershipId: member.id } })
@@ -170,7 +165,7 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
                 <Icon name="chevron-right" size={20} color={theme.color.textMuted} />
               </View>
             </PressableCard>
-          </Animated.View>
+          </View>
         ))}
         {list.length > 0 ? (
           <Card tint>

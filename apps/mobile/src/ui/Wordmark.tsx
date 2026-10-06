@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { useTheme } from '@/theme';
+import { fontFamily, useTheme } from '@/theme';
 import { AppText } from './AppText';
 
 // The mark (a clock face with the paddle) and the lowercase wordmark, in the theme primary.
@@ -37,7 +37,7 @@ export function Wordmark({ size = 28 }: { size?: number }) {
         variant="h2"
         weight={800}
         color={theme.color.text}
-        style={{ fontSize: size, lineHeight: size * 1.2 }}
+        style={[fontFamily('display', 800), { fontSize: size, lineHeight: size * 1.2 }]}
       >
         klokka
       </AppText>

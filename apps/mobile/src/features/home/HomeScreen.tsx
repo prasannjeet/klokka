@@ -1,6 +1,5 @@
-import { useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import type { Entry, Member } from '@klokka/api-client';
 import { addDays, formatDate, formatHours, formatWeekday, isoWeek, weekOf, type IsoDate } from '@klokka/core';
@@ -16,7 +15,7 @@ import { useMe } from '@/data/me';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
-import { AppPressable, AppText, Avatar, Card, EmptyState, Icon, Pill, PressableCard, Screen } from '@/ui';
+import { AppPressable, AppText, Avatar, Card, EmptyState, Icon, Pill, Screen, Separator } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
 import { dayActionFor } from '@/features/jobs/dayAction';
@@ -25,11 +24,19 @@ import { PushPrompt } from '@/features/push/PushPrompt';
 const styles = (t: Theme) =>
   StyleSheet.create({
     top: { flexDirection: 'row', alignItems: 'center', gap: t.space[3] },
-    bell: { width: t.tapMin, height: t.tapMin, alignItems: 'center', justifyContent: 'center' },
+    bell: {
+      width: 40,
+      height: 40,
+      borderRadius: t.radius.chip,
+      borderWidth: 1,
+      borderColor: t.color.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     badge: {
       position: 'absolute',
-      top: 4,
-      right: 4,
+      top: -4,
+      right: -4,
       minWidth: 18,
       height: 18,
       borderRadius: 9,
@@ -44,28 +51,40 @@ const styles = (t: Theme) =>
       flex: 1,
       alignItems: 'center',
       paddingVertical: t.space[2],
-      borderRadius: t.radius.sm,
+      borderRadius: t.radius.chip,
       backgroundColor: t.color.surface,
       borderWidth: StyleSheet.hairlineWidth,
       borderColor: t.color.border,
       gap: 2,
     },
     cellToday: { backgroundColor: t.color.secondary, borderColor: t.color.secondary },
-    sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-    person: { flexDirection: 'row', alignItems: 'center', gap: t.space[3] },
+    section: { gap: t.space[2] },
+    sectionHead: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: t.space[1],
+    },
+    list: { padding: 0, overflow: 'hidden' },
+    person: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.space[3],
+      paddingVertical: t.space[3],
+      paddingLeft: t.space[4],
+      paddingRight: t.space[3],
+    },
     personText: { flex: 1, minWidth: 0 },
-    hours: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
     plus: {
-      width: 44,
-      height: 44,
-      borderRadius: t.radius.pill,
+      width: 36,
+      height: 36,
+      borderRadius: t.radius.chip,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: t.color.surface2,
       borderWidth: 1,
       borderColor: t.color.border,
     },
-    plusHot: { backgroundColor: t.color.primary, borderColor: t.color.primary },
     flagRow: { flexDirection: 'row', alignItems: 'center', gap: t.space[3] },
   });
 
@@ -73,15 +92,14 @@ function entryFor(entries: Entry[] | undefined, membershipId: string, date: IsoD
   return entries?.find((e) => e.membershipId === membershipId && sameDate(e.workDate, date));
 }
 
-// Home, Today (employer): every employee is a card with today's hours as the numeral and a quick add
-// on the right; the strip on top is the team's week; open flags sit below the people.
+// Home, Today (employer): the employees in one grouped list with today's hours and a quick add on the
+// right; the strip on top is the team's week; open flags sit below the people.
 function HomeScreenInner({ workspace }: WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
-  const reduced = useReducedMotion();
   const today = todayIn(workspace.timezone);
   const week = weekOf(today, workspace.weekStart);
   const first = week[0] as IsoDate;
@@ -130,9 +148,9 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
         testID="home-screen"
       >
         <View style={s.top}>
-          <Avatar name={workspace.name} emoji={workspace.emoji} colour={workspace.colour} size={40} square />
+          <Avatar name={workspace.name} emoji={workspace.emoji} colour={workspace.colour} size={36} square />
           <View style={{ flex: 1, minWidth: 0 }}>
-            <AppText variant="h3" numberOfLines={1}>
+            <AppText variant="body" weight={600} numberOfLines={1}>
               {workspace.name}
             </AppText>
             <AppText variant="small" tone="muted" numberOfLines={1}>
@@ -145,10 +163,11 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
               unread > 0 ? t('nav.notificationsUnread', { count: unread }) : t('nav.notifications')
             }
             onPress={() => router.push('/notifications-list')}
+            hitSlop={(theme.tapMin - 40) / 2}
             style={s.bell}
             testID="bell"
           >
-            <Icon name="bell" size={24} />
+            <Icon name="bell" size={20} />
             {unread > 0 ? (
               <View style={s.badge}>
                 <AppText variant="caption" weight={700} color={theme.color.onPrimary}>
@@ -205,104 +224,106 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
           </AppText>
         ) : null}
         <PushPrompt employer />
-        <View style={s.sectionHead}>
-          <AppText variant="h3">{t('nav.people')}</AppText>
-          <AppPressable
-            onPress={() => router.push('/employees')}
-            accessibilityRole="button"
-            accessibilityLabel={t('common.manage')}
-            testID="manage-people"
-          >
-            <AppText variant="small" weight={600} tone="accent">
-              {t('common.manage')} {'>'}
+        <View style={s.section}>
+          <View style={s.sectionHead}>
+            <AppText variant="small" weight={600} tone="muted" accessibilityRole="header">
+              {t('nav.people')}
             </AppText>
-          </AppPressable>
-        </View>
-        {members.data && people.length === 0 ? (
-          <EmptyState
-            icon="users"
-            title={t('employees.addEmployeeShortHint')}
-            actionLabel={t('employees.addEmployee')}
-            onAction={() => router.push('/employees')}
-          />
-        ) : null}
-        {people.map((member, i) => {
-          const todayEntry = entryFor(entries.data, member.id, today);
-          const yesterday = entryFor(entries.data, member.id, addDays(today, -1));
-          const subtitle = todayEntry?.note
-            ? todayEntry.note
-            : yesterday
-              ? t('mobile.home.yesterdayHours', { hours: formatHours(yesterday.hours, locale) })
-              : '';
-          return (
-            <Animated.View
-              key={member.id}
-              entering={reduced ? undefined : FadeInUp.delay(i * 60).duration(theme.motion.duration.base)}
+            <AppPressable
+              onPress={() => router.push('/employees')}
+              accessibilityRole="button"
+              accessibilityLabel={t('common.manage')}
+              hitSlop={12}
+              testID="manage-people"
             >
-              <PressableCard
-                onPress={() =>
-                  router.push({ pathname: '/member/[membershipId]', params: { membershipId: member.id } })
-                }
-                accessibilityRole="button"
-                accessibilityLabel={member.displayName}
-                testID={`person-${member.id}`}
-              >
-                <View style={s.person}>
-                  <Avatar
-                    name={member.displayName}
-                    emoji={member.avatarEmoji}
-                    colour={member.status === 'INVITED' ? 'YELLOW' : 'PURPLE'}
-                    size={44}
-                  />
-                  <View style={s.personText}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.space[2] }}>
-                      <AppText variant="lead" weight={700} numberOfLines={1} style={{ flexShrink: 1 }}>
-                        {member.displayName.split(' ')[0]}
-                      </AppText>
-                      {member.status === 'INVITED' ? (
-                        <Pill label={t('status.invited')} tone="warning" />
-                      ) : null}
-                    </View>
-                    {subtitle ? (
-                      <AppText variant="small" tone="muted" numberOfLines={1}>
-                        {subtitle}
-                      </AppText>
-                    ) : null}
-                  </View>
-                  {todayEntry ? (
-                    <View style={s.hours}>
-                      <AppText variant="h2" tabular>
-                        {formatHours(todayEntry.hours, locale, { unit: false })}
-                      </AppText>
-                      <AppText variant="small" weight={700} tone="muted">
-                        {t('common.hourUnit')}
-                      </AppText>
-                    </View>
-                  ) : (
-                    <AppText variant="small" tone="muted">
-                      {t('entry.nothingYet')}
-                    </AppText>
-                  )}
-                  <AppPressable
-                    accessibilityRole="button"
-                    accessibilityLabel={t('week.addHoursFor', { name: member.displayName })}
-                    onPress={() => openFor(member)}
-                    hapticKind="select"
-                    pressScale={0.9}
-                    style={[s.plus, todayEntry ? null : s.plusHot]}
-                    testID={`add-${member.id}`}
-                  >
-                    <Icon
-                      name="plus"
-                      size={22}
-                      color={todayEntry ? theme.color.text : theme.color.onPrimary}
-                    />
-                  </AppPressable>
-                </View>
-              </PressableCard>
-            </Animated.View>
-          );
-        })}
+              <AppText variant="small" weight={600} tone="accent">
+                {t('common.manage')}
+              </AppText>
+            </AppPressable>
+          </View>
+          {members.data && people.length === 0 ? (
+            <EmptyState
+              icon="users"
+              title={t('employees.addEmployeeShortHint')}
+              actionLabel={t('employees.addEmployee')}
+              onAction={() => router.push('/employees')}
+            />
+          ) : null}
+          {people.length > 0 ? (
+            <Card style={s.list}>
+              {people.map((member, i) => {
+                const todayEntry = entryFor(entries.data, member.id, today);
+                const yesterday = entryFor(entries.data, member.id, addDays(today, -1));
+                const subtitle = todayEntry?.note
+                  ? todayEntry.note
+                  : yesterday
+                    ? t('mobile.home.yesterdayHours', { hours: formatHours(yesterday.hours, locale) })
+                    : '';
+                return (
+                  <Fragment key={member.id}>
+                    {i > 0 ? <Separator /> : null}
+                    <AppPressable
+                      onPress={() =>
+                        router.push({
+                          pathname: '/member/[membershipId]',
+                          params: { membershipId: member.id },
+                        })
+                      }
+                      accessibilityRole="button"
+                      accessibilityLabel={member.displayName}
+                      pressScale={0.995}
+                      style={s.person}
+                      testID={`person-${member.id}`}
+                    >
+                      <Avatar
+                        name={member.displayName}
+                        emoji={member.avatarEmoji}
+                        colour={member.status === 'INVITED' ? 'YELLOW' : 'PURPLE'}
+                        size={36}
+                      />
+                      <View style={s.personText}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.space[2] }}>
+                          <AppText weight={600} numberOfLines={1} style={{ flexShrink: 1 }}>
+                            {member.displayName.split(' ')[0]}
+                          </AppText>
+                          {member.status === 'INVITED' ? (
+                            <Pill label={t('status.invited')} tone="warning" />
+                          ) : null}
+                        </View>
+                        {subtitle ? (
+                          <AppText variant="small" tone="muted" numberOfLines={1}>
+                            {subtitle}
+                          </AppText>
+                        ) : null}
+                      </View>
+                      {todayEntry ? (
+                        <AppText weight={600} tabular>
+                          {formatHours(todayEntry.hours, locale)}
+                        </AppText>
+                      ) : (
+                        <AppText variant="small" tone="muted">
+                          {t('entry.nothingYet')}
+                        </AppText>
+                      )}
+                      <AppPressable
+                        accessibilityRole="button"
+                        accessibilityLabel={t('week.addHoursFor', { name: member.displayName })}
+                        onPress={() => openFor(member)}
+                        hapticKind="select"
+                        pressScale={0.9}
+                        hitSlop={4}
+                        style={s.plus}
+                        testID={`add-${member.id}`}
+                      >
+                        <Icon name="plus" size={18} color={theme.color.text} />
+                      </AppPressable>
+                    </AppPressable>
+                  </Fragment>
+                );
+              })}
+            </Card>
+          ) : null}
+        </View>
         {flags.data && flags.data.length > 0 ? (
           <Card tint>
             <AppText variant="small" weight={700}>

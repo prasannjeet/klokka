@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '@/auth';
 import { useT } from '@/i18n/LocaleProvider';
@@ -27,7 +27,7 @@ export function SignInScreen() {
   const [busy, setBusy] = useState(false);
   const reduced = useReducedMotion();
   const rise = (delay: number) =>
-    reduced ? undefined : FadeInUp.delay(delay).duration(theme.motion.duration.rise);
+    reduced ? undefined : FadeIn.delay(delay).duration(theme.motion.duration.rise);
 
   const onSignIn = async () => {
     setBusy(true);

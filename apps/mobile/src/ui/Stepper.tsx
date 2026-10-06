@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { Icon } from './Icon';
@@ -10,25 +11,28 @@ export interface StepperProps {
   incrementLabel: string;
   canDecrement?: boolean;
   canIncrement?: boolean;
+  // The value shown between minus and plus.
+  children?: ReactNode;
 }
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    row: { flexDirection: 'row', gap: t.space[2] },
+    row: { flexDirection: 'row', alignItems: 'center', gap: t.space[2] },
     button: {
-      width: t.tapMin + 4,
-      height: t.tapMin + 4,
-      borderRadius: t.radius.pill,
+      width: STEP,
+      height: STEP,
+      borderRadius: t.radius.chip,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: t.color.surface2,
       borderWidth: 1,
       borderColor: t.color.border,
     },
     disabled: { opacity: 0.4 },
   });
 
-// The minus/plus pair next to the hours numeral in the add-hours sheet.
+const STEP = 36;
+
+// A minus/plus pair, optionally around the value it changes. Buttons draw at 36 px; hitSlop keeps the tap floor.
 export function Stepper({
   onDecrement,
   onIncrement,
@@ -36,6 +40,7 @@ export function Stepper({
   incrementLabel,
   canDecrement = true,
   canIncrement = true,
+  children,
 }: StepperProps) {
   const theme = useTheme();
   const s = useThemedStyles(styles);
@@ -47,21 +52,24 @@ export function Stepper({
         disabled={!canDecrement}
         onPress={onDecrement}
         hapticKind="tick"
+        hitSlop={(theme.tapMin - STEP) / 2}
         style={[s.button, canDecrement ? null : s.disabled]}
         testID="stepper-minus"
       >
-        <Icon name="minus" size={22} color={theme.color.text} />
+        <Icon name="minus" size={18} color={theme.color.text} />
       </AppPressable>
+      {children}
       <AppPressable
         accessibilityRole="button"
         accessibilityLabel={incrementLabel}
         disabled={!canIncrement}
         onPress={onIncrement}
         hapticKind="tick"
+        hitSlop={(theme.tapMin - STEP) / 2}
         style={[s.button, canIncrement ? null : s.disabled]}
         testID="stepper-plus"
       >
-        <Icon name="plus" size={22} color={theme.color.text} />
+        <Icon name="plus" size={18} color={theme.color.text} />
       </AppPressable>
     </View>
   );

@@ -12,8 +12,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 
-// The Nightshift mesh (DIRECTION.md 4.2): three tinted gradients over the page colour, drawn once
-// per screen behind the content. Cheap Views and two LinearGradients, no blur.
+// The Nightshift mesh (DIRECTION.md 4.2): three tinted gradients over the page colour. Only the sign-in
+// screen draws it; app screens are flat (CHQ-162). Cheap Views and two LinearGradients, no blur.
 export function Mesh() {
   const theme = useTheme();
   const { mesh1, mesh2, mesh3 } = theme.color;
@@ -88,14 +88,12 @@ export function Screen({
   if (!scroll) {
     return (
       <View style={[s.root, style]} testID={testID}>
-        <Mesh />
         <View style={[{ flex: 1 }, padding, contentStyle]}>{children}</View>
       </View>
     );
   }
   return (
     <View style={[s.root, style]} testID={testID}>
-      <Mesh />
       <ScrollView
         {...rest}
         contentContainerStyle={[s.content, padding, contentStyle]}

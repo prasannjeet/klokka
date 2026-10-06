@@ -25,11 +25,11 @@ export function PushPrompt({ employer }: { employer: boolean }) {
   const { register } = usePushPreference();
   if (shown || !me || me.pushTokenRegistered || !me.preferences.pushEnabled) return null;
   return (
-    <Card tint testID="push-prompt">
+    <Card testID="push-prompt">
       <View style={s.row}>
-        <Icon name="bell" size={22} color={theme.color.accent} />
+        <Icon name="bell" size={18} color={theme.color.accent} />
         <View style={{ flex: 1 }}>
-          <AppText weight={700}>{t('mobile.push.title')}</AppText>
+          <AppText weight={600}>{t('mobile.push.title')}</AppText>
           <AppText variant="small" tone="muted">
             {employer ? t('mobile.push.bodyEmployer') : t('mobile.push.body')}
           </AppText>

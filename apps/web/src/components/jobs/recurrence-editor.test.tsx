@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import type { JobRecurrenceRule } from '@klokka/api-client';
+import { ResponseError, type JobRecurrenceRule } from '@klokka/api-client';
+import { translator } from '@klokka/core';
 import { LocaleProvider } from '@/lib/i18n';
 import { RecurrenceEditor } from './recurrence-editor';
 const preview = vi.fn().mockResolvedValue({
@@ -14,6 +15,10 @@ const preview = vi.fn().mockResolvedValue({
 vi.mock('@/lib/api', () => ({
   api: { jobs: { previewJobRecurrence: (...args: unknown[]) => preview(...args) } },
 }));
+// A problem response whose body arrives when the test says so (toProblem reads it asynchronously).
+function problem(status: number, body: Promise<unknown>): ResponseError {
+  return new ResponseError({ status, clone: () => ({ json: () => body }) } as unknown as Response);
+}
 function Harness() {
   const [value, setValue] = useState<JobRecurrenceRule>();
   const [ready, setReady] = useState(true);
@@ -66,5 +71,50 @@ describe('recurring job editor', () => {
     expect(preview.mock.calls.at(-1)?.[0].jobRecurrencePreviewRequest.recurrence.periodCount).toBeUndefined();
     fireEvent.click(screen.getByRole('button', { name: 'Does not repeat' }));
     expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('never shows the previous failure while the next one is still being read', async () => {
+    const t = translator('en');
+    let resolveSecond: (body: unknown) => void = () => {};
+    preview
+      .mockRejectedValueOnce(problem(409, Promise.resolve({ code: 'CONFLICT' })))
+      .mockRejectedValueOnce(problem(409, new Promise((resolve) => (resolveSecond = resolve))));
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <LocaleProvider initial="en">
+          <Harness />
+        </LocaleProvider>
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Weekly' }));
+    fireEvent.change(screen.getByLabelText('Ends (required)'), { target: { value: 'count' } });
+    fireEvent.change(screen.getByTestId('repeat-count'), { target: { value: '8' } });
+    await screen.findByText(t('errors.CONFLICT'));
+
+    fireEvent.change(screen.getByTestId('repeat-count'), { target: { value: '9' } });
+    await waitFor(() =>
+      expect(preview.mock.calls.at(-1)?.[0].jobRecurrencePreviewRequest.recurrence.periodCount).toBe(9),
+    );
+    await screen.findByText(t('errors.VALIDATION'));
+    expect(screen.queryByText(t('errors.CONFLICT'))).toBeNull();
+
+    resolveSecond({ code: 'MONTH_LOCKED' });
+    await screen.findByText(t('errors.MONTH_LOCKED'));
+  });
+  it('asks for the end again when the frequency changes, so weeks never turn into months', () => {
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <LocaleProvider initial="en">
+          <Harness />
+        </LocaleProvider>
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Weekly' }));
+    fireEvent.change(screen.getByLabelText('Ends (required)'), { target: { value: 'count' } });
+    fireEvent.change(screen.getByTestId('repeat-count'), { target: { value: '8' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Monthly' }));
+    expect(screen.queryByTestId('repeat-count')).toBeNull();
+    expect((screen.getByLabelText('Ends (required)') as HTMLSelectElement).value).toBe('date');
+    expect((screen.getByRole('button', { name: 'Save' }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

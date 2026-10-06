@@ -73,7 +73,7 @@
   font-weight: var(--font-display-weight);
   font-stretch: var(--font-display-stretch);
   font-variation-settings: var(--font-display-variation);
-  font-size: calc(18px * var(--font-display-scale));
+  font-size: calc(18px * var(--display-fixed-scale));
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }

@@ -202,13 +202,12 @@ export function CreateWorkspaceScreen() {
       />
       <Field label={t('workspace.currency')} hint={t('workspace.currencyHint')}>
         <View style={s.wrap}>
-          {CURRENCIES.map((c, i) => (
+          {CURRENCIES.map((c) => (
             <Chip
               key={c}
               label={c}
               selected={c === currency}
               onPress={() => setCurrency(c)}
-              index={i}
               testID={`currency-${c}`}
             />
           ))}
@@ -225,7 +224,6 @@ export function CreateWorkspaceScreen() {
             label={t('workspace.sunday')}
             selected={weekStart === 'SUNDAY'}
             onPress={() => setWeekStart('SUNDAY')}
-            index={1}
           />
         </View>
       </Field>

@@ -39,13 +39,13 @@ const styles = (t: Theme) =>
       gap: t.space[2],
       paddingRight: t.space[3],
       paddingLeft: t.space[1],
-      height: t.tapMin,
-      borderRadius: t.radius.pill,
-      backgroundColor: t.color.surface2,
+      height: 40,
+      borderRadius: t.radius.control,
+      backgroundColor: t.color.surface,
       borderWidth: 1,
       borderColor: t.color.border,
     },
-    personOn: { backgroundColor: t.color.primary, borderColor: t.color.primary },
+    personOn: { backgroundColor: t.color.secondary, borderColor: t.color.secondary },
     page: { paddingRight: t.space[4] },
     dayRow: {
       flexDirection: 'row',
@@ -208,13 +208,19 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
                   list.current?.scrollToIndex({ index, animated: true });
                 }}
                 hapticKind="tick"
+                hitSlop={(theme.tapMin - 40) / 2}
                 style={[s.person, index === pageIndex ? s.personOn : null]}
               >
-                <Avatar name={item.displayName} emoji={item.avatarEmoji} colour="PURPLE" size={28} />
+                <Avatar
+                  name={item.displayName}
+                  emoji={item.avatarEmoji}
+                  colour={index === pageIndex ? 'INK' : 'PURPLE'}
+                  size={28}
+                />
                 <AppText
                   variant="small"
                   weight={600}
-                  color={index === pageIndex ? theme.color.onPrimary : theme.color.text}
+                  color={index === pageIndex ? theme.color.onSecondary : theme.color.text}
                 >
                   {item.displayName.split(' ')[0]}
                 </AppText>

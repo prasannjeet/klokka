@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type {
   Entry,
   Job,
@@ -30,10 +30,14 @@ import {
   AppSheet,
   AppText,
   Button,
+  Card,
   Chip,
   Icon,
+  Row,
+  Separator,
   TextField,
   Wheel,
+  WheelGroup,
   haptic,
   useToast,
   type SheetHandle,
@@ -71,58 +75,22 @@ const DEFAULT_START = '08:00';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
-    // The time card is a well in the raised sheet; the band marks the row the wheels choose.
-    card: {
-      backgroundColor: t.color.surface2,
-      borderRadius: t.radius.card,
-      borderWidth: 1,
-      borderColor: t.color.border,
-      padding: t.space[3],
-      gap: t.space[2],
-    },
-    wheels: { flexDirection: 'row', gap: t.space[2] },
-    band: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      top: t.tapMin * 2,
-      height: t.tapMin,
-      borderRadius: t.radius.md,
-      backgroundColor: t.color.surface,
-      borderWidth: 1,
-      borderColor: t.color.secondary,
-    },
-    tiles: { flexDirection: 'row', gap: t.space[2] },
-    tile: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: t.space[2],
-      padding: t.space[2],
-      minHeight: t.tapMin + t.space[3],
-      borderRadius: t.radius.lg,
-      backgroundColor: t.color.surface2,
-      borderWidth: 1,
-      borderColor: t.color.border,
-    },
-    tileIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: t.radius.md,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
+    group: { paddingVertical: 0, paddingHorizontal: t.space[4] },
+    groupRow: { minHeight: 48, paddingVertical: t.space[2] },
+    series: { paddingVertical: t.space[3] },
+    label: { paddingHorizontal: t.space[1] },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
     note: { minHeight: t.tapMin * 2, textAlignVertical: 'top' },
-    chips: { gap: t.space[2], paddingHorizontal: t.space[5] },
-    chipRow: { marginHorizontal: -t.space[5] },
     actions: { gap: t.space[2] },
     back: { flexDirection: 'row', alignItems: 'center', gap: t.space[1], minHeight: t.tapMin },
   });
 
 type Panel = 'job' | 'location' | 'start' | 'repeat' | 'scope';
 
-// A job on a member's day (CHQ-156, design screen 4): where and when it starts side by side, the hour and
-// minute wheels (CHQ-155; minutes follow the workspace rounding), quick picks, a note, and a button that says
-// what it saves. Location and start time open as panels of this same sheet, so no sheet sits on another.
+// A job on a member's day (CHQ-156, restyled in CHQ-162): where, when and how often in one grouped list,
+// the hour and minute wheels (CHQ-155; minutes follow the workspace rounding), quick picks, a note, and a
+// button that says what it saves. Location, start time and repeat open as panels of this same sheet, so no
+// sheet sits on another; AppSheet scrolls the body when it is taller than the screen.
 export const JobSheet = forwardRef<
   JobSheetHandle,
   { workspace: MyWorkspace; onSaved?: (entry: Entry) => void }
@@ -130,7 +98,6 @@ export const JobSheet = forwardRef<
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
-  const { height } = useWindowDimensions();
   const s = useThemedStyles(styles);
   const toast = useToast();
   const sheet = useRef<SheetHandle>(null);
@@ -266,12 +233,7 @@ export const JobSheet = forwardRef<
       testID="job-sheet"
     >
       {panel === 'repeat' ? (
-        <ScrollView
-          style={{ maxHeight: height - theme.space[9] * 4 }}
-          contentContainerStyle={{ gap: theme.space[3] }}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled
-        >
+        <View style={{ gap: theme.space[3] }}>
           {backRow}
           <RecurrenceEditor
             workspaceId={workspace.workspaceId}
@@ -281,7 +243,7 @@ export const JobSheet = forwardRef<
             onReady={setRecurrenceReady}
             onDone={() => setPanel('job')}
           />
-        </ScrollView>
+        </View>
       ) : panel === 'scope' ? (
         <View style={{ gap: theme.space[3] }}>
           {backRow}
@@ -296,8 +258,14 @@ export const JobSheet = forwardRef<
             .map((scope) => (
               <Button
                 key={scope}
-                label={t(scope === 'ONLY_THIS' ? 'recurrence.only' : 'recurrence.future')}
-                variant={scope === 'ONLY_THIS' ? 'primary' : 'secondary'}
+                label={t(
+                  scope === 'ONLY_THIS'
+                    ? 'recurrence.only'
+                    : scopeAction === 'remove'
+                      ? 'recurrence.stop'
+                      : 'recurrence.future',
+                )}
+                variant={scope === 'ONLY_THIS' ? 'primary' : 'outline'}
                 onPress={() => void (scopeAction === 'save' ? save(scope) : clear(scope))}
                 loading={update.isPending || remove.isPending}
                 testID={`scope-${scope}`}
@@ -324,102 +292,120 @@ export const JobSheet = forwardRef<
       ) : panel === 'start' ? (
         <View style={{ gap: theme.space[4] }}>
           {backRow}
-          <View style={s.card}>
-            <View style={s.wheels}>
-              <View style={s.band} pointerEvents="none" />
-              <Wheel
-                values={START_HOURS}
-                value={draftStart.hours}
-                onChange={(h) => setDraftStart({ hours: h, minutes: draftStart.minutes })}
-                format={two}
-                unit=""
-                accessibilityLabel={t('jobs.startsAt')}
-                testID="wheel-start-hours"
-              />
-              <Wheel
-                values={START_MINUTES}
-                value={draftStart.minutes}
-                onChange={(m) => setDraftStart({ hours: draftStart.hours, minutes: m })}
-                format={two}
-                unit=""
-                accessibilityLabel={t('jobs.startsAt')}
-                testID="wheel-start-minutes"
-              />
-            </View>
+          <WheelGroup>
+            <Wheel
+              values={START_HOURS}
+              value={draftStart.hours}
+              onChange={(h) => setDraftStart({ hours: h, minutes: draftStart.minutes })}
+              format={two}
+              unit=""
+              accessibilityLabel={t('jobs.startsAt')}
+              testID="wheel-start-hours"
+            />
+            <Wheel
+              values={START_MINUTES}
+              value={draftStart.minutes}
+              onChange={(m) => setDraftStart({ hours: draftStart.hours, minutes: m })}
+              format={two}
+              unit=""
+              accessibilityLabel={t('jobs.startsAt')}
+              testID="wheel-start-minutes"
+            />
+          </WheelGroup>
+          <View style={s.actions}>
+            <Button
+              label={t('mobile.common.done')}
+              onPress={() => {
+                setStartTime(`${two(draftStart.hours)}:${two(draftStart.minutes)}`);
+                setPanel('job');
+              }}
+              testID="start-done"
+            />
+            <Button
+              label={t('jobs.notSet')}
+              variant="ghost"
+              onPress={() => {
+                setStartTime(null);
+                setPanel('job');
+              }}
+              testID="start-clear"
+            />
           </View>
-          <Button
-            label={t('mobile.common.done')}
-            onPress={() => {
-              setStartTime(`${two(draftStart.hours)}:${two(draftStart.minutes)}`);
-              setPanel('job');
-            }}
-            testID="start-done"
-          />
-          <Button
-            label={t('jobs.notSet')}
-            variant="ghost"
-            onPress={() => {
-              setStartTime(null);
-              setPanel('job');
-            }}
-            testID="start-clear"
-          />
         </View>
       ) : (
-        <ScrollView
-          style={{ maxHeight: height - theme.space[9] * 4 }}
-          contentContainerStyle={{ gap: theme.space[4] }}
-          keyboardShouldPersistTaps="handled"
-          nestedScrollEnabled
-        >
-          <View style={s.tiles}>
-            <AppPressable
-              accessibilityRole="button"
-              accessibilityLabel={`${t('jobs.location')}, ${location?.name ?? t('jobs.noLocation')}`}
-              onPress={() => setPanel('location')}
-              style={[s.tile, { flex: 1.4 }]}
-              testID="job-location"
-            >
-              <View style={[s.tileIcon, { backgroundColor: theme.color.surface }]}>
-                <Icon name="map-pin" size={18} color={theme.color.primary} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <AppText variant="caption" tone="muted" weight={600}>
-                  {t('jobs.location')}
-                </AppText>
-                <AppText variant="small" weight={600} numberOfLines={1}>
-                  {location?.name ?? t('jobs.noLocation')}
-                </AppText>
-              </View>
-            </AppPressable>
-            <AppPressable
-              accessibilityRole="button"
-              accessibilityLabel={`${t('jobs.startsAt')}, ${startTime ?? t('jobs.notSet')}`}
-              onPress={openStart}
-              style={[s.tile, { flex: 1 }]}
-              testID="job-start"
-            >
-              <View style={[s.tileIcon, { backgroundColor: theme.color.surface }]}>
-                <Icon name="clock" size={18} color={theme.color.accent} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <AppText variant="caption" tone="muted" weight={600}>
-                  {t('jobs.startsAt')}
-                </AppText>
-                <AppText variant="small" weight={600} numberOfLines={1}>
-                  {startTime ?? t('jobs.notSet')}
-                </AppText>
-              </View>
-            </AppPressable>
+        <View style={{ gap: theme.space[4] }}>
+          <View style={{ gap: theme.space[2] }}>
+            <Card style={s.group}>
+              <Row
+                title={t('jobs.location')}
+                value={location?.name ?? t('jobs.noLocation')}
+                leading={<Icon name="map-pin" size={18} color={theme.color.primary} />}
+                onPress={() => setPanel('location')}
+                chevron
+                style={s.groupRow}
+                accessibilityLabel={`${t('jobs.location')}, ${location?.name ?? t('jobs.noLocation')}`}
+                testID="job-location"
+              />
+              <Separator />
+              <Row
+                title={t('jobs.startsAt')}
+                value={startTime ?? t('jobs.notSet')}
+                leading={<Icon name="clock" size={18} color={theme.color.accent} />}
+                onPress={openStart}
+                chevron
+                style={s.groupRow}
+                accessibilityLabel={`${t('jobs.startsAt')}, ${startTime ?? t('jobs.notSet')}`}
+                testID="job-start"
+              />
+              {target.job?.recurrence ? (
+                <>
+                  <Separator />
+                  <View style={s.series}>
+                    <RecurrenceSummary series={target.job.recurrence} />
+                  </View>
+                </>
+              ) : !editing && target.date >= todayIn(workspace.timezone) ? (
+                <>
+                  <Separator />
+                  <Row
+                    title={t('recurrence.title')}
+                    value={t(
+                      recurrence
+                        ? recurrence.frequency === 'WEEKLY'
+                          ? 'recurrence.weekly'
+                          : 'recurrence.monthly'
+                        : 'recurrence.once',
+                    )}
+                    leading={<Icon name="refresh" size={18} color={theme.color.pop1} />}
+                    onPress={() => setPanel('repeat')}
+                    chevron
+                    style={s.groupRow}
+                    testID="job-repeat"
+                  />
+                </>
+              ) : null}
+            </Card>
+            <AppText variant="caption" tone="muted" style={s.label} testID="job-start-hint">
+              {startTime
+                ? t('jobs.runsReminder', {
+                    from: startTime,
+                    to: endTime(startTime, rounded),
+                    name: firstName,
+                  })
+                : t('jobs.noStartNoReminder', { name: firstName })}
+            </AppText>
           </View>
-          <AppText variant="caption" tone="muted" testID="job-start-hint">
-            {startTime
-              ? t('jobs.runsReminder', { from: startTime, to: endTime(startTime, rounded), name: firstName })
-              : t('jobs.noStartNoReminder', { name: firstName })}
-          </AppText>
-          <View style={s.card}>
-            <View style={s.wheels}>
-              <View style={s.band} pointerEvents="none" />
+          <View style={{ gap: theme.space[2] }}>
+            <AppText variant="small" weight={600} tone="muted" style={s.label}>
+              {t('entry.hoursWheel')}
+            </AppText>
+            <WheelGroup
+              footer={
+                <AppText variant="caption" tone="muted" align="center" testID="saved-as">
+                  {t('entry.savedAs', { hours: formatHours(rounded, locale) })}
+                </AppText>
+              }
+            >
               <Wheel
                 values={HOUR_VALUES}
                 value={time.hours}
@@ -438,65 +424,36 @@ export const JobSheet = forwardRef<
                 accessibilityLabel={t('entry.minutesWheel')}
                 testID="wheel-minutes"
               />
+            </WheelGroup>
+            <View style={s.chips} accessibilityLabel={t('week.quickHours')}>
+              {QUICK_CHIPS.map((value) => (
+                <Chip
+                  key={value}
+                  label={formatDuration(value, t)}
+                  selected={rounded === value}
+                  onPress={() => setHours(value)}
+                  testID={`chip-${value}`}
+                />
+              ))}
+              <Chip
+                label={t('week.fullDayWithHours', { hours: formatDuration(target.defaultDayHours, t) })}
+                selected={rounded === target.defaultDayHours}
+                onPress={() => setHours(target.defaultDayHours)}
+                testID="chip-full-day"
+              />
+              {target.yesterdayHours != null && target.yesterdayHours > 0 ? (
+                <Chip
+                  label={t('week.sameAsYesterdayWithHours', {
+                    hours: formatDuration(target.yesterdayHours, t),
+                  })}
+                  icon="history"
+                  selected={rounded === target.yesterdayHours}
+                  onPress={() => setHours(target.yesterdayHours as number)}
+                  testID="same-as-yesterday"
+                />
+              ) : null}
             </View>
-            <AppText variant="small" tone="muted" style={{ textAlign: 'center' }} testID="saved-as">
-              {t('entry.savedAs', { hours: formatHours(rounded, locale) })}
-            </AppText>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={s.chipRow}
-            contentContainerStyle={s.chips}
-            accessibilityLabel={t('week.quickHours')}
-          >
-            {QUICK_CHIPS.map((value, i) => (
-              <Chip
-                key={value}
-                label={formatDuration(value, t)}
-                selected={rounded === value}
-                onPress={() => setHours(value)}
-                index={i}
-                testID={`chip-${value}`}
-              />
-            ))}
-            <Chip
-              label={t('week.fullDayWithHours', { hours: formatDuration(target.defaultDayHours, t) })}
-              selected={rounded === target.defaultDayHours}
-              onPress={() => setHours(target.defaultDayHours)}
-              index={QUICK_CHIPS.length}
-              testID="chip-full-day"
-            />
-            {target.yesterdayHours != null && target.yesterdayHours > 0 ? (
-              <Chip
-                label={t('week.sameAsYesterdayWithHours', {
-                  hours: formatDuration(target.yesterdayHours, t),
-                })}
-                icon="history"
-                selected={rounded === target.yesterdayHours}
-                onPress={() => setHours(target.yesterdayHours as number)}
-                index={QUICK_CHIPS.length + 1}
-                testID="same-as-yesterday"
-              />
-            ) : null}
-          </ScrollView>
-          {target.job?.recurrence ? (
-            <RecurrenceSummary series={target.job.recurrence} />
-          ) : !editing && target.date >= todayIn(workspace.timezone) ? (
-            <Button
-              label={t(
-                recurrence
-                  ? recurrence.frequency === 'WEEKLY'
-                    ? 'recurrence.weekly'
-                    : 'recurrence.monthly'
-                  : 'recurrence.title',
-              )}
-              variant="secondary"
-              icon="refresh"
-              onPress={() => setPanel('repeat')}
-              testID="job-repeat"
-            />
-          ) : null}
           <TextField
             label={t('week.noteOptional')}
             placeholder={t('week.notePlaceholder')}
@@ -548,7 +505,7 @@ export const JobSheet = forwardRef<
               />
             ) : null}
           </View>
-        </ScrollView>
+        </View>
       )}
     </AppSheet>
   );

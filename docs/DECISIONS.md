@@ -186,3 +186,16 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   least 12 opted-in testers for 14 days first.
 - Release builds block permissions nothing in Klokka uses (overlay, external storage, biometrics), and
   `release.yml` fails a build that carries them, background location or the advertising id.
+
+## D20. A calmer Nightshift for the signed-in product (owner, 2026-10-06, CHQ-162)
+
+- The owner found the app too large and too casual. The signed-in product (web app and phone app) keeps
+  Nightshift's colours but sets headings in Inter 700 (Unbounded stays in the wordmark), one type step smaller on
+  the phone, controls and cards at 12 px and chips at 8 px instead of pills and 24 px cards. Pink is for the main
+  action and the active tab only; selections are violet or a segmented control. App screens are flat (the mesh
+  stays on sign-in). Approved on the design canvas https://claude.ai/artifact/JeLcHpaPhbu8nHBeDgHthK.
+- Tokens: `tokens.app` in `@klokka/tokens`; the web app opts in with `<html data-surface="app">`, the phone reads
+  it directly. The landing site keeps the base values.
+- Layout animations may fade, never move: a translating entering animation (Reanimated `FadeInUp`/`FadeInDown`)
+  left rows and chips 25 px off their slot on a Pixel 9 Pro XL, so labels and cards overlapped on every screen.
+  `apps/mobile/src/ui/motion.test.ts` fails on any moving layout animation.

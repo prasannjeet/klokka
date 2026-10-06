@@ -14,6 +14,7 @@ import {
   themeName,
   type,
   z,
+  app,
 } from '../src/tokens.ts';
 
 const kebab = (s: string) =>
@@ -90,6 +91,19 @@ function theme(): string[] {
   return out;
 }
 
+// The signed-in web app's overrides (tokens.ts `app`); the landing site never sets data-surface.
+function surfaceApp(): string[] {
+  const out: string[] = [];
+  out.push(line('font-display', app.font.display));
+  out.push(line('font-display-weight', app.font.displayWeight));
+  out.push(line('font-display-scale', app.font.displayScale));
+  out.push(line('font-display-tracking', app.font.displayTracking));
+  out.push(line('font-display-leading', app.font.headingLeading));
+  for (const [k, v] of Object.entries(app.radius)) out.push(line(`radius-${k}`, `${v}px`));
+  for (const [k, v] of Object.entries(app.css)) out.push(line(`text-${kebab(k)}`, v));
+  return out;
+}
+
 // Tailwind v4 theme namespace: utilities like bg-surface, text-text-muted, rounded-card, font-display,
 // ease-spring and duration-base resolve to the variables above. `inline` keeps the var() reference so
 // light-dark() still resolves at use time.
@@ -125,6 +139,9 @@ export function render(): string {
     ':root {',
     ...shared(),
     ...theme(),
+    '}',
+    ':root[data-surface="app"] {',
+    ...surfaceApp(),
     '}',
     ':root[data-mode="light"] { color-scheme: light; }',
     ':root[data-mode="dark"] { color-scheme: dark; }',

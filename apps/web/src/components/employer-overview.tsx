@@ -203,7 +203,7 @@ export function EmployerOverview() {
                 {recent.data && recent.data.pages[0]?.items.length === 0 ? (
                   <p className="muted small">{t('web.overview.noRecent')}</p>
                 ) : (
-                  <div className="hgrid" style={{ borderRadius: 'var(--radius-lg)' }}>
+                  <div className="hgrid list">
                     {(recent.data?.pages[0]?.items ?? []).map((n) => (
                       <NotificationItem
                         key={n.id}

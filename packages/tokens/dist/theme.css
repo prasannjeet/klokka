@@ -69,6 +69,7 @@
   --radius-xl: 28px;
   --radius-pill: 999px;
   --radius-control: 999px;
+  --radius-chip: 999px;
   --radius-card: 24px;
   --ease-enter: var(--ease-spring);
   --ease-exit: cubic-bezier(0.4, 0, 1, 1);
@@ -120,6 +121,22 @@
   --shadow-float: 0 32px 80px -16px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
   --shadow-glow: 0 0 24px color-mix(in srgb, var(--primary) 55%, transparent), 0 0 64px color-mix(in srgb, var(--accent) 25%, transparent);
 }
+:root[data-surface="app"] {
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display-weight: 700;
+  --font-display-scale: 1;
+  --font-display-tracking: -0.01em;
+  --font-display-leading: 1.25;
+  --radius-control: 12px;
+  --radius-card: 12px;
+  --radius-chip: 8px;
+  --text-display-xl: clamp(2.25rem, 1.8rem + 1.8vw, 3rem);
+  --text-display-l: clamp(2rem, 1.6rem + 1.4vw, 2.5rem);
+  --text-h-1: clamp(1.5rem, 1.35rem + 0.6vw, 1.875rem);
+  --text-h-2: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-h-3: 1.125rem;
+  --text-lead: 1.0625rem;
+}
 :root[data-mode="light"] { color-scheme: light; }
 :root[data-mode="dark"] { color-scheme: dark; }
 
@@ -160,6 +177,7 @@
   --radius-xl: var(--radius-xl);
   --radius-pill: var(--radius-pill);
   --radius-control: var(--radius-control);
+  --radius-chip: var(--radius-chip);
   --radius-card: var(--radius-card);
   --font-display: var(--font-display);
   --font-body: var(--font-body);

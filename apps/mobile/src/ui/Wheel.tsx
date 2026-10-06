@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -22,22 +22,57 @@ export interface WheelProps {
   testID?: string;
 }
 
-// Five rows show; the middle one is the value. Row height is the tap minimum, so every row is a target.
-const VISIBLE = 5;
+// Three rows show; the middle one is the value. Row height is the tap minimum, so every row is a target.
+const VISIBLE = 3;
+const MIDDLE = Math.floor(VISIBLE / 2);
 
 const styles = (t: Theme) =>
   StyleSheet.create({
     wrap: { flex: 1, height: t.tapMin * VISIBLE },
-    content: { paddingVertical: t.tapMin * Math.floor(VISIBLE / 2) },
+    content: { paddingVertical: t.tapMin * MIDDLE },
     row: { height: t.tapMin, alignItems: 'center', justifyContent: 'center' },
     unit: {
       position: 'absolute',
       right: t.space[4],
-      top: t.tapMin * Math.floor(VISIBLE / 2),
+      top: t.tapMin * MIDDLE,
       height: t.tapMin,
       justifyContent: 'center',
     },
+    // WheelGroup: a well holding the wheels side by side, the band marking the row they choose.
+    group: {
+      backgroundColor: t.color.surface,
+      borderRadius: t.radius.card,
+      borderWidth: 1,
+      borderColor: t.color.border,
+      paddingHorizontal: t.space[2],
+      paddingVertical: t.space[1],
+      gap: t.space[1],
+    },
+    wheels: { flexDirection: 'row', gap: t.space[2] },
+    band: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: t.tapMin * MIDDLE,
+      height: t.tapMin,
+      borderRadius: t.radius.chip,
+      backgroundColor: t.color.surface2,
+    },
   });
+
+// Wheels side by side in one well with the selection band behind them; `footer` sits under the wheels.
+export function WheelGroup({ children, footer }: { children: ReactNode; footer?: ReactNode }) {
+  const s = useThemedStyles(styles);
+  return (
+    <View style={s.group}>
+      <View style={s.wheels}>
+        <View style={s.band} pointerEvents="none" />
+        {children}
+      </View>
+      {footer}
+    </View>
+  );
+}
 
 // A scroll wheel (the alarm-clock picker): drag or fling and it snaps to a row, tap a row to jump to it,
 // and TalkBack/VoiceOver adjust it one step at a time. The parent owns the value; a value set from outside
@@ -107,10 +142,11 @@ export function Wheel({ values, value, onChange, format, unit, accessibilityLabe
               testID={testID ? `${testID}-${v}` : undefined}
             >
               <AppText
-                variant={distance === 0 ? 'h2' : 'h3'}
-                weight={700}
+                variant={distance === 0 ? 'h2' : 'lead'}
+                weight={distance === 0 ? 700 : 500}
                 tone={distance === 0 ? 'text' : 'muted'}
-                style={[{ lineHeight: row }, distance > 1 ? { opacity: 0.45 } : null]}
+                tabular
+                style={{ lineHeight: row }}
               >
                 {format(v)}
               </AppText>

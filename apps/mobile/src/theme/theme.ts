@@ -16,7 +16,7 @@ export interface Theme {
   mode: Mode;
   color: Colors;
   space: typeof tokens.space;
-  radius: typeof tokens.radius;
+  radius: Omit<typeof tokens.radius, keyof typeof tokens.app.radius> & typeof tokens.app.radius;
   size: typeof tokens.type.native;
   leading: typeof tokens.type.leading;
   motion: typeof tokens.motion;
@@ -60,13 +60,10 @@ function leadingOf(role: TypeRole): number {
   switch (role) {
     case 'displayXl':
     case 'displayL':
-      return tokens.type.leading.display;
     case 'h1':
-      return tokens.type.leading.h1;
     case 'h2':
-      return tokens.type.leading.h2;
     case 'h3':
-      return tokens.type.leading.h3;
+      return tokens.app.font.headingLeading;
     case 'lead':
       return tokens.type.leading.lead;
     case 'small':
@@ -81,23 +78,18 @@ function leadingOf(role: TypeRole): number {
 
 function textStyle(role: TypeRole, weight?: FontWeight): TextStyle {
   const display = DISPLAY_ROLES.has(role);
-  // Unbounded is a wide face; the token scale is multiplied by displayScale for it (DIRECTION.md 4.2).
-  const size = display
-    ? Math.round(tokens.type.native[role] * tokens.font.displayScale)
-    : tokens.type.native[role];
-  const w = weight ?? (display ? 800 : role === 'eyebrow' ? 600 : 400);
+  // Headings are Inter in the app (tokens `app`, CHQ-162); Unbounded is left to the wordmark.
+  const size = tokens.type.native[role];
+  const w = weight ?? (display ? tokens.app.font.displayWeight : role === 'eyebrow' ? 600 : 400);
   const em = (value: string) => Math.round(size * Number.parseFloat(value) * 100) / 100;
   return {
-    ...fontFamily(display ? 'display' : 'body', w),
+    ...fontFamily('body', w),
     fontSize: size,
     lineHeight: Math.round(size * leadingOf(role)),
     ...(role === 'eyebrow'
       ? { letterSpacing: em(tokens.type.tracking.eyebrow), textTransform: 'uppercase' }
       : {}),
-    ...(role === 'h1' || role === 'displayL' || role === 'displayXl'
-      ? { letterSpacing: em(tokens.type.tracking.h1) }
-      : {}),
-    ...(role === 'h2' ? { letterSpacing: em(tokens.type.tracking.h2) } : {}),
+    ...(display && role !== 'h3' ? { letterSpacing: em(tokens.app.font.displayTracking) } : {}),
   };
 }
 
@@ -151,7 +143,7 @@ export function createTheme(mode: Mode): Theme {
     mode,
     color,
     space: tokens.space,
-    radius: tokens.radius,
+    radius: { ...tokens.radius, ...tokens.app.radius },
     size: tokens.type.native,
     leading: tokens.type.leading,
     motion: tokens.motion,

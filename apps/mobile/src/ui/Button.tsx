@@ -25,15 +25,15 @@ export interface ButtonProps {
 const styles = (t: Theme) =>
   StyleSheet.create({
     base: {
-      minHeight: 52,
-      borderRadius: t.radius.pill,
+      minHeight: 48,
+      borderRadius: t.radius.control,
       paddingHorizontal: t.space[6],
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
       gap: t.space[2],
     },
-    compact: { minHeight: t.tapMin, paddingHorizontal: t.space[4] },
+    compact: { minHeight: 36, paddingHorizontal: t.space[4], borderRadius: t.radius.chip },
     primary: { backgroundColor: t.color.primary },
     secondary: { backgroundColor: t.color.secondary },
     outline: { borderWidth: 1, borderColor: t.color.border, backgroundColor: 'transparent' },
@@ -75,6 +75,7 @@ export function Button({
       onPress={onPress}
       hapticKind={hapticKind}
       testID={testID}
+      hitSlop={compact ? (theme.tapMin - 36) / 2 : undefined}
       style={[s.base, s[variant], compact ? s.compact : null, disabled || loading ? s.disabled : null, style]}
     >
       {loading ? (

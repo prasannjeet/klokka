@@ -2,38 +2,54 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { JobRecurrenceRuleToJSON, Weekday, type JobRecurrenceRule } from '@klokka/api-client';
-import { formatDate, type IsoDate } from '@klokka/core';
+import { formatDate, formatWeekday, type IsoDate } from '@klokka/core';
 import { useApi } from '@/api/ApiProvider';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { fromIsoDate, toIsoDate } from '@/lib/dates';
 import { problemMessage } from '@/lib/problems';
-import { useThemedStyles, type Theme } from '@/theme';
-import { AppText, Button, Chip, Field, TextField, Wheel } from '@/ui';
+import { useTheme, useThemedStyles, type Theme } from '@/theme';
+import {
+  AppPressable,
+  AppText,
+  Button,
+  Card,
+  Row,
+  Segmented,
+  Separator,
+  Stepper,
+  Wheel,
+  WheelGroup,
+} from '@/ui';
 
 const DAYS = Object.values(Weekday);
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+const MAX_INTERVAL = 12;
+const MAX_PERIODS = 120;
+// A series ended by a count starts at four weeks or months; the stepper changes it.
+const FIRST_COUNT = 4;
+const DAY = 36;
+
 const styles = (t: Theme) =>
   StyleSheet.create({
-    body: { gap: t.space[3] },
-    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
-    preview: {
-      gap: t.space[2],
-      backgroundColor: t.color.surface2,
-      borderRadius: t.radius.card,
-      padding: t.space[3],
+    body: { gap: t.space[4] },
+    section: { gap: t.space[2] },
+    label: { paddingHorizontal: t.space[1] },
+    group: { paddingVertical: 0, paddingHorizontal: t.space[4] },
+    groupRow: { minHeight: 52, paddingVertical: t.space[2] },
+    inset: { paddingVertical: t.space[3], gap: t.space[2] },
+    stepValue: { minWidth: 72, textAlign: 'center' },
+    days: { flexDirection: 'row', justifyContent: 'space-between' },
+    day: {
+      width: DAY,
+      height: DAY,
+      borderRadius: t.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
       borderWidth: 1,
       borderColor: t.color.border,
     },
-    wheels: { flexDirection: 'row', gap: t.space[1] },
-    band: {
-      position: 'absolute',
-      top: t.tapMin * 2,
-      height: t.tapMin,
-      left: 0,
-      right: 0,
-      backgroundColor: t.color.surface2,
-      borderRadius: t.radius.md,
-    },
+    dayOn: { backgroundColor: t.color.secondary, borderColor: t.color.secondary },
+    preview: { gap: t.space[1] },
   });
 const iso = toIsoDate;
 
@@ -55,11 +71,13 @@ export function RecurrenceEditor({
   const t = useT();
   const locale = useLocale();
   const api = useApi();
+  const theme = useTheme();
   const s = useThemedStyles(styles);
   const [endMode, setEndMode] = useState<'date' | 'count'>(value?.periodCount ? 'count' : 'date');
   const [datePanel, setDatePanel] = useState(false);
   const [draftDate, setDraftDate] = useState(() => value?.endDate ?? fromIsoDate(date));
-  const [error, setError] = useState<string | null>(null);
+  // The message is kept with the error it came from, so a slow lookup never shows an earlier failure's text.
+  const [failure, setFailure] = useState<{ source: unknown; message: string } | null>(null);
   const valid =
     !!value &&
     Number.isInteger(value.interval) &&
@@ -84,16 +102,20 @@ export function RecurrenceEditor({
   const ready = value === undefined || (valid && preview.isSuccess && !preview.isFetching);
   useEffect(() => onReady(ready), [ready, onReady]);
   useEffect(() => {
-    if (preview.error) void problemMessage(preview.error, t).then(setError);
-    else setError(null);
+    const source = preview.error;
+    if (source) void problemMessage(source, t).then((message) => setFailure({ source, message }));
   }, [preview.error, t]);
+  const error = failure && failure.source === preview.error ? failure.message : null;
   const weekly = value?.frequency === 'WEEKLY';
-  const choose = (frequency: JobRecurrenceRule['frequency'] | undefined) => {
-    if (!frequency) {
+  const choose = (frequency: JobRecurrenceRule['frequency'] | 'ONCE') => {
+    if (frequency === 'ONCE') {
       onChange(undefined);
       return;
     }
-    const { weekdays: _days, lastDayOfMonth: _last, ...rest } = value ?? { interval: 1 };
+    if (frequency === value?.frequency) return;
+    // A count of weeks is not a count of months: switching frequency asks for the end again.
+    const { weekdays: _days, lastDayOfMonth: _last, periodCount: _count, ...rest } = value ?? { interval: 1 };
+    if (endMode === 'count') setEndMode('date');
     onChange({
       ...rest,
       frequency,
@@ -110,9 +132,10 @@ export function RecurrenceEditor({
       setDraftDate(new Date(y, m - 1, Math.min(d, new Date(y, m, 0).getDate())));
     return (
       <View style={s.body}>
-        <AppText weight={600}>{t('recurrence.endDate')}</AppText>
-        <View style={s.wheels}>
-          <View style={s.band} pointerEvents="none" />
+        <AppText variant="small" weight={600} tone="muted" style={s.label}>
+          {t('recurrence.endDate')}
+        </AppText>
+        <WheelGroup>
           <Wheel
             values={days}
             value={day}
@@ -142,7 +165,7 @@ export function RecurrenceEditor({
             accessibilityLabel={t('recurrence.year')}
             testID="repeat-year"
           />
-        </View>
+        </WheelGroup>
         <Button
           label={t('recurrence.useDate')}
           disabled={iso(draftDate) < date}
@@ -156,138 +179,189 @@ export function RecurrenceEditor({
       </View>
     );
   }
+  const interval = value?.interval ?? 1;
+  const count = value?.periodCount;
+  const period = (n: number) => t(weekly ? 'recurrence.weeks' : 'recurrence.months', { count: n });
   return (
     <View style={s.body}>
-      <Field label={t('recurrence.title')}>
-        <View style={s.chips}>
-          {([undefined, 'WEEKLY', 'MONTHLY'] as const).map((f) => (
-            <Chip
-              key={f ?? 'once'}
-              label={t(
-                f === undefined
-                  ? 'recurrence.once'
-                  : f === 'WEEKLY'
-                    ? 'recurrence.weekly'
-                    : 'recurrence.monthly',
-              )}
-              selected={value?.frequency === f}
-              onPress={() => choose(f)}
-              testID={`repeat-${f ?? 'once'}`}
-            />
-          ))}
-        </View>
-      </Field>
+      <Segmented
+        accessibilityLabel={t('recurrence.title')}
+        value={value?.frequency ?? 'ONCE'}
+        onChange={choose}
+        options={[
+          { value: 'ONCE', label: t('recurrence.once'), testID: 'repeat-once' },
+          { value: 'WEEKLY', label: t('recurrence.weekly'), testID: 'repeat-WEEKLY' },
+          { value: 'MONTHLY', label: t('recurrence.monthly'), testID: 'repeat-MONTHLY' },
+        ]}
+      />
       {value ? (
         <>
-          <TextField
-            label={t('recurrence.every')}
-            keyboardType="number-pad"
-            value={value.interval ? String(value.interval) : ''}
-            onChangeText={(text) => onChange({ ...value, interval: Number(text) })}
-            hint={`${t(weekly ? 'recurrence.weeks' : 'recurrence.months', { count: value.interval })}. ${t('recurrence.intervalHint')}`}
-            maxLength={2}
-            testID="repeat-interval"
-          />
-          {weekly ? (
-            <Field label={t('recurrence.weekdays')}>
-              <View style={s.chips}>
-                {DAYS.map((d, i) => (
-                  <Chip
-                    key={d}
-                    label={new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
-                      new Date(2026, 9, 5 + i),
-                    )}
-                    selected={value.weekdays?.has(d)}
-                    onPress={() =>
-                      onChange({
-                        ...value,
-                        weekdays: value.weekdays?.has(d)
-                          ? new Set([...value.weekdays].filter((x) => x !== d))
-                          : new Set([...(value.weekdays ?? []), d]),
-                      })
-                    }
-                    testID={`repeat-${d}`}
-                  />
-                ))}
+          <Card style={s.group}>
+            <Row
+              title={t('recurrence.every')}
+              style={s.groupRow}
+              trailing={
+                <Stepper
+                  decrementLabel={t('recurrence.decrease')}
+                  incrementLabel={t('recurrence.increase')}
+                  canDecrement={interval > 1}
+                  canIncrement={interval < MAX_INTERVAL}
+                  onDecrement={() => onChange({ ...value, interval: interval - 1 })}
+                  onIncrement={() => onChange({ ...value, interval: interval + 1 })}
+                >
+                  <AppText weight={600} tabular style={s.stepValue} testID="repeat-interval">
+                    {period(interval)}
+                  </AppText>
+                </Stepper>
+              }
+            />
+            <Separator />
+            {weekly ? (
+              <View style={s.inset}>
+                <AppText variant="small" tone="muted">
+                  {t('recurrence.weekdays')}
+                </AppText>
+                <View style={s.days}>
+                  {DAYS.map((d, i) => {
+                    const on = !!value.weekdays?.has(d);
+                    return (
+                      <AppPressable
+                        key={d}
+                        accessibilityRole="checkbox"
+                        accessibilityLabel={formatWeekday(i, locale, 'long')}
+                        accessibilityState={{ checked: on }}
+                        hapticKind="tick"
+                        hitSlop={4}
+                        style={[s.day, on ? s.dayOn : null]}
+                        onPress={() =>
+                          onChange({
+                            ...value,
+                            weekdays: on
+                              ? new Set([...(value.weekdays ?? [])].filter((x) => x !== d))
+                              : new Set([...(value.weekdays ?? []), d]),
+                          })
+                        }
+                        testID={`repeat-${d}`}
+                      >
+                        <AppText
+                          variant="small"
+                          weight={600}
+                          color={on ? theme.color.onSecondary : theme.color.text}
+                        >
+                          {formatWeekday(i, locale, 'narrow')}
+                        </AppText>
+                      </AppPressable>
+                    );
+                  })}
+                </View>
               </View>
-            </Field>
-          ) : (
-            <Field label={t('recurrence.monthlyDay')} hint={t('recurrence.shortMonths')}>
-              <View style={s.chips}>
-                <Chip
-                  label={t('recurrence.sameDate')}
-                  selected={!value.lastDayOfMonth}
-                  onPress={() => onChange({ ...value, lastDayOfMonth: false })}
+            ) : (
+              <View style={s.inset}>
+                <AppText variant="small" tone="muted">
+                  {t('recurrence.monthlyDay')}
+                </AppText>
+                <Segmented
+                  accessibilityLabel={t('recurrence.monthlyDay')}
+                  value={value.lastDayOfMonth ? 'last' : 'same'}
+                  onChange={(v) => onChange({ ...value, lastDayOfMonth: v === 'last' })}
+                  options={[
+                    { value: 'same', label: t('recurrence.sameDate') },
+                    { value: 'last', label: t('recurrence.lastDay') },
+                  ]}
                 />
-                <Chip
-                  label={t('recurrence.lastDay')}
-                  selected={!!value.lastDayOfMonth}
-                  onPress={() => onChange({ ...value, lastDayOfMonth: true })}
-                />
+                <AppText variant="caption" tone="muted">
+                  {t('recurrence.shortMonths')}
+                </AppText>
               </View>
-            </Field>
-          )}
-          <Field label={t('recurrence.ends')}>
-            <View style={s.chips}>
-              {(['date', 'count'] as const).map((mode) => (
-                <Chip
-                  key={mode}
-                  label={t(
-                    mode === 'date'
-                      ? 'recurrence.endDate'
-                      : weekly
-                        ? 'recurrence.weeksCount'
-                        : 'recurrence.monthsCount',
-                  )}
-                  selected={endMode === mode}
-                  onPress={() => {
+            )}
+          </Card>
+          <View style={s.section}>
+            <AppText variant="small" weight={600} tone="muted" style={s.label}>
+              {t('recurrence.ends')}
+            </AppText>
+            <Card style={s.group}>
+              <View style={s.inset}>
+                <Segmented
+                  accessibilityLabel={t('recurrence.ends')}
+                  value={endMode}
+                  onChange={(mode) => {
+                    if (mode === endMode) return;
                     setEndMode(mode);
                     const { endDate: _end, periodCount: _count, ...rest } = value;
-                    onChange(rest);
+                    onChange(mode === 'count' ? { ...rest, periodCount: FIRST_COUNT } : rest);
                   }}
-                  testID={`repeat-end-mode-${mode}`}
+                  options={[
+                    { value: 'date', label: t('recurrence.endDate'), testID: 'repeat-end-mode-date' },
+                    {
+                      value: 'count',
+                      label: t(weekly ? 'recurrence.weeksCount' : 'recurrence.monthsCount'),
+                      testID: 'repeat-end-mode-count',
+                    },
+                  ]}
                 />
-              ))}
-            </View>
-          </Field>
-          {endMode === 'date' ? (
-            <Button
-              label={
-                value.endDate ? formatDate(iso(value.endDate), locale, 'long') : t('recurrence.chooseDate')
-              }
-              variant="secondary"
-              onPress={() => {
-                setDraftDate(value.endDate ?? fromIsoDate(date));
-                setDatePanel(true);
-              }}
-              testID="repeat-end-date"
-            />
-          ) : (
-            <TextField
-              label={t(weekly ? 'recurrence.weeksCount' : 'recurrence.monthsCount')}
-              keyboardType="number-pad"
-              value={value.periodCount == null ? '' : String(value.periodCount)}
-              onChangeText={(text) => {
-                const { periodCount: _count, ...rest } = value;
-                onChange(text ? { ...rest, periodCount: Number(text) } : rest);
-              }}
-              maxLength={3}
-              hint={t('recurrence.periodHint')}
-              testID="repeat-count"
-            />
-          )}
-          <View style={s.preview} accessibilityLiveRegion="polite" testID="repeat-preview">
+              </View>
+              <Separator />
+              {endMode === 'date' ? (
+                <Row
+                  title={t('recurrence.endDate')}
+                  value={
+                    value.endDate
+                      ? formatDate(iso(value.endDate), locale, 'long')
+                      : t('recurrence.chooseDate')
+                  }
+                  onPress={() => {
+                    setDraftDate(value.endDate ?? fromIsoDate(date));
+                    setDatePanel(true);
+                  }}
+                  chevron
+                  style={s.groupRow}
+                  testID="repeat-end-date"
+                />
+              ) : (
+                <Row
+                  title={t(weekly ? 'recurrence.weeksCount' : 'recurrence.monthsCount')}
+                  style={s.groupRow}
+                  trailing={
+                    <Stepper
+                      decrementLabel={t('recurrence.decrease')}
+                      incrementLabel={t('recurrence.increase')}
+                      canDecrement={(count ?? 1) > 1}
+                      canIncrement={(count ?? 0) < MAX_PERIODS}
+                      onDecrement={() => onChange({ ...value, periodCount: (count ?? 2) - 1 })}
+                      onIncrement={() => onChange({ ...value, periodCount: (count ?? 0) + 1 })}
+                    >
+                      <AppText weight={600} tabular style={s.stepValue} testID="repeat-count">
+                        {count ?? '-'}
+                      </AppText>
+                    </Stepper>
+                  }
+                />
+              )}
+            </Card>
+            {endMode === 'count' ? (
+              <AppText variant="caption" tone="muted" style={s.label}>
+                {t('recurrence.periodHint')}
+              </AppText>
+            ) : null}
+          </View>
+          <Card style={s.preview} accessibilityLiveRegion="polite" testID="repeat-preview">
             {!valid ? (
-              <AppText tone="muted">{t('recurrence.requiredEnd')}</AppText>
+              <AppText variant="small" tone="muted">
+                {t('recurrence.requiredEnd')}
+              </AppText>
             ) : preview.isError ? (
-              <AppText tone="danger">{error ?? t('errors.VALIDATION')}</AppText>
+              <AppText variant="small" tone="danger">
+                {error ?? t('errors.VALIDATION')}
+              </AppText>
             ) : preview.data ? (
               <>
-                <AppText weight={600}>{t('recurrence.preview')}</AppText>
-                <AppText variant="small">
+                <AppText variant="small" weight={600}>
+                  {t('recurrence.preview')}
+                </AppText>
+                <AppText variant="small" tone="muted" tabular>
                   {preview.data.dates.map(({ date: d }) => formatDate(iso(d), locale, 'dayMonth')).join(', ')}
                 </AppText>
-                <AppText variant="small" weight={600}>
+                <AppText variant="small" tone="muted">
                   {t('recurrence.previewTotal', {
                     count: preview.data.occurrenceCount,
                     date: formatDate(iso(preview.data.lastDate), locale, 'long'),
@@ -295,9 +369,11 @@ export function RecurrenceEditor({
                 </AppText>
               </>
             ) : (
-              <AppText tone="muted">{t('common.loading')}</AppText>
+              <AppText variant="small" tone="muted">
+                {t('common.loading')}
+              </AppText>
             )}
-          </View>
+          </Card>
         </>
       ) : null}
       <Button label={t('mobile.common.done')} onPress={onDone} disabled={!ready} testID="repeat-done" />

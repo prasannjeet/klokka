@@ -1,5 +1,4 @@
 import { View } from 'react-native';
-import Animated, { FadeInUp, useReducedMotion } from 'react-native-reanimated';
 import { useMe, useSwitchWorkspace } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useTheme } from '@/theme';
@@ -12,7 +11,6 @@ export function ChooseWorkspaceScreen({ onChosen }: { onChosen: () => void }) {
   const theme = useTheme();
   const { data: me } = useMe();
   const switchTo = useSwitchWorkspace();
-  const reduced = useReducedMotion();
   const workspaces = me?.workspaces ?? [];
   return (
     <Screen testID="choose-workspace">
@@ -26,15 +24,8 @@ export function ChooseWorkspaceScreen({ onChosen }: { onChosen: () => void }) {
         </AppText>
       </View>
       <View style={{ gap: theme.space[3] }}>
-        {workspaces.map((w, i) => (
-          <Animated.View
-            key={w.workspaceId}
-            entering={
-              reduced
-                ? undefined
-                : FadeInUp.delay(i * theme.motion.duration.stagger).duration(theme.motion.duration.base)
-            }
-          >
+        {workspaces.map((w) => (
+          <View key={w.workspaceId}>
             <WorkspaceRow
               workspace={w}
               onPress={() => {
@@ -43,7 +34,7 @@ export function ChooseWorkspaceScreen({ onChosen }: { onChosen: () => void }) {
               }}
               testID={`workspace-${w.workspaceId}`}
             />
-          </Animated.View>
+          </View>
         ))}
       </View>
       <AppText variant="caption" tone="muted" align="center">

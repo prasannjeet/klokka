@@ -222,7 +222,7 @@ export function ProfileView() {
 
       <section className="card sgroup" aria-labelledby="pf-ws-h" style={{ marginTop: 16 }}>
         <h2 id="pf-ws-h">{t('profile.workspaces')}</h2>
-        <div className="hgrid pf-ws" style={{ marginTop: 12 }}>
+        <div className="hgrid list pf-ws" style={{ marginTop: 12 }}>
           {me.workspaces.map((w) => (
             <div className="row" key={w.workspaceId}>
               <span

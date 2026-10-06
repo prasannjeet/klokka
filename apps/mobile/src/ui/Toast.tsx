@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeInDown, FadeOut, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText } from './AppText';
@@ -42,7 +42,7 @@ const styles = (t: Theme) =>
       gap: t.space[2],
       paddingHorizontal: t.space[4],
       paddingVertical: t.space[3],
-      borderRadius: t.radius.pill,
+      borderRadius: t.radius.control,
       backgroundColor: t.color.text,
       maxWidth: '100%',
     },
@@ -50,7 +50,7 @@ const styles = (t: Theme) =>
 
 const TOAST_MS = 2600;
 
-// One toast at a time, popping in from the bottom (DIRECTION.md: Pop), fading out.
+// One toast at a time, fading in and out (no slide: CHQ-162).
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<ToastState | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,7 +101,7 @@ function ToastHost({ toast }: { toast: ToastState | null }) {
     <View pointerEvents="none" style={[s.host, { bottom: insets.bottom + theme.space[11] }]}>
       <Animated.View
         key={toast.id}
-        entering={reduced ? undefined : FadeInDown.duration(theme.motion.duration.base)}
+        entering={reduced ? undefined : FadeIn.duration(theme.motion.duration.base)}
         exiting={reduced ? undefined : FadeOut.duration(theme.motion.duration.base)}
       >
         <Toast message={toast.message} tone={toast.tone} />

@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { JobRecurrenceRuleToJSON, Weekday, type JobRecurrenceRule } from '@klokka/api-client';
-import { formatDate, type IsoDate } from '@klokka/core';
+import { formatDate, formatWeekday, type IsoDate } from '@klokka/core';
 import { api } from '@/lib/api';
 import { useLocale, useT } from '@/lib/i18n';
 import { dateOf, isoOf } from '@/lib/time';
@@ -26,7 +26,9 @@ export function RecurrenceEditor({
 }) {
   const t = useT();
   const locale = useLocale();
-  const [error, setError] = useState<string | null>(null);
+  // The message is read from the response asynchronously, so it is kept with the error it belongs to: a new
+  // preview (pending, then failing differently) never shows the previous failure's text.
+  const [failure, setFailure] = useState<{ source: Error; message: string } | null>(null);
   const [endMode, setEndMode] = useState<'date' | 'count'>('date');
   const valid =
     !!value &&
@@ -54,8 +56,10 @@ export function RecurrenceEditor({
   // The parent only uses readiness to enable Save; state is synchronized in an effect.
   useEffect(() => onReady(ready), [ready, onReady]);
   useEffect(() => {
-    if (preview.error) void toProblem(preview.error).then((p) => setError(problemMessage(t, p)));
+    const source = preview.error;
+    if (source) void toProblem(source).then((p) => setFailure({ source, message: problemMessage(t, p) }));
   }, [preview.error, t]);
+  const error = failure && failure.source === preview.error ? failure.message : null;
   const weekly = value?.frequency === 'WEEKLY';
   const set = (next: JobRecurrenceRule) => onChange(next);
   const choose = (frequency: JobRecurrenceRule['frequency'] | undefined) => {
@@ -63,8 +67,11 @@ export function RecurrenceEditor({
       onChange(undefined);
       return;
     }
+    if (frequency === value?.frequency) return;
     const weekday = DAYS[(dateOf(date).getDay() + 6) % 7]!;
-    const { weekdays: _days, lastDayOfMonth: _last, ...rest } = value ?? { interval: 1 };
+    // A count of weeks is not a count of months: switching frequency asks for the end again.
+    const { weekdays: _days, lastDayOfMonth: _last, periodCount: _count, ...rest } = value ?? { interval: 1 };
+    if (endMode === 'count') setEndMode('date');
     set({ ...rest, frequency, ...(frequency === 'WEEKLY' ? { weekdays: new Set([weekday]) } : {}) });
   };
   return (
@@ -127,7 +134,7 @@ export function RecurrenceEditor({
                       })
                     }
                   >
-                    {new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2026, 9, 5 + i))}
+                    {formatWeekday(i, locale, 'short')}
                   </button>
                 ))}
               </div>

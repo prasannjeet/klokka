@@ -30,7 +30,9 @@ it('requires a finite end and uses a new server preview after changing weekdays 
   expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled).toBe(true);
   expect(api.calls.filter((c) => c.op === 'previewJobRecurrence')).toHaveLength(0);
   await fireEvent.press(screen.getByTestId('repeat-end-mode-count'));
-  await fireEvent.changeText(screen.getByTestId('repeat-count'), '8');
+  expect(screen.getByTestId('repeat-count')).toHaveTextContent('4');
+  await fireEvent.press(screen.getAllByTestId('stepper-plus').at(-1)!);
+  expect(screen.getByTestId('repeat-count')).toHaveTextContent('5');
   await waitFor(() =>
     expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled === true).toBe(false),
   );
@@ -38,7 +40,7 @@ it('requires a finite end and uses a new server preview after changing weekdays 
   await waitFor(() =>
     expect(api.calls.filter((c) => c.op === 'previewJobRecurrence').at(-1)?.args[0]).toMatchObject({
       jobRecurrencePreviewRequest: {
-        recurrence: { weekdays: new Set(['MONDAY', 'WEDNESDAY']), periodCount: 8 },
+        recurrence: { weekdays: new Set(['MONDAY', 'WEDNESDAY']), periodCount: 5 },
       },
     }),
   );
@@ -55,4 +57,14 @@ it('requires a finite end and uses a new server preview after changing weekdays 
   };
   expect(request.jobRecurrencePreviewRequest.recurrence.periodCount).toBeUndefined();
   expect(request.jobRecurrencePreviewRequest.recurrence.endDate?.getMonth()).toBe(11);
+});
+
+it('asks for the end again when the frequency changes, so weeks never turn into months', async () => {
+  await renderApp(<Harness />, { api: fakeApi({}) });
+  await fireEvent.press(screen.getByTestId('repeat-WEEKLY'));
+  await fireEvent.press(screen.getByTestId('repeat-end-mode-count'));
+  expect(screen.getByTestId('repeat-count')).toHaveTextContent('4');
+  await fireEvent.press(screen.getByTestId('repeat-MONTHLY'));
+  expect(screen.queryByTestId('repeat-count')).toBeNull();
+  expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled).toBe(true);
 });

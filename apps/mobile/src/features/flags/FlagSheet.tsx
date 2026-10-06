@@ -91,13 +91,12 @@ export const FlagSheet = forwardRef<
     >
       <View style={{ gap: theme.space[4] }}>
         <View style={s.chips}>
-          {reasons.map((r, i) => (
+          {reasons.map((r) => (
             <Chip
               key={r.value}
               label={r.label}
               selected={reason === r.value}
               onPress={() => setReason(r.value)}
-              index={i}
               testID={`reason-${r.value}`}
             />
           ))}

@@ -6,7 +6,8 @@ import { requestLocale, requestMode, requestPreviewLocale } from '@/lib/server-p
 import { Providers } from './providers';
 import './globals.css';
 
-// Nightshift type (docs/DECISIONS.md D11): Unbounded for display, Inter for body, JetBrains Mono for ids.
+// Nightshift type (docs/DECISIONS.md D11): Inter for headings and body in the product (data-surface="app",
+// CHQ-162), Unbounded only for the wordmark, JetBrains Mono for ids.
 const unbounded = Unbounded({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-unbounded',
@@ -60,6 +61,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang={locale}
       data-mode={mode ?? undefined}
+      data-surface="app"
       className={`${unbounded.variable} ${inter.variable} ${jetbrains.variable}`}
       suppressHydrationWarning
     >

@@ -1,7 +1,7 @@
 'use client';
 
 import { Weekday, type JobRecurrence } from '@klokka/api-client';
-import { formatDate } from '@klokka/core';
+import { formatDate, formatWeekday } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
 import { isoOf } from '@/lib/time';
 import { Icon } from '../icons';
@@ -11,12 +11,8 @@ export function RecurrenceSummary({ series }: { series: JobRecurrence }) {
   const locale = useLocale();
   const rule = series.recurrence;
   const weekly = rule.frequency === 'WEEKLY';
-  const names = Object.values(Weekday);
-  const days = names
-    .filter((d) => rule.weekdays?.has(d))
-    .map((d) =>
-      new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(new Date(2026, 9, 5 + names.indexOf(d))),
-    )
+  const days = Object.values(Weekday)
+    .flatMap((d, i) => (rule.weekdays?.has(d) ? [formatWeekday(i, locale, 'short')] : []))
     .join(', ');
   const period = t(weekly ? 'recurrence.weeks' : 'recurrence.months', { count: rule.interval });
   const label = weekly

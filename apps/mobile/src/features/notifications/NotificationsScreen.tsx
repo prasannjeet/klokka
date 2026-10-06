@@ -175,7 +175,6 @@ export function NotificationsScreen({ pushed }: { pushed?: boolean }) {
           label={unreadCount > 0 ? `${t('common.unread')} ${unreadCount}` : t('common.unread')}
           selected={unreadOnly}
           onPress={() => setUnreadOnly(true)}
-          index={1}
           testID="filter-unread"
         />
       </View>

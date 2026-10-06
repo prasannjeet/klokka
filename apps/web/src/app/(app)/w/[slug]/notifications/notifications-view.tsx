@@ -66,7 +66,7 @@ export function NotificationsView() {
           <p>{filter === 'unread' ? t('notifications.emptyUnread') : t('notifications.empty')}</p>
         </div>
       ) : (
-        <div className="hgrid" aria-live="polite">
+        <div className="hgrid list" aria-live="polite">
           {items.map((n) => (
             <NotificationItem
               key={n.id}

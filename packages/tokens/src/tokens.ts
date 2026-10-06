@@ -122,6 +122,7 @@ export const radius = {
   xl: 28,
   pill: 999,
   control: 999,
+  chip: 999,
   card: 24,
 } as const;
 
@@ -149,17 +150,18 @@ export const type = {
     caption: '0.78125rem',
     eyebrow: '0.6875rem',
   },
-  // the same scale at phone width (the clamp() minimum), in px, for React Native
+  // the phone app's scale in px, for React Native: one step below the web's phone-width minimum, with
+  // Inter headings (CHQ-162, see `app` below)
   native: {
-    displayXl: 48,
-    displayL: 40,
-    h1: 34,
-    h2: 28,
-    h3: 20,
-    lead: 17,
-    body: 16,
-    small: 14,
-    caption: 12.5,
+    displayXl: 40,
+    displayL: 32,
+    h1: 24,
+    h2: 20,
+    h3: 17,
+    lead: 16,
+    body: 15,
+    small: 13,
+    caption: 12,
     eyebrow: 11,
   },
   leading: {
@@ -244,6 +246,30 @@ export const z = {
   devbar: 9999,
 } as const;
 
+// The signed-in product (web app and phone app) next to the marketing site: same colours, quieter type and
+// shapes (CHQ-162). Inter headings instead of Unbounded (which stays in the wordmark), controls and cards at
+// 12 px, chips at 8 px. The landing site keeps the base values; the web app opts in with
+// <html data-surface="app">, the phone app reads these directly.
+export const app = {
+  font: {
+    display: font.stack.body,
+    displayWeight: 700,
+    displayScale: 1,
+    displayTracking: '-0.01em',
+    headingLeading: 1.25,
+  },
+  radius: { control: 12, card: 12, chip: 8 },
+  // css-only, the web app's heading sizes
+  css: {
+    displayXl: 'clamp(2.25rem, 1.8rem + 1.8vw, 3rem)',
+    displayL: 'clamp(2rem, 1.6rem + 1.4vw, 2.5rem)',
+    h1: 'clamp(1.5rem, 1.35rem + 0.6vw, 1.875rem)',
+    h2: 'clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem)',
+    h3: '1.125rem',
+    lead: '1.0625rem',
+  },
+} as const;
+
 export const tokens = {
   themeName,
   color,
@@ -258,6 +284,7 @@ export const tokens = {
   motion,
   texture,
   z,
+  app,
 } as const;
 
 export type Tokens = typeof tokens;

@@ -2,6 +2,19 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## Unreleased
+
+### Changed
+- A calmer, more professional look on web and Android with the same colours: Inter headings, smaller type,
+  12 px corners, grouped lists, pink only for the main action. The job sheet groups place, start time and repeat in
+  one list; repeat uses segmented choices and steppers (CHQ-162).
+
+### Fixed
+- Android: rows, chips and labels no longer overlap on some phones (a slide-in animation left them 25 px off).
+  The job sheet no longer clips the quick picks, and "1 jobs" reads "1 job" (CHQ-162).
+- Recurring jobs: switching weekly to monthly asks for the end again instead of turning weeks into months; the web
+  editor no longer flashes an earlier error (CHQ-162).
+
 ## 1.4.0, 2026-10-05
 
 ### Added
