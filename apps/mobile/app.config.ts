@@ -70,13 +70,15 @@ const config: ExpoConfig = {
     ],
   },
   ios: {
-    // Not built yet (no Apple account); the identity is reserved so the door stays open.
+    // Shared identity for local simulator builds and future App Store releases.
     supportsTablet: false,
     bundleIdentifier: 'se.klokka.app',
     infoPlist: { UIBackgroundModes: ['remote-notification'] },
   },
   plugins: [
     'expo-router',
+    // Required when building SDK 57 with Xcode 27 and running on iOS 27.
+    ['expo-build-properties', { ios: { enableSceneSupport: true } }],
     [
       'expo-font',
       {

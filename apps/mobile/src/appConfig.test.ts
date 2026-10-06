@@ -39,6 +39,10 @@ describe('app.config.ts', () => {
     expect(source).toContain(`fontFamily: '${tokens.font.body}'`);
     expect(source).not.toContain('expo-dev-client');
   });
+
+  it('opts into the scene lifecycle required to launch on iOS 27', () => {
+    expect(source).toMatch(/'expo-build-properties',\s*\{\s*ios:\s*\{\s*enableSceneSupport:\s*true/);
+  });
 });
 
 describe('resolveAppConfig', () => {
