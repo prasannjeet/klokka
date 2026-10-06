@@ -56,6 +56,7 @@ chat. `README.md` in that folder lists every file.
 | Google Play API (`fastlane`, run from `apps/mobile`; `fastlane/Appfile` holds the key path and the package) | none | `firebase-service-account.json` (Play Android Developer API enabled in `klokka-64f3a`; a user of the CleanHQ Play developer account with release rights on all its apps, 2026-10-03) |
 | Staging host sudo | `sudo.json` | n/a (`ssh netcup` is root) |
 | Google Maps Platform key (job locations, CHQ-156): the API's `KLOKKA_GOOGLE_MAPS_API_KEY` only, never a client | `google-maps.json` (same key) | `google-maps.json`; needs Places API (New), Geocoding and Maps Static API enabled |
+| Maps SDK for Android key (the phone's location map, CHQ-163): built into the APK, restricted to `se.klokka.app` + the release SHA-1 and to Maps SDK for Android; both Maps keys live in Google Cloud project `gen-lang-client-0540235986`, not `klokka-64f3a` | `google-maps-android.env` (same key; GitHub secret `GOOGLE_MAPS_ANDROID_API_KEY`) | same |
 
 CI secrets and build values live in GitHub (`gh secret list`, `gh variable list`): `NEXUS_*`, `COOLIFY_TOKEN` +
 `COOLIFY_APP_*_UUID` (staging deploys), `ANDROID_*`, `GOOGLE_SERVICES_JSON`, `EAS_PROJECT_ID`, `EXPO_TOKEN`, and the

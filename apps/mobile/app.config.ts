@@ -53,6 +53,12 @@ const config: ExpoConfig = {
     predictiveBackGestureEnabled: false,
     // ADJUST_RESIZE: the IME becomes an inset the app consumes (react-native-keyboard-controller).
     softwareKeyboardLayoutMode: 'resize',
+    // The job location map (CHQ-163): a Maps SDK for Android key restricted to this package and the release
+    // certificate, so it is safe inside the APK. CI refuses a release build without it; a local build without it
+    // shows an empty map. iOS draws Apple Maps and needs no key.
+    ...(process.env.GOOGLE_MAPS_ANDROID_API_KEY
+      ? { config: { googleMaps: { apiKey: process.env.GOOGLE_MAPS_ANDROID_API_KEY } } }
+      : {}),
     // Pulled in by libraries, used by nothing in Klokka (exports go to the app cache, no biometric lock, no overlay);
     // Play's review reads the manifest, so they stay out of release builds. release.yml checks the result.
     blockedPermissions: [

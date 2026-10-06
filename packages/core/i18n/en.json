@@ -404,7 +404,10 @@
     "poweredBy": "Places by Google",
     "noResults": "No places match that.",
     "locationDenied": "Klokka may not use your location. Search for the place instead.",
-    "mapOf": "Map of {place}"
+    "mapOf": "Map of {place}",
+    "useThisPlace": "Use this place",
+    "moveMapHint": "Move the map to adjust the pin",
+    "map": "Map. Move it to adjust the pin."
   },
   "reminders": {
     "title": "Job reminders",

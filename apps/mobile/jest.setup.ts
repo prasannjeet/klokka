@@ -15,6 +15,7 @@ jest.mock('expo-sharing', () => require('./src/testing/nativeMocks').sharingModu
 jest.mock('react-native-view-shot', () => require('./src/testing/nativeMocks').viewShotModule());
 jest.mock('expo-localization', () => require('./src/testing/nativeMocks').localizationModule());
 jest.mock('expo-location', () => require('./src/testing/nativeMocks').locationModule());
+jest.mock('expo-maps', () => require('./src/testing/nativeMocks').mapsModule());
 jest.mock('expo-crypto', () => require('./src/testing/nativeMocks').cryptoModule());
 jest.mock('expo-device', () => ({ deviceName: 'Test phone', isDevice: true }));
 jest.mock('expo-network', () => require('./src/testing/nativeMocks').networkModule());

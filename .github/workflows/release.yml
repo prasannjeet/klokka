@@ -154,6 +154,8 @@ jobs:
       EXPO_PUBLIC_LOGTO_APP_ID: ${{ vars.PROD_LOGTO_APP_ID }}
       EXPO_PUBLIC_LOGTO_API_RESOURCE: ${{ vars.PROD_API_RESOURCE }}
       EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      # The job location map's key (CHQ-163), restricted to se.klokka.app + the release certificate.
+      GOOGLE_MAPS_ANDROID_API_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_API_KEY }}
       APK: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
       AAB: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
     steps:
@@ -199,6 +201,7 @@ jobs:
         run: |
           keystore="$RUNNER_TEMP/klokka-release.keystore"
           echo "KEYSTORE=$keystore" >> "$GITHUB_ENV"
+          [ -n "$GOOGLE_MAPS_ANDROID_API_KEY" ] || { echo "GOOGLE_MAPS_ANDROID_API_KEY is empty: the map would be blank"; exit 1; }
           printf '%s' "$GOOGLE_SERVICES_JSON" | base64 -d > apps/mobile/google-services.json
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$keystore"
           chmod 600 "$keystore"

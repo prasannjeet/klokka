@@ -294,3 +294,27 @@ export function cryptoModule() {
     randomUUID: () => `00000000-0000-4000-8000-${String(++uuidCounter).padStart(12, '0')}`,
   };
 }
+
+// expo-maps (CHQ-163): the native map is a View in tests. Each map keeps its last props in `mapsMock.last`, so a
+// test can play a camera move (`mapsMock.last?.onCameraMove?.(...)`) and read where the picker flew it.
+export const mapsMock: {
+  last: { onCameraMove?: (event: { coordinates: { latitude?: number; longitude?: number } }) => void } | null;
+  moves: { coordinates?: { latitude?: number; longitude?: number }; zoom?: number }[];
+} = { last: null, moves: [] };
+
+export function mapsModule() {
+  const React = require('react') as typeof import('react');
+  const { View } = require('react-native') as typeof import('react-native');
+  const MapView = React.forwardRef(function MapView(props: AnyRecord, ref: React.Ref<unknown>) {
+    mapsMock.last = props as typeof mapsMock.last;
+    React.useImperativeHandle(ref, () => ({
+      setCameraPosition: (to: (typeof mapsMock.moves)[number]) => mapsMock.moves.push(to),
+    }));
+    return React.createElement(View, { testID: 'native-map' });
+  });
+  const scheme = { LIGHT: 'LIGHT', DARK: 'DARK', FOLLOW_SYSTEM: 'FOLLOW_SYSTEM', AUTOMATIC: 'AUTOMATIC' };
+  return {
+    GoogleMaps: { View: MapView, MapColorScheme: scheme },
+    AppleMaps: { View: MapView, MapColorScheme: scheme },
+  };
+}

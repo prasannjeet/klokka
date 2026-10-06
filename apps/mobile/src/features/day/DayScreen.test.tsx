@@ -11,7 +11,7 @@ import {
   membersFixture,
   workspaceFixture,
 } from '@/testing/fixtures';
-import { routerState } from '@/testing/nativeMocks';
+import { mapsMock, routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
 
 const entry = entryFixture('mem-maria', '2026-09-23', 6.5, {
@@ -129,9 +129,19 @@ describe('DayScreen', () => {
     await fireEvent.press(screen.getByTestId('wheel-start-hours-9'));
     await fireEvent.press(screen.getByTestId('start-done'));
     await fireEvent.press(screen.getByTestId('job-location'));
+    await fireEvent(screen.getByTestId('place-search'), 'focus');
     await fireEvent.changeText(screen.getByTestId('place-search'), 'Kungs');
     await fireEvent.press(await screen.findByTestId('place-place-k12', {}, { timeout: 2000 }));
-    expect(await screen.findByText('Use Café Nord')).toBeTruthy();
+    expect(await screen.findByTestId('place-picked')).toBeTruthy();
+    expect(screen.getByText('Café Nord')).toBeTruthy();
+    // The map flew to the place; that landing is not a drag, so the place keeps its name.
+    expect(mapsMock.moves.at(-1)).toEqual({
+      coordinates: expect.objectContaining({
+        latitude: cafeLocation.latitude,
+        longitude: cafeLocation.longitude,
+      }),
+      zoom: 16,
+    });
     await fireEvent.press(screen.getByTestId('place-use'));
 
     await fireEvent.press(await screen.findByTestId('wheel-hours-4'));

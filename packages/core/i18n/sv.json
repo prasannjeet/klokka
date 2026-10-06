@@ -404,7 +404,10 @@
     "poweredBy": "Platser från Google",
     "noResults": "Inga platser matchar.",
     "locationDenied": "Klokka får inte använda din plats. Sök efter platsen i stället.",
-    "mapOf": "Karta över {place}"
+    "mapOf": "Karta över {place}",
+    "useThisPlace": "Använd den här platsen",
+    "moveMapHint": "Flytta kartan för att justera nålen",
+    "map": "Karta. Flytta den för att justera nålen."
   },
   "reminders": {
     "title": "Jobbpåminnelser",

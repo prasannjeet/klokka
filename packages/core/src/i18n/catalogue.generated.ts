@@ -671,7 +671,9 @@ export const sv = {
   "overview.weekdaysLeft_one": "{count} vardag",
   "overview.weekdaysLeft_other": "{count} vardagar",
   "places.locationDenied": "Klokka får inte använda din plats. Sök efter platsen i stället.",
+  "places.map": "Karta. Flytta den för att justera nålen.",
   "places.mapOf": "Karta över {place}",
+  "places.moveMapHint": "Flytta kartan för att justera nålen",
   "places.noResults": "Inga platser matchar.",
   "places.none": "Ingen plats för det här jobbet",
   "places.poweredBy": "Platser från Google",
@@ -683,6 +685,7 @@ export const sv = {
   "places.use": "Använd {name}",
   "places.useHere": "Använd där jag är nu",
   "places.useHereHint": "Frågar efter din plats en gång",
+  "places.useThisPlace": "Använd den här platsen",
   "profile.avatar": "Avatar",
   "profile.avatarHint": "Ett foto eller en emoji. Din arbetsgivare ser den bredvid ditt namn.",
   "profile.editProfile": "Redigera profil",
@@ -1790,7 +1793,9 @@ export const en = {
   "overview.weekdaysLeft_one": "{count} weekday",
   "overview.weekdaysLeft_other": "{count} weekdays",
   "places.locationDenied": "Klokka may not use your location. Search for the place instead.",
+  "places.map": "Map. Move it to adjust the pin.",
   "places.mapOf": "Map of {place}",
+  "places.moveMapHint": "Move the map to adjust the pin",
   "places.noResults": "No places match that.",
   "places.none": "No location for this job",
   "places.poweredBy": "Places by Google",
@@ -1802,6 +1807,7 @@ export const en = {
   "places.use": "Use {name}",
   "places.useHere": "Use where I am now",
   "places.useHereHint": "Asks for your location once",
+  "places.useThisPlace": "Use this place",
   "profile.avatar": "Avatar",
   "profile.avatarHint": "A photo or an emoji. Your employer sees it next to your name.",
   "profile.editProfile": "Edit profile",
@@ -2890,7 +2896,9 @@ export type MessageParams = {
   "overview.weekdayDistribution": Record<never, never>;
   "overview.weekdaysLeft": { count: string | number };
   "places.locationDenied": Record<never, never>;
+  "places.map": Record<never, never>;
   "places.mapOf": { place: string | number };
+  "places.moveMapHint": Record<never, never>;
   "places.noResults": Record<never, never>;
   "places.none": Record<never, never>;
   "places.poweredBy": Record<never, never>;
@@ -2902,6 +2910,7 @@ export type MessageParams = {
   "places.use": { name: string | number };
   "places.useHere": Record<never, never>;
   "places.useHereHint": Record<never, never>;
+  "places.useThisPlace": Record<never, never>;
   "profile.avatar": Record<never, never>;
   "profile.avatarHint": Record<never, never>;
   "profile.editProfile": Record<never, never>;

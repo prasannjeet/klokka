@@ -48,6 +48,7 @@ import { RecurrenceEditor } from './RecurrenceEditor';
 import { RecurrenceSummary } from './RecurrenceSummary';
 import { endTime } from './JobCard';
 import { LocationPicker } from './LocationPicker';
+import { MapImage } from './MapImage';
 
 export interface JobSheetTarget {
   membershipId: string;
@@ -83,9 +84,15 @@ const styles = (t: Theme) =>
     note: { minHeight: t.tapMin * 2, textAlignVertical: 'top' },
     actions: { gap: t.space[2] },
     back: { flexDirection: 'row', alignItems: 'center', gap: t.space[1], minHeight: t.tapMin },
+    mapPreview: {
+      borderRadius: t.radius.card,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: t.color.border,
+    },
   });
 
-type Panel = 'job' | 'location' | 'start' | 'repeat' | 'scope';
+type Panel = 'job' | 'start' | 'repeat' | 'scope';
 
 // A job on a member's day (CHQ-156, restyled in CHQ-162): where, when and how often in one grouped list,
 // the hour and minute wheels (CHQ-155; minutes follow the workspace rounding), quick picks, a note, and a
@@ -111,6 +118,7 @@ export const JobSheet = forwardRef<
   const [initial, setInitial] = useState({ hours: 0, minutes: 0 });
   const [note, setNote] = useState('');
   const [location, setLocation] = useState<JobLocation | null>(null);
+  const [picking, setPicking] = useState(false);
   const [startTime, setStartTime] = useState<string | null>(null);
   const [draftStart, setDraftStart] = useState({ hours: 8, minutes: 0 });
   const [recurrence, setRecurrence] = useState<JobRecurrenceRule | undefined>();
@@ -129,6 +137,7 @@ export const JobSheet = forwardRef<
       setNote(next.job?.note ?? '');
       setLocation(next.job?.location ?? null);
       setStartTime(next.job?.startTime ?? null);
+      setPicking(false);
       setError(null);
       setRecurrence(undefined);
       setRecurrenceReady(true);
@@ -221,11 +230,9 @@ export const JobSheet = forwardRef<
     <AppSheet
       ref={sheet}
       title={
-        panel === 'location'
-          ? t('places.title')
-          : editing
-            ? t('jobs.editJobFor', { name: target.memberName })
-            : t('jobs.newJobFor', { name: target.memberName })
+        editing
+          ? t('jobs.editJobFor', { name: target.memberName })
+          : t('jobs.newJobFor', { name: target.memberName })
       }
       subtitle={subtitle}
       closeLabel={t('common.close')}
@@ -276,18 +283,6 @@ export const JobSheet = forwardRef<
               {error}
             </AppText>
           ) : null}
-        </View>
-      ) : panel === 'location' ? (
-        <View style={{ gap: theme.space[2] }}>
-          {backRow}
-          <LocationPicker
-            workspaceId={workspace.workspaceId}
-            value={location}
-            onPick={(next) => {
-              setLocation(next);
-              setPanel('job');
-            }}
-          />
         </View>
       ) : panel === 'start' ? (
         <View style={{ gap: theme.space[4] }}>
@@ -340,7 +335,7 @@ export const JobSheet = forwardRef<
                 title={t('jobs.location')}
                 value={location?.name ?? t('jobs.noLocation')}
                 leading={<Icon name="map-pin" size={18} color={theme.color.primary} />}
-                onPress={() => setPanel('location')}
+                onPress={() => setPicking(true)}
                 chevron
                 style={s.groupRow}
                 accessibilityLabel={`${t('jobs.location')}, ${location?.name ?? t('jobs.noLocation')}`}
@@ -385,6 +380,11 @@ export const JobSheet = forwardRef<
                 </>
               ) : null}
             </Card>
+            {location ? (
+              <View style={s.mapPreview}>
+                <MapImage workspaceId={workspace.workspaceId} location={location} height={96} />
+              </View>
+            ) : null}
             <AppText variant="caption" tone="muted" style={s.label} testID="job-start-hint">
               {startTime
                 ? t('jobs.runsReminder', {
@@ -470,6 +470,16 @@ export const JobSheet = forwardRef<
               {error}
             </AppText>
           ) : null}
+          <LocationPicker
+            visible={picking}
+            workspaceId={workspace.workspaceId}
+            value={location}
+            onPick={(next) => {
+              setLocation(next);
+              setPicking(false);
+            }}
+            onClose={() => setPicking(false)}
+          />
           <View style={s.actions}>
             <Button
               label={
