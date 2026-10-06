@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.prasannjeet.klokka</groupId>
         <artifactId>klokka-api-parent</artifactId>
-        <version>1.4.0</version>
+        <version>1.5.0</version>
     </parent>
 
     <artifactId>klokka-api-contract</artifactId>
