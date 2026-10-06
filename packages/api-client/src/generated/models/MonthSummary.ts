@@ -13,6 +13,13 @@
  */
 
 import { mapValues } from '../runtime';
+import type { MonthSummaryDay } from './MonthSummaryDay';
+import {
+    MonthSummaryDayFromJSON,
+    MonthSummaryDayFromJSONTyped,
+    MonthSummaryDayToJSON,
+    MonthSummaryDayToJSONTyped,
+} from './MonthSummaryDay';
 import type { MemberMonthTotal } from './MemberMonthTotal';
 import {
     MemberMonthTotalFromJSON,
@@ -70,6 +77,10 @@ export interface MonthSummary {
      * 
      */
     weeks: Array<WeekTotal>;
+    /**
+     * Every date of the month in order, logged or not.
+     */
+    days: Array<MonthSummaryDay>;
 }
 
 /**
@@ -84,6 +95,7 @@ export function instanceOfMonthSummary(value: object): value is MonthSummary {
     if (!('workingDays' in value) || value['workingDays'] === undefined) return false;
     if (!('members' in value) || value['members'] === undefined) return false;
     if (!('weeks' in value) || value['weeks'] === undefined) return false;
+    if (!('days' in value) || value['days'] === undefined) return false;
     return true;
 }
 
@@ -106,6 +118,7 @@ export function MonthSummaryFromJSONTyped(json: any, ignoreDiscriminator: boolea
         'labourCost': json['labourCost'] === undefined ? undefined : json['labourCost'] === null ? null : json['labourCost'],
         'members': ((json['members'] as Array<any>).map(MemberMonthTotalFromJSON)),
         'weeks': ((json['weeks'] as Array<any>).map(WeekTotalFromJSON)),
+        'days': ((json['days'] as Array<any>).map(MonthSummaryDayFromJSON)),
     };
 }
 
@@ -129,6 +142,7 @@ export function MonthSummaryToJSONTyped(value?: MonthSummary | null, ignoreDiscr
         'labourCost': value['labourCost'],
         'members': ((value['members'] as Array<any>).map(MemberMonthTotalToJSON)),
         'weeks': ((value['weeks'] as Array<any>).map(WeekTotalToJSON)),
+        'days': ((value['days'] as Array<any>).map(MonthSummaryDayToJSON)),
     };
 }
 

@@ -52,6 +52,7 @@ export * from './MemberStatus';
 export * from './MemberUpdate';
 export * from './MonthStatus';
 export * from './MonthSummary';
+export * from './MonthSummaryDay';
 export * from './MyWorkspace';
 export * from './NothingLoggedDay';
 export * from './Notification';

@@ -3377,9 +3377,33 @@ components:
         hours: 118
         daysWorked: 20
         earnings: 20060
+    MonthSummaryDay:
+      type: object
+      description: The whole team's hours on one date of the month and who worked it (CHQ-171, the team calendar).
+      required: [date, hours, membershipIds]
+      properties:
+        date:
+          type: string
+          format: date
+          example: '2026-09-23'
+        hours:
+          type: number
+          description: Every member's hours on the date, planned (future) jobs included; 0 when nobody has any.
+          example: 24
+        membershipIds:
+          type: array
+          description: The members with hours on the date, in the order of `MonthSummary.members`.
+          items:
+            type: string
+            format: uuid
+          example: [5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21, 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d]
+      example:
+        date: '2026-09-23'
+        hours: 24
+        membershipIds: [5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21, 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d]
     MonthSummary:
       type: object
-      required: [month, locked, currency, showPay, totalHours, workingDays, members, weeks]
+      required: [month, locked, currency, showPay, totalHours, workingDays, members, weeks, days]
       properties:
         month:
           type: string
@@ -3411,6 +3435,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WeekTotal'
+        days:
+          type: array
+          description: Every date of the month in order, logged or not.
+          items:
+            $ref: '#/components/schemas/MonthSummaryDay'
       example:
         month: '2026-09'
         locked: false
@@ -3449,6 +3478,10 @@ components:
             from: '2026-09-21'
             to: '2026-09-27'
             hours: 113.5
+        days:
+          - date: '2026-09-01'
+            hours: 21
+            membershipIds: [5f1d2a3c-9b7e-4c1a-8d2f-6e4b1a0c9d21, 7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d]
 
     # ------------------------------------------------------------ read models
     MemberMonthDay:

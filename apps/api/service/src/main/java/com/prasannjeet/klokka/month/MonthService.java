@@ -9,6 +9,7 @@ import com.prasannjeet.klokka.contract.model.Actor;
 import com.prasannjeet.klokka.contract.model.MemberMonthTotal;
 import com.prasannjeet.klokka.contract.model.MonthStatus;
 import com.prasannjeet.klokka.contract.model.MonthSummary;
+import com.prasannjeet.klokka.contract.model.MonthSummaryDay;
 import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.contract.model.WeekTotal;
 import com.prasannjeet.klokka.domain.WorkspaceId;
@@ -32,9 +33,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 // Months (CHQ-120 lock/unlock with history and notifications, CHQ-122 summary, CHQ-129 CSV export).
@@ -147,7 +151,26 @@ public class MonthService {
                 .workingDays(Months.workingDays(ym))
                 .labourCost(costKnown ? cost : null)
                 .members(members)
-                .weeks(weekTotals(id, null, ym));
+                .weeks(weekTotals(id, null, ym))
+                .days(teamDays(id, ym, members));
+    }
+
+    // The team calendar (CHQ-171): every date of the month, the team's hours and who has any, in the members' order.
+    private List<MonthSummaryDay> teamDays(WorkspaceId id, YearMonth ym, List<MemberMonthTotal> members) {
+        Map<LocalDate, BigDecimal> hours = new HashMap<>();
+        Map<LocalDate, Set<UUID>> worked = new HashMap<>();
+        for (HourEntryEntity e : entries.listLive(id, null, ym.atDay(1), ym.atEndOfMonth())) {
+            if (e.hours.signum() <= 0) continue;
+            hours.merge(e.workDate, e.hours, BigDecimal::add);
+            worked.computeIfAbsent(e.workDate, d -> new HashSet<>()).add(e.membershipId);
+        }
+        List<MonthSummaryDay> days = new ArrayList<>();
+        for (LocalDate d = ym.atDay(1); !d.isAfter(ym.atEndOfMonth()); d = d.plusDays(1)) {
+            Set<UUID> who = worked.getOrDefault(d, Set.of());
+            days.add(new MonthSummaryDay().date(d).hours(hours.getOrDefault(d, BigDecimal.ZERO))
+                    .membershipIds(members.stream().map(MemberMonthTotal::getMembershipId).filter(who::contains).toList()));
+        }
+        return days;
     }
 
     // Employers export the workspace or one member; employees only themselves.

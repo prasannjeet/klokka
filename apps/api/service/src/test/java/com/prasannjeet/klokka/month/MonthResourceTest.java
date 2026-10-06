@@ -2,6 +2,8 @@ package com.prasannjeet.klokka.month;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -105,7 +107,13 @@ class MonthResourceTest {
                 .body("weeks", hasSize(6))
                 .body("weeks[0].isoWeek", is(31)).body("weeks[0].from", is("2026-08-01")).body("weeks[0].to", is("2026-08-02")).body("weeks[0].hours", is(0))
                 .body("weeks[1].isoWeek", is(32)).body("weeks[1].hours", is(18.5f))
-                .body("weeks[5].to", is("2026-08-31"));
+                .body("weeks[5].to", is("2026-08-31"))
+                // The team calendar (CHQ-171): every date, the team's hours on it and who worked.
+                .body("days", hasSize(31))
+                .body("days[0].date", is("2026-08-01")).body("days[0].hours", is(0)).body("days[0].membershipIds", hasSize(0))
+                .body("days[2].date", is("2026-08-03")).body("days[2].hours", is(4.0f)).body("days[2].membershipIds", contains(maria.toString()))
+                .body("days[3].hours", is(14.5f)).body("days[3].membershipIds", containsInAnyOrder(maria.toString(), jonas.toString()))
+                .body("days[30].date", is("2026-08-31"));
     }
 
     @Test

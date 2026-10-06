@@ -53,7 +53,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `getMonth` | `GET /workspaces/{workspaceId}/months/{month}` | member | month header lock badge |
 | `lockMonth` | `PUT /workspaces/{workspaceId}/months/{month}/lock` | employer | "Close September" |
 | `unlockMonth` | `DELETE /workspaces/{workspaceId}/months/{month}/lock` | employer | "Unlock September" |
-| `getMonthSummary` | `GET /workspaces/{workspaceId}/months/{month}/summary` | employer | close-month dialog, per-person totals |
+| `getMonthSummary` | `GET /workspaces/{workspaceId}/months/{month}/summary` | employer | close-month dialog, per-person totals, team calendar (`days`) |
 | `exportMonthCsv` | `GET /workspaces/{workspaceId}/months/{month}/export.csv?membershipId` | employer (self for own) | "Export CSV", mobile share sheet |
 | `getMemberMonth` | `GET /workspaces/{workspaceId}/members/{membershipId}/months/{month}` | employer or self | employee month (web), My month and employee month (mobile), calendar heat-map |
 | `getWorkspaceInsights` | `GET /workspaces/{workspaceId}/insights?month=` | employer | overview dashboard, mobile Insights and Home strip |
