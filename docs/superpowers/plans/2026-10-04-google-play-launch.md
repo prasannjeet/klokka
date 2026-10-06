@@ -15,6 +15,9 @@ from CHQ-156). Review fixes applied. **D done:** v1.3.0 released and pinned in p
 landing; APK `se.klokka.app` versionCode 10; AAB on Nexus; IndexNow sent). Open: A3 and C3 (need the phone), the
 review account (production, needs go-ahead), E onwards.
 
+**Remaining steps to production are tracked in CHQ-161** (2026-10-06): store listing and screenshots are uploaded,
+v1.3.0 is on Internal testing with our signing key.
+
 **Tickets:** CHQ-153 (Play launch: package, AAB, signing, listing, upload pipeline) and CHQ-157 (account deletion,
 API + web + mobile + public page; a Play blocker). Session:
 https://claude.ai/code/session_01W1MBPy3jTfcPSH3HNPCMyM

@@ -195,6 +195,8 @@ guarded by a regenerate-and-diff check.
   The Play Android Developer API is enabled in Cloud project `klokka-64f3a` and the account is a user of the CleanHQ Play
   developer account (2026-10-03) with release rights on every app there, Pooja Pro included: touch only Klokka.
   Creating the app and its first upload are manual in Play Console (CHQ-153).
+- **Google Play launch status and the remaining steps (owner and agent): Jira CHQ-161** ("Publish the Android app to
+  production on Google Play"). Read it first when Play comes up; it holds the state, access, commands and gotchas.
 - Postgres: `klokka` database on the Common Resources PostgreSQL 18 (Coolify uuid `k10e48k41urcbb1erev0vhmu`), two roles
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
 - SMTP: Migadu `smtp.migadu.com:587` STARTTLS, senders `no-reply@cleanhq.se` (staging) and `no-reply@klokka.se`

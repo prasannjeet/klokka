@@ -1,5 +1,8 @@
 # Google Play
 
+**Open work to reach production: Jira CHQ-161** (closed test with 12 testers for 14 days, reviewer account, Console
+forms, review, promote). It lists what the owner does and what the agent does.
+
 Klokka is on Google Play as `se.klokka.app` (`docs/DECISIONS.md` D19) under the CleanHQ developer account, a personal
 account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play-launch.md` (CHQ-153).
 
