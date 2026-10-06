@@ -95,6 +95,8 @@ export function secureStoreModule() {
 
 export const notificationState = {
   permission: 'undetermined' as 'undetermined' | 'granted' | 'denied',
+  // False once the user has refused the OS prompt for good: the OS no longer shows it.
+  canAskAgain: true,
   channels: [] as AnyRecord[],
   handler: null as null | { handleNotification: (n: unknown) => Promise<unknown> },
   token: 'ExponentPushToken[test]',
@@ -106,6 +108,17 @@ export const notificationState = {
   receivedListeners: [] as ((notification: unknown) => void)[],
   lastResponse: null as unknown,
 };
+// expo-device: a simulator or emulator reports isDevice false, and push needs a real phone.
+export const deviceState = { isDevice: true };
+export function deviceModule() {
+  return {
+    deviceName: 'Test phone',
+    get isDevice() {
+      return deviceState.isDevice;
+    },
+  };
+}
+
 export function notificationsModule() {
   return {
     AndroidImportance: { MAX: 5, HIGH: 4, DEFAULT: 3, LOW: 2, MIN: 1 },
@@ -119,14 +132,14 @@ export function notificationsModule() {
     getPermissionsAsync: async () => ({
       status: notificationState.permission,
       granted: notificationState.permission === 'granted',
-      canAskAgain: true,
+      canAskAgain: notificationState.canAskAgain,
     }),
     requestPermissionsAsync: async () => {
       if (notificationState.permission === 'undetermined') notificationState.permission = 'granted';
       return {
         status: notificationState.permission,
         granted: notificationState.permission === 'granted',
-        canAskAgain: true,
+        canAskAgain: notificationState.canAskAgain,
       };
     },
     getExpoPushTokenAsync: async (options?: { devicePushToken?: { data: string } }) => {

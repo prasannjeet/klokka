@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { useQueryClient } from '@tanstack/react-query';
@@ -55,15 +55,27 @@ Notifications.setNotificationHandler({
   }),
 });
 
+// Turning push on always answers the tap (CHQ-167): a simulator gets a line saying push needs a real phone, and a
+// phone where the OS will not show its prompt again (refused before) opens the app's settings page instead.
 export function usePushPreference() {
   const api = useApi();
   const t = useT();
+  const toast = useToast();
   const setPromptShown = useAppStore((s) => s.setPushPromptShown);
 
   const register = useCallback(async (): Promise<boolean> => {
-    if (!Device.isDevice) return false;
+    if (!Device.isDevice) {
+      toast.show(t('mobile.push.needsPhone'), 'neutral');
+      return false;
+    }
     await ensureChannels(t);
-    let { status } = await Notifications.getPermissionsAsync();
+    const current = await Notifications.getPermissionsAsync();
+    let { status } = current;
+    if (status !== 'granted' && !current.canAskAgain) {
+      toast.show(t('mobile.push.blocked'), 'neutral');
+      await Linking.openSettings();
+      return false;
+    }
     if (status !== 'granted') status = (await Notifications.requestPermissionsAsync()).status;
     setPromptShown(true);
     if (status !== 'granted') return false;
@@ -77,7 +89,7 @@ export function usePushPreference() {
     });
     await rememberPushToken(token);
     return true;
-  }, [api, setPromptShown, t]);
+  }, [api, setPromptShown, t, toast]);
 
   const setEnabled = useCallback(
     async (enabled: boolean) => {

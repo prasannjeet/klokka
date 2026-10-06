@@ -403,6 +403,7 @@ export const sv = {
   "mobile.noWorkspaces.body": "Be din arbetsgivare bjuda in dig och öppna sedan länken i mejlet. Driver du ett företag själv? Skapa det här.",
   "mobile.noWorkspaces.title": "Inget företag än",
   "mobile.notifications.openRow": "Öppna notis",
+  "mobile.push.blocked": "Notiser är avstängda för Klokka. Slå på dem i telefonens inställningar.",
   "mobile.push.body": "Klokka skickar en push när timmar läggs till eller ändras, en flagga besvaras eller en månad stängs. Inget annat.",
   "mobile.push.bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
   "mobile.push.channelFlags": "Flaggor",
@@ -410,6 +411,7 @@ export const sv = {
   "mobile.push.channelReminders": "Jobbpåminnelser",
   "mobile.push.channelWorkspace": "Företag",
   "mobile.push.enable": "Slå på notiser",
+  "mobile.push.needsPhone": "Notiser kräver en riktig telefon. De fungerar inte i en simulator.",
   "mobile.push.title": "Få veta direkt när dina timmar ändras",
   "mobile.settings.account": "Konto",
   "mobile.settings.editWorkspace": "Ändra företaget",
@@ -1525,6 +1527,7 @@ export const en = {
   "mobile.noWorkspaces.body": "Ask your employer to invite you, then open the link in the email. Running a business yourself? Create it here.",
   "mobile.noWorkspaces.title": "No business yet",
   "mobile.notifications.openRow": "Open notification",
+  "mobile.push.blocked": "Notifications are off for Klokka. Turn them on in your phone's settings.",
   "mobile.push.body": "Klokka sends a push when hours are added or changed, a flag is answered or a month is closed. Nothing else.",
   "mobile.push.bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
   "mobile.push.channelFlags": "Flags",
@@ -1532,6 +1535,7 @@ export const en = {
   "mobile.push.channelReminders": "Job reminders",
   "mobile.push.channelWorkspace": "Business",
   "mobile.push.enable": "Turn on notifications",
+  "mobile.push.needsPhone": "Notifications need a real phone. They do not work in a simulator.",
   "mobile.push.title": "Know the moment your hours change",
   "mobile.settings.account": "Account",
   "mobile.settings.editWorkspace": "Edit business",
@@ -2638,6 +2642,7 @@ export type MessageParams = {
   "mobile.noWorkspaces.body": Record<never, never>;
   "mobile.noWorkspaces.title": Record<never, never>;
   "mobile.notifications.openRow": Record<never, never>;
+  "mobile.push.blocked": Record<never, never>;
   "mobile.push.body": Record<never, never>;
   "mobile.push.bodyEmployer": Record<never, never>;
   "mobile.push.channelFlags": Record<never, never>;
@@ -2645,6 +2650,7 @@ export type MessageParams = {
   "mobile.push.channelReminders": Record<never, never>;
   "mobile.push.channelWorkspace": Record<never, never>;
   "mobile.push.enable": Record<never, never>;
+  "mobile.push.needsPhone": Record<never, never>;
   "mobile.push.title": Record<never, never>;
   "mobile.settings.account": Record<never, never>;
   "mobile.settings.editWorkspace": Record<never, never>;

@@ -5,6 +5,7 @@ import { useActiveWorkspace } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
 import { useTheme } from '@/theme';
 import { Icon, type IconName } from '@/ui';
+import { TabButton } from '@/ui/TabButton';
 
 // Bottom tabs per the mockup: the employer gets Home, Week, Insights, Settings; the employee gets
 // Month, Week, Notifications, Profile. One layout, the tabs that do not belong to the role are hidden.
@@ -22,7 +23,8 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.color.primary,
+        // The selected tab: full text colour plus TabButton's primary bar on the top edge, as on the web (CHQ-167).
+        tabBarActiveTintColor: theme.color.text,
         tabBarInactiveTintColor: theme.color.textMuted,
         tabBarStyle: {
           backgroundColor: theme.color.surface,
@@ -33,6 +35,7 @@ export default function TabsLayout() {
           height: (Platform.OS === 'ios' ? 50 : 68) + insets.bottom,
           paddingTop: theme.space[2],
         },
+        tabBarButton: (props) => <TabButton {...props} />,
         tabBarLabelStyle: { ...theme.text('caption', 600), marginTop: 2 },
         sceneStyle: { backgroundColor: theme.color.bg },
       }}

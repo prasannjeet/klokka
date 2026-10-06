@@ -958,6 +958,8 @@
       "body": "Klokka sends a push when hours are added or changed, a flag is answered or a month is closed. Nothing else.",
       "bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
       "enable": "Turn on notifications",
+      "needsPhone": "Notifications need a real phone. They do not work in a simulator.",
+      "blocked": "Notifications are off for Klokka. Turn them on in your phone's settings.",
       "channelHours": "Hours",
       "channelFlags": "Flags",
       "channelWorkspace": "Business",

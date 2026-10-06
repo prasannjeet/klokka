@@ -958,6 +958,8 @@
       "body": "Klokka skickar en push när timmar läggs till eller ändras, en flagga besvaras eller en månad stängs. Inget annat.",
       "bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
       "enable": "Slå på notiser",
+      "needsPhone": "Notiser kräver en riktig telefon. De fungerar inte i en simulator.",
+      "blocked": "Notiser är avstängda för Klokka. Slå på dem i telefonens inställningar.",
       "channelHours": "Timmar",
       "channelFlags": "Flaggor",
       "channelWorkspace": "Företag",
