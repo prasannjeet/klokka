@@ -1,6 +1,7 @@
 import { forwardRef, useImperativeHandle, useRef, type ReactNode } from 'react';
-import { ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { BottomSheetModal, BottomSheetView } from '@expo/ui/community/bottom-sheet';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RaisedTheme, raisedTheme, useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText } from './AppText';
@@ -10,7 +11,9 @@ import { AppPressable } from './Pressable';
 // The one seam over the native bottom sheet (@expo/ui, Compose ModalBottomSheet on Android). Every
 // sheet in the app is an AppSheet, so the gesture area, the close button and the safe-area padding
 // are decided once. Content sizes the sheet (no snap points); a body taller than the screen scrolls under
-// the fixed header, capped here once instead of per sheet (CHQ-162).
+// the fixed header, capped here once instead of per sheet (CHQ-162). Neither native sheet moves its content for
+// the keyboard, so the body scrolls the focused field above it on every phone size (CHQ-166). The scroll follows
+// the caret, so the gap is the tallest field (the two-row note) to keep the whole box in view, not just its first line.
 const CLOSE = 36;
 
 export interface SheetHandle {
@@ -127,15 +130,16 @@ function SheetBody({
             </AppPressable>
           </View>
         ) : null}
-        <ScrollView
+        <KeyboardAwareScrollView
           style={[s.scroll, { maxHeight: maxBody }]}
           contentContainerStyle={s.scrollContent}
+          bottomOffset={theme.tapMin * 2}
           keyboardShouldPersistTaps="handled"
           nestedScrollEnabled
           showsVerticalScrollIndicator={false}
         >
           {children}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       </View>
     </BottomSheetView>
   );

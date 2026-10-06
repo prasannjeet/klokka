@@ -318,3 +318,17 @@ export function mapsModule() {
     AppleMaps: { View: MapView, MapColorScheme: scheme },
   };
 }
+
+// The library's own jest mock renders KeyboardAwareScrollView as a plain ScrollView, so a test could not tell a
+// keyboard-aware body from one that ignores the keyboard; this one tags it.
+export function keyboardAwareModule() {
+  const React = require('react') as typeof import('react');
+  const { ScrollView } = require('react-native') as typeof import('react-native');
+  function KeyboardAwareScrollView(props: AnyRecord) {
+    return React.createElement(ScrollView, { ...props, testID: 'keyboard-aware-scroll' });
+  }
+  return {
+    ...jest.requireActual<AnyRecord>('react-native-keyboard-controller/jest'),
+    KeyboardAwareScrollView,
+  };
+}
