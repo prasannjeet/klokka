@@ -281,3 +281,27 @@ describe('recurring jobs', () => {
     );
   });
 });
+
+describe('day arrows (CHQ-169)', () => {
+  beforeEach(() => useAppStore.getState().setActiveWorkspace('ws-cafe'));
+  it('tells the stack which way the day moved, so the new day slides in from that side', async () => {
+    const api = fakeApi({
+      getMe: meFixture,
+      listEntries: [entry],
+      getEntryHistory: history,
+      getWorkspace: workspaceFixture,
+      getMemberMonth: memberMonthFixture,
+    });
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
+    await fireEvent.press(await screen.findByTestId('day-prev'));
+    expect(routerState.replaces.at(-1)).toEqual({
+      pathname: '/day/[membershipId]/[date]',
+      params: { membershipId: 'mem-maria', date: '2026-09-22', step: 'back' },
+    });
+    await fireEvent.press(screen.getByTestId('day-next'));
+    expect(routerState.replaces.at(-1)).toEqual({
+      pathname: '/day/[membershipId]/[date]',
+      params: { membershipId: 'mem-maria', date: '2026-09-24', step: 'forward' },
+    });
+  });
+});

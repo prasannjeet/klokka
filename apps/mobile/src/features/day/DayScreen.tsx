@@ -32,6 +32,7 @@ import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
 import { JobCard } from '@/features/jobs/JobCard';
 import { FlagSheet, type FlagSheetHandle } from '@/features/flags/FlagSheet';
 import { todayIn, toIsoDate } from '@/lib/dates';
+import { type DayStep } from './dayStep';
 import { HistoryList } from './HistoryList';
 
 const styles = (t: Theme) =>
@@ -83,8 +84,8 @@ function DayScreenInner({
     settings.data?.showPay && entry?.earnings != null && entry.hours > 0
       ? entry.earnings / entry.hours
       : null;
-  const go = (next: IsoDate) =>
-    router.replace({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date: next } });
+  const go = (next: IsoDate, step: DayStep) =>
+    router.replace({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date: next, step } });
   const openSheet = (job: Entry['jobs'][number] | null) =>
     addSheet.current?.open({
       membershipId,
@@ -109,7 +110,7 @@ function DayScreenInner({
           <AppPressable
             accessibilityRole="button"
             accessibilityLabel={t('jobs.previousDay')}
-            onPress={() => go(addDays(date, -1))}
+            onPress={() => go(addDays(date, -1), 'back')}
             style={s.navButton}
             testID="day-prev"
           >
@@ -142,7 +143,7 @@ function DayScreenInner({
           <AppPressable
             accessibilityRole="button"
             accessibilityLabel={t('jobs.nextDay')}
-            onPress={() => go(addDays(date, 1))}
+            onPress={() => go(addDays(date, 1), 'forward')}
             style={s.navButton}
             testID="day-next"
           >
