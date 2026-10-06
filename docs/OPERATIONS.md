@@ -8,7 +8,7 @@ vars one by one), `docs/RELEASING.md` (the production release flow).
 **Rule:** test, probe and experiment on staging. Anything that changes production (Coolify, Logto, Postgres,
 Migadu) needs the owner's explicit go-ahead for that change.
 
-**Current production release:** v1.4.0 (2026-10-05, CHQ-159), API, web and landing. Android versionCode 11 is
+**Current production release:** v1.5.0 (2026-10-06, CHQ-162), API, web and landing. Android versionCode 12 is
 on Play internal testing. Public Play publishing still requires the initial Console setup/review.
 
 ## 1. The map
@@ -241,6 +241,7 @@ Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled 
 | A phone signs in against the wrong environment | Metro's cache inlined old `EXPO_PUBLIC_*` values (fixed in v1.0.2: job-local cache + a bundle check) | rebuild; never ship an APK whose check step failed |
 | API answers 401 to a signed-in client | the client did not send `resource` (Logto then issues an opaque token) or the audience differs | clients must send the environment's API resource |
 | Logto sends English emails to Swedish browsers | Swedish is not in Logto's language library | push the Swedish texts (`npm run emails:push <env>`) |
+| A release's APK job hangs for ~50 min on "Timeout waiting to lock daemon addresses registry", then is cancelled | the runners and local builds share `~/.gradle` on this host, which was at its memory cap (40 GB; raised to 45 GB on 2026-10-06), so a daemon stalled holding the lock | check `/proc/pressure/memory` and stray `GradleDaemon` processes, then `gh run rerun <id> --failed` |
 | Inviting an employee fails with "Logto is unreachable" after ~10 s | Logto sends the invitation email before answering | the API waits up to 30 s (`quarkus.rest-client.logto.read-timeout`) |
 | Creating a business or inviting an employee fails with a generic error; the API log shows Logto 422 `entity.relation_foreign_key_not_found` on `assignUserRoles` | `KLOKKA_LOGTO_EMPLOYER_ROLE_ID` / `KLOKKA_LOGTO_EMPLOYEE_ROLE_ID` are not set, so the API uses the defaults, which are the staging Logto's role ids (production, 2026-10-02) | set both on the API app to that Logto's organization role ids (console, Organization template) and restart |
 | Sign-up email never arrives | sender mailbox not allowed to send, or the monthly quota used up | section 8 |
