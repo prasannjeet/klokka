@@ -469,6 +469,7 @@ export const sv = {
   "month.workingDays_one": "{count} arbetsdag",
   "month.workingDays_other": "{count} arbetsdagar",
   "nav.backToApp": "Tillbaka till appen",
+  "nav.calendar": "Kalender",
   "nav.chooseWorkspace": "Välj företag",
   "nav.createWorkspace": "Skapa ett företag",
   "nav.employeeView": "Anställd",
@@ -856,6 +857,33 @@ export const sv = {
   "status.openForEdits": "Öppen för ändringar",
   "status.pending": "Väntar",
   "status.revoked": "Återkallad",
+  "team.allInsights": "Alla insikter",
+  "team.byPerson": "{month} per person",
+  "team.calendarLabel": "Teamets timmar per datum i {month}",
+  "team.day": "Dag",
+  "team.dayTotalFor": "{name}, {hours}",
+  "team.invite": "Bjud in någon",
+  "team.month": "Månad",
+  "team.monthHours": "{hours} i {month}",
+  "team.monthSoFar": "{month} hittills",
+  "team.nextMonth": "Nästa månad",
+  "team.noJobsDay": "Inga jobb den här dagen.",
+  "team.noJobsToday": "Inga jobb i dag.",
+  "team.nothingToday": "Inget i dag, {week} den här veckan",
+  "team.openDay": "Öppna {date}",
+  "team.previousMonth": "Föregående månad",
+  "team.statusDone": "Klart",
+  "team.statusLater": "Senare",
+  "team.statusNow": "Pågår",
+  "team.today": "I dag",
+  "team.todayAndWeek": "{today} i dag, {week} den här veckan",
+  "team.todaysJobs": "Dagens jobb",
+  "team.view": "Visa",
+  "team.week": "Vecka",
+  "team.weekSoFar": "Veckan hittills",
+  "team.wholeTeam": "Hela teamet",
+  "team.workingToday": "Jobbar i dag",
+  "team.workingTodayValue": "{logged} av {total}",
   "web.colour.BLUE": "Hallon",
   "web.colour.GREEN": "Blågrön",
   "web.colour.INK": "Violett",
@@ -1593,6 +1621,7 @@ export const en = {
   "month.workingDays_one": "{count} working day",
   "month.workingDays_other": "{count} working days",
   "nav.backToApp": "Back to the app",
+  "nav.calendar": "Calendar",
   "nav.chooseWorkspace": "Choose a business",
   "nav.createWorkspace": "Create a business",
   "nav.employeeView": "Employee view",
@@ -1980,6 +2009,33 @@ export const en = {
   "status.openForEdits": "Open for edits",
   "status.pending": "Pending",
   "status.revoked": "Revoked",
+  "team.allInsights": "All insights",
+  "team.byPerson": "{month} by person",
+  "team.calendarLabel": "Team hours per date in {month}",
+  "team.day": "Day",
+  "team.dayTotalFor": "{name}, {hours}",
+  "team.invite": "Invite someone",
+  "team.month": "Month",
+  "team.monthHours": "{hours} in {month}",
+  "team.monthSoFar": "{month} so far",
+  "team.nextMonth": "Next month",
+  "team.noJobsDay": "No jobs on this day.",
+  "team.noJobsToday": "No jobs today.",
+  "team.nothingToday": "Nothing today, {week} this week",
+  "team.openDay": "Open {date}",
+  "team.previousMonth": "Previous month",
+  "team.statusDone": "Done",
+  "team.statusLater": "Later",
+  "team.statusNow": "Now",
+  "team.today": "Today",
+  "team.todayAndWeek": "{today} today, {week} this week",
+  "team.todaysJobs": "Today's jobs",
+  "team.view": "View",
+  "team.week": "Week",
+  "team.weekSoFar": "This week so far",
+  "team.wholeTeam": "Whole team",
+  "team.workingToday": "Working today",
+  "team.workingTodayValue": "{logged} of {total}",
   "web.colour.BLUE": "Raspberry",
   "web.colour.GREEN": "Teal",
   "web.colour.INK": "Violet",
@@ -2706,6 +2762,7 @@ export type MessageParams = {
   "month.weekLabel": { week: string | number };
   "month.workingDays": { count: string | number };
   "nav.backToApp": Record<never, never>;
+  "nav.calendar": Record<never, never>;
   "nav.chooseWorkspace": Record<never, never>;
   "nav.createWorkspace": Record<never, never>;
   "nav.employeeView": Record<never, never>;
@@ -3080,6 +3137,33 @@ export type MessageParams = {
   "status.openForEdits": Record<never, never>;
   "status.pending": Record<never, never>;
   "status.revoked": Record<never, never>;
+  "team.allInsights": Record<never, never>;
+  "team.byPerson": { month: string | number };
+  "team.calendarLabel": { month: string | number };
+  "team.day": Record<never, never>;
+  "team.dayTotalFor": { hours: string | number; name: string | number };
+  "team.invite": Record<never, never>;
+  "team.month": Record<never, never>;
+  "team.monthHours": { hours: string | number; month: string | number };
+  "team.monthSoFar": { month: string | number };
+  "team.nextMonth": Record<never, never>;
+  "team.noJobsDay": Record<never, never>;
+  "team.noJobsToday": Record<never, never>;
+  "team.nothingToday": { week: string | number };
+  "team.openDay": { date: string | number };
+  "team.previousMonth": Record<never, never>;
+  "team.statusDone": Record<never, never>;
+  "team.statusLater": Record<never, never>;
+  "team.statusNow": Record<never, never>;
+  "team.today": Record<never, never>;
+  "team.todayAndWeek": { today: string | number; week: string | number };
+  "team.todaysJobs": Record<never, never>;
+  "team.view": Record<never, never>;
+  "team.week": Record<never, never>;
+  "team.weekSoFar": Record<never, never>;
+  "team.wholeTeam": Record<never, never>;
+  "team.workingToday": Record<never, never>;
+  "team.workingTodayValue": { logged: string | number; total: string | number };
   "web.colour.BLUE": Record<never, never>;
   "web.colour.GREEN": Record<never, never>;
   "web.colour.INK": Record<never, never>;

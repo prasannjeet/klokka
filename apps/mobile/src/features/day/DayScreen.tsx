@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Entry, FlagReason } from '@klokka/api-client';
@@ -51,19 +51,24 @@ const styles = (t: Theme) =>
     jobs: { gap: t.space[3] },
   });
 
+export interface DayPageProps {
+  membershipId: string;
+  date: IsoDate;
+  workspace: WorkspaceProps['workspace'];
+  // What sits above the day: the stack's header, or the person screen's header and view switch (CHQ-171).
+  header: (name: string) => ReactNode;
+  // The arrows: the day route replaces itself, the person screen changes its date.
+  onStep: (next: IsoDate, step: DayStep) => void;
+}
+
 // One day (CHQ-119, CHQ-156): the total, then one card per job with its place, time and note, and the full
 // history of who changed the day. Any day opens, past or future; the employer adds and edits jobs through the
 // job sheet unless the month is closed, the employee may flag the day.
-function DayScreenInner({
-  membershipId,
-  date,
-  workspace,
-}: { membershipId: string; date: IsoDate } & WorkspaceProps) {
+export function DayPage({ membershipId, date, workspace, header, onStep }: DayPageProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
-  const router = useRouter();
   const employer = workspace.role === 'EMPLOYER';
   const entries = useEntries(workspace.workspaceId, date, date, membershipId);
   const entry = entries.data?.[0] ?? null;
@@ -84,8 +89,6 @@ function DayScreenInner({
     settings.data?.showPay && entry?.earnings != null && entry.hours > 0
       ? entry.earnings / entry.hours
       : null;
-  const go = (next: IsoDate, step: DayStep) =>
-    router.replace({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date: next, step } });
   const openSheet = (job: Entry['jobs'][number] | null) =>
     addSheet.current?.open({
       membershipId,
@@ -100,17 +103,12 @@ function DayScreenInner({
   return (
     <>
       <Screen onRefresh={() => entries.refetch()} testID="day-screen">
-        <Header
-          title={employer ? name || t('jobs.title') : t('jobs.myDay')}
-          subtitle={t('entry.daySubtitle', { week: isoWeek(date).week, workspace: workspace.name })}
-          back
-          large={false}
-        />
+        {header(name)}
         <View style={s.nav}>
           <AppPressable
             accessibilityRole="button"
             accessibilityLabel={t('jobs.previousDay')}
-            onPress={() => go(addDays(date, -1), 'back')}
+            onPress={() => onStep(addDays(date, -1), 'back')}
             style={s.navButton}
             testID="day-prev"
           >
@@ -143,7 +141,7 @@ function DayScreenInner({
           <AppPressable
             accessibilityRole="button"
             accessibilityLabel={t('jobs.nextDay')}
-            onPress={() => go(addDays(date, 1), 'forward')}
+            onPress={() => onStep(addDays(date, 1), 'forward')}
             style={s.navButton}
             testID="day-next"
           >
@@ -316,6 +314,34 @@ function OpenFlagCard({
         testID="day-resolve-flag"
       />
     </Card>
+  );
+}
+
+function DayScreenInner({
+  membershipId,
+  date,
+  workspace,
+}: { membershipId: string; date: IsoDate } & WorkspaceProps) {
+  const t = useT();
+  const router = useRouter();
+  const employer = workspace.role === 'EMPLOYER';
+  return (
+    <DayPage
+      membershipId={membershipId}
+      date={date}
+      workspace={workspace}
+      header={(name) => (
+        <Header
+          title={employer ? name || t('jobs.title') : t('jobs.myDay')}
+          subtitle={t('entry.daySubtitle', { week: isoWeek(date).week, workspace: workspace.name })}
+          back
+          large={false}
+        />
+      )}
+      onStep={(next, step) =>
+        router.replace({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date: next, step } })
+      }
+    />
   );
 }
 

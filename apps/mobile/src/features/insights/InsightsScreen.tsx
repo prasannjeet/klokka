@@ -71,6 +71,7 @@ function InsightsScreenInner({ workspace }: WorkspaceProps) {
       <Header
         title={t('insights.title')}
         subtitle={subtitle}
+        back
         trailing={
           <View style={s.nav}>
             <AppPressable

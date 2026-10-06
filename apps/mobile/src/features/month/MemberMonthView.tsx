@@ -68,6 +68,8 @@ export interface MemberMonthViewProps {
   streakDays?: number | undefined;
   // Averages, comparisons, best week and streak (CHQ-156: the employer may turn these off for employees).
   analysis?: boolean;
+  // A tapped day: the day page by default, the person screen's Day view there (CHQ-171).
+  onOpenDay?: ((date: IsoDate) => void) | undefined;
 }
 
 // The month shared by "My month" (employee) and the employer's per-employee month (CHQ-121/122):
@@ -86,6 +88,7 @@ export function MemberMonthView({
   membershipId,
   streakDays,
   analysis = true,
+  onOpenDay,
 }: MemberMonthViewProps) {
   const t = useT();
   const locale = useLocale();
@@ -97,8 +100,10 @@ export function MemberMonthView({
     .filter((d) => (d.hours ?? 0) > 0 || d.flag)
     .sort((a, b) => (a.date < b.date ? 1 : -1));
   const monthLabel = formatMonthName(month, locale);
-  const openDay = (date: IsoDate) =>
-    router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date } });
+  const openDay =
+    onOpenDay ??
+    ((date: IsoDate) =>
+      router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date } }));
   const planned = data.plannedHours ?? 0;
   const subtitleFor = (day: MemberMonthDay): string => {
     const places = day.jobs.map((j) => j.location?.name).filter(Boolean);

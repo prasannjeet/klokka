@@ -37,6 +37,8 @@ const styles = (t: Theme) =>
     planned: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: t.color.accent },
     dayNumber: { position: 'absolute', top: 2, left: 4 },
     dot: { position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: 3 },
+    markers: { position: 'absolute', bottom: 3, flexDirection: 'row', gap: 2 },
+    marker: { width: 5, height: 5, borderRadius: 3 },
   });
 
 // Six fill steps, chosen by hours relative to the month's busiest day.
@@ -74,13 +76,21 @@ export function flagFill(theme: Theme): string {
   return mixHex(theme.color.surface2, theme.color.danger, FLAG_STRENGTH);
 }
 
+// A member's day, or the team's (CHQ-171): the date, its hours and, for a member, an open flag.
+export type HeatDay = Pick<MemberMonthDay, 'date'> & {
+  hours?: number | null | undefined;
+  flag?: MemberMonthDay['flag'];
+};
+
 export interface HeatMapCalendarProps {
   month: IsoMonth;
   weekStart: WeekStart;
-  days: MemberMonthDay[];
+  days: readonly HeatDay[];
   today: IsoDate;
   // Every day of the month, empty and future ones too (CHQ-156).
   onPressDay?: (date: IsoDate) => void;
+  // Small dots along the bottom of a cell, one colour each (the team calendar's people).
+  markers?: (date: IsoDate) => readonly string[];
   accessibilityLabel: string;
 }
 
@@ -92,6 +102,7 @@ export function HeatMapCalendar({
   days,
   today,
   onPressDay,
+  markers,
   accessibilityLabel,
 }: HeatMapCalendarProps) {
   const t = useT();
@@ -161,6 +172,15 @@ export function HeatMapCalendar({
                   </AppText>
                 ) : null}
                 {isFlagged ? <View style={[s.dot, { backgroundColor: theme.color.danger }]} /> : null}
+                {markers?.(cell.date).length ? (
+                  <View style={s.markers}>
+                    {markers(cell.date)
+                      .slice(0, 4)
+                      .map((colour, i) => (
+                        <View key={i} style={[s.marker, { backgroundColor: colour }]} />
+                      ))}
+                  </View>
+                ) : null}
               </AppPressable>
             );
           })}

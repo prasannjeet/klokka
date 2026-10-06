@@ -3,7 +3,9 @@ import type { Job } from '@klokka/api-client';
 import { useT } from '@/i18n/LocaleProvider';
 import { formatDuration } from '@/lib/duration';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
-import { AppPressable, AppText, Icon } from '@/ui';
+import { AppPressable, AppText, Avatar, Icon, Pill, type PillTone } from '@/ui';
+import type { MessageKey } from '@klokka/core';
+import type { JobStatus } from './jobStatus';
 import { RecurrenceSummary } from './RecurrenceSummary';
 import { MapImage, directionsUrl } from './MapImage';
 
@@ -27,6 +29,7 @@ const styles = (t: Theme) =>
       justifyContent: 'center',
     },
     actions: { flexDirection: 'row', gap: t.space[2], flexWrap: 'wrap' },
+    who: { flexDirection: 'row', alignItems: 'center', gap: t.space[2] },
     action: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -44,16 +47,26 @@ export function endTime(start: string, hours: number): string {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
 }
 
+const STATUS: Record<JobStatus, { key: MessageKey; tone: PillTone }> = {
+  done: { key: 'team.statusDone', tone: 'success' },
+  now: { key: 'team.statusNow', tone: 'primary' },
+  later: { key: 'team.statusLater', tone: 'neutral' },
+};
+
 // One job on a day (CHQ-156): the map when it has a place, where, when, how long, the note, and
-// Directions; Edit for the employer.
+// Directions; Edit for the employer. The team views (CHQ-171) add who does it and where it stands.
 export function JobCard({
   job,
   workspaceId,
   onEdit,
+  memberName,
+  status,
 }: {
   job: Job;
   workspaceId: string;
   onEdit?: (() => void) | undefined;
+  memberName?: string | undefined;
+  status?: JobStatus | null | undefined;
 }) {
   const t = useT();
   const theme = useTheme();
@@ -66,6 +79,27 @@ export function JobCard({
     <View style={s.card} testID={`job-${job.id}`}>
       {location ? <MapImage workspaceId={workspaceId} location={location} height={96} /> : null}
       <View style={s.body}>
+        {memberName || status ? (
+          <View style={s.who}>
+            {memberName ? (
+              <>
+                <Avatar name={memberName} size={24} />
+                <AppText variant="small" weight={600} numberOfLines={1} style={{ flex: 1 }}>
+                  {memberName}
+                </AppText>
+              </>
+            ) : (
+              <View style={{ flex: 1 }} />
+            )}
+            {status ? (
+              <Pill
+                label={t(STATUS[status].key)}
+                tone={STATUS[status].tone}
+                testID={`job-status-${job.id}`}
+              />
+            ) : null}
+          </View>
+        ) : null}
         <View style={s.head}>
           {location ? null : (
             <View style={s.pin}>

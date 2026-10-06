@@ -38,3 +38,19 @@ export function todayIn(timeZone: string, now: Date = new Date()): IsoDate {
 export function currentMonthIn(timeZone: string, now: Date = new Date()): IsoMonth {
   return todayIn(timeZone, now).slice(0, 7);
 }
+
+// Minutes since midnight now, in the workspace time zone (a job's start time is the workspace's clock).
+export function minutesNowIn(timeZone: string, now: Date = new Date()): number {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    }).formatToParts(now);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+    return get('hour') * 60 + get('minute');
+  } catch {
+    return now.getHours() * 60 + now.getMinutes();
+  }
+}

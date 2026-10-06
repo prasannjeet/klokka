@@ -1,143 +1,101 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, within } from '@testing-library/react-native';
+import type { Entry } from '@klokka/api-client';
 import { HomeScreen } from './HomeScreen';
 import { fakeApi, renderApp } from '@/testing/render';
 import {
+  cafeLocation,
   employerMeFixture,
-  entriesFixture,
   entryFixture,
   flagFixture,
-  jobFixture,
   insightsFixture,
+  jobFixture,
   membersFixture,
   workspaceFixture,
 } from '@/testing/fixtures';
-import { hapticCalls, routerState } from '@/testing/nativeMocks';
+import { routerState } from '@/testing/nativeMocks';
+import { toIsoDate } from '@/lib/dates';
 import { useAppStore } from '@/store/appStore';
 
-function homeApi() {
+// Today (the 25th) has three jobs: Maria's 08:00 to 12:00 is over at 12:00 Stockholm time, Jonas is in the
+// middle of his and Ayla's starts later. Yesterday's entry must not show among today's jobs.
+const entries: Entry[] = [
+  entryFixture('mem-maria', '2026-09-24', 4),
+  entryFixture('mem-maria', '2026-09-25', 4, {
+    jobs: [jobFixture('job-maria', 4, { startTime: '08:00', location: cafeLocation })],
+  }),
+  entryFixture('mem-jonas', '2026-09-25', 8, { jobs: [jobFixture('job-jonas', 8, { startTime: '09:00' })] }),
+  entryFixture('mem-ayla', '2026-09-25', 3, { jobs: [jobFixture('job-ayla', 3, { startTime: '15:00' })] }),
+];
+
+function homeApi(flags = [flagFixture]) {
   return fakeApi({
     getMe: employerMeFixture,
     getWorkspace: workspaceFixture,
     listMembers: membersFixture,
-    listEntries: entriesFixture,
+    listEntries: ({ from, to }: { from: Date; to: Date }) =>
+      entries.filter((e) => e.workDate >= from && e.workDate <= to),
     getWorkspaceInsights: insightsFixture,
-    listFlags: [flagFixture],
-    createJob: (args: { jobWrite: { hours: number } }) =>
-      entryFixture('mem-sam', '2026-09-25', args.jobWrite.hours),
+    listFlags: flags,
   });
 }
 
-describe('HomeScreen (employer, today)', () => {
+describe('HomeScreen (employer, today, CHQ-171)', () => {
   beforeEach(() => {
+    // 10:00 UTC is 12:00 in Stockholm.
     jest.useFakeTimers({ now: new Date('2026-09-25T10:00:00Z') });
     useAppStore.getState().setActiveWorkspace('ws-cafe');
     useAppStore.getState().setPushPromptShown(true);
     routerState.pushes.length = 0;
-    hapticCalls.length = 0;
   });
   afterEach(() => jest.useRealTimers());
 
-  it('lists every employee with today, the week strip and the open flag', async () => {
+  it("shows today's figures from the insights read model", async () => {
     await renderApp(<HomeScreen />, { api: homeApi() });
-    expect(await screen.findByText('Maria')).toBeTruthy();
-    expect(screen.getByText('Jonas')).toBeTruthy();
-    expect(screen.getByText('Sam')).toBeTruthy();
-    expect(screen.getByText('Invited')).toBeTruthy();
-    // Sam and Ayla have nothing today; Maria and Jonas do.
-    expect(screen.getAllByText('Nothing yet')).toHaveLength(2);
-    expect(screen.getByText('Week 39, 101 h so far.')).toBeTruthy();
-    expect(screen.getByText(/3 of 4 logged today\./)).toBeTruthy();
+    expect((await screen.findByTestId('home-today-hours')).props.children).toBe('17 h');
+    expect(screen.getByText('3 jobs, 1 place')).toBeTruthy();
+    expect(screen.getByText('101 h')).toBeTruthy();
+    expect(screen.getByTestId('home-working-today').props.children).toBe('3 of 4');
+    expect(screen.getByText('September so far')).toBeTruthy();
+    expect(screen.getByText('335.5 h')).toBeTruthy();
     expect(screen.getByText('1 open flag')).toBeTruthy();
+    expect(screen.getByText('September by person')).toBeTruthy();
     expect(screen.getByText('Nora Lind, employer')).toBeTruthy();
-    expect(screen.getByText('Café Nord')).toBeTruthy();
   });
 
-  it('opens the job sheet from the plus, a chip and the minutes wheel set the time, save creates a job', async () => {
+  it("lists today's jobs in time order with who does them and where they stand", async () => {
     const api = homeApi();
     await renderApp(<HomeScreen />, { api });
-    await screen.findByText('Sam');
-    await fireEvent.press(screen.getByTestId('add-mem-sam'));
-    expect(await screen.findByText('New job for Sam Ali')).toBeTruthy();
-    expect(screen.getByText('Full day, 7 h 30 min')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('chip-4'));
-    expect(screen.getByText('Save job, 4 h')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
-    expect(screen.getByText('Save job, 4 h 30 min')).toBeTruthy();
-    expect(screen.getByText('Saved as 4.5 h')).toBeTruthy();
-    expect(hapticCalls.some((c) => c.includes('segment-tick') || c === 'selection')).toBe(true);
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    const call = api.calls.find((c) => c.op === 'createJob')?.args[0] as {
-      membershipId: string;
-      jobWrite: { hours: number; startTime: string | null };
-    };
-    expect(call.membershipId).toBe('mem-sam');
-    expect(call.jobWrite).toEqual({ hours: 4.5, startTime: null, note: null });
+    await screen.findByTestId('job-job-maria');
+    const order = screen.getAllByTestId(/^job-job-/).map((n) => n.props.testID);
+    expect(order).toEqual(['job-job-maria', 'job-job-jonas', 'job-job-ayla']);
+    expect(within(screen.getByTestId('job-job-maria')).getByText('Maria Lind')).toBeTruthy();
+    expect(within(screen.getByTestId('job-job-maria')).getByText('Done')).toBeTruthy();
+    expect(within(screen.getByTestId('job-job-jonas')).getByText('Now')).toBeTruthy();
+    expect(within(screen.getByTestId('job-job-ayla')).getByText('Later')).toBeTruthy();
+    // Only today's range is asked for.
+    const call = api.calls.find((c) => c.op === 'listEntries')?.args[0] as { from: Date; to: Date };
+    expect([toIsoDate(call.from), toIsoDate(call.to)]).toEqual(['2026-09-25', '2026-09-25']);
   });
 
-  it('offers only the minutes the rounding allows, and 24 h has no minutes', async () => {
-    const api = homeApi();
-    await renderApp(<HomeScreen />, { api });
-    await screen.findByText('Sam');
-    await fireEvent.press(screen.getByTestId('add-mem-sam'));
-    await screen.findByText('New job for Sam Ali');
-    expect(screen.getByText('Choose the time first')).toBeTruthy();
-    // Half-hour rounding: the minutes wheel is 00 and 30, nothing in between.
-    expect(screen.queryByTestId('wheel-minutes-15')).toBeNull();
-    await fireEvent.press(screen.getByTestId('wheel-hours-23'));
-    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
-    expect(screen.getByText('Save job, 23 h 30 min')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-hours-24'));
-    expect(screen.queryByTestId('wheel-minutes-30')).toBeNull();
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    const call = api.calls.find((c) => c.op === 'createJob')?.args[0] as { jobWrite: { hours: number } };
-    expect(call.jobWrite.hours).toBe(24);
-  });
-
-  it("edits the day's one job, and a day with several jobs opens the day page instead of the sheet", async () => {
+  it('says so when nobody has a job today', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
       getWorkspace: workspaceFixture,
-      listMembers: membersFixture,
-      listEntries: [
-        entryFixture('mem-maria', '2026-09-25', 4),
-        entryFixture('mem-jonas', '2026-09-25', 8, {
-          jobs: [jobFixture('job-a', 5), jobFixture('job-b', 3)],
-        }),
-      ],
+      listEntries: [],
       getWorkspaceInsights: insightsFixture,
       listFlags: [],
-      updateJob: () => entryFixture('mem-maria', '2026-09-25', 5),
     });
     await renderApp(<HomeScreen />, { api });
-    await screen.findByText('Jonas');
-    await fireEvent.press(screen.getByTestId('add-mem-jonas'));
-    expect(routerState.pushes.at(-1)).toEqual({
-      pathname: '/day/[membershipId]/[date]',
-      params: { membershipId: 'mem-jonas', date: '2026-09-25' },
-    });
-    await fireEvent.press(screen.getByTestId('add-mem-maria'));
-    expect(await screen.findByText('Job for Maria Lind')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-hours-5'));
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'updateJob')).toBe(true));
-    expect(api.calls.find((c) => c.op === 'updateJob')?.args[0]).toMatchObject({
-      workspaceId: 'ws-cafe',
-      jobId: 'job-mem-maria-2026-09-25',
-      jobWrite: { hours: 5 },
-    });
+    expect(await screen.findByText('No jobs today.')).toBeTruthy();
+    expect(screen.queryByText('1 open flag')).toBeNull();
   });
 
-  it('routes the flag row to the resolve screen and the person card to their month', async () => {
+  it('opens a flag to resolve it and the rest of the insights', async () => {
     await renderApp(<HomeScreen />, { api: homeApi() });
-    await screen.findByText('Maria');
+    await screen.findByText('1 open flag');
     await fireEvent.press(screen.getByTestId('flag-flag-1'));
     expect(routerState.pushes.at(-1)).toEqual({ pathname: '/flag/[flagId]', params: { flagId: 'flag-1' } });
-    await fireEvent.press(screen.getByTestId('person-mem-maria'));
-    expect(routerState.pushes.at(-1)).toEqual({
-      pathname: '/member/[membershipId]',
-      params: { membershipId: 'mem-maria' },
-    });
+    await fireEvent.press(screen.getByTestId('all-insights'));
+    expect(routerState.pushes.at(-1)).toBe('/insights');
   });
 });

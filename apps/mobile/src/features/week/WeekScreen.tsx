@@ -1,25 +1,17 @@
 import { useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import type { Entry, Member } from '@klokka/api-client';
-import {
-  addDays,
-  formatDate,
-  formatHours,
-  formatHoursDelta,
-  isoWeek,
-  sumHours,
-  weekOf,
-  type IsoDate,
-} from '@klokka/core';
-import { sameDate, useEntries, useMembers, useWorkspace } from '@/data/workspace';
+import type { Member } from '@klokka/api-client';
+import { addDays, formatDate, isoWeek, weekOf, type IsoDate } from '@klokka/core';
+import { useEntries, useMembers, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
-import { AppPressable, AppText, Avatar, Card, Header, Icon, Pill, Screen } from '@/ui';
+import { AppPressable, AppText, Avatar, Header, Icon, Pill, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
 import { dayActionFor } from '@/features/jobs/dayAction';
+import { WeekCard, entryFor } from './WeekCard';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -47,39 +39,7 @@ const styles = (t: Theme) =>
     },
     personOn: { backgroundColor: t.color.secondary, borderColor: t.color.secondary },
     page: { paddingRight: t.space[4] },
-    dayRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: t.space[3],
-      minHeight: 56,
-      paddingVertical: t.space[2],
-    },
-    dayLabel: { width: 44 },
-    dayBody: { flex: 1, minWidth: 0 },
-    hours: { flexDirection: 'row', alignItems: 'baseline', gap: 2 },
-    plus: {
-      width: 36,
-      height: 36,
-      borderRadius: t.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: t.color.surface2,
-      borderWidth: 1,
-      borderColor: t.color.border,
-    },
-    sep: { height: StyleSheet.hairlineWidth, backgroundColor: t.color.border },
-    total: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'baseline',
-      paddingTop: t.space[3],
-    },
-    pageHeader: { flexDirection: 'row', alignItems: 'center', gap: t.space[2], marginBottom: t.space[2] },
   });
-
-function entryFor(entries: Entry[] | undefined, membershipId: string, date: IsoDate): Entry | undefined {
-  return entries?.find((e) => e.membershipId === membershipId && sameDate(e.workDate, date));
-}
 
 // The week (CHQ-118): one person per page, swipe sideways for the next; tap a day to change it. The
 // employee sees only their own page. Totals here are sums of the visible entries (presentation).
@@ -241,110 +201,22 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
           onMomentumScrollEnd={(e) => setPageIndex(Math.round(e.nativeEvent.contentOffset.x / pageWidth))}
           style={{ marginHorizontal: -theme.space[4] }}
           contentContainerStyle={{ paddingHorizontal: theme.space[4] }}
-          renderItem={({ item: member }) => {
-            const weekEntries = week.map((d) => entryFor(range.data, member.id, d));
-            const total = sumHours(weekEntries.map((e) => e?.hours ?? 0));
-            const lastTotal = sumHours(
-              previousWeek.map((d) => entryFor(range.data, member.id, d)?.hours ?? 0),
-            );
-            return (
-              <View style={{ width: pageWidth }} testID={`week-page-${member.id}`}>
-                <Card style={{ marginRight: theme.space[2] }}>
-                  <View style={s.pageHeader}>
-                    <Avatar name={member.displayName} emoji={member.avatarEmoji} colour="PURPLE" size={32} />
-                    <AppText variant="lead" weight={700} style={{ flex: 1 }} numberOfLines={1}>
-                      {member.displayName}
-                    </AppText>
-                    {lastTotal > 0 || total > 0 ? (
-                      <Pill
-                        label={t('week.vsLastWeek', { delta: formatHoursDelta(total - lastTotal, locale) })}
-                        tone={total >= lastTotal ? 'success' : 'warning'}
-                        icon={total >= lastTotal ? 'trending-up' : 'trending-down'}
-                      />
-                    ) : null}
-                  </View>
-                  {week.map((date, i) => {
-                    const entry = weekEntries[i];
-                    const isToday = date === today;
-                    const jobs = entry?.jobs ?? [];
-                    const places = jobs.map((j) => j.location?.name).filter(Boolean);
-                    const subtitle =
-                      jobs.length > 1
-                        ? [t('jobs.jobCount', { count: jobs.length }), ...places].join(', ')
-                        : places.length > 0
-                          ? places.join(', ')
-                          : entry?.note
-                            ? entry.note
-                            : isToday
-                              ? t('common.today')
-                              : entry && entry.changeCount > 0
-                                ? t('week.edited')
-                                : undefined;
-                    return (
-                      <View key={date}>
-                        <AppPressable
-                          accessibilityRole="button"
-                          accessibilityLabel={t('week.addHoursForDay', {
-                            day: formatDate(date, locale, 'weekdayDayMonth'),
-                          })}
-                          onPress={() => openDay(member, date)}
-                          pressScale={0.99}
-                          style={s.dayRow}
-                          testID={`day-${member.id}-${date}`}
-                        >
-                          <View style={s.dayLabel}>
-                            <AppText variant="eyebrow" tone={isToday ? 'primary' : 'muted'}>
-                              {formatDate(date, locale, 'weekdayDay').split(' ')[0]}
-                            </AppText>
-                            <AppText variant="lead" weight={700} tone={isToday ? 'primary' : 'text'} tabular>
-                              {formatDate(date, locale, 'day')}
-                            </AppText>
-                          </View>
-                          <View style={s.dayBody}>
-                            {subtitle ? (
-                              <AppText variant="small" tone="muted" numberOfLines={1}>
-                                {subtitle}
-                              </AppText>
-                            ) : null}
-                          </View>
-                          {entry ? (
-                            <View style={s.hours}>
-                              <AppText variant="h2" tabular>
-                                {formatHours(entry.hours, locale, { unit: false })}
-                              </AppText>
-                              <AppText variant="small" weight={700} tone="muted">
-                                {t('common.hourUnit')}
-                              </AppText>
-                            </View>
-                          ) : employer ? (
-                            <View style={s.plus}>
-                              <Icon name="plus" size={18} color={theme.color.text} />
-                            </View>
-                          ) : (
-                            <AppText variant="small" tone="muted">
-                              {t('entry.nothingYet')}
-                            </AppText>
-                          )}
-                        </AppPressable>
-                        {i < 6 ? <View style={s.sep} /> : null}
-                      </View>
-                    );
-                  })}
-                  <View style={s.total}>
-                    <AppText weight={600}>{t('week.weekTotal')}</AppText>
-                    <View style={s.hours}>
-                      <AppText variant="h2" tabular>
-                        {formatHours(total, locale, { unit: false })}
-                      </AppText>
-                      <AppText variant="small" weight={700} tone="muted">
-                        {t('common.hourUnit')}
-                      </AppText>
-                    </View>
-                  </View>
-                </Card>
-              </View>
-            );
-          }}
+          renderItem={({ item: member }) => (
+            <View
+              style={{ width: pageWidth, paddingRight: theme.space[2] }}
+              testID={`week-page-${member.id}`}
+            >
+              <WeekCard
+                member={member}
+                week={week}
+                previousWeek={previousWeek}
+                entries={range.data}
+                today={today}
+                employer={employer}
+                onOpenDay={(date) => openDay(member, date)}
+              />
+            </View>
+          )}
         />
         <AppText variant="caption" tone="muted" align="center">
           {employer ? t('week.swipeHint') : t('month.notesVisibleHint')}

@@ -7,8 +7,9 @@ import { useTheme } from '@/theme';
 import { Icon, type IconName } from '@/ui';
 import { TabButton } from '@/ui/TabButton';
 
-// Bottom tabs per the mockup: the employer gets Home, Week, Insights, Settings; the employee gets
-// Month, Week, Notifications, Profile. One layout, the tabs that do not belong to the role are hidden.
+// Bottom tabs: the employer gets Home, People, Calendar, Settings (CHQ-171); the employee gets Month, Week,
+// Notifications, Profile. One layout, the tabs that do not belong to the role are hidden. Insights left the
+// bar for a page Home opens (app/insights.tsx).
 export default function TabsLayout() {
   const t = useT();
   const theme = useTheme();
@@ -48,14 +49,21 @@ export default function TabsLayout() {
         name="month"
         options={{ title: t('nav.month'), tabBarIcon: icon('calendar'), href: employer ? null : undefined }}
       />
-      <Tabs.Screen name="week" options={{ title: t('nav.week'), tabBarIcon: icon('clock') }} />
       <Tabs.Screen
-        name="insights"
+        name="people"
+        options={{ title: t('nav.people'), tabBarIcon: icon('users'), href: employer ? undefined : null }}
+      />
+      <Tabs.Screen
+        name="calendar"
         options={{
-          title: t('nav.insights'),
-          tabBarIcon: icon('bar-chart'),
+          title: t('nav.calendar'),
+          tabBarIcon: icon('calendar'),
           href: employer ? undefined : null,
         }}
+      />
+      <Tabs.Screen
+        name="week"
+        options={{ title: t('nav.week'), tabBarIcon: icon('clock'), href: employer ? null : undefined }}
       />
       <Tabs.Screen
         name="notifications"

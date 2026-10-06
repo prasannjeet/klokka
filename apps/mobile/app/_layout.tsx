@@ -31,9 +31,16 @@ function Navigator() {
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: theme.color.bg } }}>
             {/* The tabs are always the root of the history (enterApp): no back arrow, no back gesture. */}
             <Stack.Screen name="(tabs)" options={{ headerBackVisible: false, gestureEnabled: false }} />
-            {/* The day arrows slide the next day in from the right and the previous day from the left (CHQ-169). */}
+            {/* The day arrows slide the next day in from the right and the previous day from the left (CHQ-169),
+                on a person's day and on the team's (CHQ-171). */}
             <Stack.Screen
               name="day/[membershipId]/[date]"
+              options={({ route }) => ({
+                animation: dayStepAnimation((route.params as { step?: string } | undefined)?.step),
+              })}
+            />
+            <Stack.Screen
+              name="team-day/[date]"
               options={({ route }) => ({
                 animation: dayStepAnimation((route.params as { step?: string } | undefined)?.step),
               })}
