@@ -381,9 +381,12 @@ export const JobSheet = forwardRef<
               ) : null}
             </Card>
             {location ? (
-              <View style={s.mapPreview}>
-                <MapImage workspaceId={workspace.workspaceId} location={location} height={96} />
-              </View>
+              <MapImage
+                workspaceId={workspace.workspaceId}
+                location={location}
+                height={96}
+                style={s.mapPreview}
+              />
             ) : null}
             <AppText variant="caption" tone="muted" style={s.label} testID="job-start-hint">
               {startTime

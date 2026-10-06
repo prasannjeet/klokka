@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, type ImageStyle, type StyleProp } from 'react-native';
 import type { JobLocation } from '@klokka/api-client';
 import { appConfig } from '@/config';
 import { useAuth } from '@/auth';
@@ -15,10 +15,13 @@ export function MapImage({
   workspaceId,
   location,
   height,
+  style,
 }: {
   workspaceId: string;
   location: JobLocation;
   height: number;
+  // Extra image style (a radius, a border): it disappears with the image when the map cannot load.
+  style?: StyleProp<ImageStyle>;
 }) {
   const t = useT();
   const theme = useTheme();
@@ -42,7 +45,7 @@ export function MapImage({
         uri: `${appConfig().apiBaseUrl}/workspaces/${workspaceId}/map.png?${query}`,
         headers: { Authorization: `Bearer ${token}` },
       }}
-      style={[styles.map, { height, backgroundColor: theme.color.surface2 }]}
+      style={[styles.map, { height, backgroundColor: theme.color.surface2 }, style]}
       resizeMode="cover"
       onError={() => setFailed(true)}
       accessibilityLabel={t('places.mapOf', { place: location.name })}
