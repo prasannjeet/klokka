@@ -59,7 +59,7 @@ function MonthScreenInner({ workspace }: WorkspaceProps) {
   const insights = useMemberInsights(workspace.workspaceId, workspace.membershipId, month, analysis);
   const unread = workspace.unreadNotifications;
   return (
-    <Screen refreshing={data.isRefetching} onRefresh={() => void data.refetch()} testID="month-screen">
+    <Screen onRefresh={() => data.refetch()} testID="month-screen">
       <View style={s.top}>
         <AppPressable
           accessibilityRole="button"

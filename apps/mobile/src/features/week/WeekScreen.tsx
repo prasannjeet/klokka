@@ -150,7 +150,7 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
 
   return (
     <>
-      <Screen refreshing={range.isRefetching} onRefresh={() => void range.refetch()} testID="week-screen">
+      <Screen onRefresh={() => range.refetch()} testID="week-screen">
         <Header
           title={t('week.title', { week: isoWeekNumber })}
           subtitle={t('week.range', {

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -61,8 +61,10 @@ export interface ScreenProps extends Omit<ScrollViewProps, 'style' | 'contentCon
   padTop?: boolean;
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
-  refreshing?: boolean;
-  onRefresh?: () => void;
+  // Pull to refresh: return the refetch, and the spinner shows until it settles. The screen owns the spinner, so a
+  // background refetch never starts the native control: on iOS that moved the scroll view down, and on a tab not on
+  // screen the offset stayed, so the tab opened half empty (CHQ-170).
+  onRefresh?: () => Promise<unknown>;
   testID?: string;
 }
 
@@ -73,7 +75,6 @@ export function Screen({
   padTop = true,
   style,
   contentStyle,
-  refreshing,
   onRefresh,
   testID,
   ...rest
@@ -81,6 +82,14 @@ export function Screen({
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const insets = useSafeAreaInsets();
+  const [pulling, setPulling] = useState(false);
+  const pull = () => {
+    if (!onRefresh) return;
+    setPulling(true);
+    void onRefresh()
+      .catch(() => undefined)
+      .finally(() => setPulling(false));
+  };
   const padding = {
     paddingTop: (padTop ? insets.top : 0) + theme.space[4],
     paddingBottom: insets.bottom + theme.space[6] + bottomInset,
@@ -100,11 +109,7 @@ export function Screen({
         keyboardShouldPersistTaps="handled"
         refreshControl={
           onRefresh ? (
-            <RefreshControl
-              refreshing={refreshing ?? false}
-              onRefresh={onRefresh}
-              tintColor={theme.color.primary}
-            />
+            <RefreshControl refreshing={pulling} onRefresh={pull} tintColor={theme.color.primary} />
           ) : undefined
         }
       >

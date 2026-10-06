@@ -99,7 +99,7 @@ function DayScreenInner({
 
   return (
     <>
-      <Screen refreshing={entries.isRefetching} onRefresh={() => void entries.refetch()} testID="day-screen">
+      <Screen onRefresh={() => entries.refetch()} testID="day-screen">
         <Header
           title={employer ? name || t('jobs.title') : t('jobs.myDay')}
           subtitle={t('entry.daySubtitle', { week: isoWeek(date).week, workspace: workspace.name })}

@@ -140,8 +140,7 @@ export function NotificationsScreen({ pushed }: { pushed?: boolean }) {
 
   return (
     <Screen
-      refreshing={query.isRefetching && !query.isFetchingNextPage}
-      onRefresh={() => void query.refetch()}
+      onRefresh={() => query.refetch()}
       onScroll={undefined}
       testID="notifications-screen"
       onMomentumScrollEnd={() => {

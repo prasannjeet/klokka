@@ -107,11 +107,7 @@ function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
 
   return (
     <>
-      <Screen
-        refreshing={workspace.isRefetching}
-        onRefresh={() => void workspace.refetch()}
-        testID="settings-screen"
-      >
+      <Screen onRefresh={() => workspace.refetch()} testID="settings-screen">
         <Header title={t('settings.title')} subtitle={active.name} />
         <Card>
           <AppPressable

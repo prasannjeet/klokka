@@ -87,12 +87,7 @@ function EmployeesScreenInner({ workspace }: WorkspaceProps) {
 
   return (
     <>
-      <Screen
-        bottomInset={72}
-        refreshing={members.isRefetching}
-        onRefresh={() => void members.refetch()}
-        testID="employees-screen"
-      >
+      <Screen bottomInset={72} onRefresh={() => members.refetch()} testID="employees-screen">
         <Header
           title={t('employees.title')}
           subtitle={t('employees.subtitleShort', {

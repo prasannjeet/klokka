@@ -143,8 +143,7 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
   return (
     <>
       <Screen
-        refreshing={entries.isRefetching}
-        onRefresh={() => void Promise.all([entries.refetch(), insights.refetch(), flags.refetch()])}
+        onRefresh={() => Promise.all([entries.refetch(), insights.refetch(), flags.refetch()])}
         testID="home-screen"
       >
         <View style={s.top}>

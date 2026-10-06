@@ -49,11 +49,7 @@ function MemberMonthScreenInner({
 
   return (
     <>
-      <Screen
-        refreshing={data.isRefetching}
-        onRefresh={() => void data.refetch()}
-        testID="member-month-screen"
-      >
+      <Screen onRefresh={() => data.refetch()} testID="member-month-screen">
         <Header
           title={name}
           subtitle={formatMonth(month, locale, { capitalize: true })}

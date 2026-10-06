@@ -67,11 +67,7 @@ function InsightsScreenInner({ workspace }: WorkspaceProps) {
     : monthName;
 
   return (
-    <Screen
-      refreshing={insights.isRefetching}
-      onRefresh={() => void insights.refetch()}
-      testID="insights-screen"
-    >
+    <Screen onRefresh={() => insights.refetch()} testID="insights-screen">
       <Header
         title={t('insights.title')}
         subtitle={subtitle}
