@@ -172,7 +172,7 @@ guarded by a regenerate-and-diff check.
   Android package id `se.klokka.app` (D19) never changes once uploaded to Play.
 
 ## Environments (runbook: `docs/OPERATIONS.md`, skill `klokka-ops`)
-- **Production is live (v1.6.2, 2026-10-07)** on NetCup Coolify `https://coolify.prod.roxa.org` (`ssh netcup`, MCP
+- **Production is live (v1.6.3, 2026-10-07)** on NetCup Coolify `https://coolify.prod.roxa.org` (`ssh netcup`, MCP
   `coolify-prod` read-only, `coolify-prod-rw` only with the owner's go-ahead per change), project **Klokka**:
   `klokka.se` (landing), `app.klokka.se` (web), `api.klokka.se` (API), `auth.klokka.se` / `auth-admin.klokka.se`
   (Logto, own template Postgres); database `klokka` on the Common Resources Postgres 18 (`gual64hodx8mn2x4xr04lbhm`);
