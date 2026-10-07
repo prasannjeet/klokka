@@ -2,6 +2,12 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.3, 2026-10-07
+
+### Fixed
+- Android: a text field in a sheet (the job note) stays fully visible above the keyboard while typing, on every
+  phone size, and the sheet keeps its header on screen (CHQ-175).
+
 ## 1.6.2, 2026-10-07
 
 ### Fixed

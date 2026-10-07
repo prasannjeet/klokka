@@ -1,0 +1,1 @@
+The note box stays fully visible above the keyboard while you type, on every phone size.
