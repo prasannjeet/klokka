@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { MonthScreen } from '@/features/month/MonthScreen';
@@ -27,8 +27,8 @@ describe('the workspace guard (CHQ-145)', () => {
     useAppStore.getState().setActiveWorkspace('ws-gone');
     const api = fakeApi({ getMe: { ...employerMeFixture, workspaces: [] } });
     await renderApp(<HomeScreen />, { api });
-    await act(async () => undefined);
-    expect(routerState.replaces).toContain('/');
+    // Waits for the redirect: one tick was not enough under the full suite's load (CI failed on it).
+    await waitFor(() => expect(routerState.replaces).toContain('/'));
     expect(screen.queryByTestId('home-screen')).toBeNull();
     // The stale id is repaired, so the next start does not meet it again.
     expect(useAppStore.getState().activeWorkspaceId).toBeNull();
