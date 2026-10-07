@@ -42,7 +42,8 @@ describe('ResolveFlagScreen (employer)', () => {
     expect(await screen.findByText('Flag from Maria')).toBeTruthy();
     expect(screen.getByText('You logged')).toBeTruthy();
     expect(screen.getByText('Maria says')).toBeTruthy();
-    expect(screen.getByText('Maria Lind flagged the entry')).toBeTruthy();
+    // The history is its own query and may land after the flag: wait for it (CI load made a sync read flaky).
+    expect(await screen.findByText('Maria Lind flagged the entry')).toBeTruthy();
     expect(screen.getByText('Nora Lind logged 2 h')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('flag-fix'));
     await waitFor(() => expect(api.calls.some((c) => c.op === 'resolveFlag')).toBe(true));
