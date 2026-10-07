@@ -2,7 +2,7 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
-## Unreleased
+## 1.6.4, 2026-10-07
 
 ### Fixed
 - Job location search keeps the tapped result in the search field (phone and web), so the house number can be typed
