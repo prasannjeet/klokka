@@ -48,11 +48,11 @@ export interface CurrentWeek {
      */
     days: Array<CurrentWeekDay>;
     /**
-     * 
+     * Employees in membersActive with an entry today.
      */
     membersLoggedToday: number;
     /**
-     * 
+     * Employees hours can be logged for, active or invited (not deactivated, not the employer).
      */
     membersActive: number;
 }

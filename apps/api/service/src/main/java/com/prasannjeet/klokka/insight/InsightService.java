@@ -1,6 +1,7 @@
 package com.prasannjeet.klokka.insight;
 
 import static com.prasannjeet.klokka.contract.model.MemberStatus.ACTIVE;
+import static com.prasannjeet.klokka.contract.model.MemberStatus.INVITED;
 import static com.prasannjeet.klokka.error.KlokkaException.forbidden;
 
 import com.prasannjeet.klokka.auth.Access;
@@ -193,6 +194,9 @@ public class InsightService {
         List<MembershipEntity> all = memberships.listMembers(id);
         Map<UUID, BigDecimal> perMember = entries.hoursPerMember(id, from, until);
         long activeMembers = all.stream().filter(m -> m.status == ACTIVE && m.role == Role.EMPLOYEE).count();
+        // "Working today" counts the people hours are logged for, invited ones included (CHQ-173).
+        Set<UUID> team = new HashSet<>();
+        for (MembershipEntity m : all) if (m.role == Role.EMPLOYEE && (m.status == ACTIVE || m.status == INVITED)) team.add(m.id);
         List<MemberShare> shares = new ArrayList<>();
         BigDecimal labourCost = BigDecimal.ZERO;
         boolean anyRate = false;
@@ -268,7 +272,7 @@ public class InsightService {
                 .weekdayDistribution(distribution)
                 .busiestDay(busiest)
                 .nothingLoggedDays(nothingLogged.stream().map(d -> new NothingLoggedDay().date(d)).toList())
-                .currentWeek(currentWeek(a, today, activeMembers))
+                .currentWeek(currentWeek(a, today, team))
                 .openFlags((int) flags.countOpen(id, null));
     }
 
@@ -335,7 +339,7 @@ public class InsightService {
         return p;
     }
 
-    private CurrentWeek currentWeek(Access a, LocalDate today, long activeMembers) {
+    private CurrentWeek currentWeek(Access a, LocalDate today, Set<UUID> team) {
         DayOfWeek startDay = a.workspace().weekStart == WeekStart.SUNDAY ? DayOfWeek.SUNDAY : DayOfWeek.MONDAY;
         LocalDate from = today;
         while (from.getDayOfWeek() != startDay) from = from.minusDays(1);
@@ -354,8 +358,10 @@ public class InsightService {
                 .to(to)
                 .hours(sum)
                 .days(days)
-                .membersLoggedToday((int) entries.membersLoggedOn(a.workspaceId(), today))
-                .membersActive((int) activeMembers);
+                // Both counts come from the same team, so the first can never exceed the second.
+                .membersLoggedToday((int) entries.listLive(a.workspaceId(), null, today, today).stream()
+                        .map(e -> e.membershipId).filter(team::contains).distinct().count())
+                .membersActive(team.size());
     }
 
     private static WeekTotal best(List<WeekTotal> weeks) {

@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ExpoConfig } from 'expo/config';
 
@@ -27,6 +27,12 @@ const googleServicesFile = join(__dirname, 'google-services.json');
 const inter = (weight: string) => `../../node_modules/@expo-google-fonts/inter/${weight}/Inter_${weight}.ttf`;
 const unbounded = (weight: string) =>
   `../../node_modules/@expo-google-fonts/unbounded/${weight}/Unbounded_${weight}.ttf`;
+
+// The iOS location prompt's text comes from the string catalogue (D2), read as JSON for the same reason as
+// the colours: the config loader cannot import packages/core. iOS shows the device language's version.
+const catalogue = (lang: 'en' | 'sv') =>
+  JSON.parse(readFileSync(join(__dirname, `../../packages/core/i18n/${lang}.json`), 'utf8'));
+const locationText = (lang: 'en' | 'sv'): string => catalogue(lang).places.permission;
 
 const config: ExpoConfig = {
   name: 'Klokka',
@@ -143,12 +149,17 @@ const config: ExpoConfig = {
     [
       'expo-location',
       {
-        locationWhenInUsePermission: 'Klokka uses your location once, to fill in where a job is.',
+        locationWhenInUsePermission: locationText('en'),
         isAndroidBackgroundLocationEnabled: false,
       },
     ],
     './plugins/withReleaseSigning.js',
   ],
+  // Under `ios` only: flat keys would also land in Android's string resources.
+  locales: {
+    en: { ios: { NSLocationWhenInUseUsageDescription: locationText('en') } },
+    sv: { ios: { NSLocationWhenInUseUsageDescription: locationText('sv') } },
+  },
   extra: {
     ...(easProjectId ? { eas: { projectId: easProjectId } } : {}),
   },

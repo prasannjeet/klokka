@@ -397,6 +397,7 @@
     "search": "Sök en adress eller en plats",
     "useHere": "Använd där jag är nu",
     "useHereHint": "Frågar efter din plats en gång",
+    "permission": "Klokka använder din plats en gång, för att fylla i var ett jobb utförs.",
     "recent": "Senaste platser",
     "results": "Resultat",
     "none": "Ingen plats för det här jobbet",

@@ -397,6 +397,7 @@
     "search": "Search an address or a place",
     "useHere": "Use where I am now",
     "useHereHint": "Asks for your location once",
+    "permission": "Klokka uses your location once, to fill in where a job is.",
     "recent": "Recent places",
     "results": "Results",
     "none": "No location for this job",

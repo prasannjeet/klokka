@@ -27,8 +27,9 @@ that has iOS access (a Mac, or an Apple Developer account for Expo's cloud build
   Without it the app works, but no push arrives.
 - Location permission text: `NSLocationWhenInUseUsageDescription` must be set in `app.config.ts` (`ios.infoPlist`) in
   Swedish and English before "Use where I am now" can work; iOS rejects a location request without it.
-  **MacBook session:** done in English through the `expo-location` plugin (`locationWhenInUsePermission`), and the
-  prompt shows it. A Swedish text still needs an iOS `locales` entry in `app.config.ts`.
+  **MacBook session:** done in both languages. The text is the catalogue's `places.permission`, which
+  `app.config.ts` reads for the `expo-location` plugin and for `locales.{en,sv}.ios` (CHQ-174). iOS picks the
+  device language: verified on a Swedish simulator.
 - App Store Connect record and TestFlight testers, if the build should reach phones without a Mac.
 
 ## Two ways to build
@@ -72,8 +73,8 @@ Use the staging employer account from `.agents/local-credentials/staging-account
 
 Found and fixed on the way: CHQ-173. A cold start crashed ("undefined is not a function" in `RecurrenceSummary`)
 once a recurring job was in the persisted query cache, because JSON wrote its weekdays `Set` as `{}`. This affected
-Android too. Also open, not fixed: Home's "Working today" tile can read "1 of 0", because the API counts an invited
-person's hours in `membersLoggedToday` but only active employees in `membersActive`.
+Android too. CHQ-174 then fixed Home's "Working today" tile reading "1 of 0": both counts now come from the
+same team (employees who are active or invited), so an invited person counts and the employer's own hours do not.
 
 1. Sign in, sign out, sign in again (Custom Tab hand-off and the `klokka://` redirect).
 2. Home, Week, Insights, Settings render without overlap at the iPhone's size and with Dynamic Type one step larger.
@@ -100,8 +101,7 @@ model and iOS version.
 - `expo-maps` reports camera moves on iOS too; if a drag does not rename the place on iOS, check `onCameraMove` in
   `PlaceMap.tsx` first (Android was the platform it was verified on). **MacBook session:** verified on iOS, a drag
   renames the place.
-- **MacBook session:** signing out shows the iOS system sheet "Klokka wants to use klokka-logto… to Sign In",
-  because sign-out ends the Logto session in an auth session (`oidcClient.ts`, `openAuthSessionAsync`). iOS
-  words that sheet the same way for every auth session. Tapping Continue completes the sign-out. If the wording
-  confuses users, `preferEphemeralSession` on iOS or skipping the browser step on sign-out are the options; both
-  touch the privacy choice of ending the server session, so that is the owner's call.
+- **MacBook session:** iOS signs in through a private auth session (`preferEphemeralSession`, CHQ-174). Safari
+  keeps no Logto cookie, so iOS no longer shows its "Klokka wants to use ... to Sign In" sheet, and sign-out opens
+  no browser at all (there is no browser session to end). The cost: iOS never reuses a Safari login, so each
+  sign-in types the credentials. Android is unchanged: a Custom Tab, with the session ended on sign-out.

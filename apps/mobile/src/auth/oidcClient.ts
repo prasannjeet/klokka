@@ -1,6 +1,7 @@
 import { AuthRequest, exchangeCodeAsync, fetchDiscoveryAsync, refreshAsync } from 'expo-auth-session';
 import type { DiscoveryDocument, TokenResponse } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
+import { Platform } from 'react-native';
 import type { AuthConfig } from './config';
 import type { FirstScreen } from './oidcRequests';
 import {
@@ -64,7 +65,9 @@ export function createOidcClient(config: AuthConfig): OidcClient {
     async signIn(firstScreen) {
       const doc = await discovery();
       const request = new AuthRequest(buildAuthRequestConfig(config, firstScreen));
-      const result = await request.promptAsync(doc);
+      // iOS: a private session keeps no Logto cookie in Safari, which also skips the system's "wants to use
+      // ... to Sign In" sheet. Android ignores the flag; its Custom Tab session is ended on sign-out instead.
+      const result = await request.promptAsync(doc, { preferEphemeralSession: true });
       if (result.type === 'cancel' || result.type === 'dismiss') return { kind: 'cancelled' };
       if (result.type === 'error') {
         return {
@@ -89,6 +92,9 @@ export function createOidcClient(config: AuthConfig): OidcClient {
     },
 
     async endSession(idToken) {
+      // iOS signs in privately (above): no browser session is left to end, and opening one would only show
+      // the system sheet again. The tokens are already gone from the device.
+      if (Platform.OS === 'ios') return;
       const doc = await discovery();
       const endpoint = doc.endSessionEndpoint;
       if (endpoint === undefined) return;

@@ -136,15 +136,6 @@ public class EntryRepository implements PanacheRepositoryBase<HourEntryEntity, U
         return query.getResultStream().collect(Collectors.toMap(row -> (LocalDate) row[0], row -> (BigDecimal) row[1]));
     }
 
-    // Distinct members with a live entry on one day.
-    public long membersLoggedOn(WorkspaceId workspaceId, LocalDate date) {
-        return em().createQuery("select count(distinct e.membershipId) from HourEntryEntity e where e.workspaceId = :w "
-                        + "and e.workDate = :d and e.deletedAt is null", Long.class)
-                .setParameter("w", workspaceId.value())
-                .setParameter("d", date)
-                .getSingleResult();
-    }
-
     // Which days of the week (1 = Monday .. 7 = Sunday) the workspace has ever logged on.
     public List<Integer> weekdaysEverLogged(WorkspaceId workspaceId) {
         return em().createNativeQuery("select distinct extract(isodow from work_date)::int from hour_entry "

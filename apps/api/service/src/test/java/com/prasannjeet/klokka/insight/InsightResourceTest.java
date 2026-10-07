@@ -34,6 +34,7 @@ class InsightResourceTest {
 
     TestData data;
     UUID ws;
+    UUID nora;
     UUID maria;
     UUID jonas;
 
@@ -45,7 +46,7 @@ class InsightResourceTest {
         data.user(MARIA, "maria@example.com", "Maria Lind");
         data.user(JONAS, "jonas@example.com", "Jonas Berg");
         ws = data.workspace("Insight Corp", "insight-" + UUID.randomUUID().toString().substring(0, 8), true, "NONE", "Europe/Stockholm");
-        data.member(ws, NORA, "EMPLOYER", "Nora Lind", "nora@cafenord.example", null, "ACTIVE");
+        nora = data.member(ws, NORA, "EMPLOYER", "Nora Lind", "nora@cafenord.example", null, "ACTIVE");
         maria = data.member(ws, MARIA, "EMPLOYEE", "Maria Lind", "maria@example.com", new BigDecimal("170.00"), "ACTIVE");
         jonas = data.member(ws, JONAS, "EMPLOYEE", "Jonas Berg", "jonas@example.com", new BigDecimal("150.00"), "ACTIVE");
         // September 2026 up to Wednesday the 23rd (asOf): Maria Mon-Fri 4 h in weeks 37 and 38, then 21, 22, 23; Jonas 8 h on the
@@ -114,6 +115,23 @@ class InsightResourceTest {
         given().when().get("/v1/workspaces/" + ws + "/insights?month=2026-08").then().statusCode(200)
                 .body("asOf", is("2026-08-31")).body("totalHours", is(40.0f)).body("elapsedWorkingDays", is(21)).body("projectedMonthEndHours", is(40.0f))
                 .body("nothingLoggedDays", hasSize(16));
+    }
+
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void workingTodayCountsInvitedEmployeesAndOnlyTheTeam() {
+        // An invited employee with hours today is working and part of the team; the employer's own hours and a
+        // deactivated employee's are neither, so "working today" never reads more than the team ("1 of 0").
+        UUID ayla = data.member(ws, null, "EMPLOYEE", "Ayla Demir", "ayla@example.com", null, "INVITED");
+        data.user("usr_in_olle", "olle@example.com", "Olle Ek");
+        UUID olle = data.member(ws, "usr_in_olle", "EMPLOYEE", "Olle Ek", "olle@example.com", null, "DEACTIVATED");
+        LocalDate today = LocalDate.of(2026, 9, 23);
+        data.entry(ws, ayla, today, new BigDecimal("2.00"), null, NORA);
+        data.entry(ws, olle, today, new BigDecimal("2.00"), null, NORA);
+        data.entry(ws, nora, today, new BigDecimal("2.00"), null, NORA);
+        given().when().get("/v1/workspaces/" + ws + "/insights").then().statusCode(200)
+                .body("currentWeek.membersLoggedToday", is(2)).body("currentWeek.membersActive", is(3));
     }
 
     @Test

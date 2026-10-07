@@ -679,6 +679,7 @@ export const sv = {
   "places.moveMapHint": "Flytta kartan för att justera nålen",
   "places.noResults": "Inga platser matchar.",
   "places.none": "Ingen plats för det här jobbet",
+  "places.permission": "Klokka använder din plats en gång, för att fylla i var ett jobb utförs.",
   "places.poweredBy": "Platser från Google",
   "places.recent": "Senaste platser",
   "places.results": "Resultat",
@@ -1831,6 +1832,7 @@ export const en = {
   "places.moveMapHint": "Move the map to adjust the pin",
   "places.noResults": "No places match that.",
   "places.none": "No location for this job",
+  "places.permission": "Klokka uses your location once, to fill in where a job is.",
   "places.poweredBy": "Places by Google",
   "places.recent": "Recent places",
   "places.results": "Results",
@@ -2964,6 +2966,7 @@ export type MessageParams = {
   "places.moveMapHint": Record<never, never>;
   "places.noResults": Record<never, never>;
   "places.none": Record<never, never>;
+  "places.permission": Record<never, never>;
   "places.poweredBy": Record<never, never>;
   "places.recent": Record<never, never>;
   "places.results": Record<never, never>;

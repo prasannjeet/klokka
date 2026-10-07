@@ -3809,9 +3809,11 @@ components:
             $ref: '#/components/schemas/CurrentWeekDay'
         membersLoggedToday:
           type: integer
+          description: Employees in membersActive with an entry today.
           example: 3
         membersActive:
           type: integer
+          description: Employees hours can be logged for, active or invited (not deactivated, not the employer).
           example: 4
       example:
         isoWeek: 39
