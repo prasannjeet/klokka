@@ -21,3 +21,12 @@ it('keeps a focused field in a sheet above the keyboard on every phone size', as
   expect(body).toContainElement(screen.getByTestId('sheet-note'));
   expect(body.props.bottomOffset).toBeGreaterThan(0);
 });
+
+it('shows the close button on a main page only, so a sub-page cannot discard the main page (CHQ-172)', async () => {
+  const sheet = createRef<SheetHandle>();
+  const view = await renderApp(<AppSheet ref={sheet} title="Job" closeLabel="Close" />);
+  await act(() => sheet.current?.present());
+  expect(screen.getByTestId('sheet-close')).toBeTruthy();
+  await view.rerender(<AppSheet ref={sheet} title="Job" closeLabel="Close" showClose={false} />);
+  expect(screen.queryByTestId('sheet-close')).toBeNull();
+});

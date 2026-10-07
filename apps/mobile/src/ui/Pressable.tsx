@@ -62,8 +62,12 @@ export function AppPressable({
     [hapticKind, onPress],
   );
 
+  // `key`: a new native view whenever `disabled` flips (CHQ-172). React Native on Android (Fabric) sets the view's
+  // `enabled` flag from accessibilityState.disabled but drops the key once it is false, so a button that started
+  // disabled stayed natively disabled; Android's hit test skips such a view and only taps on its label got through.
   return (
     <AnimatedPressable
+      key={rest.disabled ? 'disabled' : 'enabled'}
       {...rest}
       onPressIn={handleIn}
       onPressOut={handleOut}

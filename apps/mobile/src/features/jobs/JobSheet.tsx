@@ -236,6 +236,7 @@ export const JobSheet = forwardRef<
       }
       subtitle={subtitle}
       closeLabel={t('common.close')}
+      showClose={panel === 'job'}
       onDismiss={() => setTarget(null)}
       testID="job-sheet"
     >

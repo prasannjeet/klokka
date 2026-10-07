@@ -25,6 +25,9 @@ export interface AppSheetProps {
   title?: string | undefined;
   subtitle?: string | undefined;
   closeLabel: string;
+  // False on a sheet's sub-page (a step reached from the main page): it shows only its own Back, so the close
+  // button cannot throw away what the main page holds. Swiping the sheet down still closes it.
+  showClose?: boolean;
   onDismiss?: () => void;
   children?: ReactNode;
   testID?: string;
@@ -56,7 +59,7 @@ const styles = (t: Theme) =>
   });
 
 export const AppSheet = forwardRef<SheetHandle, AppSheetProps>(function AppSheet(
-  { title, subtitle, closeLabel, onDismiss, children, testID },
+  { title, subtitle, closeLabel, showClose = true, onDismiss, children, testID },
   ref,
 ) {
   const theme = useTheme();
@@ -78,6 +81,7 @@ export const AppSheet = forwardRef<SheetHandle, AppSheetProps>(function AppSheet
           title={title}
           subtitle={subtitle}
           closeLabel={closeLabel}
+          showClose={showClose}
           onClose={() => sheet.current?.dismiss()}
           testID={testID}
         >
@@ -94,6 +98,7 @@ function SheetBody({
   title,
   subtitle,
   closeLabel,
+  showClose,
   onClose,
   children,
   testID,
@@ -119,15 +124,18 @@ function SheetBody({
                 </AppText>
               ) : null}
             </View>
-            <AppPressable
-              accessibilityRole="button"
-              accessibilityLabel={closeLabel}
-              onPress={onClose}
-              hitSlop={(theme.tapMin - CLOSE) / 2}
-              style={s.close}
-            >
-              <Icon name="x" size={18} />
-            </AppPressable>
+            {showClose ? (
+              <AppPressable
+                accessibilityRole="button"
+                accessibilityLabel={closeLabel}
+                onPress={onClose}
+                hitSlop={(theme.tapMin - CLOSE) / 2}
+                style={s.close}
+                testID="sheet-close"
+              >
+                <Icon name="x" size={18} />
+              </AppPressable>
+            ) : null}
           </View>
         ) : null}
         <KeyboardAwareScrollView
