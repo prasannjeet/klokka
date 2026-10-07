@@ -1,0 +1,1 @@
+Fixes: buttons that start greyed out (Done, Use this date, Save job) react anywhere on the button again, and closing a step of the job form no longer discards the job.

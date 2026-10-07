@@ -1,0 +1,1 @@
+Rättningar: knappar som först är gråa (Klar, Använd det här datumet, Spara jobb) reagerar på hela knappen igen, och att stänga ett steg i jobbformuläret kastar inte längre jobbet.

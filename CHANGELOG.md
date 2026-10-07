@@ -2,6 +2,14 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.1, 2026-10-07
+
+### Fixed
+- Android: buttons that start disabled (Repeat's Done, Use this date, Save job) react anywhere on the button again,
+  not only on the label (CHQ-172).
+- Inside a step of the job sheet (Repeat, Starts at), the close button no longer throws away the new job; the step
+  keeps its Back (CHQ-172).
+
 ## 1.6.0, 2026-10-06
 
 ### Added
