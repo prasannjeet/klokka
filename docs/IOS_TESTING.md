@@ -4,6 +4,12 @@ Klokka's phone app is one Expo project (`apps/mobile`) for Android and iOS, but 
 and tested: this host is Ubuntu, and iOS apps can only be compiled on macOS with Xcode. This page is for a session
 that has iOS access (a Mac, or an Apple Developer account for Expo's cloud builds) and an iPhone.
 
+> **MacBook session (2026-10-07):** the app now builds and runs on a Mac (Xcode 27, iOS 27 simulator, iPhone 18
+> Pro) against staging. iOS-only fixes from that work: CHQ-165 (scene lifecycle for SDK 57 on iOS 27, Node pinned in
+> `.nvmrc`), CHQ-166 to CHQ-170 (keyboard in sheets, notification prompt, tab highlight, Insights chart, day
+> slide direction, pull to refresh), CHQ-173 (cold-start crash, below). Notes from that pass are marked
+> "MacBook session" on this page.
+
 ## What exists for iOS already
 
 - `apps/mobile/app.config.ts`: `ios.bundleIdentifier` is `se.klokka.app` (the same id as Android, D19), no tablet
@@ -21,6 +27,8 @@ that has iOS access (a Mac, or an Apple Developer account for Expo's cloud build
   Without it the app works, but no push arrives.
 - Location permission text: `NSLocationWhenInUseUsageDescription` must be set in `app.config.ts` (`ios.infoPlist`) in
   Swedish and English before "Use where I am now" can work; iOS rejects a location request without it.
+  **MacBook session:** done in English through the `expo-location` plugin (`locationWhenInUsePermission`), and the
+  prompt shows it. A Swedish text still needs an iOS `locales` entry in `app.config.ts`.
 - App Store Connect record and TestFlight testers, if the build should reach phones without a Mac.
 
 ## Two ways to build
@@ -36,6 +44,13 @@ that has iOS access (a Mac, or an Apple Developer account for Expo's cloud build
    Runtime values come from `apps/mobile/.env` (`EXPO_PUBLIC_*`), as on Android: point them at **staging** (see
    `apps/mobile/.env.example`). Never test against production.
 
+   **MacBook session:** this works. On the Mac use the nvm Node from `.nvmrc` (24.14.0) and `LANG=en_US.UTF-8`
+   (CocoaPods needs it). With Metro already running, `npx expo run:ios --no-bundler --device <simulator id>`.
+   Xcode 27 with iOS 27 needs `ios.enableSceneSupport` (`expo-build-properties`, CHQ-165), which is already in
+   `app.config.ts`. Handy simulator switches: `xcrun simctl ui <id> appearance dark|light`,
+   `xcrun simctl ui <id> content_size extra-large|large`, `xcrun simctl location <id> set <lat>,<lng>`,
+   `xcrun simctl privacy <id> reset location se.klokka.app`.
+
 2. **From any host with Expo's cloud builders (EAS Build)**: needs the Apple Developer account and `EXPO_TOKEN`
    (`.agents/local-credentials/expo.json`). `eas build --platform ios --profile preview` builds on Expo's Macs; the
    result installs through TestFlight or an ad-hoc link. This Ubuntu host can start such a build, but it cannot run
@@ -44,6 +59,21 @@ that has iOS access (a Mac, or an Apple Developer account for Expo's cloud build
 ## What to test (staging, both light and dark mode)
 
 Use the staging employer account from `.agents/local-credentials/staging-accounts.json`.
+
+**MacBook session results (2026-10-07, iPhone 18 Pro simulator, iOS 27, app 1.6.1, staging):**
+
+| Step | Result |
+|---|---|
+| 1. Sign in / out / in | Signing in works (the app has run signed in against staging all along). The sign-out and sign-in loop was handed to the owner, because the agent does not type passwords on a remote sign-in page. |
+| 2. Tabs render | Pass, light and dark, default text and one step larger (`extra-large`): Home, People, Calendar, Settings, plus Insights behind Home. The tabs are the CHQ-171 set now (Week and Insights are no longer tabs for an employer). If the text size changes while the app runs, labels can stay clipped until a relaunch; a relaunch shows them correctly. |
+| 3. Job location | Pass, every item: Apple Maps picker; Back closes it without changes; results in a fixed area with "Places by Google"; picking a result moves the map; a drag renames the place (`onCameraMove` works on iOS); "Use this place" shows the place and a map preview, kept after saving; "Use where I am now" asks once and lands on the simulated position; "No location for this job" clears it. With no place, the picker also lists recent places. |
+| 4. Recurring jobs | Pass: weekly, Mon and Thu, 4 weeks; the preview lists 8 dates; saved; "Stop this and future jobs" from a later date removed the rest and the job shows "Repeat stopped". |
+| 5. Push | Not tested: no APNs key yet. |
+
+Found and fixed on the way: CHQ-173. A cold start crashed ("undefined is not a function" in `RecurrenceSummary`)
+once a recurring job was in the persisted query cache, because JSON wrote its weekdays `Set` as `{}`. This affected
+Android too. Also open, not fixed: Home's "Working today" tile can read "1 of 0", because the API counts an invited
+person's hours in `membersLoggedToday` but only active employees in `membersActive`.
 
 1. Sign in, sign out, sign in again (Custom Tab hand-off and the `klokka://` redirect).
 2. Home, Week, Insights, Settings render without overlap at the iPhone's size and with Dynamic Type one step larger.
@@ -68,4 +98,10 @@ model and iOS version.
 - Apple Maps instead of Google Maps (by design: no key, free, native look).
 - The back control in the picker is "‹ Back" in the accent colour (the iOS convention); Android shows an arrow.
 - `expo-maps` reports camera moves on iOS too; if a drag does not rename the place on iOS, check `onCameraMove` in
-  `PlaceMap.tsx` first (Android was the platform it was verified on).
+  `PlaceMap.tsx` first (Android was the platform it was verified on). **MacBook session:** verified on iOS, a drag
+  renames the place.
+- **MacBook session:** signing out shows the iOS system sheet "Klokka wants to use klokka-logto… to Sign In",
+  because sign-out ends the Logto session in an auth session (`oidcClient.ts`, `openAuthSessionAsync`). iOS
+  words that sheet the same way for every auth session. Tapping Continue completes the sign-out. If the wording
+  confuses users, `preferEphemeralSession` on iOS or skipping the browser step on sign-out are the options; both
+  touch the privacy choice of ending the server session, so that is the owner's call.

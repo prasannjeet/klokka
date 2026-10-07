@@ -64,6 +64,18 @@ describe('the persisted query cache', () => {
     });
   });
 
+  it("keeps a recurring job's weekdays a Set (plain JSON wrote {} and RecurrenceSummary crashed on cold start)", () => {
+    const rule = { frequency: 'WEEKLY', interval: 1, weekdays: new Set(['MONDAY', 'THURSDAY']) };
+    // Positive control: plain JSON loses the Set entirely.
+    const plain = JSON.parse(JSON.stringify(persisted(rule))) as PersistedClient;
+    expect((plain.clientState.queries[0]?.state.data as typeof rule).weekdays).toEqual({});
+
+    const restored = deserializeCache(serializeCache(persisted(rule)));
+    const weekdays = (restored.clientState.queries[0]?.state.data as typeof rule).weekdays;
+    expect(weekdays).toBeInstanceOf(Set);
+    expect([...weekdays]).toEqual(['MONDAY', 'THURSDAY']);
+  });
+
   it('restores a cache saved by the real persister with Dates intact', async () => {
     const persister = createPersister('usr_maria');
     const source = client();

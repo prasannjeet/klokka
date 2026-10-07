@@ -51,6 +51,19 @@ describe('PeopleScreen (employer)', () => {
     expect(screen.getByText('Café Nord, 4 people')).toBeTruthy();
   });
 
+  it('names no count while the people are still loading (a cold start said "0 people")', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getWorkspace: workspaceFixture,
+      listMembers: () => new Promise(() => {}),
+      listEntries: entriesFixture,
+      listFlags: [],
+    });
+    await renderApp(<PeopleScreen />, { api });
+    expect(await screen.findByText('Café Nord')).toBeTruthy();
+    expect(screen.queryByText(/0 people/)).toBeNull();
+  });
+
   it('opens the job sheet from the plus, a chip and the minutes wheel set the time, save creates a job', async () => {
     const api = peopleApi();
     await renderApp(<PeopleScreen />, { api });

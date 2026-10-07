@@ -51,29 +51,40 @@ export function createPersister(userId: string) {
 // The generated client hands the screens real Dates (work dates, timestamps). Plain JSON writes a Date
 // as a string and never turns it back, so a restored cache fed strings to code calling getFullYear()
 // and every cold start crashed until the app was reinstalled (CHQ-145). Dates are tagged on the way
-// out and revived on the way in, so a restored query is indistinguishable from a fetched one.
+// out and revived on the way in, so a restored query is indistinguishable from a fetched one. Sets (a
+// recurring job's weekdays) get the same treatment: plain JSON writes a Set as {}.
 const DATE_TAG = '$klokkaDate';
+const SET_TAG = '$klokkaSet';
 
 export function serializeCache(client: PersistedClient): string {
   return JSON.stringify(client, function (this: Record<string, unknown>, key: string, value: unknown) {
     const raw = this[key];
-    return raw instanceof Date ? { [DATE_TAG]: raw.getTime() } : value;
+    if (raw instanceof Date) return { [DATE_TAG]: raw.getTime() };
+    if (raw instanceof Set) return { [SET_TAG]: [...raw] };
+    return value;
   });
 }
 
 export function deserializeCache(text: string): PersistedClient {
   return JSON.parse(text, (_key: string, value: unknown) => {
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      const tagged = (value as Record<string, unknown>)[DATE_TAG];
-      if (typeof tagged === 'number' && Object.keys(value).length === 1) return new Date(tagged);
+    if (
+      value !== null &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 1
+    ) {
+      const date = (value as Record<string, unknown>)[DATE_TAG];
+      if (typeof date === 'number') return new Date(date);
+      const set = (value as Record<string, unknown>)[SET_TAG];
+      if (Array.isArray(set)) return new Set(set);
     }
     return value;
   }) as PersistedClient;
 }
 
-// Bumped whenever the persisted shape changes; 2 = dates tagged. A cache written by another app
-// version, another contract or the untagged serializer is dropped instead of read back.
-const CACHE_SCHEMA = 2;
+// Bumped whenever the persisted shape changes; 2 = dates tagged, 3 = sets tagged. A cache written by
+// another app version, another contract or an older serializer is dropped instead of read back.
+const CACHE_SCHEMA = 3;
 
 export function cacheBuster(): string {
   const version = Constants.expoConfig?.version ?? '0';

@@ -99,10 +99,15 @@ function PeopleScreenInner({ workspace }: WorkspaceProps) {
       >
         <Header
           title={t('nav.people')}
-          subtitle={t('team.peopleSubtitle', {
-            workspace: workspace.name,
-            people: t('common.people', { count: people.length }),
-          })}
+          // No count until the members load: a cold start without a cache said "0 people" for a moment.
+          subtitle={
+            members.data
+              ? t('team.peopleSubtitle', {
+                  workspace: workspace.name,
+                  people: t('common.people', { count: people.length }),
+                })
+              : workspace.name
+          }
           trailing={
             <AppPressable
               accessibilityRole="button"
