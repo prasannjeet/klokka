@@ -2,6 +2,14 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## Unreleased
+
+### Fixed
+- Job location search keeps the tapped result in the search field (phone and web), so the house number can be typed
+  after a street picked from a few letters (CHQ-176).
+- Android: picking a search result moves the map straight to it; a camera flight cut short could rename the place
+  after the wrong spot (CHQ-176).
+
 ## 1.6.3, 2026-10-07
 
 ### Fixed

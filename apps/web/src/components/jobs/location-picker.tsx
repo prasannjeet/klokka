@@ -81,6 +81,9 @@ export function LocationPicker({
     try {
       const place = await api.places.getPlace({ workspaceId, placeId: s.placeId, session: session.current });
       choose(place);
+      // The picked result stays in the search field (CHQ-176): "Change" opens it again with its results, and the
+      // user can type on, such as the house number after a street picked from two letters.
+      setQuery(s.primaryText);
     } catch (e) {
       setError(problemMessage(t, await toProblem(e)));
     }

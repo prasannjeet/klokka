@@ -140,7 +140,8 @@ export function LocationPicker({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const debounced = useDebounced(query);
-  const search = usePlaceSearch(workspaceId, debounced, session.current);
+  // Only while the field has focus: the picked result stays in it and must not search in the background.
+  const search = usePlaceSearch(workspaceId, focused ? debounced : '', session.current);
   const recent = useRecentPlaces(workspaceId, visible);
   const typing = focused && debounced.trim().length >= 2;
   const recents = (recent.data ?? []).slice(0, RECENT_SHOWN);
@@ -165,14 +166,17 @@ export function LocationPicker({
     map.current?.moveTo(place, PLACE_ZOOM);
   };
 
-  const choose = async (placeId: string) => {
+  // The tapped result stays in the search field (CHQ-176): a tap on the field again shows the results again, and
+  // the user can type on, such as the house number after a street picked from two letters.
+  const choose = async (placeId: string, text: string) => {
     Keyboard.dismiss();
+    setFocused(false);
+    setQuery(text);
     setBusy(true);
     setError(null);
     try {
       const place = await api.places.getPlace({ workspaceId, placeId, session: session.current });
       session.current = Crypto.randomUUID();
-      setQuery('');
       show(place);
     } catch (e) {
       setError(await problemMessage(e, t));
@@ -366,7 +370,7 @@ export function LocationPicker({
                       theme.color.primary,
                       r.primaryText,
                       r.secondaryText ?? null,
-                      () => void choose(r.placeId),
+                      () => void choose(r.placeId, r.primaryText),
                     )}
                   </View>
                 ))}

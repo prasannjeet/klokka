@@ -39,7 +39,10 @@ export const PlaceMap = forwardRef<
   useImperativeHandle(ref, () => ({
     moveTo: (to, z) => {
       if (Platform.OS === 'ios') apple.current?.setCameraPosition({ coordinates: to, zoom: z });
-      else google.current?.setCameraPosition({ coordinates: to, zoom: z, duration: 400 });
+      // An instant move (duration 0): Google cancels an animated flight when the map resizes under it (the
+      // keyboard closing), and a camera resting short of the place can rename it after the wrong spot (CHQ-176).
+      // expo-maps drops the rejected promise, so it cannot be caught and retried.
+      else google.current?.setCameraPosition({ coordinates: to, zoom: z, duration: 0 });
     },
   }));
   const onCameraMove = (e: { coordinates: { latitude?: number; longitude?: number } }) => {
