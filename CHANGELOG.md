@@ -2,6 +2,14 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.2, 2026-10-07
+
+### Fixed
+- Android and iOS: the app no longer crashes on a cold start after a recurring job was loaded once (CHQ-173).
+- Home's "working today" counts the same team on both sides, active and invited employees (CHQ-174).
+- iOS: sign-in and sign-out no longer show a system sheet or open the browser to sign out; the location prompt is
+  in Swedish and English (CHQ-174).
+
 ## 1.6.1, 2026-10-07
 
 ### Fixed

@@ -1,0 +1,1 @@
+Fixes a crash when opening the app after a recurring job was loaded, and Home's working today now counts the whole team.

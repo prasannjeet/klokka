@@ -1,0 +1,1 @@
+Rättar en krasch när appen öppnas efter att ett återkommande jobb laddats, och Hemmets arbetar idag räknar nu hela teamet.
