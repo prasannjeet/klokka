@@ -547,6 +547,8 @@
     "employersCreateOnWeb": "Employers create their business on the web.",
     "expired": "This invitation has expired. Ask {name} to send a new one.",
     "wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
+    "signedInAsOther": "You are signed in as {current}, but this invitation was sent to {email}. Sign out, then sign in with {email} to accept it.",
+    "signOutToAccept": "Sign out to accept",
     "accepted": "You joined {workspace}.",
     "continueOnWeb": "Continue on the web"
   },

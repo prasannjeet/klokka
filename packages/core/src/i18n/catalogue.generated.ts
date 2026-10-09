@@ -310,6 +310,8 @@ export const sv = {
   "invitation.repeatPassword": "Upprepa lösenordet",
   "invitation.repeatPasswordPlaceholder": "Samma igen",
   "invitation.signInToAccept": "Logga in för att acceptera",
+  "invitation.signOutToAccept": "Logga ut för att acceptera",
+  "invitation.signedInAsOther": "Du är inloggad som {current}, men inbjudan skickades till {email}. Logga ut och logga sedan in med {email} för att acceptera.",
   "invitation.title": "Inbjudan",
   "invitation.workspace": "Företag",
   "invitation.wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
@@ -1463,6 +1465,8 @@ export const en = {
   "invitation.repeatPassword": "Repeat password",
   "invitation.repeatPasswordPlaceholder": "Same again",
   "invitation.signInToAccept": "Sign in to accept",
+  "invitation.signOutToAccept": "Sign out to accept",
+  "invitation.signedInAsOther": "You are signed in as {current}, but this invitation was sent to {email}. Sign out, then sign in with {email} to accept it.",
   "invitation.title": "Invitation",
   "invitation.workspace": "Business",
   "invitation.wrongAccount": "This invitation was sent to {email}. Sign in with that address to accept it.",
@@ -2610,6 +2614,8 @@ export type MessageParams = {
   "invitation.repeatPassword": Record<never, never>;
   "invitation.repeatPasswordPlaceholder": Record<never, never>;
   "invitation.signInToAccept": Record<never, never>;
+  "invitation.signOutToAccept": Record<never, never>;
+  "invitation.signedInAsOther": { current: string | number; email: string | number };
   "invitation.title": Record<never, never>;
   "invitation.workspace": Record<never, never>;
   "invitation.wrongAccount": { email: string | number };

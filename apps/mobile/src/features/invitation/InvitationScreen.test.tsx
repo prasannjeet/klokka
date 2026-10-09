@@ -54,6 +54,17 @@ describe('InvitationScreen (second workspace, in-app)', () => {
     expect(routerState.replaces.at(-1)).toBe('/');
   });
 
+  it('signed in as another account: says so and offers sign-out instead of Join (CHQ-178)', async () => {
+    const api = fakeApi({
+      getMe: { ...meFixture, user: { ...meFixture.user, email: 'other@example.com' } },
+      getInvitation: invitation,
+    });
+    await renderApp(<InvitationScreen token="tok-123" />, { api });
+    expect(await screen.findByTestId('invitation-sign-out')).toBeTruthy();
+    expect(screen.getByText(/signed in as other@example.com/)).toBeTruthy();
+    expect(screen.queryByTestId('invitation-join')).toBeNull();
+  });
+
   it('explains an expired invitation from the problem code', async () => {
     const problem = new Response(JSON.stringify({ code: 'INVITATION_EXPIRED', status: 410, title: 'Gone' }), {
       status: 410,

@@ -3,7 +3,8 @@
 // Accepting an invitation (CHQ-114, mockup login.html "Invited"): the workspace tile first, then one action.
 // Not signed in: Join opens Logto's sign-up with the invited email filled in (or sign in with an existing
 // account) and comes back here with accept=1. Signed in: accept right away. Afterwards: get the Android app
-// or continue on the web.
+// or continue on the web. Signed in as another account (CHQ-178): no Join, only a sign-out that comes back
+// here, so the invited address can sign in.
 import Link from 'next/link';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -12,7 +13,7 @@ import { BrandPanel } from '@/components/brand-panel';
 import { Icon } from '@/components/icons';
 import { LanguageToggle } from '@/components/language-toggle';
 import { api } from '@/lib/api';
-import { signInAction } from '@/lib/auth-actions';
+import { signInAction, signOutAction } from '@/lib/auth-actions';
 import { useT } from '@/lib/i18n';
 import { problemMessage, toProblem, type ProblemInfo } from '@/lib/problem';
 import { colourVar } from '@/lib/visual';
@@ -24,12 +25,14 @@ export function JoinView({
   token,
   lookup,
   signedIn,
+  accountEmail,
   autoAccept,
   apkUrl,
 }: {
   token: string;
   lookup: JoinLookup;
   signedIn: boolean;
+  accountEmail: string | null;
   autoAccept: boolean;
   apkUrl: string | null;
 }) {
@@ -50,12 +53,17 @@ export function JoinView({
   });
 
   const pending = invitation?.status === 'PENDING';
+  const otherAccount =
+    signedIn &&
+    !!accountEmail &&
+    !!invitation &&
+    accountEmail.toLowerCase() !== invitation.email.toLowerCase();
   useEffect(() => {
-    if (autoAccept && signedIn && pending && !started.current) {
+    if (autoAccept && signedIn && !otherAccount && pending && !started.current) {
       started.current = true;
       accept.mutate();
     }
-  }, [autoAccept, signedIn, pending, accept]);
+  }, [autoAccept, signedIn, otherAccount, pending, accept]);
 
   const tileStyle = invitation
     ? ({ '--ws-color': colourVar(invitation.workspaceColour) } as CSSProperties)
@@ -132,7 +140,22 @@ export function JoinView({
                   <label htmlFor="join-email">{t('invitation.emailFromInvitation')}</label>
                   <input className="input" id="join-email" type="email" value={invitation.email} readOnly />
                 </div>
-                {signedIn ? (
+                {otherAccount ? (
+                  <>
+                    <div className="banner bad" role="alert" style={{ marginTop: 16 }}>
+                      <Icon name="alert" />
+                      <span>
+                        {t('invitation.signedInAsOther', { current: accountEmail, email: invitation.email })}
+                      </span>
+                    </div>
+                    <form action={signOutAction}>
+                      <input type="hidden" name="next" value={`/join?token=${encodeURIComponent(token)}`} />
+                      <button className="btn btn-primary btn-block mt" type="submit">
+                        {t('invitation.signOutToAccept')}
+                      </button>
+                    </form>
+                  </>
+                ) : signedIn ? (
                   <>
                     <button
                       className="btn btn-primary btn-block mt"

@@ -15,6 +15,15 @@ export async function isSignedIn(): Promise<boolean> {
   return context.isAuthenticated;
 }
 
+// The signed-in account's email from the ID token (the Email scope), or null when unknown. The development fake
+// session has none, so the join page keeps its plain signed-in path there.
+export async function signedInEmail(): Promise<string | null> {
+  if (fakeSessionEnabled()) return null;
+  const context = await getLogtoContext(logtoConfig());
+  const email = context.isAuthenticated ? context.claims?.email : null;
+  return typeof email === 'string' && email ? email : null;
+}
+
 export async function devPersona(): Promise<Persona | null> {
   if (!fakeSessionEnabled()) return null;
   return personaFrom((await cookies()).get(PERSONA_COOKIE)?.value);

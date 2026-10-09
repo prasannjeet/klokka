@@ -547,6 +547,8 @@
     "employersCreateOnWeb": "Arbetsgivare skapar sitt företag på webben.",
     "expired": "Inbjudan har gått ut. Be {name} skicka en ny.",
     "wrongAccount": "Inbjudan skickades till {email}. Logga in med den adressen för att acceptera.",
+    "signedInAsOther": "Du är inloggad som {current}, men inbjudan skickades till {email}. Logga ut och logga sedan in med {email} för att acceptera.",
+    "signOutToAccept": "Logga ut för att acceptera",
     "accepted": "Du gick med i {workspace}.",
     "continueOnWeb": "Fortsätt på webben"
   },

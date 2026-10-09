@@ -1,7 +1,7 @@
 import { ResponseError, type Invitation } from '@klokka/api-client';
 import { androidApkUrl } from '@/lib/env';
 import { requestLocale } from '@/lib/server-prefs';
-import { isSignedIn, serverApi } from '@/lib/session';
+import { serverApi, signedInEmail, isSignedIn } from '@/lib/session';
 import { JoinView, type JoinLookup } from './join-view';
 
 // The invitation link from the email (docs/DECISIONS.md D3): /join?token=... The workspace card comes from
@@ -13,7 +13,7 @@ export default async function JoinPage({
 }) {
   const params = await searchParams;
   const token = typeof params.token === 'string' ? params.token.trim() : '';
-  const [signedIn, lang] = await Promise.all([isSignedIn(), requestLocale()]);
+  const [signedIn, accountEmail, lang] = await Promise.all([isSignedIn(), signedInEmail(), requestLocale()]);
   let lookup: JoinLookup;
   if (!token) {
     lookup = { kind: 'NOT_FOUND' };
@@ -36,6 +36,7 @@ export default async function JoinPage({
       token={token}
       lookup={lookup}
       signedIn={signedIn}
+      accountEmail={accountEmail}
       autoAccept={params.accept === '1'}
       apkUrl={androidApkUrl()}
     />

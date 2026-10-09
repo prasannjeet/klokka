@@ -9,6 +9,7 @@ import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemCode, problemMessage } from '@/lib/problems';
 import { useAppStore } from '@/store/appStore';
 import { enterApp } from '@/features/shell/enterApp';
+import { useSignOut } from '@/features/shell/useSignOut';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppText, Avatar, Button, Card, EmptyState, Header, Icon, Pill, Screen, useToast } from '@/ui';
 
@@ -34,6 +35,7 @@ export function InvitationScreen({ token }: { token: string }) {
   const { data: me } = useMe();
   const setActive = useAppStore((st) => st.setActiveWorkspace);
   const accept = useAcceptInvitation();
+  const signOut = useSignOut();
   const [error, setError] = useState<string | null>(null);
   const invitation = useQuery({
     queryKey: keys.invitation(token),
@@ -87,6 +89,8 @@ export function InvitationScreen({ token }: { token: string }) {
     );
   }
   const expired = inv.status !== 'PENDING' || inv.expiresAt.getTime() < Date.now();
+  // Signed in as another account (CHQ-178): no Join, only sign-out, so the invited address can sign in.
+  const otherAccount = !!me?.user.email && inv.email.toLowerCase() !== me.user.email.toLowerCase();
   return (
     <Screen testID="invitation-screen">
       <Header title={t('invitation.title')} back large={false} />
@@ -138,9 +142,9 @@ export function InvitationScreen({ token }: { token: string }) {
           {t('invitation.expired', { name: inv.inviterName })}
         </AppText>
       ) : null}
-      {me?.user.email && inv.email.toLowerCase() !== me.user.email.toLowerCase() ? (
+      {otherAccount ? (
         <AppText variant="small" tone="warning">
-          {t('invitation.wrongAccount', { email: inv.email })}
+          {t('invitation.signedInAsOther', { current: me?.user.email ?? '', email: inv.email })}
         </AppText>
       ) : null}
       {error ? (
@@ -149,14 +153,22 @@ export function InvitationScreen({ token }: { token: string }) {
         </AppText>
       ) : null}
       <View style={s.actions}>
-        <Button
-          label={t('invitation.join', { workspace: inv.workspaceName })}
-          iconRight="arrow-right"
-          onPress={() => void join()}
-          disabled={expired}
-          loading={accept.isPending}
-          testID="invitation-join"
-        />
+        {otherAccount ? (
+          <Button
+            label={t('invitation.signOutToAccept')}
+            onPress={() => void signOut()}
+            testID="invitation-sign-out"
+          />
+        ) : (
+          <Button
+            label={t('invitation.join', { workspace: inv.workspaceName })}
+            iconRight="arrow-right"
+            onPress={() => void join()}
+            disabled={expired}
+            loading={accept.isPending}
+            testID="invitation-join"
+          />
+        )}
         <Button label={t('common.notNow')} variant="outline" onPress={enterApp} hapticKind="select" />
       </View>
     </Screen>
