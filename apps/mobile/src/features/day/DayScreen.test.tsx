@@ -13,6 +13,7 @@ import {
 } from '@/testing/fixtures';
 import { mapsMock, routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
+import { toIsoDate } from '@/lib/dates';
 
 const entry = entryFixture('mem-maria', '2026-09-23', 6.5, {
   note: 'Delivery day, stayed to unload.',
@@ -199,6 +200,14 @@ describe('DayScreen', () => {
   });
 });
 
+// A Wednesday at least a week ahead: Repeat and "this and future" are offered only from today on, so the fixed
+// 2026-10-07 broke these tests once the calendar passed it.
+const wednesday = new Date();
+wednesday.setHours(12, 0, 0, 0);
+wednesday.setDate(wednesday.getDate() + 7 + ((3 - wednesday.getDay() + 7) % 7));
+const plusDays = (days: number) => new Date(wednesday.getTime() + days * 24 * 3600 * 1000);
+const repeatDay = toIsoDate(wednesday);
+
 describe('recurring jobs', () => {
   beforeEach(() => useAppStore.getState().setActiveWorkspace('ws-cafe'));
   it('creates only after the required end preview and sends the finite schedule and retry key', async () => {
@@ -206,17 +215,17 @@ describe('recurring jobs', () => {
       getMe: employerMeFixture,
       listEntries: [],
       getWorkspace: workspaceFixture,
-      getMemberMonth: { ...memberMonthFixture, month: '2026-10', locked: false, days: [] },
+      getMemberMonth: { ...memberMonthFixture, month: repeatDay.slice(0, 7), locked: false, days: [] },
       getMember: membersFixture[0],
       previewJobRecurrence: {
-        dates: [{ date: new Date(2026, 9, 7) }],
+        dates: [{ date: wednesday }],
         occurrenceCount: 4,
-        lastDate: new Date(2026, 9, 28),
-        endDate: new Date(2026, 10, 3),
+        lastDate: plusDays(21),
+        endDate: plusDays(27),
       },
-      createJob: () => entryFixture('mem-maria', '2026-10-07', 4),
+      createJob: () => entryFixture('mem-maria', repeatDay, 4),
     });
-    await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
+    await renderApp(<DayScreen membershipId="mem-maria" date={repeatDay} />, { api });
     await fireEvent.press(await screen.findByTestId('day-add-job'));
     await fireEvent.press(screen.getByTestId('wheel-hours-4'));
     await fireEvent.press(screen.getByTestId('job-repeat'));
@@ -241,9 +250,9 @@ describe('recurring jobs', () => {
   it('shows the recurring job and sends future scope only after the employer chooses it', async () => {
     const series = {
       id: 'series-1',
-      firstDate: new Date(2026, 9, 7),
-      endDate: new Date(2026, 10, 3),
-      lastDate: new Date(2026, 9, 28),
+      firstDate: wednesday,
+      endDate: plusDays(27),
+      lastDate: plusDays(21),
       occurrenceCount: 4,
       stopped: false,
       recurrence: {
@@ -257,16 +266,16 @@ describe('recurring jobs', () => {
       getMe: employerMeFixture,
       getMember: membersFixture[0],
       listEntries: [
-        entryFixture('mem-maria', '2026-10-07', 4, {
+        entryFixture('mem-maria', repeatDay, 4, {
           jobs: [jobFixture('job-repeat', 4, { recurrence: series })],
         }),
       ],
       getEntryHistory: [],
       getWorkspace: workspaceFixture,
-      getMemberMonth: { ...memberMonthFixture, locked: false },
+      getMemberMonth: { ...memberMonthFixture, month: repeatDay.slice(0, 7), locked: false },
       deleteJob: undefined,
     });
-    await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
+    await renderApp(<DayScreen membershipId="mem-maria" date={repeatDay} />, { api });
     expect(await screen.findByText('Every 1 week: Wed')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('job-edit-job-repeat'));
     await fireEvent.press(screen.getByTestId('remove-job'));
