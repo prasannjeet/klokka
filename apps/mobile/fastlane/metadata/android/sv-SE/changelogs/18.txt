@@ -1,0 +1,1 @@
+En inbjudan som öppnas när du är inloggad med en annan e-postadress ber dig nu logga ut först, i stället för en Gå med-knapp som misslyckas.

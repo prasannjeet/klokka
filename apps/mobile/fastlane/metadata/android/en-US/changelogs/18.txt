@@ -1,0 +1,1 @@
+An invitation opened while you are signed in with another email now tells you to sign out first, instead of a Join button that fails.

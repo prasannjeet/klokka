@@ -2,6 +2,13 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.5, 2026-10-10
+
+### Fixed
+- An invitation opened while signed in with another email no longer offers Join (which then failed): it says who is
+  signed in and who the invitation is for, and offers to sign out. On the web the sign-out comes back to the
+  invitation, ready for the invited address (CHQ-178).
+
 ## 1.6.4, 2026-10-07
 
 ### Fixed
