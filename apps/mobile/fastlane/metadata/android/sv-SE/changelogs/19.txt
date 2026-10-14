@@ -1,0 +1,1 @@
+Att lägga till ett andra jobb samma dag skapar nu ett nytt jobb i stället för att öppna det första för redigering.

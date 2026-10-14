@@ -1,0 +1,1 @@
+Adding a second job to the same day now creates a new job instead of opening the first one for editing.

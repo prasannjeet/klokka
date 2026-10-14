@@ -2,6 +2,13 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.6.6, 2026-10-14
+
+### Fixed
+- Phone: the plus next to a person on People always adds a new job, also when the day already has one, and tapping a
+  day that has jobs opens the day page (each job its own card, plus Add another job). A second job on the same day no
+  longer opened, and overwrote, the first one (CHQ-180).
+
 ## 1.6.5, 2026-10-10
 
 ### Fixed
