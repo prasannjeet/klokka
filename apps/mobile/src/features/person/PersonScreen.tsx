@@ -199,7 +199,7 @@ function PersonWeek({
   const sheet = useRef<JobSheetHandle>(null);
   const employer = workspace.role === 'EMPLOYER';
 
-  // A day with one job or none opens the job sheet right here; a day with several opens the Day view.
+  // An empty day opens the job sheet right here; a day with jobs opens the Day view, where another can be added.
   const openDay = (day: IsoDate) => {
     const action = dayActionFor(entryFor(range.data, membershipId, day));
     if (!employer || action.kind === 'day') {
@@ -210,7 +210,7 @@ function PersonWeek({
       membershipId,
       memberName: name,
       date: day,
-      job: action.job,
+      job: null,
       dayHours: action.dayHours,
       yesterdayHours: entryFor(range.data, membershipId, addDays(day, -1))?.hours ?? null,
       rounding: settings.data?.rounding ?? workspace.rounding,

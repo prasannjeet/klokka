@@ -107,7 +107,7 @@ describe('PeopleScreen (employer)', () => {
     expect(call.jobWrite.hours).toBe(24);
   });
 
-  it("edits the day's one job, and a day with several jobs opens the day page instead of the sheet", async () => {
+  it('the plus always adds a new job, also on a day that already has one or several', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
       getWorkspace: workspaceFixture,
@@ -119,23 +119,22 @@ describe('PeopleScreen (employer)', () => {
         }),
       ],
       listFlags: [],
-      updateJob: () => entryFixture('mem-maria', '2026-09-25', 5),
+      createJob: () => entryFixture('mem-maria', '2026-09-25', 9),
     });
     await renderApp(<PeopleScreen />, { api });
     await screen.findByText('Jonas');
     await fireEvent.press(screen.getByTestId('add-mem-jonas'));
-    expect(routerState.pushes.at(-1)).toEqual({
-      pathname: '/day/[membershipId]/[date]',
-      params: { membershipId: 'mem-jonas', date: '2026-09-25' },
-    });
+    expect(await screen.findByText('New job for Jonas Berg')).toBeTruthy();
+    expect(routerState.pushes).toEqual([]);
     await fireEvent.press(screen.getByTestId('add-mem-maria'));
-    expect(await screen.findByText('Job for Maria Lind')).toBeTruthy();
+    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('wheel-hours-5'));
     await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'updateJob')).toBe(true));
-    expect(api.calls.find((c) => c.op === 'updateJob')?.args[0]).toMatchObject({
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
+    expect(api.calls.some((c) => c.op === 'updateJob')).toBe(false);
+    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
       workspaceId: 'ws-cafe',
-      jobId: 'job-mem-maria-2026-09-25',
+      membershipId: 'mem-maria',
       jobWrite: { hours: 5 },
     });
   });

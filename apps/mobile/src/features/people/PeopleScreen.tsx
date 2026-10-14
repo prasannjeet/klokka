@@ -10,7 +10,6 @@ import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, EmptyState, Header, Icon, Pill, Screen, Separator } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
-import { dayActionFor } from '@/features/jobs/dayAction';
 import { entryFor } from '@/features/week/WeekCard';
 
 const styles = (t: Theme) =>
@@ -70,21 +69,14 @@ function PeopleScreenInner({ workspace }: WorkspaceProps) {
     (m) => m.role === 'EMPLOYEE' && m.status !== 'DEACTIVATED',
   );
 
+  // The plus always adds a new job to today, next to any the day already has.
   const quickAdd = (member: Member) => {
-    const action = dayActionFor(entryFor(entries.data, member.id, today));
-    if (action.kind === 'day') {
-      router.push({
-        pathname: '/day/[membershipId]/[date]',
-        params: { membershipId: member.id, date: today },
-      });
-      return;
-    }
     sheet.current?.open({
       membershipId: member.id,
       memberName: member.displayName,
       date: today,
-      job: action.job,
-      dayHours: action.dayHours,
+      job: null,
+      dayHours: entryFor(entries.data, member.id, today)?.hours ?? 0,
       yesterdayHours: entryFor(entries.data, member.id, yesterday)?.hours ?? null,
       rounding: settings.data?.rounding ?? 'NONE',
       defaultDayHours: settings.data?.defaultDayHours ?? 8,

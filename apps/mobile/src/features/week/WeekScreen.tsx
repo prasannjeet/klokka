@@ -98,7 +98,7 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
       membershipId: member.id,
       memberName: member.displayName,
       date,
-      job: action.job,
+      job: null,
       dayHours: action.dayHours,
       yesterdayHours: yesterday?.hours ?? null,
       rounding: settings.data?.rounding ?? 'NONE',

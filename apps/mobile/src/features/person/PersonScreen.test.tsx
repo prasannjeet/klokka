@@ -59,7 +59,7 @@ describe('PersonScreen', () => {
     await waitFor(() => expect(ranges(api)).toContain('2026-09-07..2026-09-20 mem-maria'));
   });
 
-  it('opens a day with several jobs as the Day view, and an empty day in the job sheet', async () => {
+  it('opens a day with jobs as the Day view (where another can be added), and an empty day in the job sheet', async () => {
     const api = personApi();
     await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api });
     await screen.findByText('Maria Lind');
@@ -69,6 +69,14 @@ describe('PersonScreen', () => {
     expect(await screen.findByTestId('day-screen')).toBeTruthy();
     await waitFor(() => expect(ranges(api)).toContain('2026-09-23..2026-09-23 mem-maria'));
     expect(screen.getByTestId('view-day').props.accessibilityState).toEqual({ checked: true });
+  });
+
+  it('opens a day with one job as the Day view, not as an edit of that job', async () => {
+    const api = personApi();
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api });
+    await fireEvent.press(await screen.findByTestId('day-mem-maria-2026-09-22'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    expect(await screen.findByTestId('day-add-another')).toBeTruthy();
   });
 
   it('switches to the month, and a day in its calendar opens as the Day view', async () => {
