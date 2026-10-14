@@ -8,7 +8,7 @@ vars one by one), `docs/RELEASING.md` (the production release flow).
 **Rule:** test, probe and experiment on staging. Anything that changes production (Coolify, Logto, Postgres,
 Migadu) needs the owner's explicit go-ahead for that change.
 
-**Current production release:** v1.6.5 (2026-10-10, CHQ-178), API, web and landing. Android versionCode 18 is
+**Current production release:** v1.6.6 (2026-10-14, CHQ-180), API, web and landing. Android versionCode 19 is
 on Play internal testing. Public Play publishing still requires the initial Console setup/review.
 
 ## 1. The map
