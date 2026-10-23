@@ -56,6 +56,28 @@ public interface KlokkaConfig {
         @Min(1)
         @Max(10)
         int maxYears();
+
+        // CHQ-186: how far ahead an open-ended series (no end date) has its jobs planned.
+        @WithDefault("12")
+        @Min(1)
+        @Max(24)
+        int horizonMonths();
+
+        // Open series the nightly RecurrenceExtender tops up per run, and when it runs (server time).
+        @WithDefault("200")
+        @Min(1)
+        @Max(5000)
+        int extendBatchSize();
+
+        @WithDefault("0 30 2 * * ?")
+        String extendCron();
+
+        // CHQ-187: the parts one series may be split into by schedule changes (previous_id); a longer chain is a
+        // data error, refused rather than walked.
+        @WithDefault("100")
+        @Min(1)
+        @Max(1000)
+        int maxParts();
     }
 
     // Opt-in test switches; mapped here because every klokka.* key must be known (unknown keys fail the boot).

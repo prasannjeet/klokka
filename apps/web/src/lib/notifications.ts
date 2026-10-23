@@ -96,6 +96,8 @@ export const KIND_ICON: Record<NotificationKind, IconName> = {
   MONTH_CLOSED: 'lock',
   MONTH_REOPENED: 'unlock',
   JOB_REMINDER: 'clock',
+  // CHQ-188: Task 7 may pick a dedicated icon for job updates.
+  JOB_CHANGED: 'calendar',
 };
 
 // Where a notification leads inside the workspace.

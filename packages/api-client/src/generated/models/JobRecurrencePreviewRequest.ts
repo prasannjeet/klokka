@@ -32,6 +32,13 @@ export interface JobRecurrencePreviewRequest {
      */
     firstDate: Date;
     /**
+     * For a schedule change: list only the dates on or after this one (on or after firstDate), with firstDate the
+     * selected job's date, which the interval counts from. A periodCount, an endDate check and the open-ended
+     * horizon then count from fromDate, as the schedule change does.
+     * 
+     */
+    fromDate?: Date;
+    /**
      * 
      */
     recurrence: JobRecurrenceRule;
@@ -57,6 +64,7 @@ export function JobRecurrencePreviewRequestFromJSONTyped(json: any, ignoreDiscri
     return {
         
         'firstDate': (json['firstDate'] == null ? json['firstDate'] : parseDate(json['firstDate'])),
+        'fromDate': json['fromDate'] == null ? undefined : (parseDate(json['fromDate'])),
         'recurrence': JobRecurrenceRuleFromJSON(json['recurrence']),
     };
 }
@@ -73,6 +81,7 @@ export function JobRecurrencePreviewRequestToJSONTyped(value?: JobRecurrencePrev
     return {
         
         'firstDate': value['firstDate'] == null ? value['firstDate'] : serializeDate(value['firstDate']),
+        'fromDate': value['fromDate'] == null ? value['fromDate'] : serializeDate(value['fromDate']),
         'recurrence': JobRecurrenceRuleToJSON(value['recurrence']),
     };
 }

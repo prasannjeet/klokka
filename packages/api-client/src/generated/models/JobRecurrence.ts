@@ -48,13 +48,17 @@ export interface JobRecurrence {
      */
     lastDate: Date;
     /**
-     * 
+     * Inclusive end; for an open-ended series, the date jobs are planned through.
      */
     endDate: Date;
     /**
      * 
      */
     stopped: boolean;
+    /**
+     * The series has no end date; the API keeps planning it ahead until it is stopped.
+     */
+    openEnded: boolean;
 }
 
 /**
@@ -68,6 +72,7 @@ export function instanceOfJobRecurrence(value: object): value is JobRecurrence {
     if (!('lastDate' in value) || value['lastDate'] === undefined) return false;
     if (!('endDate' in value) || value['endDate'] === undefined) return false;
     if (!('stopped' in value) || value['stopped'] === undefined) return false;
+    if (!('openEnded' in value) || value['openEnded'] === undefined) return false;
     return true;
 }
 
@@ -88,6 +93,7 @@ export function JobRecurrenceFromJSONTyped(json: any, ignoreDiscriminator: boole
         'lastDate': (json['lastDate'] == null ? json['lastDate'] : parseDate(json['lastDate'])),
         'endDate': (json['endDate'] == null ? json['endDate'] : parseDate(json['endDate'])),
         'stopped': json['stopped'],
+        'openEnded': json['openEnded'],
     };
 }
 
@@ -109,6 +115,7 @@ export function JobRecurrenceToJSONTyped(value?: JobRecurrence | null, ignoreDis
         'lastDate': value['lastDate'] == null ? value['lastDate'] : serializeDate(value['lastDate']),
         'endDate': value['endDate'] == null ? value['endDate'] : serializeDate(value['endDate']),
         'stopped': value['stopped'],
+        'openEnded': value['openEnded'],
     };
 }
 

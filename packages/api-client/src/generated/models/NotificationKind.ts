@@ -14,9 +14,12 @@
 
 
 /**
- * HOURS_CHANGED covers added, changed and removed hours, coalesced per sitting. Employees receive
- * HOURS_CHANGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED and JOB_REMINDER (before a job with a start
- * time, per their preferences); employers receive INVITE_ACCEPTED and ENTRY_FLAGGED.
+ * HOURS_CHANGED covers hours added, changed and removed for a whole day (the week grid), coalesced per
+ * sitting. JOB_CHANGED covers every job an employer adds, changes or removes for an employee (single jobs,
+ * series and schedule changes, past dates included), coalesced per sitting; its push follows the
+ * `jobUpdates` preference, the notification itself is always kept. Employees receive HOURS_CHANGED,
+ * JOB_CHANGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED and JOB_REMINDER (before a job with a start time,
+ * per their preferences); employers receive INVITE_ACCEPTED and ENTRY_FLAGGED.
  * 
  * @export
  */
@@ -28,6 +31,7 @@ export const NotificationKind = {
     MonthClosed: 'MONTH_CLOSED',
     MonthReopened: 'MONTH_REOPENED',
     JobReminder: 'JOB_REMINDER',
+    JobChanged: 'JOB_CHANGED',
 } as const;
 export type NotificationKind = typeof NotificationKind[keyof typeof NotificationKind];
 

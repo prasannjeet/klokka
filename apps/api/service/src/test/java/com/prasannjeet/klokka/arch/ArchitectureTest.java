@@ -21,6 +21,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 // The structural rules of AGENTS.md, each with a positive control on a fixture in arch.fixture so a rule that
@@ -36,6 +37,8 @@ class ArchitectureTest {
             "com.prasannjeet.klokka.me..", "com.prasannjeet.klokka.operator..", "com.prasannjeet.klokka.webhook..",
             "com.prasannjeet.klokka.notification..", "com.prasannjeet.klokka.mail..", "com.prasannjeet.klokka.invitation.."
     };
+    // Cross-workspace sweeps of a nightly job that otherwise works inside one workspace per row.
+    private static final Set<String> CROSS_WORKSPACE_SWEEPS = Set.of("openSeriesBefore");
     private static final String PANACHE = "io.quarkus.hibernate.orm.panache..";
 
     @Test
@@ -98,6 +101,8 @@ class ArchitectureTest {
         return methods().that().areDeclaredInClassesThat(workspaceRepositories)
                 .and().arePublic()
                 .and().doNotHaveModifier(JavaModifier.STATIC)
+                .and(not(DescribedPredicate.describe("a cross-workspace sweep",
+                        (JavaMethod m) -> CROSS_WORKSPACE_SWEEPS.contains(m.getName()))))
                 .should(haveAParameterOfType(WorkspaceId.class))
                 .because("workspace isolation is enforced in the application as well as in the database");
     }

@@ -2,6 +2,7 @@ package com.prasannjeet.klokka.notification;
 
 import static com.prasannjeet.klokka.i18n.Formats.hours;
 import static com.prasannjeet.klokka.i18n.Formats.dayDate;
+import static com.prasannjeet.klokka.i18n.Formats.longDate;
 import static com.prasannjeet.klokka.i18n.Formats.money;
 import static com.prasannjeet.klokka.i18n.Formats.shortDate;
 
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.IsoFields;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ public class NotificationTexts {
                         t(lang, Text.MONTH_CLOSED_HINT, Map.of()));
             }
             case JOB_REMINDER -> jobReminder(payload, lang, where);
+            case JOB_CHANGED -> jobChanged(payload, lang, where);
             case MONTH_REOPENED -> {
                 String month = Formats.month(YearMonth.parse(str(payload, "month")), lang);
                 yield new Rendered(t(lang, Text.MONTH_REOPENED_TITLE, Map.of("name", name, "month", month)),
@@ -166,6 +169,94 @@ public class NotificationTexts {
             body = t(lang, oneWeek ? Text.HOURS_RANGE_WEEK : Text.HOURS_RANGE, params);
         }
         return new Rendered(title, body, null);
+    }
+
+    // Dates listed in a several-jobs detail before the rest are counted.
+    private static final int LISTED_JOBS = 5;
+
+    // What one job's write in a sitting reads as (CHQ-188): its date, kind and the values shown.
+    public record JobNews(LocalDate date, String kind, String startTime, String placeName) {}
+
+    // One sitting's job writes: {jobId -> {date, kind, startTime, placeName, hours}} (CHQ-188), counted per job. On a
+    // date where jobs were both removed and added (a schedule change replaces a date's job with a new one), each
+    // removed and added pair reads as one changed job with the added one's values. One job says what happened and
+    // when; several count them (a mix of kinds reads as changed), name the date or give the range, and list the
+    // first dates in the detail.
+    private Rendered jobChanged(Map<String, Object> payload, Language lang, String where) {
+        String name = str(payload, "actorName");
+        List<JobNews> jobs = paired(jobs(payload));
+        if (jobs.isEmpty()) return new Rendered(t(lang, Text.JOBS_CHANGED, Map.of("name", name)), where, null);
+        List<String> kinds = jobs.stream().map(JobNews::kind).distinct().toList();
+        String kind = kinds.size() == 1 ? kinds.get(0) : "CHANGED";
+        if (jobs.size() == 1) {
+            JobNews only = jobs.getFirst();
+            Text title = switch (kind) {
+                case "ADDED" -> Text.JOBS_ADDED;
+                case "REMOVED" -> Text.JOBS_REMOVED;
+                default -> Text.JOBS_CHANGED;
+            };
+            String date = dayDate(only.date(), lang);
+            String time = only.startTime();
+            String place = only.placeName();
+            String body;
+            if (time == null && place == null) body = t(lang, Text.JOBS_WHEN, Map.of("workspace", where, "date", date));
+            else if (place == null) body = t(lang, Text.JOBS_WHEN_TIME, Map.of("workspace", where, "date", date, "time", time));
+            else if (time == null) body = t(lang, Text.JOBS_WHEN_PLACE, Map.of("workspace", where, "date", date, "place", place));
+            else body = t(lang, Text.JOBS_WHEN_TIME_PLACE, Map.of("workspace", where, "date", date, "time", time, "place", place));
+            return new Rendered(t(lang, title, Map.of("name", name)), body, null);
+        }
+        Text title = switch (kind) {
+            case "ADDED" -> Text.JOBS_ADDED_MANY;
+            case "REMOVED" -> Text.JOBS_REMOVED_MANY;
+            default -> Text.JOBS_CHANGED_MANY;
+        };
+        String plural = catalogue.plural(lang, title.key(), jobs.size(), Map.of("name", name));
+        List<LocalDate> dates = jobs.stream().map(JobNews::date).distinct().toList();
+        if (dates.size() == 1) return new Rendered(plural, t(lang, Text.JOBS_WHEN, Map.of("workspace", where, "date", dayDate(dates.getFirst(), lang))), null);
+        // A series planned a year ahead spans two years; without them "Wed 18 Nov to Wed 17 Nov" reads as nothing.
+        LocalDate first = dates.getFirst();
+        LocalDate last = dates.getLast();
+        boolean oneYear = first.getYear() == last.getYear();
+        String body = t(lang, Text.JOBS_RANGE, Map.of("workspace", where,
+                "from", oneYear ? shortDate(first, lang) : longDate(first, lang),
+                "to", oneYear ? shortDate(last, lang) : longDate(last, lang)));
+        String detail = String.join(", ", dates.stream().limit(LISTED_JOBS).map(d -> shortDate(d, lang)).toList());
+        if (dates.size() > LISTED_JOBS) detail += " " + t(lang, Text.JOBS_MORE, Map.of("count", Integer.toString(dates.size() - LISTED_JOBS)));
+        return new Rendered(plural, body, detail);
+    }
+
+    // Per date, removed and added jobs paired into changed ones (the added job's values); by date, then kind.
+    private static List<JobNews> paired(List<JobNews> jobs) {
+        List<JobNews> out = new ArrayList<>();
+        TreeMap<LocalDate, List<JobNews>> byDate = new TreeMap<>();
+        for (JobNews job : jobs) byDate.computeIfAbsent(job.date(), d -> new ArrayList<>()).add(job);
+        for (List<JobNews> day : byDate.values()) {
+            List<JobNews> added = day.stream().filter(j -> j.kind().equals("ADDED")).toList();
+            List<JobNews> removed = day.stream().filter(j -> j.kind().equals("REMOVED")).toList();
+            int pairs = Math.min(added.size(), removed.size());
+            for (int i = 0; i < pairs; i++) {
+                JobNews now = added.get(i);
+                out.add(new JobNews(now.date(), "CHANGED", now.startTime(), now.placeName()));
+            }
+            out.addAll(added.subList(pairs, added.size()));
+            out.addAll(removed.subList(pairs, removed.size()));
+            out.addAll(day.stream().filter(j -> j.kind().equals("CHANGED")).toList());
+        }
+        return out;
+    }
+
+    // The sitting's jobs as written by NotificationService.jobChanged, by date then start time.
+    @SuppressWarnings("unchecked")
+    static List<JobNews> jobs(Map<String, Object> payload) {
+        List<JobNews> out = new ArrayList<>();
+        Object raw = payload.get("jobs");
+        if (!(raw instanceof Map<?, ?> map)) return out;
+        for (Object value : map.values()) {
+            Map<String, Object> job = (Map<String, Object>) value;
+            out.add(new JobNews(LocalDate.parse(str(job, "date")), str(job, "kind"), strOrNull(job, "startTime"), strOrNull(job, "placeName")));
+        }
+        out.sort(Comparator.comparing(JobNews::date).thenComparing(JobNews::startTime, Comparator.nullsLast(Comparator.naturalOrder())));
+        return out;
     }
 
     private static String clip(String message) {

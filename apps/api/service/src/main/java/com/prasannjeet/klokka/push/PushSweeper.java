@@ -3,6 +3,7 @@ package com.prasannjeet.klokka.push;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.contract.model.Language;
+import com.prasannjeet.klokka.contract.model.NotificationKind;
 import com.prasannjeet.klokka.notification.NotificationPayload;
 import com.prasannjeet.klokka.notification.NotificationLinks;
 import com.prasannjeet.klokka.notification.NotificationService;
@@ -76,9 +77,11 @@ public class PushSweeper {
         List<String> tokens = new ArrayList<>();
         for (NotificationEntity row : due) {
             NotificationRepository.Recipient recipient = repository.recipient(row.userId)
-                    .orElse(new NotificationRepository.Recipient(Language.fromValue(config.defaultLanguage()), true));
+                    .orElse(new NotificationRepository.Recipient(Language.fromValue(config.defaultLanguage()), true, true));
             row.pushedAt = now;
             if (!recipient.pushEnabled()) continue;
+            // "Job updates" off: the row stays in the centre, closed like a push-disabled one, and nothing is sent.
+            if (row.kind == NotificationKind.JOB_CHANGED && !recipient.jobUpdates()) continue;
             List<String> deviceTokens = repository.enabledTokens(row.userId);
             if (deviceTokens.isEmpty()) continue;
             WorkspaceEntity workspace = repository.workspaceOf(row).orElse(null);

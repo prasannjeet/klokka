@@ -34,6 +34,11 @@ import {
     JobRecurrencePreviewRequestToJSON,
 } from '../models/JobRecurrencePreviewRequest';
 import {
+    type JobScopeCounts,
+    JobScopeCountsFromJSON,
+    JobScopeCountsToJSON,
+} from '../models/JobScopeCounts';
+import {
     type JobWrite,
     JobWriteFromJSON,
     JobWriteToJSON,
@@ -76,6 +81,17 @@ export interface DeleteJobRequest {
      * 
      */
     scope?: JobChangeScope;
+}
+
+export interface GetJobScopeCountsRequest {
+    /**
+     * 
+     */
+    workspaceId: string;
+    /**
+     * 
+     */
+    jobId: string;
 }
 
 export interface PreviewJobRecurrenceRequest {
@@ -179,7 +195,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
+     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified with JOB_CHANGED (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
      * Add a job to a member\'s day (employer only)
      */
     async createJobRaw(requestParameters: CreateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Entry>> {
@@ -190,7 +206,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
+     * Creates the day\'s entry when there is none. Any date may be used, future ones too (planned work), unless its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day\'s jobs together may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified with JOB_CHANGED (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically, without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today or later in the business time zone. A closed month or any day limit refuses the whole series. 
      * Add a job to a member\'s day (employer only)
      */
     async createJob(requestParameters: CreateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Entry> {
@@ -246,7 +262,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
+     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE removes this occurrence and every later one and stops the series, preserving earlier jobs and unrelated work; it is allowed from a past job. ALL removes every job of the series outside closed months, including the parts before and after earlier schedule changes, and stops every part. A range scope skips jobs in closed months; a removal whose whole range is in closed months answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too). 
      * Remove a job (employer only)
      */
     async deleteJobRaw(requestParameters: DeleteJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -257,11 +273,74 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
+     * Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE removes this occurrence and every later one and stops the series, preserving earlier jobs and unrelated work; it is allowed from a past job. ALL removes every job of the series outside closed months, including the parts before and after earlier schedule changes, and stops every part. A range scope skips jobs in closed months; a removal whose whole range is in closed months answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too). 
      * Remove a job (employer only)
      */
     async deleteJob(requestParameters: DeleteJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
         await this.deleteJobRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     * Creates request options for getJobScopeCounts without sending the request
+     */
+    async getJobScopeCountsRequestOpts(requestParameters: GetJobScopeCountsRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['workspaceId'] == null) {
+            throw new runtime.RequiredError(
+                'workspaceId',
+                'Required parameter "workspaceId" was null or undefined when calling getJobScopeCounts().'
+            );
+        }
+
+        if (requestParameters['jobId'] == null) {
+            throw new runtime.RequiredError(
+                'jobId',
+                'Required parameter "jobId" was null or undefined when calling getJobScopeCounts().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/workspaces/{workspaceId}/jobs/{jobId}/scope-counts`;
+        urlPath = urlPath.replace('{workspaceId}', encodeURIComponent(String(requestParameters['workspaceId'])));
+        urlPath = urlPath.replace('{jobId}', encodeURIComponent(String(requestParameters['jobId'])));
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * For each JobChangeScope, how many jobs an update or removal from this job would change, and how many of the jobs in that range sit in closed months and would be skipped. Nothing is written. For a job that is not recurring all three are `{jobs: 1, skippedClosed: 0}` (or `{jobs: 0, skippedClosed: 1}` in a closed month). 
+     * How many jobs each change scope would touch (employer only)
+     */
+    async getJobScopeCountsRaw(requestParameters: GetJobScopeCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobScopeCounts>> {
+        const requestOptions = await this.getJobScopeCountsRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => JobScopeCountsFromJSON(jsonValue));
+    }
+
+    /**
+     * For each JobChangeScope, how many jobs an update or removal from this job would change, and how many of the jobs in that range sit in closed months and would be skipped. Nothing is written. For a job that is not recurring all three are `{jobs: 1, skippedClosed: 0}` (or `{jobs: 0, skippedClosed: 1}` in a closed month). 
+     * How many jobs each change scope would touch (employer only)
+     */
+    async getJobScopeCounts(requestParameters: GetJobScopeCountsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobScopeCounts> {
+        const response = await this.getJobScopeCountsRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -310,8 +389,8 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
-     * Preview a bounded recurring schedule (employer only)
+     * Calculates business-local dates without writing jobs. At most one of endDate or periodCount; a periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. With neither, the series has no end date: it is open-ended, planned `klokka.recurrence.horizon-months` (12 by default) ahead of the later of the first date and today, and extended nightly; the preview then counts the jobs planned so far and its endDate is the date they are planned through. MONTHLY repeats either on a day of the month (`monthlyBy` DAY_OF_MONTH with `dayOfMonth`, 31 meaning the last day, clamped in shorter months; it defaults to the first date\'s day) or on the nth weekday of the month (`monthlyBy` WEEKDAY_OF_MONTH with `weekOfMonth` and `weekday`, e.g. the third Wednesday). At most 500 jobs and 10 years per series by default. A schedule change previews with `fromDate` (see the schema) so it shows exactly the dates updateJob would write. 
+     * Preview a recurring schedule (employer only)
      */
     async previewJobRecurrenceRaw(requestParameters: PreviewJobRecurrenceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<JobRecurrencePreview>> {
         const requestOptions = await this.previewJobRecurrenceRequestOpts(requestParameters);
@@ -321,8 +400,8 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
-     * Preview a bounded recurring schedule (employer only)
+     * Calculates business-local dates without writing jobs. At most one of endDate or periodCount; a periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. With neither, the series has no end date: it is open-ended, planned `klokka.recurrence.horizon-months` (12 by default) ahead of the later of the first date and today, and extended nightly; the preview then counts the jobs planned so far and its endDate is the date they are planned through. MONTHLY repeats either on a day of the month (`monthlyBy` DAY_OF_MONTH with `dayOfMonth`, 31 meaning the last day, clamped in shorter months; it defaults to the first date\'s day) or on the nth weekday of the month (`monthlyBy` WEEKDAY_OF_MONTH with `weekOfMonth` and `weekday`, e.g. the third Wednesday). At most 500 jobs and 10 years per series by default. A schedule change previews with `fromDate` (see the schema) so it shows exactly the dates updateJob would write. 
+     * Preview a recurring schedule (employer only)
      */
     async previewJobRecurrence(requestParameters: PreviewJobRecurrenceRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<JobRecurrencePreview> {
         const response = await this.previewJobRecurrenceRaw(requestParameters, initOverrides);
@@ -387,7 +466,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
+     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. Field changes accept every scope: ONLY_THIS changes the selected occurrence, THIS_AND_FUTURE the selected and every later occurrence, ALL the whole series, including the parts before and after earlier schedule changes; THIS_AND_FUTURE and ALL include past jobs, and also become the values the series plans new jobs with. A body with `recurrence` changes the schedule instead: it needs `requestId` (reuse it unchanged for retries) and THIS_AND_FUTURE, and applies from the later of the selected job\'s date and today; earlier jobs keep their dates. The new rule\'s interval counts from the selected job\'s date, so an every-2-weeks or every-2-months rhythm is kept when the change is made from a past job. A stopped series (ended by an earlier schedule change or a removal) answers `409 CONFLICT`. A range scope skips jobs in closed months; a change whose whole range is in closed months answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too). `requestId` without `recurrence` is refused. 
      * Replace a job (employer only)
      */
     async updateJobRaw(requestParameters: UpdateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Entry>> {
@@ -398,7 +477,7 @@ export class JobsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
+     * Every field is replaced; an absent `location`, `startTime` or `note` clears it. Field changes accept every scope: ONLY_THIS changes the selected occurrence, THIS_AND_FUTURE the selected and every later occurrence, ALL the whole series, including the parts before and after earlier schedule changes; THIS_AND_FUTURE and ALL include past jobs, and also become the values the series plans new jobs with. A body with `recurrence` changes the schedule instead: it needs `requestId` (reuse it unchanged for retries) and THIS_AND_FUTURE, and applies from the later of the selected job\'s date and today; earlier jobs keep their dates. The new rule\'s interval counts from the selected job\'s date, so an every-2-weeks or every-2-months rhythm is kept when the change is made from a past job. A stopped series (ended by an earlier schedule change or a removal) answers `409 CONFLICT`. A range scope skips jobs in closed months; a change whose whole range is in closed months answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too). `requestId` without `recurrence` is refused. 
      * Replace a job (employer only)
      */
     async updateJob(requestParameters: UpdateJobRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Entry> {

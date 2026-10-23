@@ -362,6 +362,7 @@ export const employerMeFixture: Me = {
     theme: 'SYSTEM',
     jobReminders: true,
     jobReminderLead: 'HOUR_1',
+    jobUpdates: true,
   },
   workspaces: [
     {

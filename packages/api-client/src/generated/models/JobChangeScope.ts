@@ -14,12 +14,13 @@
 
 
 /**
- * 
+ * ONLY_THIS is the selected job, THIS_AND_FUTURE the selected and every later job of its series, ALL every job of the series, past included.
  * @export
  */
 export const JobChangeScope = {
     OnlyThis: 'ONLY_THIS',
     ThisAndFuture: 'THIS_AND_FUTURE',
+    All: 'ALL',
 } as const;
 export type JobChangeScope = typeof JobChangeScope[keyof typeof JobChangeScope];
 

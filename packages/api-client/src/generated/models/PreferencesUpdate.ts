@@ -65,6 +65,10 @@ export interface PreferencesUpdate {
      * 
      */
     jobReminderLead?: JobReminderLead;
+    /**
+     * Push when an employer adds, changes or removes one of my jobs (employees; on by default).
+     */
+    jobUpdates?: boolean;
 }
 
 
@@ -92,6 +96,7 @@ export function PreferencesUpdateFromJSONTyped(json: any, ignoreDiscriminator: b
         'theme': json['theme'] == null ? undefined : ThemePreferenceFromJSON(json['theme']),
         'jobReminders': json['jobReminders'] == null ? undefined : json['jobReminders'],
         'jobReminderLead': json['jobReminderLead'] == null ? undefined : JobReminderLeadFromJSON(json['jobReminderLead']),
+        'jobUpdates': json['jobUpdates'] == null ? undefined : json['jobUpdates'],
     };
 }
 
@@ -112,6 +117,7 @@ export function PreferencesUpdateToJSONTyped(value?: PreferencesUpdate | null, i
         'theme': ThemePreferenceToJSON(value['theme']),
         'jobReminders': value['jobReminders'],
         'jobReminderLead': JobReminderLeadToJSON(value['jobReminderLead']),
+        'jobUpdates': value['jobUpdates'],
     };
 }
 

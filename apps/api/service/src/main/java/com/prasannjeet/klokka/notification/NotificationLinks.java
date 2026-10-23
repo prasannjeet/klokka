@@ -16,6 +16,8 @@ public final class NotificationLinks {
             case ENTRY_FLAGGED, FLAG_RESOLVED -> "flags";
             case INVITE_ACCEPTED, MONTH_CLOSED, MONTH_REOPENED -> "workspace";
             case JOB_REMINDER -> "reminders";
+            // CHQ-188: its own Android channel, "Job updates", so it can be silenced apart from hours.
+            case JOB_CHANGED -> "jobs";
         };
     }
 
@@ -23,7 +25,8 @@ public final class NotificationLinks {
         if (link.getWorkspaceId() == null) return "/notifications";
         String ws = "/w/" + link.getWorkspaceId();
         return switch (kind) {
-            case HOURS_CHANGED -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate()
+            // A sitting of job writes links like one of hours: the member's day for one date, else the month.
+            case HOURS_CHANGED, JOB_CHANGED -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate()
                     : link.getMonth() != null ? "/month/" + link.getMonth() : null);
             case ENTRY_FLAGGED -> link.getFlagId() == null ? ws + "/notifications" : ws + "/flags/" + link.getFlagId();
             case FLAG_RESOLVED, JOB_REMINDER -> member(ws, link, link.getDate() != null ? "/day/" + link.getDate() : null);

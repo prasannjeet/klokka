@@ -43,6 +43,10 @@ public class UserPreferenceEntity {
     @Column(name = "job_reminder_lead", nullable = false, length = 10)
     public JobReminderLead jobReminderLead = JobReminderLead.HOUR_1;
 
+    // CHQ-188: push for JOB_CHANGED (the notification row is written either way).
+    @Column(name = "job_updates", nullable = false)
+    public boolean jobUpdates = true;
+
     @Column(name = "updated_at", nullable = false)
     public Instant updatedAt;
 }

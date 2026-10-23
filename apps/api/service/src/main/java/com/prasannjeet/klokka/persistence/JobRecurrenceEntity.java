@@ -1,10 +1,8 @@
 package com.prasannjeet.klokka.persistence;
 
-import static com.prasannjeet.klokka.contract.model.JobRecurrenceRule.FrequencyEnum.MONTHLY;
-
-import com.prasannjeet.klokka.contract.model.JobRecurrence;
-import com.prasannjeet.klokka.contract.model.JobRecurrenceRule;
 import com.prasannjeet.klokka.contract.model.JobRecurrenceRule.FrequencyEnum;
+import com.prasannjeet.klokka.contract.model.MonthlyBy;
+import com.prasannjeet.klokka.contract.model.WeekOfMonth;
 import com.prasannjeet.klokka.contract.model.Weekday;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -13,12 +11,16 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.UUID;
 
+// A series' rule columns are written and read through entry.RecurrencePattern (applyTo / of), its template through
+// JobService; persistence stays independent of the entry package.
 @Entity
 @Table(name = "job_recurrence")
 public class JobRecurrenceEntity {
@@ -61,15 +63,41 @@ public class JobRecurrenceEntity {
     public String createdBy;
     @Column(name = "created_at", nullable = false)
     public Instant createdAt;
-
-    public JobRecurrence view() {
-        JobRecurrenceRule rule = new JobRecurrenceRule()
-                .frequency(frequency).interval(interval);
-        if (weekdays != null && !weekdays.isEmpty()) rule.weekdays(EnumSet.copyOf(weekdays));
-        if (frequency == MONTHLY) rule.lastDayOfMonth(lastDayOfMonth);
-        if (periodCount == null) rule.endDate(endDate);
-        else rule.periodCount(periodCount);
-        return new JobRecurrence().id(id).firstDate(firstDate).recurrence(rule).endDate(endDate)
-                .occurrenceCount(occurrenceCount).lastDate(lastDate).stopped(stopped);
-    }
+    // CHQ-186: the monthly mode; NOT NULL in the column, so a weekly row carries the default and ignores it.
+    @Enumerated(EnumType.STRING)
+    @Column(name = "monthly_by", nullable = false, length = 20)
+    public MonthlyBy monthlyBy = MonthlyBy.DAY_OF_MONTH;
+    // DAY_OF_MONTH: 1 to 31, 31 being the last day; NULL otherwise.
+    @Column(name = "day_of_month")
+    public Integer dayOfMonth;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "week_of_month", length = 10)
+    public WeekOfMonth weekOfMonth;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "month_weekday", length = 10)
+    public Weekday monthWeekday;
+    // No end date: endDate is the date the jobs are planned through, moved on nightly by the RecurrenceExtender.
+    @Column(name = "open_ended", nullable = false)
+    public boolean openEnded;
+    // The series this one was split from by a schedule change (CHQ-187).
+    @Column(name = "previous_id")
+    public UUID previousId;
+    // The template: the values the series' next jobs are planned with. NULL hours only on a pre-V6 series that had
+    // no live job left when V6 ran.
+    @Column(precision = 5, scale = 2)
+    public BigDecimal hours;
+    @Column(name = "start_time")
+    public LocalTime startTime;
+    @Column(length = 500)
+    public String note;
+    @Column(name = "place_id", length = 300)
+    public String placeId;
+    @Column(name = "place_name", length = 200)
+    public String placeName;
+    @Column(name = "place_address", length = 300)
+    public String placeAddress;
+    @Column(precision = 9, scale = 6)
+    public BigDecimal latitude;
+    @Column(precision = 9, scale = 6)
+    public BigDecimal longitude;
 }

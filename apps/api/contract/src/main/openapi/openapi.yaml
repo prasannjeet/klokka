@@ -723,8 +723,17 @@ paths:
     post:
       tags: [jobs]
       operationId: previewJobRecurrence
-      summary: Preview a bounded recurring schedule (employer only)
-      description: Calculates business-local dates without writing jobs. Exactly one of endDate or periodCount is required. A periodCount means weeks for WEEKLY and months for MONTHLY, regardless of interval. Monthly dates clamp to the last day of shorter months. At most 500 jobs and 10 years per series by default.
+      summary: Preview a recurring schedule (employer only)
+      description: |
+        Calculates business-local dates without writing jobs. At most one of endDate or periodCount; a periodCount
+        means weeks for WEEKLY and months for MONTHLY, regardless of interval. With neither, the series has no end
+        date: it is open-ended, planned `klokka.recurrence.horizon-months` (12 by default) ahead of the later of the
+        first date and today, and extended nightly; the preview then counts the jobs planned so far and its endDate
+        is the date they are planned through. MONTHLY repeats either on a day of the month (`monthlyBy`
+        DAY_OF_MONTH with `dayOfMonth`, 31 meaning the last day, clamped in shorter months; it defaults to the first
+        date's day) or on the nth weekday of the month (`monthlyBy` WEEKDAY_OF_MONTH with `weekOfMonth` and
+        `weekday`, e.g. the third Wednesday). At most 500 jobs and 10 years per series by default. A schedule
+        change previews with `fromDate` (see the schema) so it shows exactly the dates updateJob would write.
       requestBody:
         required: true
         content:
@@ -761,8 +770,8 @@ paths:
       description: |
         Creates the day's entry when there is none. Any date may be used, future ones too (planned work), unless
         its month is closed (`409 MONTH_LOCKED`). Hours are rounded by the workspace rule; the day's jobs together
-        may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified as
-        for hours (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically,
+        may not pass 24 hours (`400 VALIDATION` on `hours`). At most 20 jobs per day. The member is notified
+        with JOB_CHANGED (coalesced per sitting). With recurrence and requestId, creates all occurrences atomically,
         without changing unrelated jobs. Replaying an identical requestId is safe. Recurring jobs must start today
         or later in the business time zone. A closed month or any day limit refuses the whole series.
       requestBody:
@@ -799,7 +808,18 @@ paths:
       tags: [jobs]
       operationId: updateJob
       summary: Replace a job (employer only)
-      description: Every field is replaced; an absent `location`, `startTime` or `note` clears it. ONLY_THIS changes the selected occurrence. THIS_AND_FUTURE updates the selected and later remaining occurrences without changing the schedule or earlier jobs. It is refused for past dates. Closed months refuse the entire change. Creation-only recurrence and requestId fields are not accepted on update.
+      description: |
+        Every field is replaced; an absent `location`, `startTime` or `note` clears it. Field changes accept every
+        scope: ONLY_THIS changes the selected occurrence, THIS_AND_FUTURE the selected and every later occurrence,
+        ALL the whole series, including the parts before and after earlier schedule changes; THIS_AND_FUTURE and ALL
+        include past jobs, and also become the values the series plans new jobs with. A body with `recurrence`
+        changes the schedule instead: it needs `requestId` (reuse it unchanged for retries) and THIS_AND_FUTURE, and
+        applies from the later of the selected job's date and today; earlier jobs keep their dates. The new rule's
+        interval counts from the selected job's date, so an every-2-weeks or every-2-months rhythm is kept when the
+        change is made from a past job. A stopped series (ended by an earlier schedule change or a removal)
+        answers `409 CONFLICT`. A range scope skips jobs in closed months; a change whose whole range is in closed
+        months answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too). `requestId` without
+        `recurrence` is refused.
       parameters:
         - $ref: '#/components/parameters/JobChangeScope'
       requestBody:
@@ -831,7 +851,12 @@ paths:
       tags: [jobs]
       operationId: deleteJob
       summary: Remove a job (employer only)
-      description: Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence. THIS_AND_FUTURE stops the series at this occurrence, preserving earlier jobs and unrelated work. Future scope is refused for past dates. Closed months refuse the entire removal.
+      description: |
+        Removing the last job removes the day, exactly as deleteEntry does. ONLY_THIS skips one occurrence.
+        THIS_AND_FUTURE removes this occurrence and every later one and stops the series, preserving earlier jobs
+        and unrelated work; it is allowed from a past job. ALL removes every job of the series outside closed months,
+        including the parts before and after earlier schedule changes, and stops every part. A range scope skips jobs in closed months; a removal whose whole range is in closed months
+        answers `409 MONTH_LOCKED` (ONLY_THIS on a job in a closed month does too).
       parameters:
         - $ref: '#/components/parameters/JobChangeScope'
       responses:
@@ -845,6 +870,34 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Problem'
+
+  /workspaces/{workspaceId}/jobs/{jobId}/scope-counts:
+    parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/JobId'
+    get:
+      tags: [jobs]
+      operationId: getJobScopeCounts
+      summary: How many jobs each change scope would touch (employer only)
+      description: |
+        For each JobChangeScope, how many jobs an update or removal from this job would change, and how many of
+        the jobs in that range sit in closed months and would be skipped. Nothing is written. For a job that is not
+        recurring all three are `{jobs: 1, skippedClosed: 0}` (or `{jobs: 0, skippedClosed: 1}` in a closed month).
+      responses:
+        '200':
+          description: The counts per scope.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobScopeCounts'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Problem'
 
@@ -1996,6 +2049,16 @@ components:
       type: string
       enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
       example: FRIDAY
+    MonthlyBy:
+      type: string
+      description: How a MONTHLY series picks its day. DAY_OF_MONTH uses `dayOfMonth`; WEEKDAY_OF_MONTH uses `weekOfMonth` and `weekday`.
+      enum: [DAY_OF_MONTH, WEEKDAY_OF_MONTH]
+      example: WEEKDAY_OF_MONTH
+    WeekOfMonth:
+      type: string
+      description: Which occurrence of the weekday in its month. THIRD with WEDNESDAY is the third Wednesday; LAST is the last one, the fourth or the fifth.
+      enum: [FIRST, SECOND, THIRD, FOURTH, LAST]
+      example: THIRD
     Rounding:
       type: string
       description: Applied when an entry is saved. NONE keeps two decimals, QUARTER rounds to 0.25 h, HALF to 0.5 h.
@@ -2030,10 +2093,13 @@ components:
     NotificationKind:
       type: string
       description: |
-        HOURS_CHANGED covers added, changed and removed hours, coalesced per sitting. Employees receive
-        HOURS_CHANGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED and JOB_REMINDER (before a job with a start
-        time, per their preferences); employers receive INVITE_ACCEPTED and ENTRY_FLAGGED.
-      enum: [HOURS_CHANGED, INVITE_ACCEPTED, ENTRY_FLAGGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED, JOB_REMINDER]
+        HOURS_CHANGED covers hours added, changed and removed for a whole day (the week grid), coalesced per
+        sitting. JOB_CHANGED covers every job an employer adds, changes or removes for an employee (single jobs,
+        series and schedule changes, past dates included), coalesced per sitting; its push follows the
+        `jobUpdates` preference, the notification itself is always kept. Employees receive HOURS_CHANGED,
+        JOB_CHANGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED and JOB_REMINDER (before a job with a start time,
+        per their preferences); employers receive INVITE_ACCEPTED and ENTRY_FLAGGED.
+      enum: [HOURS_CHANGED, INVITE_ACCEPTED, ENTRY_FLAGGED, FLAG_RESOLVED, MONTH_CLOSED, MONTH_REOPENED, JOB_REMINDER, JOB_CHANGED]
       example: HOURS_CHANGED
     JobReminderLead:
       type: string
@@ -2160,7 +2226,7 @@ components:
         avatarEmoji: "🐝"
     Preferences:
       type: object
-      required: [language, pushEnabled, digestEnabled, theme, jobReminders, jobReminderLead]
+      required: [language, pushEnabled, digestEnabled, theme, jobReminders, jobReminderLead, jobUpdates]
       properties:
         language:
           $ref: '#/components/schemas/Language'
@@ -2179,6 +2245,11 @@ components:
           example: true
         jobReminderLead:
           $ref: '#/components/schemas/JobReminderLead'
+        jobUpdates:
+          type: boolean
+          description: Push when an employer adds, changes or removes one of my jobs (employees; on by default). Off still keeps the notification in the list.
+          default: true
+          example: true
       example:
         language: sv
         pushEnabled: true
@@ -2186,6 +2257,7 @@ components:
         theme: SYSTEM
         jobReminders: true
         jobReminderLead: HOUR_1
+        jobUpdates: true
     PreferencesUpdate:
       type: object
       properties:
@@ -2205,6 +2277,10 @@ components:
           example: true
         jobReminderLead:
           $ref: '#/components/schemas/JobReminderLead'
+        jobUpdates:
+          type: boolean
+          description: Push when an employer adds, changes or removes one of my jobs (employees; on by default).
+          example: true
       example:
         language: en
         digestEnabled: true
@@ -2949,7 +3025,7 @@ components:
         longitude: 18.0632
     JobRecurrenceRule:
       type: object
-      description: A finite schedule. Supply exactly one of endDate or periodCount; unlimited schedules are invalid.
+      description: At most one of endDate or periodCount; neither means no end date (open-ended, planned `horizon` months ahead and extended nightly).
       required: [frequency, interval]
       properties:
         frequency:
@@ -2968,7 +3044,19 @@ components:
             $ref: '#/components/schemas/Weekday'
         lastDayOfMonth:
           type: boolean
-          description: MONTHLY only; otherwise use the first date's day of month, clamped in shorter months.
+          description: Older clients; same as dayOfMonth 31.
+        monthlyBy:
+          $ref: '#/components/schemas/MonthlyBy'
+        dayOfMonth:
+          type: integer
+          minimum: 1
+          maximum: 31
+          description: MONTHLY with DAY_OF_MONTH; 31 means the last day, and any day is clamped in shorter months. Defaults to the first date's day of month.
+          example: 15
+        weekOfMonth:
+          $ref: '#/components/schemas/WeekOfMonth'
+        weekday:
+          $ref: '#/components/schemas/Weekday'
         endDate:
           type: string
           format: date
@@ -2985,6 +3073,13 @@ components:
         firstDate:
           type: string
           format: date
+        fromDate:
+          type: string
+          format: date
+          description: |
+            For a schedule change: list only the dates on or after this one (on or after firstDate), with firstDate the
+            selected job's date, which the interval counts from. A periodCount, an endDate check and the open-ended
+            horizon then count from fromDate, as the schedule change does.
         recurrence:
           $ref: '#/components/schemas/JobRecurrenceRule'
     JobRecurrencePreview:
@@ -3013,7 +3108,7 @@ components:
           format: date
     JobRecurrence:
       type: object
-      required: [id, firstDate, recurrence, occurrenceCount, lastDate, endDate, stopped]
+      required: [id, firstDate, recurrence, occurrenceCount, lastDate, endDate, stopped, openEnded]
       properties:
         id:
           type: string
@@ -3031,12 +3126,55 @@ components:
         endDate:
           type: string
           format: date
+          description: Inclusive end; for an open-ended series, the date jobs are planned through.
         stopped:
           type: boolean
+        openEnded:
+          type: boolean
+          description: The series has no end date; the API keeps planning it ahead until it is stopped.
+          example: false
     JobChangeScope:
       type: string
-      enum: [ONLY_THIS, THIS_AND_FUTURE]
+      description: ONLY_THIS is the selected job, THIS_AND_FUTURE the selected and every later job of its series, ALL every job of the series, past included.
+      enum: [ONLY_THIS, THIS_AND_FUTURE, ALL]
       default: ONLY_THIS
+    JobScopeCount:
+      type: object
+      required: [jobs, skippedClosed]
+      properties:
+        jobs:
+          type: integer
+          minimum: 0
+          description: Jobs the scope would change.
+          example: 11
+        skippedClosed:
+          type: integer
+          minimum: 0
+          description: Jobs in the scope's range that sit in closed months and would be left as they are.
+          example: 1
+      example:
+        jobs: 11
+        skippedClosed: 1
+    JobScopeCounts:
+      type: object
+      required: [onlyThis, thisAndFuture, all]
+      properties:
+        onlyThis:
+          $ref: '#/components/schemas/JobScopeCount'
+        thisAndFuture:
+          $ref: '#/components/schemas/JobScopeCount'
+        all:
+          $ref: '#/components/schemas/JobScopeCount'
+      example:
+        onlyThis:
+          jobs: 1
+          skippedClosed: 0
+        thisAndFuture:
+          jobs: 8
+          skippedClosed: 0
+        all:
+          jobs: 11
+          skippedClosed: 1
     Job:
       type: object
       description: One piece of a day's work, optionally an occurrence of a recurring series.
@@ -3101,7 +3239,7 @@ components:
         requestId:
           type: string
           format: uuid
-          description: Required with recurrence on creation; reuse unchanged for retries. Not accepted without recurrence.
+          description: Required with recurrence (creation, or a schedule change on update); reuse unchanged for retries. Not accepted without recurrence.
         startTime:
           type: [string, 'null']
           pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'

@@ -18,7 +18,8 @@ import java.util.UUID;
 @ApplicationScoped
 public class NotificationRepository implements PanacheRepositoryBase<NotificationEntity, UUID> {
 
-    public record Recipient(Language language, boolean pushEnabled) {}
+    // jobUpdates gates only the push of JOB_CHANGED (CHQ-188); the row is written either way.
+    public record Recipient(Language language, boolean pushEnabled, boolean jobUpdates) {}
 
     public Optional<NotificationEntity> findOpenByKey(String coalesceKey) {
         return find("coalesceKey = ?1 and pushedAt is null", coalesceKey).firstResultOptional();
@@ -69,7 +70,7 @@ public class NotificationRepository implements PanacheRepositoryBase<Notificatio
 
     public Optional<Recipient> recipient(String userId) {
         UserPreferenceEntity p = em().find(UserPreferenceEntity.class, userId);
-        return p == null ? Optional.empty() : Optional.of(new Recipient(p.language, p.pushEnabled));
+        return p == null ? Optional.empty() : Optional.of(new Recipient(p.language, p.pushEnabled, p.jobUpdates));
     }
 
     // ---- the push queue

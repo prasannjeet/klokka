@@ -43,7 +43,7 @@ export interface JobWrite {
      */
     recurrence?: JobRecurrenceRule;
     /**
-     * Required with recurrence on creation; reuse unchanged for retries. Not accepted without recurrence.
+     * Required with recurrence (creation, or a schedule change on update); reuse unchanged for retries. Not accepted without recurrence.
      */
     requestId?: string;
     /**

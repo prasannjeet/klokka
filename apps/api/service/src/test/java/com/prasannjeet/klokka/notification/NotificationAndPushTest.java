@@ -62,6 +62,8 @@ class NotificationAndPushTest {
         maria = data.member(ws, MARIA, "EMPLOYEE", "Maria Lind", "maria@example.com", new BigDecimal("170.00"), "ACTIVE");
         data.run("delete from push_delivery where token like 'ExponentPushToken[nt-%' or token = ?", FakeServers.DEAD_TOKEN);
         data.run("delete from push_token where token like 'ExponentPushToken[nt-%' or token = ?", FakeServers.DEAD_TOKEN);
+        // Maria's rows still open from an earlier test would be pushed by this test's sweeps: close them first.
+        data.run("update notification set pushed_at = now() where logto_user_id = ? and pushed_at is null", MARIA);
     }
 
     @AfterEach
@@ -290,6 +292,210 @@ class NotificationAndPushTest {
         sweeper.sweep();
         assertThat(data.scalar("select pushed_at from notification where id = ?", id)).isNotNull();
         assertThat(data.count("select count(*) from push_delivery where notification_id = ?", id)).isZero();
+    }
+
+    // One sitting's payload: a job per (date, kind, startTime, placeName), keyed by its own job id.
+    private static Map<String, Object> jobSitting(Object... dateKindTimePlace) {
+        Map<String, Object> jobs = new java.util.LinkedHashMap<>();
+        for (int i = 0; i < dateKindTimePlace.length; i += 4) {
+            Map<String, Object> job = new java.util.HashMap<>();
+            job.put("date", dateKindTimePlace[i].toString());
+            job.put("kind", dateKindTimePlace[i + 1]);
+            job.put("startTime", dateKindTimePlace[i + 2]);
+            job.put("placeName", dateKindTimePlace[i + 3]);
+            job.put("hours", new BigDecimal("3"));
+            jobs.put(UUID.randomUUID().toString(), job);
+        }
+        Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("actorName", "Anna Admin");
+        payload.put("jobs", jobs);
+        return payload;
+    }
+
+    private NotificationTexts.Rendered jobs(Map<String, Object> payload, Language lang) {
+        return texts.render(NotificationKind.JOB_CHANGED, payload, lang, "Kafé Nord", "SEK");
+    }
+
+    // CHQ-188: one job names what happened and when; several count the jobs, give the range and list the first five.
+    @Test
+    void jobTextsSayWhatHappenedToWhichJobs() {
+        var added = jobs(jobSitting("2026-09-28", "ADDED", "09:00", "Café Nord"), Language.EN);
+        assertThat(added.title()).isEqualTo("Anna Admin added a job for you");
+        assertThat(added.body()).isEqualTo("Kafé Nord: Monday 28 Sept, 09:00 at Café Nord");
+        assertThat(added.detail()).isNull();
+        var addedSv = jobs(jobSitting("2026-09-28", "ADDED", "09:00", "Café Nord"), Language.SV);
+        assertThat(addedSv.title()).isEqualTo("Anna Admin la till ett jobb åt dig");
+        assertThat(addedSv.body()).isEqualTo("Kafé Nord: måndag 28 sep kl. 09:00 på Café Nord");
+        var changed = jobs(jobSitting("2026-09-28", "CHANGED", "10:00", null), Language.EN);
+        assertThat(changed.title()).isEqualTo("Anna Admin changed your job");
+        assertThat(changed.body()).isEqualTo("Kafé Nord: Monday 28 Sept, 10:00");
+        var removed = jobs(jobSitting("2026-09-28", "REMOVED", null, null), Language.SV);
+        assertThat(removed.title()).isEqualTo("Anna Admin tog bort ditt jobb");
+        assertThat(removed.body()).isEqualTo("Kafé Nord: måndag 28 sep");
+        var placeOnly = jobs(jobSitting("2026-09-28", "CHANGED", null, "Café Nord"), Language.EN);
+        assertThat(placeOnly.body()).isEqualTo("Kafé Nord: Monday 28 Sept at Café Nord");
+
+        var six = jobs(jobSitting("2026-09-23", "ADDED", "09:00", null, "2026-09-30", "ADDED", "09:00", null,
+                "2026-10-07", "ADDED", "09:00", null, "2026-10-14", "ADDED", "09:00", null, "2026-10-21", "ADDED", "09:00", null,
+                "2026-10-28", "ADDED", "09:00", null), Language.EN);
+        assertThat(six.title()).isEqualTo("Anna Admin added 6 jobs for you");
+        assertThat(six.body()).isEqualTo("Kafé Nord: Wed 23 Sept to Wed 28 Oct");
+        assertThat(six.detail()).isEqualTo("Wed 23 Sept, Wed 30 Sept, Wed 7 Oct, Wed 14 Oct, Wed 21 Oct and 1 more");
+        var twoRemovedSv = jobs(jobSitting("2026-09-23", "REMOVED", null, null, "2026-09-30", "REMOVED", null, null), Language.SV);
+        assertThat(twoRemovedSv.title()).isEqualTo("Anna Admin tog bort 2 jobb");
+        assertThat(twoRemovedSv.body()).isEqualTo("Kafé Nord: ons 23 sep till ons 30 sep");
+        assertThat(twoRemovedSv.detail()).isEqualTo("ons 23 sep, ons 30 sep");
+        var mixed = jobs(jobSitting("2026-09-23", "ADDED", null, null, "2026-09-30", "REMOVED", null, null), Language.EN);
+        assertThat(mixed.title()).isEqualTo("Anna Admin changed 2 jobs");
+
+        // Review fix: jobs are counted, not dates; a job removed and another added on the same date read as one change.
+        var twoOnADay = jobs(jobSitting("2026-09-28", "ADDED", "09:00", null, "2026-09-28", "ADDED", "14:00", null), Language.EN);
+        assertThat(twoOnADay.title()).isEqualTo("Anna Admin added 2 jobs for you");
+        assertThat(twoOnADay.body()).isEqualTo("Kafé Nord: Monday 28 Sept");
+        assertThat(twoOnADay.detail()).isNull();
+        var replaced = jobs(jobSitting("2026-09-28", "REMOVED", "09:00", null, "2026-09-28", "ADDED", "10:00", null), Language.EN);
+        assertThat(replaced.title()).isEqualTo("Anna Admin changed your job");
+        assertThat(replaced.body()).isEqualTo("Kafé Nord: Monday 28 Sept, 10:00");
+    }
+
+    // An open-ended series is planned a year ahead, so its range spans two years and needs them to make sense.
+    @Test
+    void jobRangeAcrossYearsNamesTheYears() {
+        var series = jobs(jobSitting("2026-11-18", "ADDED", "09:00", null, "2027-11-17", "ADDED", "09:00", null), Language.EN);
+        assertThat(series.body()).isEqualTo("Kafé Nord: 18 November 2026 to 17 November 2027");
+        var seriesSv = jobs(jobSitting("2026-11-18", "ADDED", "09:00", null, "2027-11-17", "ADDED", "09:00", null), Language.SV);
+        assertThat(seriesSv.body()).isEqualTo("Kafé Nord: 18 november 2026 till 17 november 2027");
+    }
+
+    private String jobId(UUID entry) {
+        return data.scalar("select id from job where entry_id = ?", entry).toString();
+    }
+
+    private List<List<Object>> jobRows() {
+        return data.query("select kind, (select string_agg((j.value->>'date') || ':' || (j.value->>'kind'), ',' "
+                + "order by j.value->>'date', j.value->>'kind') "
+                + "from jsonb_each(n.payload->'jobs') j) from notification n where logto_user_id = ? and workspace_id = ? "
+                + "order by created_at, kind", MARIA, ws);
+    }
+
+    // A start-time-only or place-only edit is news even though the day's hours stay the same, past dates included;
+    // it is a JOB_CHANGED row (no HOURS_CHANGED), pushed on the jobs channel and linking to the day.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aStartTimeOrPlaceOnlyEditIsOneJobChangedRowOnTheJobsChannel() {
+        UUID entry = data.entry(ws, maria, java.time.LocalDate.parse("2026-09-14"), new BigDecimal("4"), null, NORA);
+        String job = jobId(entry);
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"10:00\"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200);
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-14:CHANGED"));
+
+        data.pushToken(MARIA, "ExponentPushToken[nt-jobs]");
+        clock.set(MutableClock.DEFAULT.plusSeconds(10 * 60 + 30));
+        sweeper.sweep();
+        List<Map<String, Object>> sent = messagesTo("ExponentPushToken[nt-jobs]");
+        assertThat(sent).hasSize(1);
+        assertThat(sent.get(0).get("title")).isEqualTo("Nora Lind ändrade ditt jobb");
+        assertThat(sent.get(0).get("body")).isEqualTo("Notify Corp: måndag 14 sep kl. 10:00");
+        assertThat(sent.get(0).get("channelId")).isEqualTo("jobs");
+        assertThat(((Map<String, Object>) sent.get(0).get("data")).get("url")).isEqualTo("/w/" + ws + "/members/" + maria + "/day/2026-09-14");
+
+        // The pushed row is closed; a place-only edit opens a new sitting.
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"10:00\",\"location\":{\"name\":\"Café Nord\","
+                + "\"latitude\":59.33459,\"longitude\":18.06324}}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200);
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-14:CHANGED"), List.of("JOB_CHANGED", "2026-09-14:CHANGED"));
+        // The same values again are no news (the open row is closed first, so a new one would show).
+        data.run("update notification set pushed_at = now() where logto_user_id = ? and workspace_id = ?", MARIA, ws);
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"10:00\",\"location\":{\"name\":\"Café Nord\","
+                + "\"latitude\":59.33459,\"longitude\":18.06324}}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200);
+        assertThat(jobRows()).hasSize(2);
+    }
+
+    // A new series is one row listing every date; a schedule change that removes and re-adds a date says changed.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aSeriesIsOneRowAndAScheduleChangeReadsAsChanged() {
+        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"requestId\":\"" + UUID.randomUUID() + "\",\"recurrence\":"
+                + "{\"frequency\":\"WEEKLY\",\"interval\":1,\"weekdays\":[\"WEDNESDAY\"],\"periodCount\":6}}";
+        String first = given().contentType("application/json").body(body)
+                .when().post("/v1/workspaces/" + ws + "/members/" + maria + "/entries/2026-09-23/jobs").then().statusCode(201)
+                .extract().path("jobs[0].id");
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-23:ADDED,2026-09-30:ADDED,2026-10-07:ADDED,"
+                + "2026-10-14:ADDED,2026-10-21:ADDED,2026-10-28:ADDED"));
+
+        data.pushToken(MARIA, "ExponentPushToken[nt-series]");
+        clock.set(MutableClock.DEFAULT.plusSeconds(10 * 60 + 30));
+        sweeper.sweep();
+        List<Map<String, Object>> sent = messagesTo("ExponentPushToken[nt-series]");
+        assertThat(sent).hasSize(1);
+        assertThat(sent.get(0).get("title")).isEqualTo("Nora Lind la till 6 jobb åt dig");
+        assertThat(sent.get(0).get("body")).isEqualTo("Notify Corp: ons 23 sep till ons 28 okt");
+        assertThat(((Map<String, Object>) sent.get(0).get("data")).get("url")).isEqualTo("/w/" + ws + "/members/" + maria + "/month/2026-09");
+
+        String change = "{\"hours\":5,\"startTime\":\"09:00\",\"requestId\":\"" + UUID.randomUUID() + "\",\"recurrence\":"
+                + "{\"frequency\":\"WEEKLY\",\"interval\":1,\"weekdays\":[\"WEDNESDAY\"],\"periodCount\":2}}";
+        given().contentType("application/json").body(change)
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + first + "?scope=THIS_AND_FUTURE").then().statusCode(200);
+        assertThat(jobRows()).hasSize(2);
+        // The rewrite removes every job and adds new ones on the first two dates: those dates read as changed.
+        assertThat(jobRows().get(1)).containsExactly("JOB_CHANGED", "2026-09-23:ADDED,2026-09-23:REMOVED,2026-09-30:ADDED,"
+                + "2026-09-30:REMOVED,2026-10-07:REMOVED,2026-10-14:REMOVED,2026-10-21:REMOVED,2026-10-28:REMOVED");
+        assertThat(openJobRow().title()).isEqualTo("Nora Lind changed 6 jobs");
+    }
+
+    // The open JOB_CHANGED row, rendered in English.
+    private NotificationTexts.Rendered openJobRow() {
+        String json = data.scalar("select payload::text from notification where logto_user_id = ? and workspace_id = ? "
+                + "and kind = 'JOB_CHANGED' and pushed_at is null", MARIA, ws).toString();
+        try {
+            return jobs(new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, Map.class), Language.EN);
+        } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    // Review fix: a sitting is merged per job, so two jobs on one date are two jobs, and adding one job while removing
+    // another on the same date is still news (it reads as a change).
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aSittingCountsJobsNotDates() {
+        String path = "/v1/workspaces/" + ws + "/members/" + maria + "/entries/2026-09-21/jobs";
+        String b = given().contentType("application/json").body("{\"hours\":2,\"startTime\":\"08:00\"}")
+                .when().post(path).then().statusCode(201).extract().path("jobs[0].id");
+        given().contentType("application/json").body("{\"hours\":2,\"startTime\":\"13:00\"}")
+                .when().post(path).then().statusCode(201);
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-21:ADDED,2026-09-21:ADDED"));
+        assertThat(openJobRow().title()).isEqualTo("Nora Lind added 2 jobs for you");
+
+        data.run("update notification set pushed_at = now() where logto_user_id = ? and workspace_id = ?", MARIA, ws);
+        given().contentType("application/json").body("{\"hours\":3,\"startTime\":\"16:00\"}")
+                .when().post(path).then().statusCode(201);
+        given().when().delete("/v1/workspaces/" + ws + "/jobs/" + b).then().statusCode(204);
+        assertThat(jobRows().get(1)).containsExactly("JOB_CHANGED", "2026-09-21:ADDED,2026-09-21:REMOVED");
+        assertThat(openJobRow().title()).isEqualTo("Nora Lind changed your job");
+        assertThat(openJobRow().body()).isEqualTo("Kafé Nord: Monday 21 Sept, 16:00");
+    }
+
+    // Added and removed again before the push is no news; the week grid's day-level writes still say HOURS_CHANGED.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aJobAddedAndRemovedIsNoNewsAndTheWeekGridStaysHours() {
+        String job = given().contentType("application/json").body("{\"hours\":2,\"startTime\":\"08:00\"}")
+                .when().post("/v1/workspaces/" + ws + "/members/" + maria + "/entries/2026-09-21/jobs").then().statusCode(201)
+                .extract().path("jobs[0].id");
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-21:ADDED"));
+        given().when().delete("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(204);
+        assertThat(jobRows()).as("added and removed within the quiet window").isEmpty();
+
+        given().contentType("application/json")
+                .body("{\"items\":[{\"membershipId\":\"" + maria + "\",\"workDate\":\"2026-09-22\",\"hours\":4}]}")
+                .when().post("/v1/workspaces/" + ws + "/entries/batch").then().statusCode(200);
+        assertThat(jobRows()).extracting(r -> r.get(0)).containsExactly("HOURS_CHANGED");
     }
 
     private static List<Map<String, Object>> messagesTo(String token) {

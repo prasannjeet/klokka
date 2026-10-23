@@ -668,6 +668,23 @@
       "in30": "30 minuter",
       "in60": "1 timme",
       "in120": "2 timmar"
+    },
+    "jobs": {
+      "added": "{name} la till ett jobb åt dig",
+      "changed": "{name} ändrade ditt jobb",
+      "removed": "{name} tog bort ditt jobb",
+      "addedMany_one": "{name} la till {count} jobb åt dig",
+      "addedMany_other": "{name} la till {count} jobb åt dig",
+      "changedMany_one": "{name} ändrade {count} jobb",
+      "changedMany_other": "{name} ändrade {count} jobb",
+      "removedMany_one": "{name} tog bort {count} jobb",
+      "removedMany_other": "{name} tog bort {count} jobb",
+      "when": "{workspace}: {date}",
+      "whenTime": "{workspace}: {date} kl. {time}",
+      "whenPlace": "{workspace}: {date} på {place}",
+      "whenTimePlace": "{workspace}: {date} kl. {time} på {place}",
+      "range": "{workspace}: {from} till {to}",
+      "more": "och {count} till"
     }
   },
   "email": {
@@ -1208,7 +1225,8 @@
         "FLAG_RESOLVED": "Flagga löst",
         "MONTH_CLOSED": "Månad stängd",
         "MONTH_REOPENED": "Månad öppnad igen",
-        "JOB_REMINDER": "Jobbpåminnelser"
+        "JOB_REMINDER": "Jobbpåminnelser",
+        "JOB_CHANGED": "Jobbuppdateringar"
       },
       "health": {
         "UP": "Uppe",

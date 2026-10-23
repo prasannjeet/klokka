@@ -255,6 +255,7 @@ describe('recurring jobs', () => {
       lastDate: plusDays(21),
       occurrenceCount: 4,
       stopped: false,
+      openEnded: false,
       recurrence: {
         frequency: 'WEEKLY' as const,
         interval: 1,

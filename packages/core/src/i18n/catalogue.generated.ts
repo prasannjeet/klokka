@@ -542,6 +542,21 @@ export const sv = {
   "notifications.jobReminder.titlePlace": "Jobb på {place} om {lead}",
   "notifications.jobReminder.titlePlaceTomorrow": "Jobb på {place} i morgon kl. {time}",
   "notifications.jobReminder.titleTomorrow": "Jobb i morgon kl. {time}",
+  "notifications.jobs.added": "{name} la till ett jobb åt dig",
+  "notifications.jobs.addedMany_one": "{name} la till {count} jobb åt dig",
+  "notifications.jobs.addedMany_other": "{name} la till {count} jobb åt dig",
+  "notifications.jobs.changed": "{name} ändrade ditt jobb",
+  "notifications.jobs.changedMany_one": "{name} ändrade {count} jobb",
+  "notifications.jobs.changedMany_other": "{name} ändrade {count} jobb",
+  "notifications.jobs.more": "och {count} till",
+  "notifications.jobs.range": "{workspace}: {from} till {to}",
+  "notifications.jobs.removed": "{name} tog bort ditt jobb",
+  "notifications.jobs.removedMany_one": "{name} tog bort {count} jobb",
+  "notifications.jobs.removedMany_other": "{name} tog bort {count} jobb",
+  "notifications.jobs.when": "{workspace}: {date}",
+  "notifications.jobs.whenPlace": "{workspace}: {date} på {place}",
+  "notifications.jobs.whenTime": "{workspace}: {date} kl. {time}",
+  "notifications.jobs.whenTimePlace": "{workspace}: {date} kl. {time} på {place}",
   "notifications.markAllRead": "Markera alla som lästa",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -1010,6 +1025,7 @@ export const sv = {
   "web.operator.kind.FLAG_RESOLVED": "Flagga löst",
   "web.operator.kind.HOURS_CHANGED": "Timmar tillagda eller ändrade",
   "web.operator.kind.INVITE_ACCEPTED": "Inbjudan accepterad",
+  "web.operator.kind.JOB_CHANGED": "Jobbuppdateringar",
   "web.operator.kind.JOB_REMINDER": "Jobbpåminnelser",
   "web.operator.kind.MONTH_CLOSED": "Månad stängd",
   "web.operator.kind.MONTH_REOPENED": "Månad öppnad igen",
@@ -1697,6 +1713,21 @@ export const en = {
   "notifications.jobReminder.titlePlace": "Job at {place} in {lead}",
   "notifications.jobReminder.titlePlaceTomorrow": "Job at {place} tomorrow at {time}",
   "notifications.jobReminder.titleTomorrow": "Job tomorrow at {time}",
+  "notifications.jobs.added": "{name} added a job for you",
+  "notifications.jobs.addedMany_one": "{name} added {count} job for you",
+  "notifications.jobs.addedMany_other": "{name} added {count} jobs for you",
+  "notifications.jobs.changed": "{name} changed your job",
+  "notifications.jobs.changedMany_one": "{name} changed {count} job",
+  "notifications.jobs.changedMany_other": "{name} changed {count} jobs",
+  "notifications.jobs.more": "and {count} more",
+  "notifications.jobs.range": "{workspace}: {from} to {to}",
+  "notifications.jobs.removed": "{name} removed your job",
+  "notifications.jobs.removedMany_one": "{name} removed {count} job",
+  "notifications.jobs.removedMany_other": "{name} removed {count} jobs",
+  "notifications.jobs.when": "{workspace}: {date}",
+  "notifications.jobs.whenPlace": "{workspace}: {date} at {place}",
+  "notifications.jobs.whenTime": "{workspace}: {date}, {time}",
+  "notifications.jobs.whenTimePlace": "{workspace}: {date}, {time} at {place}",
   "notifications.markAllRead": "Mark all as read",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -2165,6 +2196,7 @@ export const en = {
   "web.operator.kind.FLAG_RESOLVED": "Flag resolved",
   "web.operator.kind.HOURS_CHANGED": "Hours added or changed",
   "web.operator.kind.INVITE_ACCEPTED": "Invitation accepted",
+  "web.operator.kind.JOB_CHANGED": "Job updates",
   "web.operator.kind.JOB_REMINDER": "Job reminders",
   "web.operator.kind.MONTH_CLOSED": "Month closed",
   "web.operator.kind.MONTH_REOPENED": "Month reopened",
@@ -2837,6 +2869,18 @@ export type MessageParams = {
   "notifications.jobReminder.titlePlace": { lead: string | number; place: string | number };
   "notifications.jobReminder.titlePlaceTomorrow": { place: string | number; time: string | number };
   "notifications.jobReminder.titleTomorrow": { time: string | number };
+  "notifications.jobs.added": { name: string | number };
+  "notifications.jobs.addedMany": { count: string | number; name: string | number };
+  "notifications.jobs.changed": { name: string | number };
+  "notifications.jobs.changedMany": { count: string | number; name: string | number };
+  "notifications.jobs.more": { count: string | number };
+  "notifications.jobs.range": { from: string | number; to: string | number; workspace: string | number };
+  "notifications.jobs.removed": { name: string | number };
+  "notifications.jobs.removedMany": { count: string | number; name: string | number };
+  "notifications.jobs.when": { date: string | number; workspace: string | number };
+  "notifications.jobs.whenPlace": { date: string | number; place: string | number; workspace: string | number };
+  "notifications.jobs.whenTime": { date: string | number; time: string | number; workspace: string | number };
+  "notifications.jobs.whenTimePlace": { date: string | number; place: string | number; time: string | number; workspace: string | number };
   "notifications.markAllRead": Record<never, never>;
   "notifications.monthClosed.body": { hours: string | number; money: string | number; workspace: string | number };
   "notifications.monthClosed.bodyHoursOnly": { hours: string | number; workspace: string | number };
@@ -3294,6 +3338,7 @@ export type MessageParams = {
   "web.operator.kind.FLAG_RESOLVED": Record<never, never>;
   "web.operator.kind.HOURS_CHANGED": Record<never, never>;
   "web.operator.kind.INVITE_ACCEPTED": Record<never, never>;
+  "web.operator.kind.JOB_CHANGED": Record<never, never>;
   "web.operator.kind.JOB_REMINDER": Record<never, never>;
   "web.operator.kind.MONTH_CLOSED": Record<never, never>;
   "web.operator.kind.MONTH_REOPENED": Record<never, never>;
@@ -3455,6 +3500,9 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "notifications.hours.added",
   "notifications.hours.changed",
   "notifications.hours.removed",
+  "notifications.jobs.addedMany",
+  "notifications.jobs.changedMany",
+  "notifications.jobs.removedMany",
   "operator.invitations.expireTomorrow",
   "operator.invitations.resent",
   "overview.nothingLoggedDays",

@@ -89,6 +89,7 @@ public class MeService {
         if (update.getTheme() != null) preferences.theme = update.getTheme();
         if (update.getJobReminders() != null) preferences.jobReminders = update.getJobReminders();
         if (update.getJobReminderLead() != null) preferences.jobReminderLead = update.getJobReminderLead();
+        if (update.getJobUpdates() != null) preferences.jobUpdates = update.getJobUpdates();
         preferences.updatedAt = clock.instant();
         return toPreferences(preferences);
     }
@@ -259,6 +260,7 @@ public class MeService {
                 .digestEnabled(preferences.digestEnabled)
                 .theme(preferences.theme)
                 .jobReminders(preferences.jobReminders)
-                .jobReminderLead(preferences.jobReminderLead);
+                .jobReminderLead(preferences.jobReminderLead)
+                .jobUpdates(preferences.jobUpdates);
     }
 }

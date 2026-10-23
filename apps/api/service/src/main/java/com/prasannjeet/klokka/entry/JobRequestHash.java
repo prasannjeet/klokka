@@ -12,10 +12,12 @@ import com.prasannjeet.klokka.contract.model.JobWrite;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
+import java.util.Map;
+import java.util.UUID;
 
-// The retry key's fingerprint of a recurring create (CHQ-162): SHA-256 hex of the body as canonical JSON. Its own
-// mapper, so a change to the application's Jackson settings cannot change the hash. Sets serialize in iteration
-// order, so callers put the weekdays in their canonical (Monday first) order before hashing.
+// The retry key's fingerprint of a recurring create (CHQ-162) or a schedule change (CHQ-187): SHA-256 hex of the body
+// as canonical JSON. Its own mapper, so a change to the application's Jackson settings cannot change the hash. Sets
+// serialize in iteration order, so callers put the weekdays in their canonical (Monday first) order before hashing.
 final class JobRequestHash {
 
     private static final ObjectMapper CANONICAL = JsonMapper.builder()
@@ -28,8 +30,18 @@ final class JobRequestHash {
     private JobRequestHash() {}
 
     static String of(JobWrite body) {
+        return hash(body);
+    }
+
+    // A schedule change also names the job it was sent for, so one key cannot replay against another job (and a
+    // creation's key never matches a schedule change).
+    static String ofScheduleChange(UUID jobId, JobWrite body) {
+        return hash(Map.of("jobId", jobId, "body", body));
+    }
+
+    private static String hash(Object value) {
         try {
-            byte[] json = CANONICAL.writeValueAsString(body).getBytes(UTF_8);
+            byte[] json = CANONICAL.writeValueAsString(value).getBytes(UTF_8);
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(json));
         } catch (JsonProcessingException | NoSuchAlgorithmException e) {
             throw new IllegalStateException("cannot fingerprint a recurring job request", e);

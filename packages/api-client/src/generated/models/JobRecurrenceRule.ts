@@ -20,9 +20,23 @@ import {
     WeekdayToJSON,
     WeekdayToJSONTyped,
 } from './Weekday';
+import type { MonthlyBy } from './MonthlyBy';
+import {
+    MonthlyByFromJSON,
+    MonthlyByFromJSONTyped,
+    MonthlyByToJSON,
+    MonthlyByToJSONTyped,
+} from './MonthlyBy';
+import type { WeekOfMonth } from './WeekOfMonth';
+import {
+    WeekOfMonthFromJSON,
+    WeekOfMonthFromJSONTyped,
+    WeekOfMonthToJSON,
+    WeekOfMonthToJSONTyped,
+} from './WeekOfMonth';
 
 /**
- * A finite schedule. Supply exactly one of endDate or periodCount; unlimited schedules are invalid.
+ * At most one of endDate or periodCount; neither means no end date (open-ended, planned `horizon` months ahead and extended nightly).
  * @export
  * @interface JobRecurrenceRule
  */
@@ -40,9 +54,25 @@ export interface JobRecurrenceRule {
      */
     weekdays?: Set<Weekday>;
     /**
-     * MONTHLY only; otherwise use the first date's day of month, clamped in shorter months.
+     * Older clients; same as dayOfMonth 31.
      */
     lastDayOfMonth?: boolean;
+    /**
+     * 
+     */
+    monthlyBy?: MonthlyBy;
+    /**
+     * MONTHLY with DAY_OF_MONTH; 31 means the last day, and any day is clamped in shorter months. Defaults to the first date's day of month.
+     */
+    dayOfMonth?: number;
+    /**
+     * 
+     */
+    weekOfMonth?: WeekOfMonth;
+    /**
+     * 
+     */
+    weekday?: Weekday;
     /**
      * Inclusive, not before the first date. Mutually exclusive with periodCount.
      */
@@ -87,6 +117,10 @@ export function JobRecurrenceRuleFromJSONTyped(json: any, ignoreDiscriminator: b
         'interval': json['interval'],
         'weekdays': json['weekdays'] == null ? undefined : (new Set((json['weekdays'] as Array<any>).map(WeekdayFromJSON))),
         'lastDayOfMonth': json['lastDayOfMonth'] == null ? undefined : json['lastDayOfMonth'],
+        'monthlyBy': json['monthlyBy'] == null ? undefined : MonthlyByFromJSON(json['monthlyBy']),
+        'dayOfMonth': json['dayOfMonth'] == null ? undefined : json['dayOfMonth'],
+        'weekOfMonth': json['weekOfMonth'] == null ? undefined : WeekOfMonthFromJSON(json['weekOfMonth']),
+        'weekday': json['weekday'] == null ? undefined : WeekdayFromJSON(json['weekday']),
         'endDate': json['endDate'] == null ? undefined : (parseDate(json['endDate'])),
         'periodCount': json['periodCount'] == null ? undefined : json['periodCount'],
     };
@@ -107,6 +141,10 @@ export function JobRecurrenceRuleToJSONTyped(value?: JobRecurrenceRule | null, i
         'interval': value['interval'],
         'weekdays': value['weekdays'] == null ? undefined : (Array.from(value['weekdays'] as Set<any>).map(WeekdayToJSON)),
         'lastDayOfMonth': value['lastDayOfMonth'],
+        'monthlyBy': MonthlyByToJSON(value['monthlyBy']),
+        'dayOfMonth': value['dayOfMonth'],
+        'weekOfMonth': WeekOfMonthToJSON(value['weekOfMonth']),
+        'weekday': WeekdayToJSON(value['weekday']),
         'endDate': value['endDate'] == null ? value['endDate'] : serializeDate(value['endDate']),
         'periodCount': value['periodCount'],
     };

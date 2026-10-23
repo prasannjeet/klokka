@@ -91,6 +91,7 @@ class MeResourceTest {
                 .body("preferences.pushEnabled", is(true))
                 .body("preferences.digestEnabled", is(false))
                 .body("preferences.theme", is("SYSTEM"))
+                .body("preferences.jobUpdates", is(true))
                 .body("workspaces", empty())
                 .body("platformAdmin", is(false))
                 .body("pushTokenRegistered", is(false));
@@ -189,8 +190,11 @@ class MeResourceTest {
         given().pathParam("token", token).when().delete("/v1/me/push-tokens/{token}").then().statusCode(204);
         given().when().get("/v1/me").then().statusCode(200).body("pushTokenRegistered", is(false));
 
-        given().contentType("application/json").body("{\"language\":\"sv\",\"digestEnabled\":false}")
-                .when().patch("/v1/me/preferences").then().statusCode(200).body("language", is("sv"));
+        given().contentType("application/json").body("{\"jobUpdates\":false}")
+                .when().patch("/v1/me/preferences").then().statusCode(200).body("jobUpdates", is(false)).body("pushEnabled", is(true));
+        given().when().get("/v1/me").then().statusCode(200).body("preferences.jobUpdates", is(false));
+        given().contentType("application/json").body("{\"language\":\"sv\",\"digestEnabled\":false,\"jobUpdates\":true}")
+                .when().patch("/v1/me/preferences").then().statusCode(200).body("language", is("sv")).body("jobUpdates", is(true));
     }
 
     @Test

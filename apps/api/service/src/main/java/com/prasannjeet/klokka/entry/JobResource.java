@@ -5,6 +5,7 @@ import com.prasannjeet.klokka.contract.model.Entry;
 import com.prasannjeet.klokka.contract.model.JobChangeScope;
 import com.prasannjeet.klokka.contract.model.JobRecurrencePreview;
 import com.prasannjeet.klokka.contract.model.JobRecurrencePreviewRequest;
+import com.prasannjeet.klokka.contract.model.JobScopeCounts;
 import com.prasannjeet.klokka.contract.model.JobWrite;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
@@ -36,5 +37,10 @@ public class JobResource implements JobsApi {
     @Override
     public void deleteJob(UUID workspaceId, UUID jobId, JobChangeScope scope) {
         service.delete(workspaceId, jobId, scope);
+    }
+
+    @Override
+    public JobScopeCounts getJobScopeCounts(UUID workspaceId, UUID jobId) {
+        return service.scopeCounts(workspaceId, jobId);
     }
 }

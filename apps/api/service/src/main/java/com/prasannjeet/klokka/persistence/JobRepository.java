@@ -5,6 +5,7 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +16,35 @@ import java.util.UUID;
 @ApplicationScoped
 public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
 
-    public List<JobEntity> seriesFrom(WorkspaceId workspaceId, UUID seriesId, LocalDate date) {
-        return list("select j from JobEntity j join HourEntryEntity e on j.entryId = e.id and j.workspaceId = e.workspaceId "
-                + "where j.workspaceId = ?1 and j.recurrenceId = ?2 and e.workDate >= ?3 order by e.workDate, j.id",
-                workspaceId.value(), seriesId, date);
+    // A series' job with its day (CHQ-187).
+    public record SeriesJob(JobEntity job, LocalDate date) {}
+
+    // The jobs of these series (the parts of one series, CHQ-187) on live days, by date then position.
+    public List<SeriesJob> seriesJobs(WorkspaceId workspaceId, Collection<UUID> seriesIds) {
+        return seriesJobs(workspaceId, seriesIds, "", null);
+    }
+
+    // The same from `fromInclusive` on.
+    public List<SeriesJob> seriesJobsFrom(WorkspaceId workspaceId, Collection<UUID> seriesIds, LocalDate fromInclusive) {
+        return seriesJobs(workspaceId, seriesIds, "and e.workDate >= :from ", fromInclusive);
+    }
+
+    private List<SeriesJob> seriesJobs(WorkspaceId workspaceId, Collection<UUID> seriesIds, String fromClause, LocalDate from) {
+        if (seriesIds.isEmpty()) return List.of();
+        var query = getEntityManager().createQuery("select j, e.workDate from JobEntity j join HourEntryEntity e "
+                        + "on j.entryId = e.id and j.workspaceId = e.workspaceId where j.workspaceId = :w and j.recurrenceId in :s "
+                        + fromClause + "and e.deletedAt is null order by e.workDate, j.position", Object[].class)
+                .setParameter("w", workspaceId.value())
+                .setParameter("s", seriesIds);
+        if (from != null) query.setParameter("from", from);
+        return query.getResultStream().map(row -> new SeriesJob((JobEntity) row[0], (LocalDate) row[1])).toList();
+    }
+
+    // The job as the database has it now, for a caller that has just taken a lock: the copy this transaction read
+    // before is dropped (the caller must not have changed it).
+    public Optional<JobEntity> reread(WorkspaceId workspaceId, JobEntity job) {
+        getEntityManager().detach(job);
+        return findJob(workspaceId, job.id);
     }
 
     // Display order: by start time (jobs without one last), then the order they were added.

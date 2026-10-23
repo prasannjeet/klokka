@@ -7,6 +7,8 @@ import com.prasannjeet.klokka.contract.model.EntryChange;
 import com.prasannjeet.klokka.contract.model.EntryFlagSummary;
 import com.prasannjeet.klokka.contract.model.Job;
 import com.prasannjeet.klokka.contract.model.JobLocation;
+import com.prasannjeet.klokka.contract.model.JobRecurrence;
+import com.prasannjeet.klokka.contract.model.JobRecurrenceRule;
 import com.prasannjeet.klokka.member.MemberViews;
 import com.prasannjeet.klokka.persistence.EntryFlagEntity;
 import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
@@ -101,9 +103,19 @@ public final class EntryViews {
         if (j.recurrenceId != null) {
             JobRecurrenceEntity row = series.get(j.recurrenceId);
             if (row == null) throw new IllegalStateException("series " + j.recurrenceId + " of job " + j.id + " not loaded");
-            job.recurrence(row.view());
+            job.recurrence(recurrenceView(row));
         }
         return job;
+    }
+
+    // A series as the contract shows it. An open-ended series has no end in its rule; its endDate is the date its
+    // jobs are planned through.
+    public static JobRecurrence recurrenceView(JobRecurrenceEntity row) {
+        JobRecurrenceRule rule = RecurrencePattern.of(row).toRule();
+        if (!row.openEnded && row.periodCount == null) rule.endDate(row.endDate);
+        if (!row.openEnded && row.periodCount != null) rule.periodCount(row.periodCount);
+        return new JobRecurrence().id(row.id).firstDate(row.firstDate).recurrence(rule).endDate(row.endDate)
+                .occurrenceCount(row.occurrenceCount).lastDate(row.lastDate).stopped(row.stopped).openEnded(row.openEnded);
     }
 
     public static final DateTimeFormatter HH_MM = DateTimeFormatter.ofPattern("HH:mm");

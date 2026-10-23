@@ -28,13 +28,21 @@ import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 // Writes every notification (the feature services call in, inside their own transaction) and serves the
 // notification centre. HOURS_CHANGED is coalesced per (recipient, workspace, actor) while the row is unpushed:
 // a sitting's changes merge into one row whose push is delayed by the quiet window, capped by max-delay (CHQ-132).
+// JOB_CHANGED (every job write, CHQ-188) is coalesced the same way, per job.
 @ApplicationScoped
 public class NotificationService {
+
+    public enum JobChangeKind { ADDED, CHANGED, REMOVED }
+
+    // One job write as the employee hears about it: the job's values after the write (before it, for a removal).
+    public record JobChange(UUID jobId, LocalDate date, JobChangeKind kind, String startTime, String placeName, BigDecimal hours) {}
 
     @Inject
     NotificationRepository repository;
@@ -99,6 +107,65 @@ public class NotificationService {
         row.updatedAt = now;
         row.readAt = null;
         row.payload = NotificationPayload.write(mapper, payload);
+    }
+
+    // A sitting's job writes merge per job: added then removed is no news (the job goes), added then changed stays
+    // added, changed then removed is removed, otherwise the later kind; the values are always the latest. A sitting
+    // left with no jobs deletes its pending row. Two jobs on one date stay two (NotificationTexts reads a date with a
+    // removed and an added job, as a schedule change leaves it, as a change).
+    public void jobChanged(WorkspaceEntity workspace, String recipientUserId, UUID membershipId, String actorId, String actorName,
+            JobChange change) {
+        if (recipientUserId == null || recipientUserId.equals(actorId)) return;
+        Instant now = clock.instant();
+        String key = "JOBS:" + recipientUserId + ":" + workspace.id + ":" + actorId;
+        NotificationEntity row = repository.findOpenByKey(key).orElse(null);
+        Map<String, Object> payload = row == null ? new LinkedHashMap<>() : NotificationPayload.read(mapper, row.payload);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> jobs = (Map<String, Object>) payload.computeIfAbsent("jobs", k -> new LinkedHashMap<String, Object>());
+        String jobId = change.jobId().toString();
+        Object earlier = jobs.get(jobId) instanceof Map<?, ?> m ? m.get("kind") : null;
+        JobChangeKind kind = merge(earlier == null ? null : JobChangeKind.valueOf(earlier.toString()), change.kind());
+        if (kind == null) {
+            jobs.remove(jobId);
+        } else {
+            Map<String, Object> merged = new LinkedHashMap<>();
+            merged.put("date", change.date().toString());
+            merged.put("kind", kind.name());
+            merged.put("startTime", change.startTime());
+            merged.put("placeName", change.placeName());
+            merged.put("hours", change.hours());
+            jobs.put(jobId, merged);
+        }
+        if (jobs.isEmpty()) {
+            if (row != null) repository.deleteNotification(row);
+            return;
+        }
+        payload.put("actorId", actorId);
+        payload.put("actorName", actorName);
+        payload.put("membershipId", membershipId.toString());
+        payload.put("workspaceName", workspace.name);
+        if (row == null) {
+            row = newRow(recipientUserId, workspace.id, NotificationKind.JOB_CHANGED, now);
+            row.coalesceKey = key;
+            row.pushDueAt = now.plus(config.push().quietWindow());
+            row.payload = NotificationPayload.write(mapper, payload);
+            repository.persistNotification(row);
+            return;
+        }
+        Instant slid = now.plus(config.push().quietWindow());
+        Instant cap = row.createdAt.plus(config.push().maxDelay());
+        row.pushDueAt = slid.isBefore(cap) ? slid : cap;
+        row.updatedAt = now;
+        row.readAt = null;
+        row.payload = NotificationPayload.write(mapper, payload);
+    }
+
+    // null: the job drops out of the sitting. Removed then added cannot happen to one job (a job id is never reused).
+    private static JobChangeKind merge(JobChangeKind earlier, JobChangeKind later) {
+        if (earlier == null) return later;
+        if (earlier == JobChangeKind.ADDED && later == JobChangeKind.REMOVED) return null;
+        if (earlier == JobChangeKind.ADDED && later == JobChangeKind.CHANGED) return JobChangeKind.ADDED;
+        return later;
     }
 
     public void inviteAccepted(WorkspaceEntity workspace, String employerUserId, UUID membershipId, String memberName) {
@@ -247,15 +314,22 @@ public class NotificationService {
     }
 
     private static LocalDate singleDayOf(NotificationKind kind, Map<String, Object> payload) {
-        if (kind != NotificationKind.HOURS_CHANGED) return null;
-        var changes = NotificationTexts.changes(payload);
-        return changes.size() == 1 ? changes.firstKey() : null;
+        var dates = datesOf(kind, payload);
+        return dates.size() == 1 ? dates.first() : null;
     }
 
     private static String monthOf(NotificationKind kind, Map<String, Object> payload) {
-        if (kind != NotificationKind.HOURS_CHANGED) return null;
-        var changes = NotificationTexts.changes(payload);
-        return changes.isEmpty() ? null : YearMonth.from(changes.firstKey()).toString();
+        var dates = datesOf(kind, payload);
+        return dates.isEmpty() ? null : YearMonth.from(dates.first()).toString();
+    }
+
+    // The days a coalesced sitting touched, in order; empty for the other kinds.
+    private static SortedSet<LocalDate> datesOf(NotificationKind kind, Map<String, Object> payload) {
+        return switch (kind) {
+            case HOURS_CHANGED -> new TreeSet<>(NotificationTexts.changes(payload).keySet());
+            case JOB_CHANGED -> new TreeSet<>(NotificationTexts.jobs(payload).stream().map(NotificationTexts.JobNews::date).toList());
+            default -> new TreeSet<>();
+        };
     }
 
     private static UUID uuidOrNull(Object value) {

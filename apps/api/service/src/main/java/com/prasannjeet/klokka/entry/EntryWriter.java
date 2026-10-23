@@ -13,6 +13,8 @@ import com.prasannjeet.klokka.contract.model.JobLocation;
 import com.prasannjeet.klokka.error.KlokkaException;
 import com.prasannjeet.klokka.i18n.Formats;
 import com.prasannjeet.klokka.notification.NotificationService;
+import com.prasannjeet.klokka.notification.NotificationService.JobChange;
+import com.prasannjeet.klokka.notification.NotificationService.JobChangeKind;
 import com.prasannjeet.klokka.persistence.EntryRepository;
 import com.prasannjeet.klokka.persistence.HourEntryChangeEntity;
 import com.prasannjeet.klokka.persistence.HourEntryEntity;
@@ -29,15 +31,21 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import org.jboss.logging.Logger;
 
 // The ONE funnel every hours write goes through (single PUT, DELETE, the batch, a flag fix, and since CHQ-156 the
 // job operations): month lock and member status checks, the live row, one history row per change, and the
 // coalesced notification. A day's entry is the sum of its jobs; a day-level write goes through the day's single
-// job and refuses a day with several (ENTRY_HAS_JOBS). Callers run it inside their transaction.
+// job and refuses a day with several (ENTRY_HAS_JOBS). Day-level writes notify HOURS_CHANGED; job writes notify
+// JOB_CHANGED per job (CHQ-188), so a new start time or place is news even when the day's hours stay. Callers run
+// it inside their transaction.
 @ApplicationScoped
 public class EntryWriter {
 
@@ -46,6 +54,21 @@ public class EntryWriter {
     // A job as written: hours already rounded by the workspace rule.
     public record JobInput(BigDecimal hours, LocalTime startTime, String note, JobLocation location) {}
 
+    // How a series write treats closed months and full days, and whether the employee is notified (CHQ-186).
+    public record SeriesOptions(boolean skipClosedMonths, boolean skipFullDays, boolean notifyEmployee) {
+        // Creating a series: a closed month or a full day refuses the whole series.
+        public static final SeriesOptions CREATE = new SeriesOptions(false, false, true);
+        // A schedule change: jobs in closed months are skipped and counted; a full day refuses the change.
+        public static final SeriesOptions CHANGE = new SeriesOptions(true, false, true);
+        // The nightly top-up of an open-ended series: closed months and full days skipped, nobody notified, so one
+        // busy day can never stall the series.
+        public static final SeriesOptions EXTEND = new SeriesOptions(true, true, false);
+    }
+
+    // firstEntry and lastDate are null when nothing was written (every date skipped, or no dates).
+    public record SeriesWrite(HourEntryEntity firstEntry, LocalDate lastDate, int written, int skippedClosed, int skippedFull) {}
+
+    private static final Logger LOG = Logger.getLogger(EntryWriter.class);
     private static final BigDecimal DAY_MAX = new BigDecimal("24");
     private static final int NOTE_MAX = 500;
 
@@ -149,33 +172,65 @@ public class EntryWriter {
     public Outcome createJob(Access access, MembershipEntity target, LocalDate date, JobInput input) {
         requireWritable(target);
         requireUnlocked(access, YearMonth.from(date));
-        return insertJob(access, target, date, input, null);
+        return insertJob(access, target, date, input, null, true);
     }
 
     // A series' jobs (CHQ-159), dates in order: the member and each distinct month are checked once, before the
-    // first write. Returns the first date's entry.
-    public HourEntryEntity createSeriesJobs(Access access, MembershipEntity target, List<LocalDate> dates, JobInput input,
-            JobRecurrenceEntity series) {
+    // first write; a closed month refuses the whole write or is skipped, as the options say.
+    public SeriesWrite createSeriesJobs(Access access, MembershipEntity target, List<LocalDate> dates, JobInput input,
+            JobRecurrenceEntity series, SeriesOptions options) {
         requireWritable(target);
-        for (YearMonth month : dates.stream().map(YearMonth::from).distinct().toList()) requireUnlocked(access, month);
-        HourEntryEntity first = null;
-        for (LocalDate date : dates) {
-            HourEntryEntity entry = insertJob(access, target, date, input, series.id).entry();
-            if (first == null) first = entry;
+        if (!options.skipClosedMonths() && dates.isEmpty()) throw new IllegalArgumentException("a series has at least one date");
+        Set<YearMonth> closed = new HashSet<>();
+        for (YearMonth month : dates.stream().map(YearMonth::from).distinct().toList()) {
+            if (!options.skipClosedMonths()) requireUnlocked(access, month);
+            else if (isLocked(access, month)) closed.add(month);
         }
-        if (first == null) throw new IllegalArgumentException("a series has at least one date");
-        return first;
+        HourEntryEntity first = null;
+        LocalDate last = null;
+        int written = 0;
+        int skippedClosed = 0;
+        int skippedFull = 0;
+        for (LocalDate date : dates) {
+            if (closed.contains(YearMonth.from(date))) {
+                skippedClosed++;
+                continue;
+            }
+            if (options.skipFullDays() && !dayTakes(access, target, date, input.hours())) {
+                LOG.debugf("series %s: %s is full (hours or jobs per day), job skipped", series.id, date);
+                skippedFull++;
+                continue;
+            }
+            HourEntryEntity entry = insertJob(access, target, date, input, series.id, options.notifyEmployee()).entry();
+            if (first == null) first = entry;
+            last = date;
+            written++;
+        }
+        return new SeriesWrite(first, last, written, skippedClosed, skippedFull);
     }
 
-    private Outcome insertJob(Access access, MembershipEntity target, LocalDate date, JobInput input, UUID seriesId) {
+    // True when insertJob would accept one more job of `hours` on the member's day: under the per-day job cap and
+    // within 24 hours in total (a day without jobs from before V3 counts its hours as one job).
+    private boolean dayTakes(Access access, MembershipEntity target, LocalDate date, BigDecimal hours) {
+        Optional<HourEntryEntity> live = entries.findLive(access.workspaceId(), target.id, date);
+        if (live.isEmpty()) return hours.compareTo(DAY_MAX) <= 0;
+        List<JobEntity> dayJobs = jobs.listForEntry(access.workspaceId(), live.get().id);
+        if (dayJobs.size() >= config.entries().jobsPerDayMax()) return false;
+        BigDecimal total = dayJobs.isEmpty() ? live.get().hours
+                : dayJobs.stream().map(j -> j.hours).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return total.add(hours).compareTo(DAY_MAX) <= 0;
+    }
+
+    private Outcome insertJob(Access access, MembershipEntity target, LocalDate date, JobInput input, UUID seriesId, boolean notify) {
         Instant now = clock.instant();
         Optional<HourEntryEntity> live = entries.findLiveForUpdate(access.workspaceId(), target.id, date);
         if (live.isEmpty()) {
             requireDayTotal(input.hours());
             HourEntryEntity entry = newEntry(access, target, date, input.hours(), clean(input.note()), now);
-            newJob(access, entry, input, now).recurrenceId = seriesId;
+            JobEntity job = newJob(access, entry, input, now);
+            job.recurrenceId = seriesId;
             history(access, entry, EntryChangeKind.CREATED, null, entry.hours, null, entry.note, access.userId(), now);
-            notifyChange(access, target, date, null, entry.hours, entry.note);
+            if (notify) notifyJob(access, target, date, JobChangeKind.ADDED, job);
             return new Outcome(entry, true);
         }
         HourEntryEntity entry = live.get();
@@ -187,8 +242,11 @@ public class EntryWriter {
         if (dayJobs.isEmpty() && entry.hours.signum() > 0) {
             newJob(access, entry, new JobInput(entry.hours, null, entry.note, null), now);
         }
-        newJob(access, entry, input, now).recurrenceId = seriesId;
-        return settle(access, target, entry, now);
+        JobEntity job = newJob(access, entry, input, now);
+        job.recurrenceId = seriesId;
+        Outcome outcome = settle(access, target, entry, now);
+        if (notify) notifyJob(access, target, date, JobChangeKind.ADDED, job);
+        return outcome;
     }
 
     public Outcome updateJob(Access access, MembershipEntity target, HourEntryEntity entry, JobEntity job, JobInput input) {
@@ -196,10 +254,14 @@ public class EntryWriter {
         requireUnlocked(access, YearMonth.from(entry.workDate));
         entries.lockEntry(access.workspaceId(), entry);
         Instant now = clock.instant();
+        List<Object> before = jobValues(job);
         apply(job, input);
         job.updatedAt = now;
         job.updatedBy = access.userId();
-        return settle(access, target, entry, now);
+        Outcome outcome = settle(access, target, entry, now);
+        // Any change to the job is news (a start time or place too); the same values again are not.
+        if (!before.equals(jobValues(job))) notifyJob(access, target, entry.workDate, JobChangeKind.CHANGED, job);
+        return outcome;
     }
 
     // Removing the last job removes the day.
@@ -208,9 +270,10 @@ public class EntryWriter {
         requireUnlocked(access, YearMonth.from(entry.workDate));
         entries.lockEntry(access.workspaceId(), entry);
         Instant now = clock.instant();
+        notifyJob(access, target, entry.workDate, JobChangeKind.REMOVED, job);
         jobs.deleteJob(access.workspaceId(), job);
         if (jobs.listForEntry(access.workspaceId(), entry.id).isEmpty()) {
-            removeDay(access, target, entry, now, true);
+            removeDay(access, target, entry, now, false);
             return new Outcome(entry, true);
         }
         return settle(access, target, entry, now);
@@ -233,7 +296,8 @@ public class EntryWriter {
         return change;
     }
 
-    // The day's total and joined note from its jobs, with one history row and one notification when they moved.
+    // The day's total and joined note from its jobs, with one history row when they moved. The job write that called
+    // it notifies (JOB_CHANGED), not the day.
     private Outcome settle(Access access, MembershipEntity target, HourEntryEntity entry, Instant now) {
         List<JobEntity> dayJobs = jobs.listForEntry(access.workspaceId(), entry.id);
         BigDecimal total = dayJobs.stream().map(j -> j.hours).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -248,7 +312,6 @@ public class EntryWriter {
         entry.hours = total;
         entry.note = note;
         history(access, entry, EntryChangeKind.UPDATED, before, total, noteBefore, note, access.userId(), now);
-        notifyChange(access, target, entry.workDate, before, total, note);
         return new Outcome(entry, true);
     }
 
@@ -309,6 +372,18 @@ public class EntryWriter {
                 date, before, after, note);
     }
 
+    private void notifyJob(Access access, MembershipEntity target, LocalDate date, JobChangeKind kind, JobEntity job) {
+        notifications.jobChanged(access.workspace(), target.userId, target.id, access.userId(), access.membership().displayName,
+                new JobChange(job.id, date, kind, job.startTime == null ? null : job.startTime.format(EntryViews.HH_MM), job.placeName, job.hours));
+    }
+
+    // What a job edit can change, for telling a real change from the same values sent again.
+    private static List<Object> jobValues(JobEntity job) {
+        return Arrays.asList(job.hours == null ? null : job.hours.stripTrailingZeros(), job.startTime, job.note, job.placeId,
+                job.placeName, job.placeAddress, job.latitude == null ? null : job.latitude.stripTrailingZeros(),
+                job.longitude == null ? null : job.longitude.stripTrailingZeros());
+    }
+
     private static void requireDayTotal(BigDecimal total) {
         if (total.compareTo(DAY_MAX) > 0) throw validation("hours", "the day's jobs would add up to more than 24 hours");
     }
@@ -320,11 +395,11 @@ public class EntryWriter {
         return joined.length() <= NOTE_MAX ? joined : joined.substring(0, NOTE_MAX - 1).stripTrailing() + "…";
     }
 
-    private static String clean(String note) {
+    static String clean(String note) {
         return note == null || note.isBlank() ? null : note.trim();
     }
 
-    private static String blankToNull(String value) {
+    static String blankToNull(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
 }

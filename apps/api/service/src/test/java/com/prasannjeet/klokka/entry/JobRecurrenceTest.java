@@ -1,10 +1,13 @@
 package com.prasannjeet.klokka.entry;
 
 import static io.restassured.RestAssured.given;
+import static java.time.temporal.ChronoUnit.DAYS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.nullValue;
 
 import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.support.Fake;
@@ -98,9 +101,8 @@ class JobRecurrenceTest {
     @Test
     @TestSecurity(user = OWNER)
     @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
-    void missingAmbiguousAndOversizedEndsAreRejectedWithoutWrites() {
-        for (String rule : new String[]{WEEKLY.replace(",\"periodCount\":8", ""),
-                WEEKLY.replace("\"periodCount\":8", "\"periodCount\":8,\"endDate\":\"2026-12-31\""),
+    void ambiguousAndOversizedEndsAreRejectedWithoutWrites() {
+        for (String rule : new String[]{WEEKLY.replace("\"periodCount\":8", "\"periodCount\":8,\"endDate\":\"2026-12-31\""),
                 WEEKLY.replace("\"periodCount\":8", "\"endDate\":\"2040-01-01\""),
                 WEEKLY.replace("\"periodCount\":8", "\"endDate\":\"2026-10-01\""),
                 WEEKLY.replace("\"periodCount\":8", "\"periodCount\":0"),
@@ -177,21 +179,21 @@ class JobRecurrenceTest {
     @Test
     @TestSecurity(user = OWNER)
     @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
-    void seriesChangesRollbackWhenLaterMonthsAreLockedAndPastScopeIsRefused() {
+    void seriesChangesSkipLaterClosedMonthsAndReachPastJobs() {
         String selected = given().contentType("application/json").body(body(UUID.randomUUID(), WEEKLY))
                 .post(create("2026-10-05")).then().statusCode(201).extract().path("jobs[0].id");
         given().put(base() + "/months/2026-11/lock").then().statusCode(200);
+        // The eight October jobs change; the eight in closed November keep their values (CHQ-187).
         given().contentType("application/json").body("{\"hours\":4}")
-                .put(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(409);
-        assertThat(data.count("select count(*) from job where workspace_id = ? and hours = 3", ws)).isEqualTo(16);
-        given().delete(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(409);
-        assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isEqualTo(16);
-        assertThat(data.count("select count(*) from job_recurrence where workspace_id = ? and stopped", ws)).isZero();
+                .put(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(200);
+        assertThat(data.count("select count(*) from job where workspace_id = ? and hours = 4", ws)).isEqualTo(8);
+        assertThat(data.count("select count(*) from job where workspace_id = ? and hours = 3", ws)).isEqualTo(8);
         given().delete(base() + "/months/2026-11/lock").then().statusCode(200);
         clock.set(Instant.parse("2026-10-05T22:30:00Z")); // Already October 6 in Stockholm.
-        given().delete(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(400);
-        given().delete(base() + "/jobs/" + selected).then().statusCode(204);
-        assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isEqualTo(15);
+        // A past job's range scope is no longer refused: it removes it and everything after, and stops the series.
+        given().delete(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(204);
+        assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isZero();
+        assertThat(data.count("select count(*) from job_recurrence where workspace_id = ? and stopped", ws)).isEqualTo(1);
         given().contentType("application/json").body(body(UUID.randomUUID(), WEEKLY)).post(create("2026-10-05"))
                 .then().statusCode(400).body("errors[0].field", is("date"));
         clock.reset();
@@ -306,10 +308,93 @@ class JobRecurrenceTest {
                 .then().statusCode(200).body("[0].jobs[0].recurrence.stopped", is(true)).extract().path("[0].jobs[0].id");
         given().contentType("application/json").body("{\"hours\":2,\"note\":\"Moved\"}").put(base() + "/jobs/" + kept)
                 .then().statusCode(200).body("hours", is(2.0f)).body("jobs[0].note", is("Moved"))
-                .body("jobs[0].recurrence.stopped", is(true)).body("jobs[0].recurrence.occurrenceCount", is(16));
+                .body("jobs[0].recurrence.stopped", is(true)).body("jobs[0].recurrence.occurrenceCount", is(5));
         assertThat(data.count("select count(*) from job where workspace_id = ? and hours = 3", ws)).isEqualTo(4);
         given().delete(base() + "/jobs/" + kept).then().statusCode(204);
         assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isEqualTo(4);
         assertThat(data.count("select count(*) from job_recurrence where workspace_id = ? and stopped", ws)).isEqualTo(1);
+    }
+
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void monthlyOnTheNthWeekdayOrAChosenDayPreviewsAndCreates() {
+        // October 2026 starts on a Thursday: its third Wednesday is the 21st.
+        String third = "{\"frequency\":\"MONTHLY\",\"interval\":1,\"monthlyBy\":\"WEEKDAY_OF_MONTH\",\"weekOfMonth\":\"THIRD\","
+                + "\"weekday\":\"WEDNESDAY\",\"endDate\":\"2026-12-31\"}";
+        given().contentType("application/json").body(preview("2026-10-05", third))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(200)
+                .body("occurrenceCount", is(3)).body("dates.date", contains("2026-10-21", "2026-11-18", "2026-12-16"));
+        given().contentType("application/json").body(body(UUID.randomUUID(), third)).post(create("2026-10-05"))
+                .then().statusCode(201).body("workDate", is("2026-10-21"))
+                .body("jobs[0].recurrence.openEnded", is(false))
+                .body("jobs[0].recurrence.recurrence.monthlyBy", is("WEEKDAY_OF_MONTH"))
+                .body("jobs[0].recurrence.recurrence.weekOfMonth", is("THIRD"))
+                .body("jobs[0].recurrence.recurrence.weekday", is("WEDNESDAY"))
+                .body("jobs[0].recurrence.recurrence.lastDayOfMonth", is(false))
+                .body("jobs[0].recurrence.recurrence.endDate", is("2026-12-31"));
+        assertThat(data.count("select count(*) from job_recurrence where workspace_id = ? and monthly_by = 'WEEKDAY_OF_MONTH' "
+                + "and week_of_month = 'THIRD' and month_weekday = 'WEDNESDAY' and day_of_month is null", ws)).isEqualTo(1);
+        // Day 31 is the last day of each month; older clients still read lastDayOfMonth.
+        String lastDay = "{\"frequency\":\"MONTHLY\",\"interval\":1,\"dayOfMonth\":31,\"periodCount\":3}";
+        given().contentType("application/json").body(preview("2026-10-05", lastDay))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(200)
+                .body("dates.date", contains("2026-10-31", "2026-11-30", "2026-12-31"));
+        given().contentType("application/json").body(body(UUID.randomUUID(), lastDay)).post(create("2026-10-05"))
+                .then().statusCode(201).body("workDate", is("2026-10-31"))
+                .body("jobs[0].recurrence.recurrence.monthlyBy", is("DAY_OF_MONTH"))
+                .body("jobs[0].recurrence.recurrence.dayOfMonth", is(31))
+                .body("jobs[0].recurrence.recurrence.lastDayOfMonth", is(true))
+                .body("jobs[0].recurrence.recurrence.periodCount", is(3));
+        assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isEqualTo(6);
+        // A weekday-of-month rule without its week names the field.
+        given().contentType("application/json").body(preview("2026-10-05", third.replace("\"weekOfMonth\":\"THIRD\",", "")))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(400)
+                .body("errors[0].field", is("recurrence.weekOfMonth"));
+    }
+
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void noEndDateIsAnOpenSeriesPlannedTheHorizonAheadWithItsTemplate() {
+        int horizon = config.recurrence().horizonMonths();
+        String open = "{\"frequency\":\"MONTHLY\",\"interval\":1,\"dayOfMonth\":31}";
+        // From a future first date the horizon counts from that date; from a past one, from today (2026-09-23).
+        given().contentType("application/json").body(preview("2026-10-05", open))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(200)
+                .body("endDate", is(LocalDate.of(2026, 10, 5).plusMonths(horizon).toString()));
+        given().contentType("application/json").body(preview("2026-09-01", open))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(200)
+                .body("endDate", is(LocalDate.of(2026, 9, 23).plusMonths(horizon).toString()));
+        String request = "{\"hours\":3,\"startTime\":\"09:00\",\"note\":\" Recurring clean \",\"requestId\":\"" + UUID.randomUUID()
+                + "\",\"location\":{\"name\":\" Office \",\"latitude\":59.33,\"longitude\":18.06},\"recurrence\":" + open + "}";
+        given().contentType("application/json").body(request).post(create("2026-10-05"))
+                .then().statusCode(201).body("workDate", is("2026-10-31"))
+                .body("jobs[0].recurrence.openEnded", is(true))
+                .body("jobs[0].recurrence.endDate", is("2027-10-05"))
+                .body("jobs[0].recurrence.lastDate", is("2027-09-30"))
+                .body("jobs[0].recurrence.occurrenceCount", is(12))
+                .body("jobs[0].recurrence.recurrence.endDate", nullValue())
+                .body("jobs[0].recurrence.recurrence.periodCount", nullValue())
+                .body("jobs[0].recurrence.recurrence.lastDayOfMonth", is(true));
+        assertThat(data.count("select count(*) from job where workspace_id = ?", ws)).isEqualTo(12);
+        // The series keeps the values its later jobs are planned with, cleaned like the job itself.
+        assertThat(data.count("select count(*) from job_recurrence where workspace_id = ? and open_ended and hours = 3 "
+                + "and start_time = time '09:00' and note = 'Recurring clean' and place_name = 'Office' and latitude = 59.33", ws)).isEqualTo(1);
+    }
+
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void aDailyOpenSeriesStaysUnderTheJobCap() {
+        String everyDay = "{\"frequency\":\"WEEKLY\",\"interval\":1,\"weekdays\":[\"MONDAY\",\"TUESDAY\",\"WEDNESDAY\",\"THURSDAY\","
+                + "\"FRIDAY\",\"SATURDAY\",\"SUNDAY\"]}";
+        LocalDate first = LocalDate.of(2026, 10, 5);
+        LocalDate end = first.plusMonths(config.recurrence().horizonMonths());
+        given().contentType("application/json").body(preview(first.toString(), everyDay))
+                .post(base() + "/jobs/recurrence-preview").then().statusCode(200)
+                .body("endDate", is(end.toString())).body("lastDate", is(end.toString()))
+                .body("occurrenceCount", is((int) first.until(end, DAYS) + 1))
+                .body("occurrenceCount", lessThanOrEqualTo(config.recurrence().maxJobs()));
     }
 }

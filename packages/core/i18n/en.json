@@ -668,6 +668,23 @@
       "in30": "30 minutes",
       "in60": "1 hour",
       "in120": "2 hours"
+    },
+    "jobs": {
+      "added": "{name} added a job for you",
+      "changed": "{name} changed your job",
+      "removed": "{name} removed your job",
+      "addedMany_one": "{name} added {count} job for you",
+      "addedMany_other": "{name} added {count} jobs for you",
+      "changedMany_one": "{name} changed {count} job",
+      "changedMany_other": "{name} changed {count} jobs",
+      "removedMany_one": "{name} removed {count} job",
+      "removedMany_other": "{name} removed {count} jobs",
+      "when": "{workspace}: {date}",
+      "whenTime": "{workspace}: {date}, {time}",
+      "whenPlace": "{workspace}: {date} at {place}",
+      "whenTimePlace": "{workspace}: {date}, {time} at {place}",
+      "range": "{workspace}: {from} to {to}",
+      "more": "and {count} more"
     }
   },
   "email": {
@@ -1208,7 +1225,8 @@
         "FLAG_RESOLVED": "Flag resolved",
         "MONTH_CLOSED": "Month closed",
         "MONTH_REOPENED": "Month reopened",
-        "JOB_REMINDER": "Job reminders"
+        "JOB_REMINDER": "Job reminders",
+        "JOB_CHANGED": "Job updates"
       },
       "health": {
         "UP": "Up",
