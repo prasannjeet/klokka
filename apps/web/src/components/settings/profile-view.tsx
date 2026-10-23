@@ -19,7 +19,7 @@ import { DeleteAccountDialog } from './delete-account-dialog';
 import { Icon } from '../icons';
 import { roleLine } from '../shell/role-line';
 import { ViewHeader } from '../view-header';
-import { JobReminderPrefs } from './job-reminder-prefs';
+import { JobNotificationPrefs } from './job-reminder-prefs';
 import { NotificationPrefs } from './notification-prefs';
 import { SavedMark } from './saved-mark';
 import { usePreferenceSave, useProfileSave, useSavedRow } from './use-save';
@@ -216,7 +216,7 @@ export function ProfileView() {
 
       {ws.isEmployer ? null : (
         <div style={{ marginTop: 16 }}>
-          <JobReminderPrefs />
+          <JobNotificationPrefs />
         </div>
       )}
 

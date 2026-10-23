@@ -1,15 +1,14 @@
-import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { addDays, formatDate, formatHours, isoWeek, sumHours, type IsoDate } from '@klokka/core';
-import { useEntries, useWorkspace } from '@/data/workspace';
+import { useEntries } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { formatDuration } from '@/lib/duration';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, EmptyState, Header, Icon, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
-import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
+import { jobEditorHref } from '@/features/jobs/jobEditorHref';
 import type { DayStep } from '@/features/day/dayStep';
 import { TeamJobs } from './TeamJobs';
 
@@ -51,8 +50,6 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
   const s = useThemedStyles(styles);
   const router = useRouter();
   const entries = useEntries(workspace.workspaceId, date, date);
-  const settings = useWorkspace(workspace.workspaceId);
-  const sheet = useRef<JobSheetHandle>(null);
   const employer = workspace.role === 'EMPLOYER';
   const today = todayIn(workspace.timezone);
   const list = (entries.data ?? []).filter((e) => e.hours > 0 || e.jobs.length > 0);
@@ -177,21 +174,14 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
             onEdit={
               employer
                 ? ({ job, entry }) =>
-                    sheet.current?.open({
-                      membershipId: entry.membershipId,
-                      memberName: entry.memberName,
-                      date,
-                      job,
-                      dayHours: entry.hours,
-                      rounding: settings.data?.rounding ?? workspace.rounding,
-                      defaultDayHours: settings.data?.defaultDayHours ?? workspace.defaultDayHours,
-                    })
+                    router.push(
+                      jobEditorHref({ membershipId: entry.membershipId, date, mode: 'edit', jobId: job.id }),
+                    )
                 : undefined
             }
           />
         )}
       </Screen>
-      {employer ? <JobSheet ref={sheet} workspace={workspace} /> : null}
     </>
   );
 }

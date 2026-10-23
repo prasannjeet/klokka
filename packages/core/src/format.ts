@@ -59,13 +59,15 @@ export function formatRate(rate: number, currency: string, locale: Locale): stri
   return formatMoney(rate, currency, locale);
 }
 
-export type DateStyle = 'day' | 'weekdayDay' | 'weekdayDayMonth' | 'dayMonth' | 'long' | 'iso';
+export type DateStyle =
+  'day' | 'weekdayDay' | 'weekdayDayMonth' | 'dayMonth' | 'dayMonthYear' | 'long' | 'iso';
 
 const DATE_OPTIONS: Record<Exclude<DateStyle, 'iso'>, Intl.DateTimeFormatOptions> = {
   day: { day: 'numeric' },
   weekdayDay: { weekday: 'short', day: 'numeric' },
   weekdayDayMonth: { weekday: 'long', day: 'numeric', month: 'long' },
   dayMonth: { day: 'numeric', month: 'short' },
+  dayMonthYear: { day: 'numeric', month: 'long', year: 'numeric' },
   long: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
 };
 

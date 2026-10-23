@@ -3,14 +3,14 @@ import { FlatList, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Member } from '@klokka/api-client';
 import { addDays, formatDate, isoWeek, weekOf, type IsoDate } from '@klokka/core';
-import { useEntries, useMembers, useWorkspace } from '@/data/workspace';
+import { useEntries, useMembers } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Header, Icon, Pill, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
-import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
 import { dayActionFor } from '@/features/jobs/dayAction';
+import { jobEditorHref } from '@/features/jobs/jobEditorHref';
 import { WeekCard, entryFor } from './WeekCard';
 
 const styles = (t: Theme) =>
@@ -61,7 +61,6 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
     [first, workspace.weekStart],
   );
   const members = useMembers(workspace.workspaceId);
-  const settings = useWorkspace(workspace.workspaceId);
   const people: Member[] = useMemo(
     () =>
       (members.data ?? []).filter(
@@ -80,7 +79,6 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
   );
   const [pageIndex, setPageIndex] = useState(0);
   const list = useRef<FlatList<Member>>(null);
-  const sheet = useRef<JobSheetHandle>(null);
   const pageWidth = width - theme.space[4] * 2;
 
   const openDay = (member: Member, date: IsoDate) => {
@@ -88,22 +86,11 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
       router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId: member.id, date } });
       return;
     }
-    const action = dayActionFor(entryFor(range.data, member.id, date));
-    if (action.kind === 'day') {
+    if (dayActionFor(entryFor(range.data, member.id, date)).kind === 'day') {
       router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId: member.id, date } });
       return;
     }
-    const yesterday = entryFor(range.data, member.id, addDays(date, -1));
-    sheet.current?.open({
-      membershipId: member.id,
-      memberName: member.displayName,
-      date,
-      job: null,
-      dayHours: action.dayHours,
-      yesterdayHours: yesterday?.hours ?? null,
-      rounding: settings.data?.rounding ?? 'NONE',
-      defaultDayHours: settings.data?.defaultDayHours ?? 8,
-    });
+    router.push(jobEditorHref({ membershipId: member.id, date, mode: 'single' }));
   };
 
   const isoWeekNumber = isoWeek(first).week;
@@ -222,7 +209,6 @@ function WeekScreenInner({ workspace }: WorkspaceProps) {
           {employer ? t('week.swipeHint') : t('month.notesVisibleHint')}
         </AppText>
       </Screen>
-      {employer ? <JobSheet ref={sheet} workspace={workspace} /> : null}
     </>
   );
 }

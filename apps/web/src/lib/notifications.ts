@@ -96,7 +96,7 @@ export const KIND_ICON: Record<NotificationKind, IconName> = {
   MONTH_CLOSED: 'lock',
   MONTH_REOPENED: 'unlock',
   JOB_REMINDER: 'clock',
-  // CHQ-188: Task 7 may pick a dedicated icon for job updates.
+  // A job added, changed or removed (CHQ-188): the icon set has no briefcase, so the day it is on.
   JOB_CHANGED: 'calendar',
 };
 

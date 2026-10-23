@@ -47,6 +47,8 @@ export function iconForKind(kind: NotificationKind): IconName {
       return 'unlock';
     case 'JOB_REMINDER':
       return 'clock';
+    case 'JOB_CHANGED':
+      return 'briefcase';
     default:
       return 'bell';
   }

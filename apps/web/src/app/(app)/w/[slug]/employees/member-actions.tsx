@@ -1,8 +1,9 @@
 'use client';
 
-// Member management (CHQ-116): hourly rate (pay on), deactivate and reactivate (a person leaves by being
-// deactivated; their hours stay), withdraw a pending invitation. Status changes are optimistic and roll
+// Member management (CHQ-116): a new job for the person (CHQ-185, the full job editor), hourly rate (pay on),
+// deactivate and reactivate (a person leaves by being deactivated; their hours stay), withdraw a pending invitation. Status changes are optimistic and roll
 // back on a problem.
+import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Menu } from '@base-ui/react/menu';
@@ -13,8 +14,10 @@ import { Icon } from '@/components/icons';
 import { useToast } from '@/components/toast';
 import { api } from '@/lib/api';
 import { useLocale, useT } from '@/lib/i18n';
+import { jobEditorHref } from '@/lib/job-links';
 import { fieldError, problemMessage, toProblem, type ProblemInfo } from '@/lib/problem';
 import { invalidateFigures, keys } from '@/lib/queries';
+import { todayIn } from '@/lib/time';
 import type { WorkspaceView } from '@/lib/workspace';
 import { parseRate } from './rate';
 
@@ -22,6 +25,7 @@ export function MemberActions({ ws, member, month }: { ws: WorkspaceView; member
   const t = useT();
   const locale = useLocale();
   const toast = useToast();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [editingRate, setEditingRate] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
@@ -94,6 +98,25 @@ export function MemberActions({ ws, member, month }: { ws: WorkspaceView; member
         <Menu.Portal>
           <Menu.Positioner side="bottom" align="end" sideOffset={6}>
             <Menu.Popup className="pop">
+              <Menu.Item
+                className="pop-item"
+                onClick={() =>
+                  router.push(
+                    jobEditorHref(ws.slug, {
+                      member: member.id,
+                      date: todayIn(ws.timezone),
+                      mode: 'full',
+                      back: `/w/${ws.slug}/employees`,
+                    }),
+                  )
+                }
+              >
+                <Icon name="plus" />
+                <span>
+                  <b>{t('jobs.newJob')}</b>
+                </span>
+                <span />
+              </Menu.Item>
               {ws.showPay ? (
                 <Menu.Item className="pop-item" onClick={() => setEditingRate(true)}>
                   <Icon name="edit" />

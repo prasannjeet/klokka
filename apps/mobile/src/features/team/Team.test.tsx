@@ -112,11 +112,14 @@ describe('TeamDayScreen (CHQ-171)', () => {
     expect(routerState.pushes.at(-1)).toEqual({ pathname: '/flag/[flagId]', params: { flagId: 'flag-9' } });
   });
 
-  it('edits a job in the job sheet', async () => {
+  it('edits a job in the job editor', async () => {
     await renderApp(<TeamDayScreen date="2026-09-24" />, { api: dayApi() });
     await screen.findByText('Maria, 4 h');
     await fireEvent.press(screen.getByTestId('job-edit-job-m'));
-    expect(await screen.findByText('Job for Maria Lind')).toBeTruthy();
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-09-24', mode: 'edit', jobId: 'job-m' },
+    });
   });
 
   it('says so on a day without jobs', async () => {

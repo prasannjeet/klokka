@@ -24,7 +24,7 @@ import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 import { enterApp } from '@/features/shell/enterApp';
 import { WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
-import { AppPreferenceRows, JobReminderRows, NotificationPreferenceRows } from './PreferenceRows';
+import { AppPreferenceRows, JobNotificationRows, NotificationPreferenceRows } from './PreferenceRows';
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -137,9 +137,9 @@ export function ProfileScreen() {
         </Card>
         <Card>
           <AppText variant="eyebrow" tone="accent">
-            {t('reminders.title')}
+            {t('settings.jobNotifications')}
           </AppText>
-          <JobReminderRows />
+          <JobNotificationRows />
           <AppText variant="caption" tone="muted">
             {t('reminders.hint')}
           </AppText>

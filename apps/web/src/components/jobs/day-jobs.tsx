@@ -1,63 +1,78 @@
 'use client';
 
-// A day's jobs (CHQ-156): one card per job and, for the employer while the month is open, Add, Edit and
-// Remove through the job dialog. The employee sees the same cards to read, with Directions.
+// A day's jobs (CHQ-156): one card per job and, for the employer while the month is open, Add and Edit through the
+// job editor page (CHQ-185: Add makes a single job on this day) and Remove here, scoped for a series (CHQ-187).
+// The employee sees the same cards to read, with Directions.
+import Link from 'next/link';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Job, Rounding } from '@klokka/api-client';
+import type { Job, JobChangeScope } from '@klokka/api-client';
 import type { IsoDate } from '@klokka/core';
 import { api } from '@/lib/api';
 import { useT } from '@/lib/i18n';
+import { jobEditorHref } from '@/lib/job-links';
 import { problemMessage, toProblem } from '@/lib/problem';
 import { invalidateFigures } from '@/lib/queries';
-import { todayIn } from '@/lib/time';
 import { firstName } from '@/lib/visual';
 import type { WorkspaceView } from '@/lib/workspace';
 import { Dialog } from '../dialog';
 import { Icon } from '../icons';
 import { useToast } from '../toast';
 import { JobCard } from './job-card';
-import { JobDialog } from './job-dialog';
+import { ScopeStep } from './scope-step';
 import './jobs.css';
 
 export interface DayJobsEditing {
   membershipId: string;
   personName: string;
-  rounding: Rounding;
-  defaultDayHours: number;
   locked: boolean;
+}
+
+// Where the editor returns to: this page, showing this person and this day.
+function useBackHref(membershipId: string | undefined, date: IsoDate): string {
+  const pathname = usePathname() ?? '';
+  const search = useSearchParams();
+  const params = new URLSearchParams(search?.toString() ?? '');
+  if (membershipId) params.set('member', membershipId);
+  params.set('day', date);
+  return `${pathname}?${params.toString()}`;
 }
 
 export function DayJobs({
   ws,
   date,
   jobs,
-  dayTotal,
   editing,
 }: {
   ws: WorkspaceView;
   date: IsoDate;
   jobs: readonly Job[];
-  dayTotal: number;
   editing?: DayJobsEditing;
 }) {
   const t = useT();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const [dialog, setDialog] = useState<{ job: Job | null } | null>(null);
+  const back = useBackHref(editing?.membershipId, date);
   const [removing, setRemoving] = useState<Job | null>(null);
-  const [removeScope, setRemoveScope] = useState<'ONLY_THIS' | 'THIS_AND_FUTURE'>('ONLY_THIS');
+  const [error, setError] = useState<string | null>(null);
   const writable = editing !== undefined && !editing.locked;
 
   const remove = useMutation({
-    mutationFn: (job: Job) => api.jobs.deleteJob({ workspaceId: ws.id, jobId: job.id, scope: removeScope }),
-    onSuccess: () => toast({ title: t('jobs.removed'), icon: 'check' }),
-    onError: async (e) => toast({ title: problemMessage(t, await toProblem(e)), tone: 'error' }),
-    onSettled: () => {
+    mutationFn: ({ job, scope }: { job: Job; scope?: JobChangeScope }) =>
+      api.jobs.deleteJob({ workspaceId: ws.id, jobId: job.id, ...(scope ? { scope } : {}) }),
+    onSuccess: () => {
+      toast({ title: t('jobs.removed'), icon: 'check' });
       setRemoving(null);
-      void invalidateFigures(queryClient, ws.id);
     },
+    onError: async (e) => setError(problemMessage(t, await toProblem(e))),
+    onSettled: () => void invalidateFigures(queryClient, ws.id),
   });
+
+  const close = () => {
+    setRemoving(null);
+    setError(null);
+  };
 
   return (
     <div className="day-jobs">
@@ -69,9 +84,15 @@ export function DayJobs({
           busy={remove.isPending}
           {...(writable
             ? {
-                onEdit: () => setDialog({ job }),
+                editHref: jobEditorHref(ws.slug, {
+                  member: editing.membershipId,
+                  date,
+                  mode: 'edit',
+                  jobId: job.id,
+                  back,
+                }),
                 onRemove: () => {
-                  setRemoveScope('ONLY_THIS');
+                  setError(null);
                   setRemoving(job);
                 },
               }
@@ -79,66 +100,51 @@ export function DayJobs({
         />
       ))}
       {writable ? (
-        <button
+        <Link
           className={jobs.length === 0 ? 'btn btn-primary' : 'btn btn-ghost add-job'}
-          type="button"
-          onClick={() => setDialog({ job: null })}
+          href={jobEditorHref(ws.slug, { member: editing.membershipId, date, mode: 'single', back })}
           data-testid="add-job"
         >
           <Icon name="plus" />
           {jobs.length === 0
             ? t('jobs.addJobFor', { name: firstName(editing.personName) })
             : t('jobs.addAnother')}
-        </button>
+        </Link>
       ) : null}
-      {editing ? (
-        <JobDialog
-          ws={ws}
-          open={dialog !== null}
-          onClose={() => setDialog(null)}
-          membershipId={editing.membershipId}
-          personName={editing.personName}
-          date={date}
-          job={dialog?.job ?? null}
-          rounding={editing.rounding}
-          defaultDayHours={editing.defaultDayHours}
-          dayTotal={dayTotal}
-        />
-      ) : null}
-      <Dialog open={removing !== null} onClose={() => setRemoving(null)} title={t('jobs.removeConfirm')}>
+      <Dialog open={removing !== null} onClose={close} title={t('jobs.removeConfirm')}>
         {removing?.recurrence ? (
-          <div className="field">
-            <label htmlFor="remove-job-scope">{t('recurrence.removeScope')}</label>
-            <select
-              id="remove-job-scope"
-              className="input"
-              value={removeScope}
-              onChange={(e) => setRemoveScope(e.target.value as typeof removeScope)}
-            >
-              <option value="ONLY_THIS">{t('recurrence.only')}</option>
-              {date >= todayIn(ws.timezone) ? (
-                <option value="THIS_AND_FUTURE">{t('recurrence.stop')}</option>
-              ) : null}
-            </select>
-            <span className="hint">
-              {t(removeScope === 'THIS_AND_FUTURE' ? 'recurrence.confirmStop' : 'recurrence.scopeHint')}
-            </span>
-          </div>
-        ) : null}
-        <div className="dlg-actions">
-          <button className="btn btn-ghost" type="button" onClick={() => setRemoving(null)}>
-            {t('common.cancel')}
-          </button>
-          <button
-            className="btn btn-primary"
-            type="button"
-            disabled={remove.isPending}
-            onClick={() => removing && remove.mutate(removing)}
-          >
-            <Icon name="trash" />
-            {t('jobs.removeJob')}
-          </button>
-        </div>
+          <ScopeStep
+            workspaceId={ws.id}
+            jobId={removing.id}
+            action="remove"
+            scheduleChange={false}
+            onConfirm={(scope) => remove.mutate({ job: removing, scope })}
+            busy={remove.isPending}
+            error={error}
+          />
+        ) : (
+          <>
+            {error ? (
+              <p className="err" role="alert">
+                {error}
+              </p>
+            ) : null}
+            <div className="dlg-actions">
+              <button className="btn btn-ghost" type="button" onClick={close}>
+                {t('common.cancel')}
+              </button>
+              <button
+                className="btn btn-primary"
+                type="button"
+                disabled={remove.isPending}
+                onClick={() => removing && remove.mutate({ job: removing })}
+              >
+                <Icon name="trash" />
+                {t('jobs.removeJob')}
+              </button>
+            </div>
+          </>
+        )}
       </Dialog>
     </div>
   );

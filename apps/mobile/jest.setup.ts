@@ -31,6 +31,7 @@ process.env.EXPO_PUBLIC_LOGTO_ENDPOINT = 'https://logto.test';
 process.env.EXPO_PUBLIC_LOGTO_APP_ID = 'test-client';
 process.env.EXPO_PUBLIC_LOGTO_API_RESOURCE = 'https://api.klokka.app';
 jest.mock('expo-router', () => require('./src/testing/nativeMocks').expoRouterModule());
+jest.mock('expo-router/react-navigation', () => require('./src/testing/nativeMocks').reactNavigationModule());
 jest.mock('expo-file-system', () => ({
   Paths: { cache: 'file:///cache/' },
   File: class {

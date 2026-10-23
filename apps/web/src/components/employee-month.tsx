@@ -272,7 +272,7 @@ function DayDetail({
             <span className="num">{formatDuration(day.hours, t)}</span>
             <Money amount={day.earnings} currency={ws.currency} showPay={ws.showPay} />
           </div>
-          <DayJobs ws={ws} date={date} jobs={day.jobs} dayTotal={day.hours} />
+          <DayJobs ws={ws} date={date} jobs={day.jobs} />
           {day.jobs.length === 0 && day.note ? (
             <div className="note-row">
               <Icon name="note" />

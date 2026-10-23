@@ -1,7 +1,8 @@
 'use client';
 
-// Job reminders (CHQ-156): a push before each job with a start time, this long before it. The employee's own
-// preference, the same in every workspace; the employer neither sees nor changes it.
+// The employee's job notifications: Job updates (CHQ-188, a notification when the employer adds, changes or removes
+// one of their jobs, on by default) and job reminders (CHQ-156, a push before each job with a start time, this long
+// before it). The employee's own preferences, the same in every workspace; the employer neither sees nor changes them.
 import type { JobReminderLead } from '@klokka/api-client';
 import { useT } from '@/lib/i18n';
 import { useMe } from '@/lib/me';
@@ -12,17 +13,32 @@ import { usePreferenceSave, useSavedRow } from './use-save';
 
 const LEADS: readonly JobReminderLead[] = ['MINUTES_15', 'MINUTES_30', 'HOUR_1', 'HOURS_2', 'DAY_BEFORE'];
 
-export function JobReminderPrefs() {
+export function JobNotificationPrefs() {
   const t = useT();
   const me = useMe();
   const [savedRow, markSaved] = useSavedRow();
   const save = usePreferenceSave(markSaved);
-  const { jobReminders, jobReminderLead } = me.preferences;
+  const { jobReminders, jobReminderLead, jobUpdates } = me.preferences;
   const lead = t(`reminders.lead.${jobReminderLead}`);
 
   return (
-    <section className="card sgroup" aria-labelledby="prefs-reminders">
-      <h2 id="prefs-reminders">{t('reminders.title')}</h2>
+    <section className="card sgroup" aria-labelledby="prefs-job-notifications">
+      <h2 id="prefs-job-notifications">{t('settings.jobNotifications')}</h2>
+      <div className="srow">
+        <div>
+          <b className="t t-line">
+            {t('settings.jobUpdates')}
+            <SavedMark show={savedRow === 'job-updates'} />
+          </b>
+          <p>{t('settings.jobUpdatesHint')}</p>
+        </div>
+        <Switch
+          checked={jobUpdates}
+          onChange={(on) => void save({ jobUpdates: on }, 'job-updates')}
+          label={t('settings.jobUpdates')}
+          hint={jobUpdates ? t('common.on') : t('common.off')}
+        />
+      </div>
       <div className="srow">
         <div>
           <b className="t t-line">

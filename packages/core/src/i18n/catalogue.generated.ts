@@ -53,9 +53,11 @@ export const sv = {
   "common.back": "Tillbaka",
   "common.cancel": "Avbryt",
   "common.close": "Stäng",
+  "common.confirm": "Bekräfta",
   "common.days_one": "{count} dag",
   "common.days_other": "{count} dagar",
   "common.dismiss": "Avfärda",
+  "common.done": "Klar",
   "common.durationHm": "{hours} h {minutes} min",
   "common.durationM": "{minutes} min",
   "common.earlier": "Tidigare",
@@ -322,9 +324,13 @@ export const sv = {
   "jobs.addJobFor": "Lägg till ett jobb för {name}",
   "jobs.change": "Byt",
   "jobs.chooseTimeFirst": "Välj tiden först",
+  "jobs.date": "Datum",
   "jobs.dayTotalSoFar": "{date}, dagens summa hittills {duration}",
   "jobs.directions": "Vägbeskrivning",
   "jobs.directionsInMaps": "Vägbeskrivning i Google Maps",
+  "jobs.discard": "Släng",
+  "jobs.discardBody": "Det du har fyllt i för jobbet försvinner.",
+  "jobs.discardTitle": "Släng ändringarna?",
   "jobs.edit": "Ändra",
   "jobs.editJobFor": "Jobb för {name}",
   "jobs.flagThisDay": "Stämmer något inte? Flagga dagen",
@@ -334,13 +340,18 @@ export const sv = {
   "jobs.history": "Historik: {summary}",
   "jobs.jobCount_one": "{count} jobb",
   "jobs.jobCount_other": "{count} jobb",
+  "jobs.jobGone": "Jobbet finns inte längre.",
   "jobs.jobNumber": "Jobb {number}",
   "jobs.jobsThisMonth": "Jobb den här månaden",
+  "jobs.keepEditing": "Fortsätt redigera",
+  "jobs.loadingJob": "Hämtar jobbet",
   "jobs.location": "Plats",
   "jobs.monthClosed": "{month} är stängd. Lås upp den för att lägga till eller ändra jobb.",
   "jobs.monthOpen": "Månaden är öppen",
   "jobs.myDay": "Min dag",
+  "jobs.newJob": "Nytt jobb",
   "jobs.newJobFor": "Nytt jobb för {name}",
+  "jobs.newSingleJobFor": "Nytt enstaka jobb för {name}",
   "jobs.nextDay": "Nästa dag",
   "jobs.nextUp": "Nästa: {date}",
   "jobs.noJobs": "Inga jobb den här dagen",
@@ -361,6 +372,7 @@ export const sv = {
   "jobs.saveJob": "Spara jobbet, {duration}",
   "jobs.saved": "Sparade {duration} för {name}.",
   "jobs.severalJobsCell": "En dag med två jobb eller fler visar summan; öppna den för att ändra jobben.",
+  "jobs.singleSubtitle": "{date}, upprepas inte",
   "jobs.soFarPlanned": "{hours} hittills, {planned} planerat",
   "jobs.startsAt": "Börjar",
   "jobs.tapAnyDay": "Klicka på en dag för att lägga till eller ändra jobb, bakåt eller framåt.",
@@ -410,6 +422,7 @@ export const sv = {
   "mobile.push.bodyEmployer": "Klokka skickar en push när en inbjudan accepteras eller en registrering flaggas. Inget annat.",
   "mobile.push.channelFlags": "Flaggor",
   "mobile.push.channelHours": "Timmar",
+  "mobile.push.channelJobUpdates": "Jobbändringar",
   "mobile.push.channelReminders": "Jobbpåminnelser",
   "mobile.push.channelWorkspace": "Företag",
   "mobile.push.enable": "Slå på notiser",
@@ -729,47 +742,81 @@ export const sv = {
   "profile.uploadPhoto": "Ladda upp foto",
   "profile.uploadPhotoHint": "JPG eller PNG, beskuret kvadratiskt.",
   "profile.workspaces": "Företag",
+  "recurrence.afterCount": "Efter ett antal veckor/månader",
+  "recurrence.allCount_one": "Hela serien ({count} jobb)",
+  "recurrence.allCount_other": "Alla {count} jobb i serien",
+  "recurrence.byDay": "På en dag i månaden",
+  "recurrence.byWeekday": "På en veckodag i månaden",
   "recurrence.chooseDate": "Välj slutdatum",
-  "recurrence.confirmStop": "Återstående jobb i serien stoppas. Tidigare jobb och annat arbete finns kvar.",
   "recurrence.day": "Dag",
   "recurrence.decrease": "Färre",
   "recurrence.endDate": "Slutdatum",
-  "recurrence.ends": "Slutar (obligatoriskt)",
+  "recurrence.ends": "Slutar",
+  "recurrence.endsNever": "Inget slutdatum",
   "recurrence.every": "Varje",
-  "recurrence.future": "Detta och kommande jobb",
+  "recurrence.futureCount_one": "Det här och nästa jobb",
+  "recurrence.futureCount_other": "Det här och de {count} följande jobben",
+  "recurrence.futureNoCount": "Det här och de följande jobben",
   "recurrence.increase": "Fler",
-  "recurrence.intervalHint": "Välj 1 för varje vecka/månad eller ett större antal för ett eget intervall.",
-  "recurrence.lastDay": "Månadens sista dag",
+  "recurrence.lastDayShort": "Sista dagen",
   "recurrence.month": "Månad",
   "recurrence.monthly": "Månadsvis",
-  "recurrence.monthlyDay": "Datum varje månad",
-  "recurrence.monthlyLastSummary": "Varje {period}, sista dagen",
-  "recurrence.monthlySummary": "Varje {period}, dag {day}",
   "recurrence.monthsCount": "Antal månader",
   "recurrence.months_one": "{count} månad",
   "recurrence.months_other": "{count} månader",
+  "recurrence.never": "Inget slutdatum",
+  "recurrence.neverHint": "Upprepas tills du stoppar det. Jobben planeras {months} månader framåt.",
+  "recurrence.onDate": "På ett datum",
+  "recurrence.onDay": "På dag {day}",
+  "recurrence.onWeekday": "Den {ordinal} {weekday}",
   "recurrence.once": "Upprepas inte",
-  "recurrence.only": "Bara detta jobb",
+  "recurrence.onlyThis": "Bara det här jobbet",
+  "recurrence.ordinal.FIRST": "första",
+  "recurrence.ordinal.FOURTH": "fjärde",
+  "recurrence.ordinal.LAST": "sista",
+  "recurrence.ordinal.SECOND": "andra",
+  "recurrence.ordinal.THIRD": "tredje",
   "recurrence.periodHint": "Räknar kalenderveckor/månader från första datumet, även om jobben upprepas mer sällan.",
   "recurrence.preview": "Nästa datum",
   "recurrence.previewTotal_one": "{count} jobb. Sista jobbet: {date}.",
   "recurrence.previewTotal_other": "{count} jobb. Sista jobbet: {date}.",
-  "recurrence.removeScope": "Vilka jobb ska tas bort?",
-  "recurrence.requiredEnd": "Välj ett slutdatum eller ange antal veckor/månader.",
-  "recurrence.sameDate": "Samma datum varje månad",
+  "recurrence.removeAllConfirm": "Det här tar också bort tidigare jobb. Deras timmar försvinner ur summorna; historiken behåller dem.",
+  "recurrence.removeCount_one": "Ta bort {count} jobb",
+  "recurrence.removeCount_other": "Ta bort {count} jobb",
   "recurrence.save": "Spara återkommande jobb",
+  "recurrence.saveCount_one": "Spara ändringen i {count} jobb",
+  "recurrence.saveCount_other": "Spara ändringarna i {count} jobb",
   "recurrence.saved": "Återkommande jobb sparade.",
-  "recurrence.scope": "Vilka jobb ska ändras?",
-  "recurrence.scopeHint": "Tidigare jobb ändras inte. Stängda månader kan inte ändras.",
+  "recurrence.scheduleFrom": "Det nya schemat börjar {date}. Tidigare jobb behåller sina datum.",
+  "recurrence.scopeTitle": "Vilka jobb?",
+  "recurrence.sentence.forCount": "{rule}, i {period}",
+  "recurrence.sentence.from": "{rule}, från {date}",
+  "recurrence.sentence.monthlyDay_one": "Varje månad på dag {day}",
+  "recurrence.sentence.monthlyDay_other": "Med {count} månaders mellanrum på dag {day}",
+  "recurrence.sentence.monthlyLast_one": "Varje månad på sista dagen",
+  "recurrence.sentence.monthlyLast_other": "Med {count} månaders mellanrum på sista dagen",
+  "recurrence.sentence.monthlyWeekday_one": "Varje månad den {ordinal} {weekday}",
+  "recurrence.sentence.monthlyWeekday_other": "Med {count} månaders mellanrum den {ordinal} {weekday}",
+  "recurrence.sentence.noEnd": "{rule}, inget slutdatum",
+  "recurrence.sentence.until": "{rule}, till och med {date}",
+  "recurrence.sentence.weekly_one": "Varje vecka på {days}",
+  "recurrence.sentence.weekly_other": "Med {count} veckors mellanrum på {days}",
   "recurrence.shortMonths": "Kortare månader använder sin sista dag.",
-  "recurrence.stop": "Stoppa detta och kommande jobb",
+  "recurrence.skippedClosed_one": "{count} i en stängd månad ändras inte",
+  "recurrence.skippedClosed_other": "{count} i stängda månader ändras inte",
   "recurrence.stopped": "Upprepningen har stoppats",
   "recurrence.title": "Upprepa",
   "recurrence.until": "Slutar {date}",
   "recurrence.useDate": "Använd detta datum",
+  "recurrence.weekdayInMonth.FRIDAY": "fredagen",
+  "recurrence.weekdayInMonth.MONDAY": "måndagen",
+  "recurrence.weekdayInMonth.SATURDAY": "lördagen",
+  "recurrence.weekdayInMonth.SUNDAY": "söndagen",
+  "recurrence.weekdayInMonth.THURSDAY": "torsdagen",
+  "recurrence.weekdayInMonth.TUESDAY": "tisdagen",
+  "recurrence.weekdayInMonth.WEDNESDAY": "onsdagen",
   "recurrence.weekdays": "Upprepa på",
   "recurrence.weekly": "Veckovis",
-  "recurrence.weeklySummary": "Varje {period}: {days}",
   "recurrence.weeksCount": "Antal veckor",
   "recurrence.weeks_one": "{count} vecka",
   "recurrence.weeks_other": "{count} veckor",
@@ -784,7 +831,6 @@ export const sv = {
   "reminders.lead.MINUTES_30": "30 minuter innan",
   "reminders.off": "Av. Du får inga påminnelser före jobb.",
   "reminders.on": "På, {lead}.",
-  "reminders.title": "Jobbpåminnelser",
   "reminders.toggle": "Påminn mig innan ett jobb börjar",
   "role.employee": "Anställd",
   "role.employeeAtWorkspaces_one": "Anställd på {count} företag",
@@ -814,6 +860,9 @@ export const sv = {
   "settings.fullDayChipHint": "Knappen Hel dag",
   "settings.hint": "Ändringar sparas medan du gör dem. Alla i företaget ser det nya namnet, färgen och emojin direkt.",
   "settings.hours": "Timmar",
+  "settings.jobNotifications": "Jobbnotiser",
+  "settings.jobUpdates": "Jobbändringar",
+  "settings.jobUpdatesHint": "En notis när din arbetsgivare lägger till, ändrar eller tar bort ett av dina jobb.",
   "settings.language": "Språk",
   "settings.languageHint": "Appen och varje notis, även push när telefonen är låst.",
   "settings.light": "Ljust",
@@ -841,6 +890,8 @@ export const sv = {
   "settings.showPayOn": "På. Timlön per person under Anställda.",
   "settings.showPayShortHint": "Var och en ser sin intjäning bredvid sina timmar.",
   "settings.swedish": "Svenska",
+  "settings.systemCategories": "Notiskategorier",
+  "settings.systemCategoriesHint": "Slå på eller av enskilda sorter i telefonens inställningar.",
   "settings.time": "Tid",
   "settings.title": "Inställningar",
   "settings.weeklyDigest": "Veckosammanfattning via e-post",
@@ -1224,9 +1275,11 @@ export const en = {
   "common.back": "Back",
   "common.cancel": "Cancel",
   "common.close": "Close",
+  "common.confirm": "Confirm",
   "common.days_one": "{count} day",
   "common.days_other": "{count} days",
   "common.dismiss": "Dismiss",
+  "common.done": "Done",
   "common.durationHm": "{hours} h {minutes} min",
   "common.durationM": "{minutes} min",
   "common.earlier": "Earlier",
@@ -1493,9 +1546,13 @@ export const en = {
   "jobs.addJobFor": "Add a job for {name}",
   "jobs.change": "Change",
   "jobs.chooseTimeFirst": "Choose the time first",
+  "jobs.date": "Date",
   "jobs.dayTotalSoFar": "{date}, day total {duration} so far",
   "jobs.directions": "Directions",
   "jobs.directionsInMaps": "Directions in Google Maps",
+  "jobs.discard": "Discard",
+  "jobs.discardBody": "What you entered for this job will be lost.",
+  "jobs.discardTitle": "Discard changes?",
   "jobs.edit": "Edit",
   "jobs.editJobFor": "Job for {name}",
   "jobs.flagThisDay": "Something wrong? Flag this day",
@@ -1505,13 +1562,18 @@ export const en = {
   "jobs.history": "History: {summary}",
   "jobs.jobCount_one": "{count} job",
   "jobs.jobCount_other": "{count} jobs",
+  "jobs.jobGone": "This job no longer exists.",
   "jobs.jobNumber": "Job {number}",
   "jobs.jobsThisMonth": "Jobs this month",
+  "jobs.keepEditing": "Keep editing",
+  "jobs.loadingJob": "Loading the job",
   "jobs.location": "Location",
   "jobs.monthClosed": "{month} is closed. Unlock it to add or change jobs.",
   "jobs.monthOpen": "Month open",
   "jobs.myDay": "My day",
+  "jobs.newJob": "New job",
   "jobs.newJobFor": "New job for {name}",
+  "jobs.newSingleJobFor": "New single job for {name}",
   "jobs.nextDay": "Next day",
   "jobs.nextUp": "Next: {date}",
   "jobs.noJobs": "No jobs on this day",
@@ -1532,6 +1594,7 @@ export const en = {
   "jobs.saveJob": "Save job, {duration}",
   "jobs.saved": "Saved {duration} for {name}.",
   "jobs.severalJobsCell": "A day with two or more jobs shows its total; open it to change the jobs.",
+  "jobs.singleSubtitle": "{date}, does not repeat",
   "jobs.soFarPlanned": "{hours} so far, {planned} planned",
   "jobs.startsAt": "Starts at",
   "jobs.tapAnyDay": "Click any day to add or change jobs, past or future.",
@@ -1581,6 +1644,7 @@ export const en = {
   "mobile.push.bodyEmployer": "Klokka sends a push when an invitation is accepted or an entry is flagged. Nothing else.",
   "mobile.push.channelFlags": "Flags",
   "mobile.push.channelHours": "Hours",
+  "mobile.push.channelJobUpdates": "Job updates",
   "mobile.push.channelReminders": "Job reminders",
   "mobile.push.channelWorkspace": "Business",
   "mobile.push.enable": "Turn on notifications",
@@ -1900,47 +1964,81 @@ export const en = {
   "profile.uploadPhoto": "Upload photo",
   "profile.uploadPhotoHint": "JPG or PNG, cropped square.",
   "profile.workspaces": "Businesses",
+  "recurrence.afterCount": "After a number of weeks/months",
+  "recurrence.allCount_one": "The whole series ({count} job)",
+  "recurrence.allCount_other": "All {count} jobs in the series",
+  "recurrence.byDay": "On a day of the month",
+  "recurrence.byWeekday": "On a weekday of the month",
   "recurrence.chooseDate": "Choose end date",
-  "recurrence.confirmStop": "This stops the remaining jobs in the series. Earlier jobs and other work stay visible.",
   "recurrence.day": "Day",
   "recurrence.decrease": "Fewer",
   "recurrence.endDate": "End date",
-  "recurrence.ends": "Ends (required)",
+  "recurrence.ends": "Ends",
+  "recurrence.endsNever": "No end date",
   "recurrence.every": "Every",
-  "recurrence.future": "This and future jobs",
+  "recurrence.futureCount_one": "This and the following job",
+  "recurrence.futureCount_other": "This and the {count} following jobs",
+  "recurrence.futureNoCount": "This and the following jobs",
   "recurrence.increase": "More",
-  "recurrence.intervalHint": "Choose 1 for every week/month, or a larger number for a custom interval.",
-  "recurrence.lastDay": "Last day of the month",
+  "recurrence.lastDayShort": "Last day",
   "recurrence.month": "Month",
   "recurrence.monthly": "Monthly",
-  "recurrence.monthlyDay": "Monthly date",
-  "recurrence.monthlyLastSummary": "Every {period}, last day",
-  "recurrence.monthlySummary": "Every {period}, day {day}",
   "recurrence.monthsCount": "Number of months",
   "recurrence.months_one": "{count} month",
   "recurrence.months_other": "{count} months",
+  "recurrence.never": "No end date",
+  "recurrence.neverHint": "Repeats until you stop it. Jobs are planned {months} months ahead.",
+  "recurrence.onDate": "On a date",
+  "recurrence.onDay": "On day {day}",
+  "recurrence.onWeekday": "On the {ordinal} {weekday}",
   "recurrence.once": "Does not repeat",
-  "recurrence.only": "Only this job",
+  "recurrence.onlyThis": "Only this job",
+  "recurrence.ordinal.FIRST": "first",
+  "recurrence.ordinal.FOURTH": "fourth",
+  "recurrence.ordinal.LAST": "last",
+  "recurrence.ordinal.SECOND": "second",
+  "recurrence.ordinal.THIRD": "third",
   "recurrence.periodHint": "Counts calendar weeks/months from the first date, even when jobs repeat less often.",
   "recurrence.preview": "Next dates",
   "recurrence.previewTotal_one": "{count} job. Last job: {date}.",
   "recurrence.previewTotal_other": "{count} jobs. Last job: {date}.",
-  "recurrence.removeScope": "Remove which jobs?",
-  "recurrence.requiredEnd": "Choose an end date or enter a number of weeks/months.",
-  "recurrence.sameDate": "Same date each month",
+  "recurrence.removeAllConfirm": "This also removes past jobs. Their hours leave the totals; the history keeps them.",
+  "recurrence.removeCount_one": "Remove {count} job",
+  "recurrence.removeCount_other": "Remove {count} jobs",
   "recurrence.save": "Save recurring job",
+  "recurrence.saveCount_one": "Save changes to {count} job",
+  "recurrence.saveCount_other": "Save changes to {count} jobs",
   "recurrence.saved": "Recurring jobs saved.",
-  "recurrence.scope": "Change which jobs?",
-  "recurrence.scopeHint": "Earlier jobs stay unchanged. Closed months cannot be changed.",
+  "recurrence.scheduleFrom": "The new schedule starts {date}. Earlier jobs keep their dates.",
+  "recurrence.scopeTitle": "Which jobs?",
+  "recurrence.sentence.forCount": "{rule}, for {period}",
+  "recurrence.sentence.from": "{rule}, from {date}",
+  "recurrence.sentence.monthlyDay_one": "Every month on day {day}",
+  "recurrence.sentence.monthlyDay_other": "Every {count} months on day {day}",
+  "recurrence.sentence.monthlyLast_one": "Every month on the last day",
+  "recurrence.sentence.monthlyLast_other": "Every {count} months on the last day",
+  "recurrence.sentence.monthlyWeekday_one": "Every month on the {ordinal} {weekday}",
+  "recurrence.sentence.monthlyWeekday_other": "Every {count} months on the {ordinal} {weekday}",
+  "recurrence.sentence.noEnd": "{rule}, no end date",
+  "recurrence.sentence.until": "{rule}, until {date}",
+  "recurrence.sentence.weekly_one": "Every week on {days}",
+  "recurrence.sentence.weekly_other": "Every {count} weeks on {days}",
   "recurrence.shortMonths": "Shorter months use their last day.",
-  "recurrence.stop": "Stop this and future jobs",
+  "recurrence.skippedClosed_one": "{count} in a closed month stays unchanged",
+  "recurrence.skippedClosed_other": "{count} in closed months stay unchanged",
   "recurrence.stopped": "Repeat stopped",
   "recurrence.title": "Repeat",
   "recurrence.until": "Ends {date}",
   "recurrence.useDate": "Use this date",
+  "recurrence.weekdayInMonth.FRIDAY": "Friday",
+  "recurrence.weekdayInMonth.MONDAY": "Monday",
+  "recurrence.weekdayInMonth.SATURDAY": "Saturday",
+  "recurrence.weekdayInMonth.SUNDAY": "Sunday",
+  "recurrence.weekdayInMonth.THURSDAY": "Thursday",
+  "recurrence.weekdayInMonth.TUESDAY": "Tuesday",
+  "recurrence.weekdayInMonth.WEDNESDAY": "Wednesday",
   "recurrence.weekdays": "Repeat on",
   "recurrence.weekly": "Weekly",
-  "recurrence.weeklySummary": "Every {period}: {days}",
   "recurrence.weeksCount": "Number of weeks",
   "recurrence.weeks_one": "{count} week",
   "recurrence.weeks_other": "{count} weeks",
@@ -1955,7 +2053,6 @@ export const en = {
   "reminders.lead.MINUTES_30": "30 minutes before",
   "reminders.off": "Off. You get no reminders before jobs.",
   "reminders.on": "On, {lead}.",
-  "reminders.title": "Job reminders",
   "reminders.toggle": "Remind me before a job starts",
   "role.employee": "Employee",
   "role.employeeAtWorkspaces_one": "Employee at {count} business",
@@ -1985,6 +2082,9 @@ export const en = {
   "settings.fullDayChipHint": "The Full day chip",
   "settings.hint": "Changes save as you make them. Everyone in the business sees the new name, colour and emoji at once.",
   "settings.hours": "Hours",
+  "settings.jobNotifications": "Job notifications",
+  "settings.jobUpdates": "Job updates",
+  "settings.jobUpdatesHint": "A notification when your employer adds, changes or removes one of your jobs.",
   "settings.language": "Language",
   "settings.languageHint": "The app and every notification, including push while your phone is locked.",
   "settings.light": "Light",
@@ -2012,6 +2112,8 @@ export const en = {
   "settings.showPayOn": "On. Rates per person in Employees.",
   "settings.showPayShortHint": "Each person sees earnings next to their hours.",
   "settings.swedish": "Svenska",
+  "settings.systemCategories": "Notification categories",
+  "settings.systemCategoriesHint": "Turn single kinds on or off in your phone's settings.",
   "settings.time": "Time",
   "settings.title": "Settings",
   "settings.weeklyDigest": "Weekly email digest",
@@ -2396,8 +2498,10 @@ export type MessageParams = {
   "common.back": Record<never, never>;
   "common.cancel": Record<never, never>;
   "common.close": Record<never, never>;
+  "common.confirm": Record<never, never>;
   "common.days": { count: string | number };
   "common.dismiss": Record<never, never>;
+  "common.done": Record<never, never>;
   "common.durationHm": { hours: string | number; minutes: string | number };
   "common.durationM": { minutes: string | number };
   "common.earlier": Record<never, never>;
@@ -2658,9 +2762,13 @@ export type MessageParams = {
   "jobs.addJobFor": { name: string | number };
   "jobs.change": Record<never, never>;
   "jobs.chooseTimeFirst": Record<never, never>;
+  "jobs.date": Record<never, never>;
   "jobs.dayTotalSoFar": { date: string | number; duration: string | number };
   "jobs.directions": Record<never, never>;
   "jobs.directionsInMaps": Record<never, never>;
+  "jobs.discard": Record<never, never>;
+  "jobs.discardBody": Record<never, never>;
+  "jobs.discardTitle": Record<never, never>;
   "jobs.edit": Record<never, never>;
   "jobs.editJobFor": { name: string | number };
   "jobs.flagThisDay": Record<never, never>;
@@ -2669,13 +2777,18 @@ export type MessageParams = {
   "jobs.futureOpen": Record<never, never>;
   "jobs.history": { summary: string | number };
   "jobs.jobCount": { count: string | number };
+  "jobs.jobGone": Record<never, never>;
   "jobs.jobNumber": { number: string | number };
   "jobs.jobsThisMonth": Record<never, never>;
+  "jobs.keepEditing": Record<never, never>;
+  "jobs.loadingJob": Record<never, never>;
   "jobs.location": Record<never, never>;
   "jobs.monthClosed": { month: string | number };
   "jobs.monthOpen": Record<never, never>;
   "jobs.myDay": Record<never, never>;
+  "jobs.newJob": Record<never, never>;
   "jobs.newJobFor": { name: string | number };
+  "jobs.newSingleJobFor": { name: string | number };
   "jobs.nextDay": Record<never, never>;
   "jobs.nextUp": { date: string | number };
   "jobs.noJobs": Record<never, never>;
@@ -2695,6 +2808,7 @@ export type MessageParams = {
   "jobs.saveJob": { duration: string | number };
   "jobs.saved": { duration: string | number; name: string | number };
   "jobs.severalJobsCell": Record<never, never>;
+  "jobs.singleSubtitle": { date: string | number };
   "jobs.soFarPlanned": { hours: string | number; planned: string | number };
   "jobs.startsAt": Record<never, never>;
   "jobs.tapAnyDay": Record<never, never>;
@@ -2743,6 +2857,7 @@ export type MessageParams = {
   "mobile.push.bodyEmployer": Record<never, never>;
   "mobile.push.channelFlags": Record<never, never>;
   "mobile.push.channelHours": Record<never, never>;
+  "mobile.push.channelJobUpdates": Record<never, never>;
   "mobile.push.channelReminders": Record<never, never>;
   "mobile.push.channelWorkspace": Record<never, never>;
   "mobile.push.enable": Record<never, never>;
@@ -3049,45 +3164,70 @@ export type MessageParams = {
   "profile.uploadPhoto": Record<never, never>;
   "profile.uploadPhotoHint": Record<never, never>;
   "profile.workspaces": Record<never, never>;
+  "recurrence.afterCount": Record<never, never>;
+  "recurrence.allCount": { count: string | number };
+  "recurrence.byDay": Record<never, never>;
+  "recurrence.byWeekday": Record<never, never>;
   "recurrence.chooseDate": Record<never, never>;
-  "recurrence.confirmStop": Record<never, never>;
   "recurrence.day": Record<never, never>;
   "recurrence.decrease": Record<never, never>;
   "recurrence.endDate": Record<never, never>;
   "recurrence.ends": Record<never, never>;
+  "recurrence.endsNever": Record<never, never>;
   "recurrence.every": Record<never, never>;
-  "recurrence.future": Record<never, never>;
+  "recurrence.futureCount": { count: string | number };
+  "recurrence.futureNoCount": Record<never, never>;
   "recurrence.increase": Record<never, never>;
-  "recurrence.intervalHint": Record<never, never>;
-  "recurrence.lastDay": Record<never, never>;
+  "recurrence.lastDayShort": Record<never, never>;
   "recurrence.month": Record<never, never>;
   "recurrence.monthly": Record<never, never>;
-  "recurrence.monthlyDay": Record<never, never>;
-  "recurrence.monthlyLastSummary": { period: string | number };
-  "recurrence.monthlySummary": { day: string | number; period: string | number };
   "recurrence.monthsCount": Record<never, never>;
   "recurrence.months": { count: string | number };
+  "recurrence.never": Record<never, never>;
+  "recurrence.neverHint": { months: string | number };
+  "recurrence.onDate": Record<never, never>;
+  "recurrence.onDay": { day: string | number };
+  "recurrence.onWeekday": { ordinal: string | number; weekday: string | number };
   "recurrence.once": Record<never, never>;
-  "recurrence.only": Record<never, never>;
+  "recurrence.onlyThis": Record<never, never>;
+  "recurrence.ordinal.FIRST": Record<never, never>;
+  "recurrence.ordinal.FOURTH": Record<never, never>;
+  "recurrence.ordinal.LAST": Record<never, never>;
+  "recurrence.ordinal.SECOND": Record<never, never>;
+  "recurrence.ordinal.THIRD": Record<never, never>;
   "recurrence.periodHint": Record<never, never>;
   "recurrence.preview": Record<never, never>;
   "recurrence.previewTotal": { count: string | number; date: string | number };
-  "recurrence.removeScope": Record<never, never>;
-  "recurrence.requiredEnd": Record<never, never>;
-  "recurrence.sameDate": Record<never, never>;
+  "recurrence.removeAllConfirm": Record<never, never>;
+  "recurrence.removeCount": { count: string | number };
   "recurrence.save": Record<never, never>;
+  "recurrence.saveCount": { count: string | number };
   "recurrence.saved": Record<never, never>;
-  "recurrence.scope": Record<never, never>;
-  "recurrence.scopeHint": Record<never, never>;
+  "recurrence.scheduleFrom": { date: string | number };
+  "recurrence.scopeTitle": Record<never, never>;
+  "recurrence.sentence.forCount": { period: string | number; rule: string | number };
+  "recurrence.sentence.from": { date: string | number; rule: string | number };
+  "recurrence.sentence.monthlyDay": { count: string | number; day: string | number };
+  "recurrence.sentence.monthlyLast": { count: string | number };
+  "recurrence.sentence.monthlyWeekday": { count: string | number; ordinal: string | number; weekday: string | number };
+  "recurrence.sentence.noEnd": { rule: string | number };
+  "recurrence.sentence.until": { date: string | number; rule: string | number };
+  "recurrence.sentence.weekly": { count: string | number; days: string | number };
   "recurrence.shortMonths": Record<never, never>;
-  "recurrence.stop": Record<never, never>;
+  "recurrence.skippedClosed": { count: string | number };
   "recurrence.stopped": Record<never, never>;
   "recurrence.title": Record<never, never>;
   "recurrence.until": { date: string | number };
   "recurrence.useDate": Record<never, never>;
+  "recurrence.weekdayInMonth.FRIDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.MONDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.SATURDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.SUNDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.THURSDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.TUESDAY": Record<never, never>;
+  "recurrence.weekdayInMonth.WEDNESDAY": Record<never, never>;
   "recurrence.weekdays": Record<never, never>;
   "recurrence.weekly": Record<never, never>;
-  "recurrence.weeklySummary": { days: string | number; period: string | number };
   "recurrence.weeksCount": Record<never, never>;
   "recurrence.weeks": { count: string | number };
   "recurrence.year": Record<never, never>;
@@ -3101,7 +3241,6 @@ export type MessageParams = {
   "reminders.lead.MINUTES_30": Record<never, never>;
   "reminders.off": Record<never, never>;
   "reminders.on": { lead: string | number };
-  "reminders.title": Record<never, never>;
   "reminders.toggle": Record<never, never>;
   "role.employee": Record<never, never>;
   "role.employeeAtWorkspaces": { count: string | number };
@@ -3129,6 +3268,9 @@ export type MessageParams = {
   "settings.fullDayChipHint": Record<never, never>;
   "settings.hint": Record<never, never>;
   "settings.hours": Record<never, never>;
+  "settings.jobNotifications": Record<never, never>;
+  "settings.jobUpdates": Record<never, never>;
+  "settings.jobUpdatesHint": Record<never, never>;
   "settings.language": Record<never, never>;
   "settings.languageHint": Record<never, never>;
   "settings.light": Record<never, never>;
@@ -3156,6 +3298,8 @@ export type MessageParams = {
   "settings.showPayOn": Record<never, never>;
   "settings.showPayShortHint": Record<never, never>;
   "settings.swedish": Record<never, never>;
+  "settings.systemCategories": Record<never, never>;
+  "settings.systemCategoriesHint": Record<never, never>;
   "settings.time": Record<never, never>;
   "settings.title": Record<never, never>;
   "settings.weeklyDigest": Record<never, never>;
@@ -3507,8 +3651,17 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "operator.invitations.resent",
   "overview.nothingLoggedDays",
   "overview.weekdaysLeft",
+  "recurrence.allCount",
+  "recurrence.futureCount",
   "recurrence.months",
   "recurrence.previewTotal",
+  "recurrence.removeCount",
+  "recurrence.saveCount",
+  "recurrence.sentence.monthlyDay",
+  "recurrence.sentence.monthlyLast",
+  "recurrence.sentence.monthlyWeekday",
+  "recurrence.sentence.weekly",
+  "recurrence.skippedClosed",
   "recurrence.weeks",
   "role.employeeAtWorkspaces",
   "role.employerPeople",

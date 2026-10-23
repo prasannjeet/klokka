@@ -243,11 +243,16 @@ export function linearGradientModule() {
 }
 
 // expo-router outside a navigator: a recording router and empty params, overridable per test.
+// A screen guarded by usePreventRemove (the job editor) gets the leave attempt instead of the stack; the
+// navigation's `dispatch` of that action is what finally leaves.
+type PreventRemoveCallback = (options: { data: { action: { type: string } } }) => void;
 export const routerState = {
   pushes: [] as unknown[],
   replaces: [] as unknown[],
   backs: 0,
   dismissAlls: 0,
+  dispatches: [] as unknown[],
+  preventRemove: null as PreventRemoveCallback | null,
   params: {} as Record<string, string>,
 };
 export function expoRouterModule() {
@@ -260,6 +265,10 @@ export function expoRouterModule() {
       routerState.replaces.push(href);
     },
     back: () => {
+      if (routerState.preventRemove) {
+        routerState.preventRemove({ data: { action: { type: 'GO_BACK' } } });
+        return;
+      }
       routerState.backs += 1;
     },
     navigate: (href: unknown) => {
@@ -271,6 +280,13 @@ export function expoRouterModule() {
       routerState.dismissAlls += 1;
     },
   };
+  const navigation = {
+    setOptions: () => undefined,
+    dispatch: (action: unknown) => {
+      routerState.dispatches.push(action);
+      routerState.backs += 1;
+    },
+  };
   return {
     useRouter: () => router,
     router,
@@ -278,7 +294,7 @@ export function expoRouterModule() {
     useGlobalSearchParams: () => routerState.params,
     usePathname: () => '/',
     useSegments: () => [],
-    useNavigation: () => ({ setOptions: () => undefined }),
+    useNavigation: () => navigation,
     Redirect: ({ href }: { href: unknown }) => {
       routerState.replaces.push(href);
       return null;
@@ -288,6 +304,23 @@ export function expoRouterModule() {
     Tabs: () => null,
     Slot: () => null,
     useFocusEffect: (effect: () => void | (() => void)) => React.useEffect(effect, [effect]),
+  };
+}
+
+// The real module (themes, PlatformPressable for the tab bar) with usePreventRemove recorded as above.
+export function reactNavigationModule() {
+  const React = require('react') as typeof import('react');
+  return {
+    ...(jest.requireActual('expo-router/react-navigation') as object),
+    usePreventRemove: (prevent: boolean, callback: PreventRemoveCallback) => {
+      React.useEffect(() => {
+        if (!prevent) return;
+        routerState.preventRemove = callback;
+        return () => {
+          if (routerState.preventRemove === callback) routerState.preventRemove = null;
+        };
+      }, [prevent, callback]);
+    },
   };
 }
 

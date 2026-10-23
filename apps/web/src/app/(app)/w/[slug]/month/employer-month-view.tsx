@@ -3,6 +3,7 @@
 // "Employee view" (CHQ-122, renamed in CHQ-145): pick a person from the dropdown, see the month's figures
 // from the API, the heat-map calendar and every day with who logged it and its history. Close the month and
 // export it from here too.
+import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { addMonths, formatHours, formatMoney, formatMonthName, type IsoDate } from '@klokka/core';
@@ -19,6 +20,7 @@ import { ViewHeader } from '@/components/view-header';
 import { formatDay } from '@/lib/format';
 import { formatDuration, PLAN_AHEAD_MONTHS } from '@/lib/jobs';
 import { useLocale, useT } from '@/lib/i18n';
+import { jobEditorHref } from '@/lib/job-links';
 import { useMemberMonth, useMembers, useMonthStatus, useWorkspaceDetails } from '@/lib/queries';
 import { isoOf, monthIn, todayIn } from '@/lib/time';
 import { useMonthParam } from '@/lib/use-month-param';
@@ -65,6 +67,18 @@ export function EmployerMonthView() {
   const lastMonthName = formatMonthName(addMonths(month, -1), locale, false);
   const name = person ? firstName(person.displayName) : '';
 
+  // New job (CHQ-185): the full editor for this person, today by default; it returns here.
+  function newJobHref(membershipId: string): string {
+    const params = new URLSearchParams(search.toString());
+    params.set('member', membershipId);
+    return jobEditorHref(ws.slug, {
+      member: membershipId,
+      date: today,
+      mode: 'full',
+      back: `${pathname}?${params.toString()}`,
+    });
+  }
+
   function choose(id: string) {
     const params = new URLSearchParams(search.toString());
     params.set('member', id);
@@ -98,6 +112,12 @@ export function EmployerMonthView() {
                   </option>
                 ))}
               </select>
+            ) : null}
+            {person ? (
+              <Link className="btn btn-primary" href={newJobHref(person.id)} data-testid="new-job">
+                <Icon name="plus" />
+                {t('jobs.newJob')}
+              </Link>
             ) : null}
             <MonthNav month={month} current={current} latest={latest} onChange={setMonth} />
             <MonthLockButton ws={ws} month={month} />
@@ -219,12 +239,7 @@ export function EmployerMonthView() {
                 currency={mm.currency}
                 {...(person
                   ? {
-                      editing: {
-                        membershipId: person.id,
-                        rounding: details.data?.rounding ?? ws.my.rounding,
-                        defaultDayHours: details.data?.defaultDayHours ?? ws.my.defaultDayHours,
-                        locked: mm.locked,
-                      },
+                      editing: { membershipId: person.id, locked: mm.locked },
                     }
                   : {})}
               />

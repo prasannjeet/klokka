@@ -11,9 +11,8 @@ import {
   membersFixture,
   workspaceFixture,
 } from '@/testing/fixtures';
-import { mapsMock, routerState } from '@/testing/nativeMocks';
+import { routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
-import { toIsoDate } from '@/lib/dates';
 
 const entry = entryFixture('mem-maria', '2026-09-23', 6.5, {
   note: 'Delivery day, stayed to unload.',
@@ -72,7 +71,8 @@ describe('DayScreen', () => {
     );
   });
 
-  it('employer: a job card shows its place and time, and Edit opens the sheet with the job', async () => {
+  it('employer: a job card shows its place and time, Edit opens that job and Add another a single job (CHQ-185)', async () => {
+    routerState.pushes.length = 0;
     const withPlace = entryFixture('mem-maria', '2026-09-23', 6.5, {
       jobs: [
         jobFixture('job-1', 4.5, { startTime: '09:00', location: cafeLocation, note: 'Counter' }),
@@ -86,7 +86,6 @@ describe('DayScreen', () => {
       getEntryHistory: history,
       getWorkspace: workspaceFixture,
       getMemberMonth: memberMonthFixture,
-      deleteJob: undefined,
     });
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
     expect(await screen.findByText('6 h 30 min')).toBeTruthy();
@@ -95,71 +94,32 @@ describe('DayScreen', () => {
     expect(screen.getByText('09:00 to 13:30, Kungsgatan 12, Stockholm')).toBeTruthy();
     expect(screen.getByTestId('job-directions-job-1')).toBeTruthy();
     await fireEvent.press(screen.getByTestId('job-edit-job-1'));
-    expect(await screen.findByText('Job for Maria Lind')).toBeTruthy();
-    expect(screen.getByText('Save job, 4 h 30 min')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('remove-job'));
-    await waitFor(() =>
-      expect(api.calls.find((c) => c.op === 'deleteJob')?.args[0]).toEqual({
-        workspaceId: 'ws-cafe',
-        jobId: 'job-1',
-      }),
-    );
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-09-23', mode: 'edit', jobId: 'job-1' },
+    });
+    await fireEvent.press(screen.getByTestId('day-add-another'));
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-09-23', mode: 'single' },
+    });
   });
 
-  it('employer: an empty future day offers a job; the sheet sets a start time and a searched place', async () => {
+  it('employer: an empty day offers a single job on it', async () => {
+    routerState.pushes.length = 0;
     const api = fakeApi({
       getMe: employerMeFixture,
       listEntries: [],
       getWorkspace: workspaceFixture,
       getMemberMonth: { ...memberMonthFixture, month: '2026-10', locked: false, days: [] },
       getMember: membersFixture[0],
-      listRecentPlaces: [],
-      autocompletePlaces: [
-        { placeId: 'place-k12', primaryText: 'Kungsgatan 12', secondaryText: 'Stockholm' },
-      ],
-      getPlace: cafeLocation,
-      createJob: () => entryFixture('mem-maria', '2026-10-07', 4),
     });
     await renderApp(<DayScreen membershipId="mem-maria" date="2026-10-07" />, { api });
     expect(await screen.findByText('No jobs on this day')).toBeTruthy();
     await fireEvent.press(await screen.findByTestId('day-add-job'));
-    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
-    expect(screen.getByText('No start time: Maria gets no reminder for this job.')).toBeTruthy();
-
-    await fireEvent.press(screen.getByTestId('job-start'));
-    await fireEvent.press(screen.getByTestId('wheel-start-hours-9'));
-    await fireEvent.press(screen.getByTestId('start-done'));
-    await fireEvent.press(screen.getByTestId('job-location'));
-    await fireEvent(screen.getByTestId('place-search'), 'focus');
-    await fireEvent.changeText(screen.getByTestId('place-search'), 'Kungs');
-    await fireEvent.press(await screen.findByTestId('place-place-k12', {}, { timeout: 2000 }));
-    expect(await screen.findByTestId('place-picked')).toBeTruthy();
-    expect(screen.getByText('Café Nord')).toBeTruthy();
-    // The map flew to the place; that landing is not a drag, so the place keeps its name.
-    expect(mapsMock.moves.at(-1)).toEqual({
-      coordinates: expect.objectContaining({
-        latitude: cafeLocation.latitude,
-        longitude: cafeLocation.longitude,
-      }),
-      zoom: 16,
-    });
-    await fireEvent.press(screen.getByTestId('place-use'));
-
-    await fireEvent.press(await screen.findByTestId('wheel-hours-4'));
-    expect(screen.getByText('Runs 09:00 to 13:00. Maria gets a reminder before it starts.')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
-      workspaceId: 'ws-cafe',
-      membershipId: 'mem-maria',
-      jobWrite: { hours: 4, startTime: '09:00', note: null, location: cafeLocation },
-    });
-    const session = (api.calls.find((c) => c.op === 'autocompletePlaces')?.args[0] as { session: string })
-      .session;
-    expect(api.calls.find((c) => c.op === 'getPlace')?.args[0]).toEqual({
-      workspaceId: 'ws-cafe',
-      placeId: 'place-k12',
-      session,
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-10-07', mode: 'single' },
     });
   });
 
@@ -200,59 +160,14 @@ describe('DayScreen', () => {
   });
 });
 
-// A Wednesday at least a week ahead: Repeat and "this and future" are offered only from today on, so the fixed
-// 2026-10-07 broke these tests once the calendar passed it.
-const wednesday = new Date();
-wednesday.setHours(12, 0, 0, 0);
-wednesday.setDate(wednesday.getDate() + 7 + ((3 - wednesday.getDay() + 7) % 7));
-const plusDays = (days: number) => new Date(wednesday.getTime() + days * 24 * 3600 * 1000);
-const repeatDay = toIsoDate(wednesday);
-
 describe('recurring jobs', () => {
   beforeEach(() => useAppStore.getState().setActiveWorkspace('ws-cafe'));
-  it('creates only after the required end preview and sends the finite schedule and retry key', async () => {
-    const api = fakeApi({
-      getMe: employerMeFixture,
-      listEntries: [],
-      getWorkspace: workspaceFixture,
-      getMemberMonth: { ...memberMonthFixture, month: repeatDay.slice(0, 7), locked: false, days: [] },
-      getMember: membersFixture[0],
-      previewJobRecurrence: {
-        dates: [{ date: wednesday }],
-        occurrenceCount: 4,
-        lastDate: plusDays(21),
-        endDate: plusDays(27),
-      },
-      createJob: () => entryFixture('mem-maria', repeatDay, 4),
-    });
-    await renderApp(<DayScreen membershipId="mem-maria" date={repeatDay} />, { api });
-    await fireEvent.press(await screen.findByTestId('day-add-job'));
-    await fireEvent.press(screen.getByTestId('wheel-hours-4'));
-    await fireEvent.press(screen.getByTestId('job-repeat'));
-    await fireEvent.press(screen.getByTestId('repeat-WEEKLY'));
-    expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled).toBe(true);
-    await fireEvent.press(screen.getByTestId('repeat-end-mode-count'));
-    await fireEvent.changeText(screen.getByTestId('repeat-count'), '4');
-    await waitFor(() =>
-      expect(screen.getByTestId('repeat-done').props.accessibilityState.disabled === true).toBe(false),
-    );
-    await fireEvent.press(screen.getByTestId('repeat-done'));
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
-      jobWrite: {
-        hours: 4,
-        requestId: expect.any(String),
-        recurrence: { frequency: 'WEEKLY', interval: 1, weekdays: new Set(['WEDNESDAY']), periodCount: 4 },
-      },
-    });
-  });
-  it('shows the recurring job and sends future scope only after the employer chooses it', async () => {
+  it('a job card says how its series repeats (CHQ-186)', async () => {
     const series = {
       id: 'series-1',
-      firstDate: wednesday,
-      endDate: plusDays(27),
-      lastDate: plusDays(21),
+      firstDate: new Date(2026, 8, 2),
+      endDate: new Date(2026, 8, 23),
+      lastDate: new Date(2026, 8, 23),
       occurrenceCount: 4,
       stopped: false,
       openEnded: false,
@@ -267,28 +182,16 @@ describe('recurring jobs', () => {
       getMe: employerMeFixture,
       getMember: membersFixture[0],
       listEntries: [
-        entryFixture('mem-maria', repeatDay, 4, {
+        entryFixture('mem-maria', '2026-09-23', 4, {
           jobs: [jobFixture('job-repeat', 4, { recurrence: series })],
         }),
       ],
       getEntryHistory: [],
       getWorkspace: workspaceFixture,
-      getMemberMonth: { ...memberMonthFixture, month: repeatDay.slice(0, 7), locked: false },
-      deleteJob: undefined,
+      getMemberMonth: memberMonthFixture,
     });
-    await renderApp(<DayScreen membershipId="mem-maria" date={repeatDay} />, { api });
-    expect(await screen.findByText('Every 1 week: Wed')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('job-edit-job-repeat'));
-    await fireEvent.press(screen.getByTestId('remove-job'));
-    expect(api.calls.some((c) => c.op === 'deleteJob')).toBe(false);
-    await fireEvent.press(screen.getByTestId('scope-THIS_AND_FUTURE'));
-    await waitFor(() =>
-      expect(api.calls.find((c) => c.op === 'deleteJob')?.args[0]).toEqual({
-        workspaceId: 'ws-cafe',
-        jobId: 'job-repeat',
-        scope: 'THIS_AND_FUTURE',
-      }),
-    );
+    await renderApp(<DayScreen membershipId="mem-maria" date="2026-09-23" />, { api });
+    expect(await screen.findByText('Every week on Wed, for 4 weeks')).toBeTruthy();
   });
 });
 

@@ -23,4 +23,5 @@ export const keys = {
     ['ws', id, 'memberInsights', membershipId, month ?? 'current'] as const,
   flags: (id: string, status?: string) => ['ws', id, 'flags', status ?? 'all'] as const,
   flag: (id: string, flagId: string) => ['ws', id, 'flags', 'one', flagId] as const,
+  jobScopeCounts: (id: string, jobId: string) => ['ws', id, 'jobScopeCounts', jobId] as const,
 };

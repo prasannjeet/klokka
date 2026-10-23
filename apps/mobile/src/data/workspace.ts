@@ -309,6 +309,16 @@ export function useDeleteJob(workspaceId: string) {
   });
 }
 
+// How many jobs each scope of a series change would touch (CHQ-187), always fresh: it is read right before a write.
+export function useJobScopeCounts(workspaceId: string, jobId: string) {
+  const api = useApi();
+  return useQuery({
+    queryKey: keys.jobScopeCounts(workspaceId, jobId),
+    queryFn: () => api.jobs.getJobScopeCounts({ workspaceId, jobId }),
+    staleTime: 0,
+  });
+}
+
 // Places go through the API, which holds the Maps key (CHQ-156). `session` ties one search together.
 export function usePlaceSearch(workspaceId: string, input: string, session: string) {
   const api = useApi();

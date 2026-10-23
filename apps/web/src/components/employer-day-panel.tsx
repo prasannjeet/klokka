@@ -88,7 +88,6 @@ export function EmployerDayPanel({
         ws={ws}
         date={date}
         jobs={jobs}
-        dayTotal={day?.hours ?? 0}
         {...(editing ? { editing: { ...editing, personName } } : {})}
       />
       {day?.flag?.status === 'OPEN' ? (

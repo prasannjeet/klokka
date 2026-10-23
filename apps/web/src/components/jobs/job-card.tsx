@@ -1,7 +1,8 @@
 'use client';
 
 // One job on a day (CHQ-156): the map when it has a place, where, when ("09:00 to 13:30"), how long
-// ("4 h 30 min"), the note, and Directions. The employer also gets Edit and Remove.
+// ("4 h 30 min"), the note, and Directions. The employer also gets Edit (the job editor page, CHQ-185) and Remove.
+import Link from 'next/link';
 import type { Job } from '@klokka/api-client';
 import type { JobStatus, MessageKey } from '@klokka/core';
 import { useT } from '@/lib/i18n';
@@ -21,7 +22,7 @@ const STATUS: Record<JobStatus, { key: MessageKey; cls: string }> = {
 export function JobCard({
   workspaceId,
   job,
-  onEdit,
+  editHref,
   onRemove,
   busy,
   member,
@@ -29,7 +30,7 @@ export function JobCard({
 }: {
   workspaceId: string;
   job: Job;
-  onEdit?: () => void;
+  editHref?: string;
   onRemove?: () => void;
   busy?: boolean;
   member?: { name: string; index: number };
@@ -65,7 +66,7 @@ export function JobCard({
         </div>
         {job.recurrence ? <RecurrenceSummary series={job.recurrence} /> : null}
         {job.note ? <q className="job-note">{job.note}</q> : null}
-        {place || onEdit || onRemove ? (
+        {place || editHref || onRemove ? (
           <div className="job-acts">
             {place ? (
               <a
@@ -78,11 +79,11 @@ export function JobCard({
                 {t('jobs.directions')}
               </a>
             ) : null}
-            {onEdit ? (
-              <button className="btn btn-ghost btn-sm" type="button" onClick={onEdit} disabled={busy}>
+            {editHref ? (
+              <Link className="btn btn-ghost btn-sm" href={editHref}>
                 <Icon name="edit" />
                 {t('jobs.edit')}
-              </button>
+              </Link>
             ) : null}
             {onRemove ? (
               <button

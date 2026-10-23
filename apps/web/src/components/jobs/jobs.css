@@ -120,10 +120,106 @@
   color: var(--warning);
 }
 
-/* ---- the job dialog: wider than the other dialogs on a desktop, a sheet on a phone ---- */
-@media (min-width: 720px) {
-  .dlg:has(.job-form) {
-    width: min(calc(100% - 2 * var(--gutter)), 860px);
+/* ---- the job editor page (CHQ-185): one centred column, the actions in a footer that stays in reach ---- */
+.job-editor {
+  width: min(100%, 860px);
+  margin-inline: auto;
+  display: grid;
+  gap: var(--space-4);
+}
+.je-top {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.je-top h1 {
+  font-size: calc(var(--text-h-2) * var(--font-display-scale));
+  line-height: var(--leading-h-2);
+  overflow-wrap: anywhere;
+}
+.je-top .sub {
+  color: var(--text-muted);
+  font-size: 14.5px;
+  text-wrap: pretty;
+}
+.je-out {
+  margin-left: -10px;
+}
+.je-body {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.je-foot,
+.je-step-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.je-foot .danger {
+  color: var(--danger);
+  margin-right: auto;
+}
+.je-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: var(--tap-min);
+  padding: 12px 14px;
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.je-row > span {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.je-row small {
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+.je-row > .icon:first-child {
+  color: var(--accent);
+}
+.je-row:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* On a phone the editor is the whole page: no tab bar (every way out asks first), Save pinned to the bottom. */
+@media (max-width: 1023px) {
+  .app:has(.job-editor) .tabbar {
+    display: none;
+  }
+  .app:has(.job-editor) .content {
+    padding-bottom: 0;
+  }
+  .je-foot {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+}
+@media (max-width: 719px) {
+  .je-foot {
+    flex-direction: column-reverse;
+  }
+  .je-foot .btn {
+    width: 100%;
+  }
+  .je-foot .danger {
+    margin-right: 0;
   }
 }
 .job-form-cols {
@@ -410,9 +506,6 @@
 
 /* CHQ-159: recurrence extends the existing dialog/card vocabulary. */
 .recurrence-editor {
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
   display: grid;
   gap: var(--space-3);
 }
@@ -463,4 +556,152 @@
 .job-who > span:first-of-type {
   flex: 1;
   min-width: 0;
+}
+
+/* ---- radio lists (the end of a repeat, the scope of a series edit) ---- */
+.radio-list {
+  display: grid;
+  gap: 2px;
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  padding: 4px;
+}
+.radio-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.radio-row:has(input:checked) {
+  background: var(--surface);
+  font-weight: 600;
+}
+.radio-row input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--secondary);
+}
+.radio-row > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.radio-row small {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+}
+.repeat-ends,
+.scope-list,
+.monthly-rule {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.scope-list legend {
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+.scope-step {
+  display: grid;
+  gap: var(--space-3);
+}
+.scope-step > .btn {
+  justify-self: end;
+}
+.scope-retry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+@media (max-width: 719px) {
+  .scope-step > .btn {
+    justify-self: stretch;
+  }
+}
+
+/* ---- the monthly rule (CHQ-186): two cards, the chosen one opens its picker ---- */
+.mr-card {
+  border: var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.mr-card.on {
+  border-color: var(--secondary);
+}
+.mr-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.mr-head input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--secondary);
+}
+.mr-head > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.mr-head small {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.mr-body {
+  display: grid;
+  gap: var(--space-2);
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.mr-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.mr-day {
+  min-height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.mr-day.last {
+  grid-column: span 5;
+}
+.mr-day[aria-pressed='true'] {
+  background: var(--secondary);
+  border-color: var(--secondary);
+  color: var(--on-secondary);
+}
+.mr-day:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+@media (pointer: coarse) {
+  .mr-day {
+    min-height: var(--tap-min);
+  }
+}
+.mr-selects {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
 }

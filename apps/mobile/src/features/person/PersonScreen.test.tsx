@@ -11,6 +11,7 @@ import {
   workspaceFixture,
 } from '@/testing/fixtures';
 import { toIsoDate } from '@/lib/dates';
+import { routerState } from '@/testing/nativeMocks';
 import { useAppStore } from '@/store/appStore';
 
 const entries: Entry[] = [
@@ -44,6 +45,7 @@ describe('PersonScreen', () => {
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-09-25T10:00:00Z') });
     useAppStore.getState().setActiveWorkspace('ws-cafe');
+    routerState.pushes.length = 0;
   });
   afterEach(() => jest.useRealTimers());
 
@@ -59,12 +61,15 @@ describe('PersonScreen', () => {
     await waitFor(() => expect(ranges(api)).toContain('2026-09-07..2026-09-20 mem-maria'));
   });
 
-  it('opens a day with jobs as the Day view (where another can be added), and an empty day in the job sheet', async () => {
+  it('opens a day with jobs as the Day view (where another can be added), and an empty day in the single job editor', async () => {
     const api = personApi();
     await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api });
     await screen.findByText('Maria Lind');
     await fireEvent.press(await screen.findByTestId('day-mem-maria-2026-09-26'));
-    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-09-26', mode: 'single' },
+    });
     await fireEvent.press(screen.getByTestId('day-mem-maria-2026-09-23'));
     expect(await screen.findByTestId('day-screen')).toBeTruthy();
     await waitFor(() => expect(ranges(api)).toContain('2026-09-23..2026-09-23 mem-maria'));
@@ -92,6 +97,15 @@ describe('PersonScreen', () => {
     await fireEvent.press(await screen.findByTestId('cell-2026-09-17'));
     expect(await screen.findByTestId('day-screen')).toBeTruthy();
     await waitFor(() => expect(ranges(api)).toContain('2026-09-17..2026-09-17 mem-maria'));
+  });
+
+  it('the header opens New job for the person, on today (CHQ-185)', async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="month" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('person-new-job'));
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-maria', date: '2026-09-25', mode: 'full' },
+    });
   });
 
   it('opens on a given view and date', async () => {

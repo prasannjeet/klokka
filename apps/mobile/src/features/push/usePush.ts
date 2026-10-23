@@ -19,6 +19,8 @@ import { rememberPushToken, rememberedPushToken, unregisterPushToken } from './p
 // named queries refreshed instead), and a tap that deep-links through the allowlist.
 
 export const CHANNELS = {
+  // A job added, changed or removed (CHQ-188); the API sends JOB_CHANGED pushes on it.
+  jobs: { id: 'jobs', importance: Notifications.AndroidImportance.HIGH },
   hours: { id: 'hours', importance: Notifications.AndroidImportance.HIGH },
   flags: { id: 'flags', importance: Notifications.AndroidImportance.HIGH },
   workspace: { id: 'workspace', importance: Notifications.AndroidImportance.DEFAULT },
@@ -27,6 +29,10 @@ export const CHANNELS = {
 
 export async function ensureChannels(t: Translator): Promise<void> {
   if (Platform.OS !== 'android') return;
+  await Notifications.setNotificationChannelAsync(CHANNELS.jobs.id, {
+    name: t('mobile.push.channelJobUpdates'),
+    importance: CHANNELS.jobs.importance,
+  });
   await Notifications.setNotificationChannelAsync(CHANNELS.hours.id, {
     name: t('mobile.push.channelHours'),
     importance: CHANNELS.hours.importance,

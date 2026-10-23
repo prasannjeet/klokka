@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { Linking, Platform } from 'react-native';
 import type { JobReminderLead, Language, ThemePreference } from '@klokka/api-client';
 import { useMe, useUpdatePreferences } from '@/data/me';
 import { useT } from '@/i18n/LocaleProvider';
@@ -129,9 +130,10 @@ export function AppPreferenceRows() {
 
 const LEADS: JobReminderLead[] = ['MINUTES_15', 'MINUTES_30', 'HOUR_1', 'HOURS_2', 'DAY_BEFORE'];
 
-// Job reminders (CHQ-156): a push before each job with a start time, on by default an hour before. The
-// person's own setting; the employer never sees it.
-export function JobReminderRows() {
+// The employee's job notifications: Job updates (CHQ-188, a push when the employer adds, changes or removes one of
+// their jobs, on by default), job reminders (CHQ-156, a push before each job with a start time, on by default an hour
+// before), and on Android the phone's own per-kind switches. The person's own settings; the employer never sees them.
+export function JobNotificationRows() {
   const t = useT();
   const toast = useToast();
   const { data: me } = useMe();
@@ -139,11 +141,25 @@ export function JobReminderRows() {
   const leadSheet = useRef<SheetHandle>(null);
   const on = me?.preferences.jobReminders ?? true;
   const lead: JobReminderLead = me?.preferences.jobReminderLead ?? 'HOUR_1';
+  const updates = me?.preferences.jobUpdates ?? true;
   const leadLabel = (value: JobReminderLead) => t(`reminders.lead.${value}`);
-  const save = (patch: { jobReminders?: boolean; jobReminderLead?: JobReminderLead }) =>
+  const save = (patch: { jobReminders?: boolean; jobReminderLead?: JobReminderLead; jobUpdates?: boolean }) =>
     update.mutate(patch, { onError: () => toast.show(t('errors.INTERNAL'), 'danger') });
   return (
     <>
+      <Row
+        title={t('settings.jobUpdates')}
+        subtitle={t('settings.jobUpdatesHint')}
+        trailing={
+          <AppSwitch
+            value={updates}
+            onValueChange={(v) => save({ jobUpdates: v })}
+            accessibilityLabel={t('settings.jobUpdates')}
+            testID="pref-job-updates"
+          />
+        }
+      />
+      <Separator />
       <Row
         title={t('reminders.toggle')}
         subtitle={on ? t('reminders.on', { lead: leadLabel(lead).toLocaleLowerCase() }) : t('reminders.off')}
@@ -164,6 +180,18 @@ export function JobReminderRows() {
             value={leadLabel(lead)}
             onPress={() => leadSheet.current?.present()}
             testID="pref-reminder-lead"
+          />
+        </>
+      ) : null}
+      {Platform.OS === 'android' ? (
+        <>
+          <Separator />
+          <Row
+            title={t('settings.systemCategories')}
+            subtitle={t('settings.systemCategoriesHint')}
+            onPress={() => void Linking.openSettings()}
+            chevron
+            testID="pref-system-categories"
           />
         </>
       ) : null}

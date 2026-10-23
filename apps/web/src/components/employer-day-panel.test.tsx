@@ -17,6 +17,10 @@ vi.mock('@/lib/api', () => ({
     entries: { getEntryHistory: calls.getEntryHistory },
   },
 }));
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/w/kafe-nord/month',
+  useSearchParams: () => new URLSearchParams('month=2026-09'),
+}));
 
 const my = {
   notifyFlagDeclined: true,
@@ -86,7 +90,7 @@ function renderPanel(withFlag: boolean, jobs: (typeof JOB)[] = [JOB], editing = 
             currency="SEK"
             {...(editing
               ? {
-                  editing: { membershipId: 'm-test', rounding: 'QUARTER', defaultDayHours: 8, locked: false },
+                  editing: { membershipId: 'm-test', locked: false },
                 }
               : {})}
           />
@@ -130,8 +134,14 @@ describe('EmployerDayPanel', () => {
     expect(directions.getAttribute('href')).toBe(
       'https://www.google.com/maps/search/?api=1&query=59.3%2C18&query_place_id=p1',
     );
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Add another job' })).toBeTruthy();
+    const back = encodeURIComponent('/w/kafe-nord/month?month=2026-09&member=m-test&day=2026-09-29');
+    expect(screen.getByRole('link', { name: 'Edit' }).getAttribute('href')).toBe(
+      `/w/kafe-nord/jobs/j1?member=m-test&date=2026-09-29&back=${back}`,
+    );
+    // Add makes a single job on this day, on the job editor page (CHQ-185).
+    expect(screen.getByRole('link', { name: 'Add another job' }).getAttribute('href')).toBe(
+      `/w/kafe-nord/jobs/new?member=m-test&date=2026-09-29&mode=single&back=${back}`,
+    );
   });
 
   it('approves a flag on a day with several jobs as the day stands', async () => {

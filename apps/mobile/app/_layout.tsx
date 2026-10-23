@@ -39,6 +39,8 @@ function Navigator() {
                 animation: dayStepAnimation((route.params as { step?: string } | undefined)?.step),
               })}
             />
+            {/* The job editor is a full page (CHQ-185), not a sheet: its own guard asks before unsaved changes go. */}
+            <Stack.Screen name="job" options={{ presentation: 'card', gestureEnabled: true }} />
             <Stack.Screen
               name="team-day/[date]"
               options={({ route }) => ({

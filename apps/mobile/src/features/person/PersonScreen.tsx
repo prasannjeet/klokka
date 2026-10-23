@@ -11,10 +11,10 @@ import {
   type IsoDate,
   type IsoMonth,
 } from '@klokka/core';
-import { useEntries, useMember, useMemberMonth, useWorkspace } from '@/data/workspace';
+import { useEntries, useMember, useMemberMonth } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, todayIn } from '@/lib/dates';
-import { useThemedStyles, type Theme } from '@/theme';
+import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import {
   AppPressable,
   AppText,
@@ -29,8 +29,8 @@ import {
 } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { DayPage } from '@/features/day/DayScreen';
-import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
 import { dayActionFor } from '@/features/jobs/dayAction';
+import { jobEditorHref } from '@/features/jobs/jobEditorHref';
 import { MemberMonthView } from '@/features/month/MemberMonthView';
 import { MemberActionsSheets, type MemberActionsHandle } from '@/features/member/MemberActionsSheets';
 import { MonthLockExport } from '@/features/member/MonthLockExport';
@@ -54,6 +54,16 @@ const styles = (t: Theme) =>
     },
     nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: t.space[2] },
     navText: { flex: 1, alignItems: 'center', gap: 2 },
+    actions: { flexDirection: 'row', alignItems: 'center', gap: t.space[2] },
+    newJob: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: t.space[1],
+      minHeight: t.tapMin,
+      paddingHorizontal: t.space[3],
+      borderRadius: t.radius.pill,
+      backgroundColor: t.color.primary,
+    },
   });
 
 type Workspace = WorkspaceProps['workspace'];
@@ -76,8 +86,10 @@ function PersonScreenInner({
   initialDate?: IsoDate | undefined;
 } & WorkspaceProps) {
   const t = useT();
+  const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
+  const employer = workspace.role === 'EMPLOYER';
   const today = todayIn(workspace.timezone);
   const [view, setView] = useState<PersonView>(initialView);
   const [date, setDate] = useState<IsoDate>(
@@ -104,15 +116,33 @@ function PersonScreenInner({
         large={false}
         leading={<Avatar name={name} emoji={member.data?.avatarEmoji} colour="PURPLE" size={36} />}
         trailing={
-          <AppPressable
-            accessibilityRole="button"
-            accessibilityLabel={t('common.manage')}
-            onPress={() => actions.current?.present()}
-            style={s.round}
-            testID="member-actions"
-          >
-            <Icon name="more" size={22} />
-          </AppPressable>
+          <View style={s.actions}>
+            {/* New job (CHQ-185): a date and a repeat, today by default. */}
+            {employer ? (
+              <AppPressable
+                accessibilityRole="button"
+                accessibilityLabel={t('jobs.newJob')}
+                onPress={() => router.push(jobEditorHref({ membershipId, date: today, mode: 'full' }))}
+                hapticKind="select"
+                style={s.newJob}
+                testID="person-new-job"
+              >
+                <Icon name="plus" size={18} color={theme.color.onPrimary} />
+                <AppText variant="small" weight={600} color={theme.color.onPrimary}>
+                  {t('jobs.newJob')}
+                </AppText>
+              </AppPressable>
+            ) : null}
+            <AppPressable
+              accessibilityRole="button"
+              accessibilityLabel={t('common.manage')}
+              onPress={() => actions.current?.present()}
+              style={s.round}
+              testID="member-actions"
+            >
+              <Icon name="more" size={22} />
+            </AppPressable>
+          </View>
         }
       />
       {status === 'INVITED' ? (
@@ -195,27 +225,17 @@ function PersonWeek({
     [first, workspace.weekStart],
   );
   const range = useEntries(workspace.workspaceId, addDays(first, -7), last, membershipId);
-  const settings = useWorkspace(workspace.workspaceId);
-  const sheet = useRef<JobSheetHandle>(null);
+  const router = useRouter();
   const employer = workspace.role === 'EMPLOYER';
 
-  // An empty day opens the job sheet right here; a day with jobs opens the Day view, where another can be added.
+  // An empty day opens the editor for a single job on it; a day with jobs opens the Day view, where another can be
+  // added.
   const openDay = (day: IsoDate) => {
-    const action = dayActionFor(entryFor(range.data, membershipId, day));
-    if (!employer || action.kind === 'day') {
+    if (!employer || dayActionFor(entryFor(range.data, membershipId, day)).kind === 'day') {
       onOpenDay(day);
       return;
     }
-    sheet.current?.open({
-      membershipId,
-      memberName: name,
-      date: day,
-      job: null,
-      dayHours: action.dayHours,
-      yesterdayHours: entryFor(range.data, membershipId, addDays(day, -1))?.hours ?? null,
-      rounding: settings.data?.rounding ?? workspace.rounding,
-      defaultDayHours: settings.data?.defaultDayHours ?? workspace.defaultDayHours,
-    });
+    router.push(jobEditorHref({ membershipId, date: day, mode: 'single' }));
   };
 
   return (
@@ -264,7 +284,6 @@ function PersonWeek({
           showName={false}
         />
       </Screen>
-      {employer ? <JobSheet ref={sheet} workspace={workspace} /> : null}
     </>
   );
 }

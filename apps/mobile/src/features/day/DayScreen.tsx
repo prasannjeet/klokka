@@ -28,7 +28,7 @@ import { formatDuration } from '@/lib/duration';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Button, Card, EmptyState, Header, Icon, Pill, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
-import { JobSheet, type JobSheetHandle } from '@/features/jobs/JobSheet';
+import { jobEditorHref } from '@/features/jobs/jobEditorHref';
 import { JobCard } from '@/features/jobs/JobCard';
 import { FlagSheet, type FlagSheetHandle } from '@/features/flags/FlagSheet';
 import { todayIn, toIsoDate } from '@/lib/dates';
@@ -63,12 +63,13 @@ export interface DayPageProps {
 
 // One day (CHQ-119, CHQ-156): the total, then one card per job with its place, time and note, and the full
 // history of who changed the day. Any day opens, past or future; the employer adds and edits jobs through the
-// job sheet unless the month is closed, the employee may flag the day.
+// job editor page unless the month is closed (CHQ-185), the employee may flag the day.
 export function DayPage({ membershipId, date, workspace, header, onStep }: DayPageProps) {
   const t = useT();
   const locale = useLocale();
   const theme = useTheme();
   const s = useThemedStyles(styles);
+  const router = useRouter();
   const employer = workspace.role === 'EMPLOYER';
   const entries = useEntries(workspace.workspaceId, date, date, membershipId);
   const entry = entries.data?.[0] ?? null;
@@ -77,7 +78,6 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
   // An empty day has no entry to say whether its month is closed, so the month says it.
   const month = useMemberMonth(workspace.workspaceId, membershipId, monthOf(date));
   const member = useMember(workspace.workspaceId, membershipId, undefined, employer);
-  const addSheet = useRef<JobSheetHandle>(null);
   const flagSheet = useRef<FlagSheetHandle>(null);
   const locked = entry?.locked ?? month.data?.locked ?? false;
   const name = entry?.memberName ?? member.data?.displayName ?? month.data?.name ?? '';
@@ -89,16 +89,13 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
     settings.data?.showPay && entry?.earnings != null && entry.hours > 0
       ? entry.earnings / entry.hours
       : null;
-  const openSheet = (job: Entry['jobs'][number] | null) =>
-    addSheet.current?.open({
-      membershipId,
-      memberName: name,
-      date,
-      job,
-      dayHours: entry?.hours ?? 0,
-      rounding: settings.data?.rounding ?? workspace.rounding,
-      defaultDayHours: settings.data?.defaultDayHours ?? workspace.defaultDayHours,
-    });
+  // Add is a single job on this day; Edit opens that job (CHQ-185).
+  const openEditor = (jobId: string | null) =>
+    router.push(
+      jobId
+        ? jobEditorHref({ membershipId, date, mode: 'edit', jobId })
+        : jobEditorHref({ membershipId, date, mode: 'single' }),
+    );
 
   return (
     <>
@@ -167,7 +164,7 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
               <Button
                 label={t('jobs.addJobFor', { name: firstName })}
                 icon="plus"
-                onPress={() => openSheet(null)}
+                onPress={() => openEditor(null)}
                 testID="day-add-job"
               />
             ) : null}
@@ -213,7 +210,7 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
                   key={job.id}
                   job={job}
                   workspaceId={workspace.workspaceId}
-                  onEdit={employer && !locked ? () => openSheet(job) : undefined}
+                  onEdit={employer && !locked ? () => openEditor(job.id) : undefined}
                 />
               ))}
             </View>
@@ -222,7 +219,7 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
                 label={t('jobs.addAnother')}
                 variant="outline"
                 icon="plus"
-                onPress={() => openSheet(null)}
+                onPress={() => openEditor(null)}
                 testID="day-add-another"
               />
             ) : null}
@@ -251,9 +248,7 @@ export function DayPage({ membershipId, date, workspace, header, onStep }: DayPa
           </>
         )}
       </Screen>
-      {employer ? (
-        <JobSheet ref={addSheet} workspace={workspace} />
-      ) : (
+      {employer ? null : (
         <FlagSheet
           ref={flagSheet}
           workspaceId={workspace.workspaceId}

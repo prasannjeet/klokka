@@ -11,7 +11,10 @@ import { dateOf } from './time';
 export const keys = {
   workspace: (id: string) => ['workspace', id] as const,
   members: (id: string, month: IsoMonth) => ['members', id, month] as const,
-  entries: (id: string, from: IsoDate, to: IsoDate) => ['entries', id, from, to] as const,
+  entries: (id: string, from: IsoDate, to: IsoDate, membershipId?: string) =>
+    membershipId ? (['entries', id, from, to, membershipId] as const) : (['entries', id, from, to] as const),
+  member: (id: string, membershipId: string) => ['member', id, membershipId] as const,
+  jobScopeCounts: (id: string, jobId: string) => ['job-scope-counts', id, jobId] as const,
   month: (id: string, month: IsoMonth) => ['month', id, month] as const,
   monthSummary: (id: string, month: IsoMonth) => ['month-summary', id, month] as const,
   memberMonth: (id: string, membershipId: string, month: IsoMonth) =>
@@ -36,6 +39,7 @@ const FIGURES = new Set([
   'members',
   'flags',
   'history',
+  'job-scope-counts',
 ]);
 
 // After any write that moves hours: every figure of the workspace is refetched (D9, the API owns them).
@@ -60,10 +64,33 @@ export function useMembers(workspaceId: string, month: IsoMonth) {
   });
 }
 
-export function useEntries(workspaceId: string, from: IsoDate, to: IsoDate) {
+// `membershipId` narrows the range to one person (the job editor's day and the day before).
+export function useEntries(workspaceId: string, from: IsoDate, to: IsoDate, membershipId?: string) {
   return useQuery({
-    queryKey: keys.entries(workspaceId, from, to),
-    queryFn: () => api.entries.listEntries({ workspaceId, from: dateOf(from), to: dateOf(to) }),
+    queryKey: keys.entries(workspaceId, from, to, membershipId),
+    queryFn: () =>
+      api.entries.listEntries({
+        workspaceId,
+        from: dateOf(from),
+        to: dateOf(to),
+        ...(membershipId ? { membershipId } : {}),
+      }),
+  });
+}
+
+export function useMember(workspaceId: string, membershipId: string) {
+  return useQuery({
+    queryKey: keys.member(workspaceId, membershipId),
+    queryFn: () => api.members.getMember({ workspaceId, membershipId }),
+  });
+}
+
+// How many jobs each scope of a series edit would touch (CHQ-187). Always fresh: the series may have changed since.
+export function useJobScopeCounts(workspaceId: string, jobId: string) {
+  return useQuery({
+    queryKey: keys.jobScopeCounts(workspaceId, jobId),
+    queryFn: () => api.jobs.getJobScopeCounts({ workspaceId, jobId }),
+    staleTime: 0,
   });
 }
 

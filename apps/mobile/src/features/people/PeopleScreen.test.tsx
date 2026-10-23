@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { fireEvent, screen } from '@testing-library/react-native';
 import { PeopleScreen } from './PeopleScreen';
 import { fakeApi, renderApp } from '@/testing/render';
 import {
@@ -20,8 +20,6 @@ function peopleApi() {
     listMembers: membersFixture,
     listEntries: entriesFixture,
     listFlags: [flagFixture],
-    createJob: (args: { jobWrite: { hours: number } }) =>
-      entryFixture('mem-sam', '2026-09-25', args.jobWrite.hours),
   });
 }
 
@@ -64,79 +62,31 @@ describe('PeopleScreen (employer)', () => {
     expect(screen.queryByText(/0 people/)).toBeNull();
   });
 
-  it('opens the job sheet from the plus, a chip and the minutes wheel set the time, save creates a job', async () => {
-    const api = peopleApi();
-    await renderApp(<PeopleScreen />, { api });
-    await screen.findByText('Sam');
-    await fireEvent.press(screen.getByTestId('add-mem-sam'));
-    expect(await screen.findByText('New job for Sam Ali')).toBeTruthy();
-    expect(screen.getByText('Full day, 7 h 30 min')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('chip-4'));
-    expect(screen.getByText('Save job, 4 h')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
-    expect(screen.getByText('Save job, 4 h 30 min')).toBeTruthy();
-    expect(screen.getByText('Saved as 4.5 h')).toBeTruthy();
-    expect(hapticCalls.some((c) => c.includes('segment-tick') || c === 'selection')).toBe(true);
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    const call = api.calls.find((c) => c.op === 'createJob')?.args[0] as {
-      membershipId: string;
-      jobWrite: { hours: number; startTime: string | null };
-    };
-    expect(call.membershipId).toBe('mem-sam');
-    expect(call.jobWrite).toEqual({ hours: 4.5, startTime: null, note: null });
-  });
-
-  it('offers only the minutes the rounding allows, and 24 h has no minutes', async () => {
-    const api = peopleApi();
-    await renderApp(<PeopleScreen />, { api });
-    await screen.findByText('Sam');
-    await fireEvent.press(screen.getByTestId('add-mem-sam'));
-    await screen.findByText('New job for Sam Ali');
-    expect(screen.getByText('Choose the time first')).toBeTruthy();
-    // Half-hour rounding: the minutes wheel is 00 and 30, nothing in between.
-    expect(screen.queryByTestId('wheel-minutes-15')).toBeNull();
-    await fireEvent.press(screen.getByTestId('wheel-hours-23'));
-    await fireEvent.press(screen.getByTestId('wheel-minutes-30'));
-    expect(screen.getByText('Save job, 23 h 30 min')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-hours-24'));
-    expect(screen.queryByTestId('wheel-minutes-30')).toBeNull();
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    const call = api.calls.find((c) => c.op === 'createJob')?.args[0] as { jobWrite: { hours: number } };
-    expect(call.jobWrite.hours).toBe(24);
-  });
-
-  it('the plus always adds a new job, also on a day that already has one or several', async () => {
+  it('the plus opens New job for the person on today, also on a day that already has jobs (CHQ-185)', async () => {
     const api = fakeApi({
       getMe: employerMeFixture,
       getWorkspace: workspaceFixture,
       listMembers: membersFixture,
       listEntries: [
-        entryFixture('mem-maria', '2026-09-25', 4),
         entryFixture('mem-jonas', '2026-09-25', 8, {
           jobs: [jobFixture('job-a', 5), jobFixture('job-b', 3)],
         }),
       ],
       listFlags: [],
-      createJob: () => entryFixture('mem-maria', '2026-09-25', 9),
     });
     await renderApp(<PeopleScreen />, { api });
     await screen.findByText('Jonas');
     await fireEvent.press(screen.getByTestId('add-mem-jonas'));
-    expect(await screen.findByText('New job for Jonas Berg')).toBeTruthy();
-    expect(routerState.pushes).toEqual([]);
-    await fireEvent.press(screen.getByTestId('add-mem-maria'));
-    expect(await screen.findByText('New job for Maria Lind')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('wheel-hours-5'));
-    await fireEvent.press(screen.getByTestId('save-job'));
-    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
-    expect(api.calls.some((c) => c.op === 'updateJob')).toBe(false);
-    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
-      workspaceId: 'ws-cafe',
-      membershipId: 'mem-maria',
-      jobWrite: { hours: 5 },
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-jonas', date: '2026-09-25', mode: 'full' },
     });
+    await fireEvent.press(screen.getByTestId('add-mem-sam'));
+    expect(routerState.pushes.at(-1)).toEqual({
+      pathname: '/job',
+      params: { membershipId: 'mem-sam', date: '2026-09-25', mode: 'full' },
+    });
+    expect(hapticCalls.length).toBeGreaterThan(0);
   });
 
   it('opens a person on their week and the plus in the header to invite', async () => {
