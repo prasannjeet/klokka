@@ -39,10 +39,11 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `listEntries` | `GET /workspaces/{workspaceId}/entries?from&to&membershipId` | member (employees: own only) | week grid, mobile Week and Home cards |
 | `upsertEntry` | `PUT /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | week grid single cell (a day with 2+ jobs answers `409 ENTRY_HAS_JOBS`) |
 | `deleteEntry` | `DELETE /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | clear a day |
-| `previewJobRecurrence` | `POST /workspaces/{workspaceId}/jobs/recurrence-preview` | employer | recurring job editor: first dates, count, last date and finite end |
-| `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job sheet and dialog, any day (CHQ-156) |
-| `updateJob` | `PUT /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog |
-| `deleteJob` | `DELETE /workspaces/{workspaceId}/jobs/{jobId}` | employer | job sheet and dialog "Remove" |
+| `previewJobRecurrence` | `POST /workspaces/{workspaceId}/jobs/recurrence-preview` | employer | job editor's Repeat step: first four dates, count, last date and end (planned-through date for no end date); a schedule change sends `fromDate` |
+| `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job editor page: a day's plus (single job) and New job (date and repeat), any day (CHQ-156, CHQ-185) |
+| `updateJob` | `PUT /workspaces/{workspaceId}/jobs/{jobId}?scope=` | employer | job editor page Save; a series edit goes through the scope step (ONLY_THIS, THIS_AND_FUTURE, ALL), a schedule change is THIS_AND_FUTURE only (CHQ-187) |
+| `deleteJob` | `DELETE /workspaces/{workspaceId}/jobs/{jobId}?scope=` | employer | job editor page "Remove", with the same scope step; ALL asks a second time (CHQ-187) |
+| `getJobScopeCounts` | `GET /workspaces/{workspaceId}/jobs/{jobId}/scope-counts` | employer | scope step: how many jobs each scope reaches and how many sit in closed months (CHQ-187) |
 | `autocompletePlaces` | `GET /workspaces/{workspaceId}/places/autocomplete?input&session` | employer | location search (Google Places through the API) |
 | `getPlace` | `GET /workspaces/{workspaceId}/places/{placeId}?session` | employer | picking a search result |
 | `reverseGeocode` | `GET /workspaces/{workspaceId}/places/reverse?latitude&longitude` | employer | "Use where I am now" |
@@ -99,7 +100,8 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
 - Operator routes accept the `platform-admin` role from the `roles` claim or the `operator` scope from `scope`.
 - Batch problems name the cells: `errors[].field` is `items[<index>].<field>` for `400 VALIDATION`, and a
   `409 MONTH_LOCKED` on `POST entries/batch` lists every item in a closed month as `items[<index>].workDate`.
-- Push: every notification also goes out as an Expo message with `channelId` `hours`, `flags` or `workspace` and
+- Push: every notification also goes out as an Expo message with `channelId` `hours`, `flags`, `workspace`,
+  `reminders` or `jobs` (JOB_CHANGED, "Job updates", CHQ-188) and
   `data.url` set to one of the app paths listed on `registerPushToken`; the phone follows only those shapes.
 - `WorkspaceInsights.nothingLoggedDays` is a list of `{ date }` objects (bare `format: date` strings in an array are
   left unconverted by the typescript-fetch runtime).
@@ -124,18 +126,57 @@ them with the `errors.*` keys of the catalogue; `detail` is for developers.
 - Removing or renaming anything is a major bump; making a required field optional is minor; making an optional
   field required is breaking.
 
-## Recurring jobs (CHQ-159)
+## Recurring jobs (CHQ-159, reworked in CHQ-186 to CHQ-188)
 
-`JobWrite.recurrence` on creation requires a retry-safe `requestId` and exactly one finite end: `endDate`
-(inclusive) or `periodCount` (calendar weeks/months from the first date, regardless of repeat interval).
-Weekly schedules choose weekdays and an interval of 1 to 12 weeks. Monthly schedules repeat the original
-day, clamping shorter months without drift, or the last day; intervals are 1 to 12 months. The API previews
-the first four `{ date }` objects and materializes all occurrences atomically, up to 500 jobs/10 years by default.
-Starts must be today or later in the workspace time zone. Employees read them through the normal entries
-and month operations. Future hours remain planned in the existing read models.
+**Rules.** `JobWrite.recurrence` is WEEKLY (one or more weekdays, every 1 to 12 weeks) or MONTHLY (every 1 to
+12 months), either on a day of the month (`monthlyBy` DAY_OF_MONTH, `dayOfMonth` 1 to 31, 31 meaning the last
+day, clamped in shorter months without drift) or on the nth weekday (`monthlyBy` WEEKDAY_OF_MONTH,
+`weekOfMonth` FIRST to FOURTH or LAST plus `weekday`, e.g. the third Wednesday). Older clients that send
+`lastDayOfMonth: true` are read as `dayOfMonth: 31`, and responses still set `lastDayOfMonth` for them. An
+interval counts from the series' first date (its week's Monday, or its month). Creating a series needs a
+retry-safe `requestId`; it starts today or later in the workspace time zone, and the preview and the series come
+from the same code (`RecurrencePattern`), up to 500 jobs and 10 years by default.
 
-`updateJob` and `deleteJob` accept `scope=ONLY_THIS` (default) or `THIS_AND_FUTURE`. Future scope requires
-a recurring job dated today or later. Editing replaces job details across remaining occurrences, keeping
-the schedule; stopping deletes that range and marks the series stopped. Earlier and unrelated jobs remain.
-A locked month or invalid daily total rolls back the whole change. Schedule metadata describes the original
-finite series, including when individual occurrences have been removed.
+**Ends.** At most one of `endDate` (inclusive) or `periodCount` (calendar weeks or months from the first date,
+regardless of interval). With neither, the series is open-ended: a rolling window, jobs materialised
+`klokka.recurrence.horizon-months` (12) ahead, and the nightly `RecurrenceExtender` tops every open, running
+series up to the horizon with the series' template values (hours, start, note, place, kept current by range
+edits), skipping closed months and sending no notifications. `job_recurrence.end_date` then means "planned
+through", and the preview's `endDate` is that date. Employees read jobs through the normal entries and month
+operations; future hours count as planned in the read models. A day total over 24 hours rolls back the whole
+write.
+
+**Scopes.** `updateJob` and `deleteJob` take `scope`: `ONLY_THIS` (default), `THIS_AND_FUTURE` (from the
+selected job on, past jobs included) or `ALL` (the whole series, past included). A schedule change splits a
+series into parts that point back with `previous_id`; THIS_AND_FUTURE also reaches the later parts and ALL walks
+the chain back to the first part and forward to the current one (bounded by `klokka.recurrence.max-parts`, 100;
+a longer chain is a data error). Field changes on a range also become the current part's template. Range scopes
+skip jobs in closed months and count them (`getJobScopeCounts` shows `jobs` and `skippedClosed` per scope); a range
+that is entirely closed answers `409 MONTH_LOCKED`, as ONLY_THIS on a job in a closed month does. Removing with
+THIS_AND_FUTURE or ALL removes the writable jobs and stops the parts it covers.
+
+**Schedule change.** A body with `recurrence` on `updateJob` changes the schedule: THIS_AND_FUTURE only, with a
+`requestId`, from `from` = the later of the selected job's date and today. Past jobs never move. The new rule is
+anchored at the selected job's date (an on-period of the old series), so "every 2 weeks" or "every 2 months"
+keeps its rhythm when the change is made from a past job; only the dates on or after `from` are written, a
+`periodCount` and the end check count from `from`, and the stored first date is the first planned date (on the
+same rhythm, so the extender plans the same dates). The old part's jobs from `from` on are removed (closed months
+kept). If live jobs remain before `from`, the series splits: the old part ends the day before and is stopped, and
+a new part with `previous_id` starts; otherwise the part is rewritten in place. A stopped series (ended by an
+earlier change or a removal) answers `409 CONFLICT`; the clients only offer a schedule change on a running one.
+The clients preview a change with `firstDate` = the selected job's date and `fromDate` = `from`, so the preview
+lists exactly the dates the change writes.
+
+**Retries.** The series row is locked first, so a retry that waited finds the first attempt's row by
+`requestId` and answers the same day without writing; the same key with another body is `400 VALIDATION` on
+`requestId`. Accepted gap: an in-place rewrite replaces the series' creation `requestId` with the change's, so a
+creation retry that arrives after a schedule change on the same series is no longer recognised (a narrow window,
+since the creation answered long before).
+
+**Notifications.** Every job write (add, edit, remove, series creation, schedule change, stop), past dates
+included, produces `JOB_CHANGED` instead of `HOURS_CHANGED`, coalesced per sitting like hours and keyed per job:
+added then removed is no news, added then changed stays added. Titles count jobs; on a date where one job was
+removed and another added (as a schedule change leaves it) the pair reads as one changed job. One date links to
+that day, several to the month of the first. Day-level writes (the week grid) keep `HOURS_CHANGED`; the extender
+never notifies. The `jobUpdates` preference (default on) gates the push only; the row still appears in the
+notification centre.

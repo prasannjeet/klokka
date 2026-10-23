@@ -199,3 +199,23 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
 - Layout animations may fade, never move: a translating entering animation (Reanimated `FadeInUp`/`FadeInDown`)
   left rows and chips 25 px off their slot on a Pixel 9 Pro XL, so labels and cards overlapped on every screen.
   `apps/mobile/src/ui/motion.test.ts` fails on any moving layout animation.
+
+## D21. Jobs: an editor page, open-ended series, schedule changes that split (owner, 2026-10-23, CHQ-185 to CHQ-188)
+
+- **The job editor is a page** on both clients (phone route `app/job.tsx`, web `/w/[slug]/jobs/new` and
+  `/w/[slug]/jobs/[jobId]`), not a sheet or dialog. A day's plus adds a single job (no date or repeat row); New job
+  has a date and a repeat. Leaving with unsaved changes asks "Discard changes?" on every way out; an untouched
+  form leaves silently.
+- **No end date means a rolling window.** An open-ended series has its jobs materialised 12 months ahead
+  (`klokka.recurrence.horizon-months`), topped up nightly by the `RecurrenceExtender` from the series' template
+  values. Materialising keeps every read model (month totals, insights, the CSV) working unchanged on real rows.
+- **Schedule changes never move past jobs.** A new rule applies from the later of the selected job's date and
+  today, anchored at the selected job's date so an interval keeps its rhythm. A series with live jobs before that
+  date splits (the old part ends and is stopped, the new one points back with `previous_id`); otherwise it is
+  rewritten in place. Only a running series can change schedule. "All jobs in the series" covers every part.
+- **Closed months are skipped**, not refused: a range edit or removal leaves jobs in closed months as they are
+  and says how many (`getJobScopeCounts`); only a range that is entirely closed is refused (`MONTH_LOCKED`).
+- **`JOB_CHANGED` replaces `HOURS_CHANGED` for job writes**, past dates included, coalesced per sitting and keyed
+  per job; the week grid's day-level writes keep `HOURS_CHANGED`. Its push goes to the Android channel `jobs`
+  ("Job updates") and is gated by the `jobUpdates` preference (default on); the notification centre row is
+  always written.
