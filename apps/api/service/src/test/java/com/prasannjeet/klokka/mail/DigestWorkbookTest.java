@@ -85,11 +85,27 @@ class DigestWorkbookTest {
             assertThat(hours.get(1).getCellText(0)).isEqualTo("Anna Berg");
             assertThat(numbers(hours.get(1), 1, 9)).containsExactly("4", "0", "2.5", "0", "0", "0", "0", "6.5");
             assertThat(number(hours.get(1), 9)).isEqualTo("975");
-            // Maria has no rate: no pay for her, the team row sums what there is.
+            // Maria has no rate: no pay for her, and the team's pay stays blank rather than a sum that leaves her out.
             assertThat(hours.get(2).getCellText(9)).isEmpty();
             assertThat(hours.get(3).getCellText(0)).isEqualTo("Whole team");
             assertThat(numbers(hours.get(3), 1, 9)).containsExactly("8.5", "0", "2.5", "0", "0", "0", "0", "11");
-            assertThat(number(hours.get(3), 9)).isEqualTo("975");
+            assertThat(hours.get(3).getCellText(9)).isEmpty();
+        }
+    }
+
+    @Test
+    void theTeamPayIsTheSumWhenEveryoneWithHoursHasARate() throws IOException {
+        DigestWeek week = new DigestWeek(workspace(true), true, MONDAY, List.of(
+                new WeekJob(ANNA, "Anna Berg", MONDAY, null, new BigDecimal("4.00"), null, null, null, false),
+                new WeekJob(MARIA, "Maria Lind", MONDAY.plusDays(1), null, new BigDecimal("2.00"), null, null, null, false)),
+                List.of(new DigestWeek.Member(ANNA, "Anna Berg", new BigDecimal("150.00")), new DigestWeek.Member(MARIA, "Maria Lind", new BigDecimal("200.00"))),
+                true);
+        try (ReadableWorkbook workbook = read(week, Language.EN)) {
+            List<Row> hours = rows(workbook, "Hours");
+            assertThat(number(hours.get(1), 9)).isEqualTo("600");
+            assertThat(number(hours.get(2), 9)).isEqualTo("400");
+            assertThat(hours.get(3).getCellText(0)).isEqualTo("Whole team");
+            assertThat(number(hours.get(3), 9)).isEqualTo("1000");
         }
     }
 

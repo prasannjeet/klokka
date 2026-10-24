@@ -228,13 +228,16 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
 - **An Excel workbook per workspace** with last week's jobs and hours per day, an employer and an employee version
   (`klokka-<workspace slug>-<YYYY>-W<ww>.xlsx`, built with fastexcel, no Apache POI). Pay appears under the same
   rule as the app (workspace shows pay; for an employee, their rate is set). A workspace with nothing last week
-  gets no file. The email lists at most `klokka.digest.max-jobs-in-email` jobs and points to the file for the rest.
+  gets no file. The email lists at most `klokka.digest.max-jobs-in-email` jobs and
+  `klokka.digest.max-people-in-email` team table rows and points to the file for the rest.
 - **The quota is daily, over a rolling 24 hours.** Migadu limits a mailbox to about 100 emails a day, not a month,
   so `KLOKKA_MAIL_DAILY_QUOTA` (100) replaced `KLOKKA_MAIL_MONTHLY_QUOTA`. The count is non-failed `email_send` rows
   sent in the last 24 hours. The operator console's meter shows that count against the daily quota.
 - **A reserve keeps room for people waiting on an email.** The digest sends only while `KLOKKA_DIGEST_RESERVE` (20)
   of the daily quota stays free; invitations still use the whole quota. When a sweep reaches the reserve it stops
-  and a later sweep carries on, one transaction per user, every user walked in pages.
+  and a later sweep carries on, one transaction per user. A sweep reads one bounded list of candidates (digest on,
+  an active membership, no digest in the last six days), the longest-waiting first, so a held user is first next
+  time. A failed send records nothing and stops the sweep; the next one retries inside the window.
 - **A due window, never a stale digest.** Last week's digest is due from Monday 07:00 in any of the user's
   workspaces until the end of Monday plus `KLOKKA_DIGEST_CATCH_UP_DAYS` (2, so Wednesday). A digest held back for
   budget goes out later inside the window; past it, it is dropped. With 100 a day and a reserve of 20 that is

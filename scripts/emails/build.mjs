@@ -126,14 +126,17 @@ function digestTemplate() {
 <tr>{#for d in w.days}<td ${cell.label}>{d.label}</td>{/for}</tr>
 <tr>{#for d in w.days}{#if d.hot}<td ${cell.hot}>{d.value}</td>{#else if d.off}<td ${cell.off}>{d.value}</td>{#else}<td ${cell.hours}>{d.value}</td>{/if}{/for}</tr>
 </table>`;
-  // Employer only: one row per person, Monday to Sunday and the week; a day without hours is a muted dash. The table
-  // scrolls inside its own wrapper on a narrow screen instead of squeezing the names.
-  const team = `{#if w.team}
+  // Employer only: one row per person, Monday to Sunday and the week; a day without hours is a muted dash. Column
+  // widths sit on the header cells (the fixed layout reads them from the first row): the name 28 percent and
+  // wrapping, seven days and the total sharing the rest, so the table fits a 360 px phone. Past the email's row cap
+  // a line says how many more people only the workbook lists.
+  const team = `{#if w.team || w.morePeopleLine}
 <p ${digest.heading}>{m.teamTitle}</p>
-<div ${digest.scroll}><table ${digest.table}>
-<tr><th ${digest.thName}>&nbsp;</th>{#for d in w.days}<th ${digest.th}>{d.label}</th>{/for}<th ${digest.th}>{m.totalLabel}</th></tr>
+{#if w.team}<table ${digest.table}>
+<tr><th width="28%" ${digest.thName}>&nbsp;</th>{#for d in w.days}<th width="8.5%" ${digest.th}>{d.label}</th>{/for}<th width="12.5%" ${digest.thTotal}>{m.totalLabel}</th></tr>
 {#for r in w.team}<tr><td ${digest.name}>{r.name}</td>{#for c in r.days}{#if c.zero}<td ${digest.zero}>{c.value}</td>{#else}<td ${digest.value}>{c.value}</td>{/if}{/for}<td ${digest.total}>{r.total}</td></tr>
-{/for}</table></div>
+{/for}</table>{/if}
+{#if w.morePeopleLine}${small(q('w.morePeopleLine'))}{/if}
 {/if}`;
   // Jobs per person per day: "Mon 20 Oct", then "09:00  Café Nord  4 h" lines (an employee's own list has no name).
   const jobs = `{#if w.people}

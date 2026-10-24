@@ -58,7 +58,7 @@ export const sv = {
         'Jobb: en dags jobb med timmar, starttid, anteckning och en plats som arbetsgivaren väljer (namn, adress och koordinater). Platsen syns för arbetsgivaren och för den anställda jobbet gäller.',
         'Notiser: en token för pushnotiser till varje telefon där du är inloggad i Android-appen.',
         'Telefonens position, bara när arbetsgivaren trycker på "Använd där jag är nu" på ett jobb, i Android-appen eller i webbappen. Den läses en gång medan appen är öppen, aldrig i bakgrunden, och sparas inte som din position: bara den plats som blir jobbets sparas. Anställdas position samlas aldrig in.',
-        'E-post: adresser för inbjudningar och för veckosammanfattningar som du själv har valt att få.',
+        'E-post: adresser för inbjudningar och för veckosammanfattningen, som går att stänga av under Inställningar.',
       ],
     },
     {
@@ -161,7 +161,7 @@ export const en: PageCopyOf<typeof sv> = {
         "Jobs: a day's jobs with hours, start time, note and a place the employer chooses (name, address and coordinates). The place is visible to the employer and to the employee the job belongs to.",
         'Notifications: a push notification token for each phone where you are signed in to the Android app.',
         "The phone's position, only when the employer taps \"Use where I am now\" on a job, in the Android app or the web app. It is read once while the app is open, never in the background, and is not stored as your position: only the place that becomes the job's is saved. Employees' positions are never collected.",
-        'Email: addresses for invitations and for weekly digests you chose to receive.',
+        'Email: addresses for invitations and for the weekly digest, which you can turn off in Settings.',
       ],
     },
     {

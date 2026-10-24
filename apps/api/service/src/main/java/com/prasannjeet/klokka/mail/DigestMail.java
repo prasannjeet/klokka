@@ -10,13 +10,14 @@ public record DigestMail(String lang, String subject, String title1, String titl
         List<Workspace> workspaces, String action, String webUrl, String unsubscribe, String footer, String site,
         String siteHost, String teamTitle, String jobsTitle, String totalLabel) {
 
-    // `team` is the employer's table (empty for an employee), `people` the job lists (a null name for an employee's
+    // `team` is the employer's table (empty for an employee), `morePeopleLine` says how many people only the workbook
+    // lists (null unless the email's team row cap was reached), `people` the job lists (a null name for an employee's
     // own), `fileLine` names the attached workbook (null when the workspace had nothing), `moreLine` says how many
     // jobs only the workbook lists (null unless the email's job cap was reached).
     @TemplateData
     public record Workspace(String emoji, String name, String range, List<Day> days, String hoursLabel, String hours,
-            String monthLabel, String monthHours, List<TeamRow> team, List<PersonJobs> people, String fileLine,
-            String moreLine) {}
+            String monthLabel, String monthHours, List<TeamRow> team, String morePeopleLine, List<PersonJobs> people,
+            String fileLine, String moreLine) {}
 
     // One cell of the week grid: `hot` is the week's busiest day, `off` a day without hours.
     @TemplateData

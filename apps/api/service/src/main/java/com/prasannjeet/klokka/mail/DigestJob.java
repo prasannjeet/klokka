@@ -4,6 +4,7 @@ import static com.prasannjeet.klokka.i18n.Formats.hours;
 
 import com.prasannjeet.klokka.config.KlokkaConfig;
 import com.prasannjeet.klokka.contract.model.Language;
+import com.prasannjeet.klokka.contract.model.MemberStatus;
 import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import com.prasannjeet.klokka.i18n.Catalogue;
@@ -28,6 +29,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Clock;
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -47,15 +49,21 @@ import org.jboss.logging.Logger;
 
 // The weekly digest (CHQ-133, CHQ-189): one email per user and ISO week, on by default, with one Excel workbook per
 // workspace that had anything last week. Last week's digest is due from Monday at the configured local hour in any of
-// the user's workspaces until the end of Monday plus the catch-up days; past that it is dropped. Every user is walked
-// in keyset pages, one transaction each, and the run stops when the daily quota's digest share is used up (a held
-// digest goes out on a later sweep inside the window). digest_run's primary key makes a repeat sweep a no-op; a user
-// whose week had nothing to report is recorded without an email so the quota is spent only on real content.
+// the user's active workspaces until the end of Monday plus the catch-up days; past that it is dropped. A sweep reads
+// one bounded list of candidates (the longest-waiting first) and handles each in its own transaction; it stops when
+// the daily quota's digest share is used up or a send fails (a held digest goes out on a later sweep inside the
+// window). digest_run's primary key makes a repeat sweep a no-op; a user whose week had nothing to report is recorded
+// without an email so the quota is spent only on real content.
 @ApplicationScoped
 public class DigestJob {
 
     private static final Logger LOG = Logger.getLogger(DigestJob.class);
     private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm");
+    // Not a tunable but a property of a weekly schedule: a user with a digest_run younger than this is left out of the
+    // candidates (digest_run's primary key, not this, is what prevents a second email). Six days keeps this week's
+    // handled users out for the default window, and a user handled even at the very end of a window is a candidate
+    // again a day before the next window closes, since windows end seven days apart.
+    private static final Duration DONE_THIS_WEEK = Duration.ofDays(6);
 
     @Inject
     EmailSendRepository ledger;
@@ -88,59 +96,60 @@ public class DigestJob {
     @Location("digest.html")
     Template digest;
 
-    public enum Outcome { NOT_DUE, NOTHING, SENT, NO_BUDGET, FAILED }
+    // FAILED: the mail server refused the email (the sweep stops); ERROR: this user's digest threw (the sweep goes on).
+    public enum Outcome { NOT_DUE, NOTHING, SENT, NO_BUDGET, FAILED, ERROR }
 
-    public record Result(int considered, int sent, int skipped, boolean budgetOut) {}
+    public record Result(int considered, int sent, int skipped, boolean budgetOut, boolean mailFailed) {}
 
     @Scheduled(every = "15m", identity = "weekly-digest", concurrentExecution = Scheduled.ConcurrentExecution.SKIP)
     void scheduledRun() {
         Result result = run();
-        if (result.sent() > 0 || result.budgetOut()) {
+        if (result.sent() > 0 || result.budgetOut() || result.mailFailed()) {
             LOG.infof("digest: %d considered, %d sent, %d skipped", result.considered(), result.sent(), result.skipped());
         }
     }
 
     public Result run() {
         Instant now = clock.instant();
-        int max = config.digest().maxUsersPerRun();
-        int considered = 0;
+        List<String> candidates = QuarkusTransaction.requiringNew()
+                .call(() -> ledger.digestCandidates(now.minus(DONE_THIS_WEEK), config.digest().maxUsersPerRun()));
         int sent = 0;
         int skipped = 0;
-        String after = null;
-        while (considered < max) {
-            int limit = Math.min(config.digest().batchSize(), max - considered);
-            String from = after;
-            List<String> page = QuarkusTransaction.requiringNew().call(() -> ledger.digestOptIns(from, limit));
-            for (String userId : page) {
-                considered++;
-                Outcome outcome;
-                try {
-                    outcome = QuarkusTransaction.requiringNew().call(() -> sendOne(userId, now));
-                } catch (RuntimeException e) {
-                    LOG.errorf(e, "digest for %s failed; continuing with the next user", userId);
-                    outcome = Outcome.FAILED;
-                }
-                if (outcome == Outcome.SENT) {
-                    sent++;
-                } else {
-                    skipped++;
-                }
-                if (outcome == Outcome.NO_BUDGET) {
-                    LOG.infof("digest: the daily email quota's digest share is used up; %s and the users after it wait for a later sweep", userId);
-                    return new Result(considered, sent, skipped, true);
-                }
+        for (int i = 0; i < candidates.size(); i++) {
+            String userId = candidates.get(i);
+            Outcome outcome;
+            try {
+                outcome = QuarkusTransaction.requiringNew().call(() -> sendOne(userId, now));
+            } catch (RuntimeException e) {
+                LOG.errorf(e, "digest for %s failed; continuing with the next user", userId);
+                outcome = Outcome.ERROR;
             }
-            if (page.size() < limit) break;
-            after = page.getLast();
+            if (outcome == Outcome.SENT) {
+                sent++;
+            } else {
+                skipped++;
+            }
+            int left = candidates.size() - i - 1;
+            if (outcome == Outcome.NO_BUDGET) {
+                LOG.infof("digest: the daily email quota's digest share is used up; %s and %d more candidate(s) wait for a later sweep", userId, left);
+                return new Result(i + 1, sent, skipped, true, false);
+            }
+            if (outcome == Outcome.FAILED) {
+                LOG.warnf("digest: the email to %s failed; the sweep stops and it and %d more candidate(s) wait for a later sweep", userId, left);
+                return new Result(i + 1, sent, skipped, false, true);
+            }
         }
-        return new Result(considered, sent, skipped, false);
+        return new Result(candidates.size(), sent, skipped, false, false);
     }
 
     Outcome sendOne(String userId, Instant now) {
         Optional<AppUserEntity> user = users.findUser(userId);
         Optional<UserPreferenceEntity> preferences = users.findPreferences(userId);
         if (user.isEmpty() || preferences.isEmpty() || user.get().email == null) return Outcome.NOT_DUE;
-        List<MeRepository.Membership> list = users.listMemberships(userId);
+        // Only active memberships count: a deactivated member (or a deleted account) gets no digest.
+        List<MeRepository.Membership> list = users.listMemberships(userId).stream()
+                .filter(m -> m.membership().status == MemberStatus.ACTIVE)
+                .toList();
         LocalDate lastWeekMonday = dueWeek(list, now);
         if (lastWeekMonday == null) return Outcome.NOT_DUE;
         String isoWeek = lastWeekMonday.get(IsoFields.WEEK_BASED_YEAR) + "-W" + String.format(Locale.ROOT, "%02d", lastWeekMonday.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR));
@@ -154,6 +163,7 @@ public class DigestJob {
         List<DigestMail.Workspace> blocks = new ArrayList<>();
         List<DigestWeek> withRows = new ArrayList<>();
         int jobLinesLeft = config.digest().maxJobsInEmail();
+        int teamRowsLeft = config.digest().maxPeopleInEmail();
         // The subject and headline name the first workspace that had hours, so they never read "0 h".
         String headlineWorkspace = null;
         BigDecimal headlineHours = null;
@@ -172,12 +182,19 @@ public class DigestJob {
 
             lines.append(catalogue.t(lang, Text.EMAIL_DIGEST_WORKSPACE.key(), Map.of("emoji", ws.emoji, "workspace", ws.name))).append('\n');
             lines.append(catalogue.t(lang, (employer ? Text.DIGEST_TEAM_HOURS : Text.DIGEST_YOUR_HOURS).key(), Map.of("week", week, "hours", weekText))).append('\n');
-            lines.append(catalogue.t(lang, Text.DIGEST_MONTH_SO_FAR.key(), Map.of("month", Formats.month(month, lang), "hours", monthText))).append('\n');
+            lines.append(capitalized(catalogue.t(lang, Text.DIGEST_MONTH_SO_FAR.key(), Map.of("month", Formats.month(month, lang), "hours", monthText)), lang))
+                    .append('\n');
 
-            List<DigestMail.TeamRow> team = employer ? team(digestWeek, lang) : List.of();
-            if (!team.isEmpty()) {
+            // The team table lists at most the email's remaining rows; the workbook has everyone.
+            List<DigestMail.TeamRow> allRows = employer ? team(digestWeek, lang) : List.of();
+            List<DigestMail.TeamRow> team = allRows.subList(0, Math.min(allRows.size(), Math.max(teamRowsLeft, 0)));
+            teamRowsLeft -= team.size();
+            int hiddenPeople = allRows.size() - team.size();
+            String morePeopleLine = hiddenPeople > 0 ? catalogue.plural(lang, Text.DIGEST_MORE_PEOPLE_IN_FILE.key(), hiddenPeople, Map.of()) : null;
+            if (!allRows.isEmpty()) {
                 lines.append('\n').append(catalogue.t(lang, Text.DIGEST_TEAM_TITLE.key())).append('\n');
                 for (DigestMail.TeamRow row : team) lines.append(teamLine(row, digestWeek, lang)).append('\n');
+                if (morePeopleLine != null) lines.append(morePeopleLine).append('\n');
             }
             List<DigestMail.PersonJobs> people = new ArrayList<>();
             int shown = 0;
@@ -194,7 +211,7 @@ public class DigestJob {
                     }
                     String total = hours(digestWeek.total(member.membershipId()), lang, catalogue);
                     String name = employer ? member.name() : null;
-                    if (name != null) lines.append(name).append(" (").append(total).append(")\n");
+                    if (name != null) lines.append(catalogue.t(lang, Text.DIGEST_PERSON_LINE.key(), Map.of("name", name, "total", total))).append('\n');
                     for (Map.Entry<LocalDate, List<DigestMail.JobLine>> day : byDay.entrySet()) {
                         String label = capitalized(Formats.shortDate(day.getKey(), lang), lang);
                         days.add(new DigestMail.DayJobs(label, day.getValue()));
@@ -224,7 +241,7 @@ public class DigestJob {
                     catalogue.t(lang, (employer ? Text.DIGEST_TEAM_HOURS_LABEL : Text.DIGEST_YOUR_HOURS_LABEL).key(), Map.of("week", week)),
                     weekText,
                     capitalized(catalogue.t(lang, Text.DIGEST_MONTH_SO_FAR_LABEL.key(), Map.of("month", Formats.month(month, lang))), lang),
-                    monthText, team, people, fileLine, moreLine));
+                    monthText, List.copyOf(team), morePeopleLine, people, fileLine, moreLine));
             if (headlineWorkspace == null && weekHours.signum() > 0) {
                 headlineWorkspace = ws.name;
                 headlineHours = weekHours;
@@ -240,6 +257,8 @@ public class DigestJob {
             headlineHours = BigDecimal.ZERO;
         }
         if (!mail.digestBudgetLeft()) return Outcome.NO_BUDGET;
+        // Recorded before the send so a concurrent sweep waits on the row instead of sending twice; a failed send
+        // takes the row back out below.
         if (!ledger.recordDigestRun(userId, isoWeek, now)) return Outcome.NOT_DUE;
         // The workbooks are written only for an email that goes out.
         List<MailService.Attachment> attachments = withRows.stream()
@@ -264,8 +283,9 @@ public class DigestJob {
                 greeting, intro, blocks, catalogue.t(lang, Text.DIGEST_ACTION.key()), config.webBaseUrl().toString(), unsubscribe,
                 footer, site.toString().replaceAll("/+$", ""), site.getHost(), catalogue.t(lang, Text.DIGEST_TEAM_TITLE.key()),
                 catalogue.t(lang, Text.DIGEST_JOBS_TITLE.key()), catalogue.t(lang, Text.XLSX_TOTAL.key()))).render();
-        return mail.send(EmailSendRepository.KIND_DIGEST, user.get().email, subject, body, html, userId, attachments)
-                ? Outcome.SENT : Outcome.FAILED;
+        if (mail.send(EmailSendRepository.KIND_DIGEST, user.get().email, subject, body, html, userId, attachments)) return Outcome.SENT;
+        ledger.forgetDigestRun(userId, isoWeek);
+        return Outcome.FAILED;
     }
 
     // Last week's Monday when the digest is due in any of these workspaces: from Monday at the local hour until the
@@ -304,7 +324,8 @@ public class DigestJob {
         for (DigestWeek.Member member : week.members()) {
             List<DigestMail.TeamCell> cells = new ArrayList<>(7);
             for (BigDecimal v : week.hoursPerDay(member.membershipId()).values()) {
-                cells.add(v.signum() == 0 ? new DigestMail.TeamCell("–", true) : new DigestMail.TeamCell(Formats.number(v, lang), false));
+                cells.add(v.signum() == 0 ? new DigestMail.TeamCell(catalogue.t(lang, Text.DIGEST_NO_HOURS.key()), true)
+                        : new DigestMail.TeamCell(Formats.number(v, lang), false));
             }
             rows.add(new DigestMail.TeamRow(member.name(), cells, Formats.number(week.total(member.membershipId()), lang)));
         }
@@ -316,9 +337,11 @@ public class DigestJob {
         List<String> worked = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
             DigestMail.TeamCell cell = row.days().get(i);
-            if (!cell.zero()) worked.add(weekday(week.monday().plusDays(i), lang) + " " + cell.value());
+            if (!cell.zero()) worked.add(catalogue.t(lang, Text.DIGEST_TEAM_DAY.key(), Map.of("day", weekday(week.monday().plusDays(i), lang), "hours", cell.value())));
         }
-        return row.name() + ": " + String.join(", ", worked) + " (" + catalogue.t(lang, Text.HOURS_VALUE.key(), Map.of("hours", row.total())) + ")";
+        return catalogue.t(lang, Text.DIGEST_TEAM_LINE.key(), Map.of("name", row.name(),
+                "days", String.join(catalogue.t(lang, Text.DIGEST_DAY_SEPARATOR.key()), worked),
+                "total", catalogue.t(lang, Text.HOURS_VALUE.key(), Map.of("hours", row.total()))));
     }
 
     private DigestMail.JobLine jobLine(WeekJob job, Language lang) {

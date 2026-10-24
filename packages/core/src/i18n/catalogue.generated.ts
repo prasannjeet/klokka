@@ -123,17 +123,24 @@ export const sv = {
   "email.digest.action": "Öppna Klokka",
   "email.digest.attached": "Förra veckan i Excel: {file}",
   "email.digest.dayOff": "ledig",
+  "email.digest.daySeparator": ", ",
   "email.digest.intro": "Förra veckan i ett mejl, med en Excel-fil bifogad.",
   "email.digest.jobsTitle": "Jobb",
   "email.digest.monthSoFar": "{month} hittills: {hours}",
   "email.digest.monthSoFarLabel": "{month} hittills",
   "email.digest.moreInFile_one": "{count} jobb till finns i den bifogade filen.",
   "email.digest.moreInFile_other": "{count} jobb till finns i den bifogade filen.",
+  "email.digest.morePeopleInFile_one": "{count} person till finns i den bifogade filen.",
+  "email.digest.morePeopleInFile_other": "{count} personer till finns i den bifogade filen.",
+  "email.digest.noHours": "–",
   "email.digest.noPlace": "Ingen plats",
+  "email.digest.personLine": "{name} ({total})",
   "email.digest.subject": "Din vecka {week} på {workspace}",
   "email.digest.subjectEmployer": "Vecka {week} på {workspace}: {hours}",
+  "email.digest.teamDay": "{day} {hours}",
   "email.digest.teamHours": "Teamets timmar vecka {week}: {hours}",
   "email.digest.teamHoursLabel": "Teamets timmar vecka {week}",
+  "email.digest.teamLine": "{name}: {days} ({total})",
   "email.digest.teamTitle": "Teamet den här veckan",
   "email.digest.title1": "Vecka {week}.",
   "email.digest.title2_one": "{hours} timme.",
@@ -920,7 +927,7 @@ export const sv = {
   "settings.title": "Inställningar",
   "settings.weeklyDigest": "Veckosammanfattning via e-post",
   "settings.weeklyDigestByEmail": "Veckosammanfattning via e-post",
-  "settings.weeklyDigestHint": "Ett mejl på måndag morgon med förra veckans summor. Av som standard.",
+  "settings.weeklyDigestHint": "Ett mejl på måndag morgon med förra veckans summor. På för alla, stäng av här.",
   "settings.workspace": "Företag",
   "share.aDay": "om dagen",
   "share.bestWeek": "bästa veckan",
@@ -1367,17 +1374,24 @@ export const en = {
   "email.digest.action": "Open Klokka",
   "email.digest.attached": "Last week in Excel: {file}",
   "email.digest.dayOff": "off",
+  "email.digest.daySeparator": ", ",
   "email.digest.intro": "Last week in one email, with an Excel file attached.",
   "email.digest.jobsTitle": "Jobs",
   "email.digest.monthSoFar": "{month} so far: {hours}",
   "email.digest.monthSoFarLabel": "{month} so far",
   "email.digest.moreInFile_one": "{count} more job is in the attached file.",
   "email.digest.moreInFile_other": "{count} more jobs are in the attached file.",
+  "email.digest.morePeopleInFile_one": "{count} more person is in the attached file.",
+  "email.digest.morePeopleInFile_other": "{count} more people are in the attached file.",
+  "email.digest.noHours": "–",
   "email.digest.noPlace": "No place",
+  "email.digest.personLine": "{name} ({total})",
   "email.digest.subject": "Your week {week} at {workspace}",
   "email.digest.subjectEmployer": "Week {week} at {workspace}: {hours}",
+  "email.digest.teamDay": "{day} {hours}",
   "email.digest.teamHours": "Team hours in week {week}: {hours}",
   "email.digest.teamHoursLabel": "Team hours in week {week}",
+  "email.digest.teamLine": "{name}: {days} ({total})",
   "email.digest.teamTitle": "Team this week",
   "email.digest.title1": "Week {week}.",
   "email.digest.title2_one": "{hours} hour.",
@@ -2164,7 +2178,7 @@ export const en = {
   "settings.title": "Settings",
   "settings.weeklyDigest": "Weekly email digest",
   "settings.weeklyDigestByEmail": "Weekly digest by email",
-  "settings.weeklyDigestHint": "One email on Monday morning with last week's totals. Off by default.",
+  "settings.weeklyDigestHint": "One email on Monday morning with last week's totals. On for everyone; turn it off here.",
   "settings.workspace": "Business",
   "share.aDay": "a day",
   "share.bestWeek": "best week",
@@ -2610,16 +2624,22 @@ export type MessageParams = {
   "email.digest.action": Record<never, never>;
   "email.digest.attached": { file: string | number };
   "email.digest.dayOff": Record<never, never>;
+  "email.digest.daySeparator": Record<never, never>;
   "email.digest.intro": Record<never, never>;
   "email.digest.jobsTitle": Record<never, never>;
   "email.digest.monthSoFar": { hours: string | number; month: string | number };
   "email.digest.monthSoFarLabel": { month: string | number };
   "email.digest.moreInFile": { count: string | number };
+  "email.digest.morePeopleInFile": { count: string | number };
+  "email.digest.noHours": Record<never, never>;
   "email.digest.noPlace": Record<never, never>;
+  "email.digest.personLine": { name: string | number; total: string | number };
   "email.digest.subject": { week: string | number; workspace: string | number };
   "email.digest.subjectEmployer": { hours: string | number; week: string | number; workspace: string | number };
+  "email.digest.teamDay": { day: string | number; hours: string | number };
   "email.digest.teamHours": { hours: string | number; week: string | number };
   "email.digest.teamHoursLabel": { week: string | number };
+  "email.digest.teamLine": { days: string | number; name: string | number; total: string | number };
   "email.digest.teamTitle": Record<never, never>;
   "email.digest.title1": { week: string | number };
   "email.digest.title2": { count: string | number; hours: string | number };
@@ -3697,6 +3717,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "common.days",
   "common.people",
   "email.digest.moreInFile",
+  "email.digest.morePeopleInFile",
   "email.digest.title2",
   "entry.changesThisMonth",
   "entry.editedTimes",

@@ -72,6 +72,8 @@ class WebhookResourceTest {
         post(event("User.Deleted", "2026-09-27T16:00:00Z", id, null, null)).then().statusCode(204);
         assertThat(data.scalar("select status from membership where id = ?", membership)).isEqualTo("DEACTIVATED");
         assertThat(data.scalar("select deactivated_at from membership where id = ?", membership)).isNotNull();
+        // No more weekly digest to a deleted account.
+        assertThat(data.scalar("select digest_enabled from user_preference where logto_user_id = ?", id)).isEqualTo(false);
     }
 
     @Test

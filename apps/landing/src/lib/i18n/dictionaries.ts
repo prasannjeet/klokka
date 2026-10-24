@@ -91,7 +91,7 @@ export const sv = {
       'Samma som i går: 4 h på torsdag',
       'Vecka 39 exporterad som CSV',
       'Flaggan åtgärdad: tisdag är nu 6 h',
-      'Veckosammanfattning skickad till 2 som bett om den',
+      'Veckosammanfattning skickad till 4 personer',
     ],
   },
   how: {
@@ -461,7 +461,7 @@ export const en: Dictionary = {
       'Same as yesterday: 4 h on Thursday',
       'Week 39 exported as CSV',
       'Flag resolved: Tuesday is now 6 h',
-      'Weekly digest sent to 2 people who asked for it',
+      'Weekly digest sent to 4 people',
     ],
   },
   how: {

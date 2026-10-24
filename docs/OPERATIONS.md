@@ -228,8 +228,11 @@ workspace shows pay and, for an employee, their rate is set). How it is paced:
 - Reserve: the digest sends only while `KLOKKA_DIGEST_RESERVE` (default 20) of the daily quota stays free, so sign-up
   codes and invitations always have room. A sweep that hits the reserve stops (one log line) and the next sweep,
   every 15 minutes, carries on inside the window. The API refuses to start when the reserve is not below the quota.
-- Every user is walked in pages, at most `KLOKKA_DIGEST_MAX_USERS_PER_RUN` (5000) per sweep, one transaction per
-  user. One email lists at most `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` (60) jobs; the rest are only in the workbook.
+- Each sweep reads one list of candidates, at most `KLOKKA_DIGEST_MAX_USERS_PER_RUN` (5000): the digest on, an
+  email address, an active membership and no digest in the last six days, the longest-waiting first. One transaction
+  per user. A failed send records nothing and stops the sweep (the next one retries inside the window). One email
+  lists at most `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` (40) jobs and `KLOKKA_DIGEST_MAX_PEOPLE_IN_EMAIL` (15) team table
+  rows; the rest are only in the workbook.
 - The operator console's Volume page shows the last 24 hours against the daily quota, with the month's counts under it.
 
 **Templates (CHQ-148).** Every email has the klokka.se design, in Swedish and English, generated from one layout:

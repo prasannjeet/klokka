@@ -171,7 +171,7 @@
     "pushNotifications": "Push notifications",
     "pushDevice": "Android app, signed in on this account",
     "weeklyDigest": "Weekly email digest",
-    "weeklyDigestHint": "One email on Monday morning with last week's totals. Off by default.",
+    "weeklyDigestHint": "One email on Monday morning with last week's totals. On for everyone; turn it off here.",
     "weeklyDigestByEmail": "Weekly digest by email",
     "digestTo": "Every Monday, with an Excel file of last week. To {email}",
     "app": "App",
@@ -736,7 +736,14 @@
       "attached": "Last week in Excel: {file}",
       "moreInFile_one": "{count} more job is in the attached file.",
       "moreInFile_other": "{count} more jobs are in the attached file.",
-      "noPlace": "No place"
+      "noPlace": "No place",
+      "noHours": "–",
+      "teamDay": "{day} {hours}",
+      "daySeparator": ", ",
+      "teamLine": "{name}: {days} ({total})",
+      "personLine": "{name} ({total})",
+      "morePeopleInFile_one": "{count} more person is in the attached file.",
+      "morePeopleInFile_other": "{count} more people are in the attached file."
     },
     "common": {
       "footer": "Klokka is free and open source. If you did not expect this email, ignore it.",

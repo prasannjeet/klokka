@@ -7,9 +7,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.time.Instant;
 import java.util.Optional;
 
-// What Logto events touch: the app_user profile mirror, the idempotency ledger and membership deactivation on
-// user deletion. Keyed by Logto ids, not by workspace, which is why the webhook package is exempt from the
-// WorkspaceId rule in ArchitectureTest.
+// What Logto events touch: the app_user profile mirror, the idempotency ledger, and on user deletion membership
+// deactivation and the digest switch. Keyed by Logto ids, not by workspace, which is why the webhook package is
+// exempt from the WorkspaceId rule in ArchitectureTest.
 @ApplicationScoped
 public class WebhookRepository implements PanacheRepositoryBase<AppUserEntity, String> {
 
@@ -32,6 +32,13 @@ public class WebhookRepository implements PanacheRepositoryBase<AppUserEntity, S
 
     public void persistUser(AppUserEntity user) {
         persist(user);
+    }
+
+    // A deleted account gets no more weekly digest (it is on by default, CHQ-189).
+    public void turnDigestOff(String userId) {
+        getEntityManager().createNativeQuery("update user_preference set digest_enabled = false where logto_user_id = :u")
+                .setParameter("u", userId)
+                .executeUpdate();
     }
 
     public int deactivateMembershipsOf(String userId, Instant now) {

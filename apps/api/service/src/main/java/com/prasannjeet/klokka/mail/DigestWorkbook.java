@@ -117,17 +117,23 @@ public final class DigestWorkbook {
         headerCell(sheet, widths, 8, catalogue.t(lang, Text.XLSX_WEEK_TOTAL.key()));
         if (week.withPay()) headerCell(sheet, widths, payColumn, catalogue.t(lang, Text.XLSX_PAY.key(), Map.of("currency", week.workspace().currency)));
         int r = 1;
+        // The team's pay is the sum of everyone's, or blank when someone with hours has no rate (a partial sum would
+        // read as the whole team's).
         BigDecimal teamPay = null;
+        boolean teamPayComplete = true;
         for (DigestWeek.Member member : week.members()) {
             text(sheet, widths, r, 0, member.name());
             int c = 1;
             for (BigDecimal value : week.hoursPerDay(member.membershipId()).values()) hours(sheet, widths, r, c++, value, false);
-            hours(sheet, widths, r, 8, week.total(member.membershipId()), true);
+            BigDecimal total = week.total(member.membershipId());
+            hours(sheet, widths, r, 8, total, true);
             if (week.withPay()) {
                 BigDecimal pay = week.pay(member);
                 if (pay != null) {
                     money(sheet, widths, r, payColumn, pay, false);
                     teamPay = teamPay == null ? pay : teamPay.add(pay);
+                } else if (total.signum() > 0) {
+                    teamPayComplete = false;
                 }
             }
             r++;
@@ -137,7 +143,7 @@ public final class DigestWorkbook {
             sheet.style(r, 0).bold().set();
             for (int i = 0; i < 7; i++) hours(sheet, widths, r, 1 + i, week.teamTotal(week.monday().plusDays(i)), true);
             hours(sheet, widths, r, 8, week.teamTotal(), true);
-            if (week.withPay() && teamPay != null) {
+            if (week.withPay() && teamPay != null && teamPayComplete) {
                 money(sheet, widths, r, payColumn, teamPay, true);
             }
             r++;

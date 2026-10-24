@@ -41,13 +41,20 @@ public class EmailSendRepository implements PanacheRepositoryBase<AppUserEntity,
                 .executeUpdate();
     }
 
-    // One keyset page of the users with the digest on (CHQ-189: on by default), after `afterUserId` (null: from the
-    // start), ordered by user id so a sweep can walk all of them page by page.
+    // The users a digest sweep looks at, at most `limit`: the digest on (CHQ-189: on by default), an email address, an
+    // active membership somewhere, and no digest_run after `notSince` (sent, or recorded as nothing to report, this
+    // week). The longest-waiting first: never recorded, then by their latest digest_run, then by user id.
     @SuppressWarnings("unchecked")
-    public List<String> digestOptIns(String afterUserId, int limit) {
-        return em().createNativeQuery("select p.logto_user_id from user_preference p where p.digest_enabled "
-                        + "and p.logto_user_id > :after order by p.logto_user_id limit :n", String.class)
-                .setParameter("after", afterUserId == null ? "" : afterUserId)
+    public List<String> digestCandidates(Instant notSince, int limit) {
+        return em().createNativeQuery("select p.logto_user_id from user_preference p "
+                        + "join app_user u on u.logto_user_id = p.logto_user_id "
+                        + "left join (select logto_user_id, max(sent_at) as last_sent from digest_run group by logto_user_id) r "
+                        + "on r.logto_user_id = p.logto_user_id "
+                        + "where p.digest_enabled and u.email is not null "
+                        + "and exists (select 1 from membership m where m.logto_user_id = p.logto_user_id and m.status = 'ACTIVE') "
+                        + "and (r.last_sent is null or r.last_sent <= :notSince) "
+                        + "order by r.last_sent asc nulls first, p.logto_user_id limit :n", String.class)
+                .setParameter("notSince", notSince)
                 .setParameter("n", limit)
                 .getResultList();
     }
@@ -62,6 +69,12 @@ public class EmailSendRepository implements PanacheRepositoryBase<AppUserEntity,
     public boolean recordDigestRun(String userId, String isoWeek, Instant now) {
         return em().createNativeQuery("insert into digest_run (logto_user_id, iso_week, sent_at) values (:u, :w, :now) on conflict do nothing")
                 .setParameter("u", userId).setParameter("w", isoWeek).setParameter("now", now).executeUpdate() == 1;
+    }
+
+    // Undoes recordDigestRun in the same transaction when the email then fails, so a later sweep tries again.
+    public void forgetDigestRun(String userId, String isoWeek) {
+        em().createNativeQuery("delete from digest_run where logto_user_id = :u and iso_week = :w")
+                .setParameter("u", userId).setParameter("w", isoWeek).executeUpdate();
     }
 
     private EntityManager em() {

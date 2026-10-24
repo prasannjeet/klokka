@@ -198,8 +198,9 @@ staging, `.env` locally. Secrets are marked; their values are in the named local
 | `KLOKKA_MAIL_DAILY_QUOTA` | no | Coolify | `100` (default) | the SMTP account's allowance over a rolling 24 hours: non-failed `email_send` rows are checked against it before an invite (replaced `KLOKKA_MAIL_MONTHLY_QUOTA` in CHQ-189) |
 | `KLOKKA_DIGEST_RESERVE` | no | Coolify | `20` (default) | the digest sends only while this many of the daily quota stay free for invitations and sign-up codes; must be below the daily quota or the API refuses to start |
 | `KLOKKA_DIGEST_CATCH_UP_DAYS` | no | Coolify | `2` (default, 0 to 6) | the digest stays due from Monday 07:00 until the end of Monday plus this many days (workspace time), then last week's is dropped; staging may set 6 to test on any day |
-| `KLOKKA_DIGEST_MAX_USERS_PER_RUN` | no | Coolify | `5000` (default) | users walked per 15-minute sweep |
-| `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` | no | Coolify | `60` (default) | job lines in one digest email; the rest are only in the attached workbook |
+| `KLOKKA_DIGEST_MAX_USERS_PER_RUN` | no | Coolify | `5000` (default) | candidates looked at per 15-minute sweep (the longest-waiting first) |
+| `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` | no | Coolify | `40` (default) | job lines in one digest email; the rest are only in the attached workbook |
+| `KLOKKA_DIGEST_MAX_PEOPLE_IN_EMAIL` | no | Coolify | `15` (default) | team table rows in one employer's digest email; the rest are only in the attached workbook |
 | `KLOKKA_EXPO_ACCESS_TOKEN` | no, secret | Coolify | `expo.json` | Expo enhanced push security; absent means no bearer on Expo calls |
 | `KLOKKA_EXPO_PUSH_URL` | no | none | default `https://exp.host/--/api/v2` | tests point it at a fake |
 | `KLOKKA_PUSH_QUIET_WINDOW` | no | Coolify | `PT2M` (default `PT2M`) | "one push per sitting": the push waits this long after the last change (sliding); the in-app row exists from the first change |
@@ -248,8 +249,9 @@ profiles use Dev Services for Postgres and mock the mailer; the fast-jar integra
 - Jobs (`quarkus-scheduler`, single node): push sweeper every minute, receipts every 15 minutes, weekly digest sweep
   every 15 minutes (due Monday from 07:00 workspace time until the end of Monday plus `KLOKKA_DIGEST_CATCH_UP_DAYS`,
   once per user and ISO week through `digest_run`, one transaction per user, stops for the run when only the
-  reserve is left).
-  Rows are claimed with `FOR UPDATE SKIP LOCKED`, batches are bounded (`klokka.push.batch-size`, `klokka.digest.batch-size`).
+  reserve is left or a send fails).
+  Rows are claimed with `FOR UPDATE SKIP LOCKED`, batches are bounded (`klokka.push.batch-size`,
+  `klokka.digest.max-users-per-run`).
 
 ### Image and health
 

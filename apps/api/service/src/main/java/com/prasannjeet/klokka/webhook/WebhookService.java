@@ -105,7 +105,8 @@ public class WebhookService {
         String id = string(data.get("id"));
         if (id == null) return;
         int touched = repository.deactivateMembershipsOf(id, now);
-        LOG.infof("Logto user %s deleted: %d membership(s) deactivated", id, touched);
+        repository.turnDigestOff(id);
+        LOG.infof("Logto user %s deleted: %d membership(s) deactivated, weekly digest off", id, touched);
     }
 
     private static String string(Object value) {

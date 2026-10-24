@@ -9,9 +9,12 @@ import com.prasannjeet.klokka.support.TestData;
 import io.agroal.api.AgroalDataSource;
 import io.quarkus.mailer.Attachment;
 import io.quarkus.mailer.Mail;
+import io.quarkus.arc.ClientProxy;
 import io.quarkus.mailer.MockMailbox;
+import io.quarkus.test.junit.QuarkusMock;
 import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.mutiny.Multi;
+import jakarta.enterprise.inject.Vetoed;
 import jakarta.inject.Inject;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -36,6 +39,7 @@ class DigestJobTest {
 
     private static final String NORA = "usr_dg_nora";
     private static final String MARIA = "usr_dg_maria";
+    private static final String GONE = "usr_dg_gone";
 
     @Inject
     AgroalDataSource dataSource;
@@ -52,6 +56,9 @@ class DigestJobTest {
     @Inject
     KlokkaConfig config;
 
+    @Inject
+    MailService mailService;
+
     TestData data;
     UUID ws;
     String slug;
@@ -66,7 +73,7 @@ class DigestJobTest {
             data.run("delete from " + table + " where workspace_id in (select id from workspace where slug like 'digest-%')");
         }
         data.run("delete from workspace where slug like 'digest-%'");
-        data.run("delete from email_send where recipient in ('maria@example.com', 'nora@cafenord.example', 'fill@example.com')");
+        data.run("delete from email_send where recipient in ('maria@example.com', 'nora@cafenord.example', 'fill@example.com', 'gone@example.com')");
         data.run("update user_preference set digest_enabled = false");
         data.user(NORA, "nora@cafenord.example", "Nora Lind");
         data.user(MARIA, "maria@example.com", "Maria Lind");
@@ -79,7 +86,7 @@ class DigestJobTest {
         // Week 38 (14 to 20 September): Maria 4 h on Monday and 6.5 h on Friday.
         data.entry(ws, maria, LocalDate.of(2026, 9, 14), new BigDecimal("4.00"), null, NORA);
         data.entry(ws, maria, LocalDate.of(2026, 9, 18), new BigDecimal("6.50"), null, NORA);
-        data.run("delete from digest_run where logto_user_id in (?, ?)", NORA, MARIA);
+        data.run("delete from digest_run where logto_user_id in (?, ?, ?)", NORA, MARIA, GONE);
     }
 
     @AfterEach
@@ -101,7 +108,7 @@ class DigestJobTest {
         List<Mail> toMaria = mailbox.getMailsSentTo("maria@example.com");
         assertThat(toMaria).hasSize(1);
         assertThat(toMaria.get(0).getSubject()).isEqualTo("Din vecka 38 på Digest Corp");
-        assertThat(toMaria.get(0).getText()).contains("Hej Maria Lind,").contains("Dina timmar vecka 38: 10,5 h").contains("september 2026 hittills: 10,5 h")
+        assertThat(toMaria.get(0).getText()).contains("Hej Maria Lind,").contains("Dina timmar vecka 38: 10,5 h").contains("September 2026 hittills: 10,5 h")
                 .contains("Stäng av veckosammanfattningen under Inställningar.");
         List<Mail> toNora = mailbox.getMailsSentTo("nora@cafenord.example");
         assertThat(toNora).hasSize(1);
@@ -215,6 +222,71 @@ class DigestJobTest {
         assertThat(rest.budgetOut()).isFalse();
         assertThat(mailbox.getMailsSentTo("nora@cafenord.example")).hasSize(1);
         assertThat(mailbox.getMailsSentTo("maria@example.com")).hasSize(1);
+    }
+
+    @Test
+    void onlyActiveMembershipsGetADigest() {
+        // Gone worked in week 38 and was deactivated since: no digest for them, now or later in the window.
+        data.user(GONE, "gone@example.com", "Gone Person");
+        data.preferences(GONE, "en", true, true);
+        UUID gone = data.member(ws, GONE, "EMPLOYEE", "Gone Person", "gone@example.com", null, "DEACTIVATED");
+        data.entry(ws, gone, LocalDate.of(2026, 9, 15), new BigDecimal("3.00"), null, NORA);
+        clock.set(Instant.parse("2026-09-21T05:15:00Z"));
+        DigestJob.Result result = job.run();
+        assertThat(mailbox.getMailsSentTo("gone@example.com")).isEmpty();
+        assertThat(data.count("select count(*) from digest_run where logto_user_id = ?", GONE)).isZero();
+        // Positive control: the active employer and employee of the same workspace get theirs.
+        assertThat(result.sent()).isEqualTo(2);
+        assertThat(mailbox.getMailsSentTo("maria@example.com")).hasSize(1);
+        assertThat(mailbox.getMailsSentTo("nora@cafenord.example")).hasSize(1);
+    }
+
+    @Test
+    void aFailedSendIsNotRecordedAndStopsTheRunUntilMailWorksAgain() {
+        FlakyMail flaky = new FlakyMail(ClientProxy.unwrap(mailService));
+        QuarkusMock.installMockForType(flaky, MailService.class);
+        clock.set(Instant.parse("2026-09-21T05:15:00Z"));
+        DigestJob.Result failed = job.run();
+        // The first send fails: nothing recorded, and the run stops instead of trying everyone else.
+        assertThat(flaky.attempts).isEqualTo(1);
+        assertThat(failed.sent()).isZero();
+        assertThat(failed.considered()).isEqualTo(1);
+        assertThat(failed.mailFailed()).isTrue();
+        assertThat(data.count("select count(*) from digest_run where logto_user_id in (?, ?)", NORA, MARIA)).isZero();
+
+        // The next sweep inside the window, with mail working: both are sent (positive control).
+        flaky.down = false;
+        clock.set(Instant.parse("2026-09-21T05:30:00Z"));
+        DigestJob.Result retried = job.run();
+        assertThat(retried.sent()).isEqualTo(2);
+        assertThat(retried.mailFailed()).isFalse();
+        assertThat(mailbox.getMailsSentTo("maria@example.com")).hasSize(1);
+        assertThat(mailbox.getMailsSentTo("nora@cafenord.example")).hasSize(1);
+        assertThat(data.count("select count(*) from digest_run where logto_user_id in (?, ?) and iso_week = '2026-W38'", NORA, MARIA)).isEqualTo(2);
+    }
+
+    // The real MailService behind a switch: while `down`, every send fails the way an SMTP outage does (false).
+    // Vetoed: a test object handed to QuarkusMock, not a second MailService bean.
+    @Vetoed
+    static final class FlakyMail extends MailService {
+        private final MailService real;
+        volatile boolean down = true;
+        int attempts;
+
+        FlakyMail(MailService real) {
+            this.real = real;
+        }
+
+        @Override
+        public boolean digestBudgetLeft() {
+            return real.digestBudgetLeft();
+        }
+
+        @Override
+        public boolean send(String kind, String to, String subject, String text, String html, String userId, List<MailService.Attachment> attachments) {
+            attempts++;
+            return !down && real.send(kind, to, subject, text, html, userId, attachments);
+        }
     }
 
     private void fill(long rows, Instant at) {

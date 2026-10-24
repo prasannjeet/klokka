@@ -171,7 +171,7 @@
     "pushNotifications": "Pushnotiser",
     "pushDevice": "Android-appen, inloggad på det här kontot",
     "weeklyDigest": "Veckosammanfattning via e-post",
-    "weeklyDigestHint": "Ett mejl på måndag morgon med förra veckans summor. Av som standard.",
+    "weeklyDigestHint": "Ett mejl på måndag morgon med förra veckans summor. På för alla, stäng av här.",
     "weeklyDigestByEmail": "Veckosammanfattning via e-post",
     "digestTo": "Varje måndag, med en Excel-fil för förra veckan. Till {email}",
     "app": "App",
@@ -736,7 +736,14 @@
       "attached": "Förra veckan i Excel: {file}",
       "moreInFile_one": "{count} jobb till finns i den bifogade filen.",
       "moreInFile_other": "{count} jobb till finns i den bifogade filen.",
-      "noPlace": "Ingen plats"
+      "noPlace": "Ingen plats",
+      "noHours": "–",
+      "teamDay": "{day} {hours}",
+      "daySeparator": ", ",
+      "teamLine": "{name}: {days} ({total})",
+      "personLine": "{name} ({total})",
+      "morePeopleInFile_one": "{count} person till finns i den bifogade filen.",
+      "morePeopleInFile_other": "{count} personer till finns i den bifogade filen."
     },
     "common": {
       "footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",

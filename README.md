@@ -91,7 +91,7 @@ The API reads its environment from `KLOKKA_*` variables (see `.env.example` and
 `KLOKKA_LOGTO_M2M_CLIENT_SECRET`, `KLOKKA_LOGTO_WEBHOOK_SIGNING_KEY`, `KLOKKA_MAIL_HOST`, `KLOKKA_MAIL_PORT`,
 `KLOKKA_MAIL_USERNAME`, `KLOKKA_MAIL_PASSWORD`, `KLOKKA_MAIL_FROM`, `KLOKKA_MAIL_START_TLS`,
 `KLOKKA_MAIL_DAILY_QUOTA`, `KLOKKA_DIGEST_RESERVE`, `KLOKKA_DIGEST_CATCH_UP_DAYS`, `KLOKKA_DIGEST_MAX_USERS_PER_RUN`,
-`KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL`, `KLOKKA_WEB_BASE_URL`, `KLOKKA_EXPO_ACCESS_TOKEN`. The image is built from
+`KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL`, `KLOKKA_DIGEST_MAX_PEOPLE_IN_EMAIL`, `KLOKKA_WEB_BASE_URL`, `KLOKKA_EXPO_ACCESS_TOKEN`. The image is built from
 `apps/api/Dockerfile` after `mvn package` (context `apps/api`, fast-jar on `eclipse-temurin:25-jre`, port 8080).
 
 `docs/CONTRACT.md` indexes every operation of the API contract.

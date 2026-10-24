@@ -156,14 +156,16 @@ export const rows = (inner) =>
 // The digest's team table and job lists (CHQ-189): compact text styles in the same palette, picked by build.mjs.
 export const digest = {
   heading: `class="k-text" style="margin:22px 0 10px;font-family:${BODY};font-weight:700;font-size:15px;line-height:1.3;color:${C.text};"`,
-  scroll: `style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 4px;"`,
-  table: `role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;min-width:100%;"`,
-  th: `class="k-muted k-rule" style="padding:0 6px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;letter-spacing:0.4px;color:${C.muted};text-align:center;white-space:nowrap;"`,
-  thName: `class="k-muted k-rule" style="padding:0 8px 6px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;color:${C.muted};text-align:left;"`,
-  name: `class="k-text k-rule" style="padding:8px 8px 8px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.text};white-space:nowrap;"`,
-  value: `class="k-text k-rule" style="padding:8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.text};text-align:center;white-space:nowrap;"`,
-  zero: `class="k-muted k-rule" style="padding:8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.muted};text-align:center;"`,
-  total: `class="k-text k-rule" style="padding:8px 0 8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:700;font-size:13px;color:${C.text};text-align:right;white-space:nowrap;"`,
+  // The team table fits a 360 px phone: fixed layout over the card's width, the name column wraps, the numbers
+  // share the rest at 12 px with almost no padding (column widths come from the header cells, see build.mjs).
+  table: `role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;table-layout:fixed;width:100%;"`,
+  th: `class="k-muted k-rule" style="padding:0 1px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;color:${C.muted};text-align:center;"`,
+  thName: `class="k-muted k-rule" style="padding:0 4px 6px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;color:${C.muted};text-align:left;"`,
+  thTotal: `class="k-muted k-rule" style="padding:0 0 6px 1px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;color:${C.muted};text-align:right;"`,
+  name: `class="k-text k-rule" style="padding:6px 4px 6px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:12px;line-height:1.3;color:${C.text};word-break:break-word;overflow-wrap:break-word;"`,
+  value: `class="k-text k-rule" style="padding:6px 1px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:12px;color:${C.text};text-align:center;"`,
+  zero: `class="k-muted k-rule" style="padding:6px 1px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:12px;color:${C.muted};text-align:center;"`,
+  total: `class="k-text k-rule" style="padding:6px 0 6px 1px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:700;font-size:12px;color:${C.text};text-align:right;"`,
   person: `class="k-text" style="margin:14px 0 4px;font-family:${BODY};font-weight:600;font-size:14px;line-height:1.4;color:${C.text};"`,
   personTotal: `class="k-muted" style="font-weight:400;color:${C.muted};"`,
   day: `class="k-muted" style="margin:8px 0 2px;font-family:${BODY};font-weight:600;font-size:12px;letter-spacing:0.3px;line-height:1.4;color:${C.muted};"`,

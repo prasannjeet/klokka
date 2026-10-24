@@ -39,7 +39,7 @@ export const sv = {
       h2: 'En notis per tillfälle, inte fem',
       body: [
         'När arbetsgivaren lägger till, ändrar eller tar bort timmar får den anställda en notis i appen och som push i Android-appen. Ändringar som görs vid samma tillfälle slås ihop till en notis: "Nora lade till 5 dagar för dig, 22,5 h i vecka 39" i stället för fem separata.',
-        'Den som vill kan dessutom få en sammanfattning av veckan på mejl varje måndag. Den är avstängd tills man själv slår på den.',
+        'Varje måndag kommer dessutom en sammanfattning av veckan på mejl, med en Excel-fil över förra veckans jobb och timmar. Den går att stänga av under Inställningar.',
       ],
     },
     {
@@ -141,7 +141,7 @@ export const en: PageCopyOf<typeof sv> = {
       h2: 'One notification per sitting, not five',
       body: [
         'When the employer adds, changes or removes hours, the employee gets a notification in the app and as a push in the Android app. Changes made in one sitting are merged into one notification: "Nora added 5 days for you, 22.5 h in week 39" instead of five separate ones.',
-        'Anyone who wants it can also get a weekly summary by email every Monday. It stays off until they switch it on.',
+        "Every Monday a summary of the week also arrives by email, with an Excel file of last week's jobs and hours. It can be turned off in Settings.",
       ],
     },
     {

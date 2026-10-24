@@ -151,12 +151,6 @@ public interface KlokkaConfig {
         @Max(23)
         int localHour();
 
-        // Users read per page while a sweep walks every user (keyset paging).
-        @WithDefault("200")
-        @Min(1)
-        @Max(5000)
-        int batchSize();
-
         // Emails of the daily quota the digest leaves untouched, so invitations and sign-up codes always have room.
         @WithDefault("20")
         @Min(0)
@@ -169,15 +163,20 @@ public interface KlokkaConfig {
         @Max(6)
         int catchUpDays();
 
-        // Users one sweep looks at, at most (a bound on the walk, not a page size).
+        // Candidates one sweep reads and looks at, at most (the longest-waiting first).
         @WithDefault("5000")
         @Min(1)
         int maxUsersPerRun();
 
         // Job lines listed in one email across all workspaces; the rest are in the attached workbook.
-        @WithDefault("60")
+        @WithDefault("40")
         @Min(1)
         int maxJobsInEmail();
+
+        // Rows of the employer's team tables in one email across all workspaces; the rest are in the workbook.
+        @WithDefault("15")
+        @Min(1)
+        int maxPeopleInEmail();
     }
 
     interface Logto {
