@@ -33,6 +33,17 @@ describe('the tabs layout keeps each role on its own tabs (CHQ-190)', () => {
     await waitFor(() => expect(routerState.replaces).toContain('/(tabs)/home'));
   });
 
+  it("sends an employer opened on the employee's Notifications tab (a push link) to the employer's list", async () => {
+    await openTab(employerMeFixture, ['(tabs)', 'notifications']);
+    await waitFor(() => expect(routerState.replaces).toContain('/notifications-list'));
+    expect(routerState.replaces).not.toContain('/(tabs)/home');
+  });
+
+  it('leaves an employee on their own Notifications tab (positive control)', async () => {
+    await openTab(meFixture, ['(tabs)', 'notifications']);
+    expect(routerState.replaces).toEqual([]);
+  });
+
   it('leaves an employee on their own tab (positive control)', async () => {
     await openTab(meFixture, ['(tabs)', 'week']);
     expect(routerState.replaces).toEqual([]);

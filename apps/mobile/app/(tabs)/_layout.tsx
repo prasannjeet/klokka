@@ -25,10 +25,15 @@ export default function TabsLayout() {
   const employer = workspace?.role === 'EMPLOYER';
   // Expo Router keeps the open tab while AuthGate shows sign-in, so signing out and in as the other role
   // (without restarting) would land on a tab of the previous role (CHQ-190): send it to this role's first tab.
+  // A notification link opens the employee's Notifications tab for everyone, so an employer who lands there gets
+  // the employer's own notification list instead.
   const openTab = segments[0] === '(tabs)' ? segments[1] : undefined;
   if (workspace && openTab) {
     const tabs: readonly string[] = ROLE_TABS[workspace.role];
-    if (!tabs.includes(openTab)) return <Redirect href={employer ? '/(tabs)/home' : '/(tabs)/month'} />;
+    if (!tabs.includes(openTab)) {
+      if (employer && openTab === 'notifications') return <Redirect href="/notifications-list" />;
+      return <Redirect href={employer ? '/(tabs)/home' : '/(tabs)/month'} />;
+    }
   }
   const icon =
     (name: IconName) =>
