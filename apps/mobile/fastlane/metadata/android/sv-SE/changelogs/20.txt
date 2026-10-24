@@ -1,0 +1,1 @@
+Jobbredigeraren är nu en hel sida som frågar innan ändringar kastas. Upprepa varje månad på ett datum eller en veckodag som tredje onsdagen, med eller utan slutdatum, och välj vilka jobb en ändring gäller. Anställda får en notis när deras jobb ändras, med en egen inställning för jobbuppdateringar. Veckomejlet har nu en Excel-fil över förra veckan.

@@ -1,0 +1,1 @@
+The job editor is now a full page that asks before discarding changes. Repeat monthly on a date or a weekday such as the third Wednesday, with or without an end date, and choose which jobs a change applies to. Employees get a notification when their jobs change, with its own Job updates setting. The weekly email now includes an Excel file of last week.

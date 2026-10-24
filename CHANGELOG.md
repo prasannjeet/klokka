@@ -2,7 +2,7 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
-## Unreleased
+## 1.7.0, 2026-10-24
 
 ### Added
 - The job editor is a full page on the phone and the web instead of a sheet. Leaving it with unsaved changes asks
