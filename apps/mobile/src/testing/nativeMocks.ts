@@ -254,6 +254,8 @@ export const routerState = {
   dispatches: [] as unknown[],
   preventRemove: null as PreventRemoveCallback | null,
   params: {} as Record<string, string>,
+  // What useSegments() answers: the open route's segments, e.g. ['(tabs)', 'home'].
+  segments: [] as string[],
 };
 export function expoRouterModule() {
   const React = require('react') as typeof import('react');
@@ -293,7 +295,7 @@ export function expoRouterModule() {
     useLocalSearchParams: () => routerState.params,
     useGlobalSearchParams: () => routerState.params,
     usePathname: () => '/',
-    useSegments: () => [],
+    useSegments: () => routerState.segments,
     useNavigation: () => navigation,
     Redirect: ({ href }: { href: unknown }) => {
       routerState.replaces.push(href);
