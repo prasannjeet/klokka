@@ -20,6 +20,7 @@ export const sv = {
   "api.csv.note": "Anteckning",
   "api.csv.rate": "Timlön",
   "api.csv.weekday": "Veckodag",
+  "api.email.digest.jobWithPlace": "{title}, {place}",
   "api.email.digest.nothing": "Inga timmar loggades förra veckan.",
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka är gratis och öppen källkod. Alla med ett Klokka-konto får det här mejlet på måndagar.",
@@ -38,6 +39,7 @@ export const sv = {
   "api.xlsx.sheetJobs": "Jobb",
   "api.xlsx.start": "Start",
   "api.xlsx.team": "Hela teamet",
+  "api.xlsx.title": "Titel",
   "api.xlsx.total": "Totalt",
   "api.xlsx.weekTotal": "Veckan totalt",
   "api.xlsx.weekday": "Veckodag",
@@ -373,6 +375,8 @@ export const sv = {
   "jobs.jobCount_other": "{count} jobb",
   "jobs.jobGone": "Jobbet finns inte längre.",
   "jobs.jobNumber": "Jobb {number}",
+  "jobs.jobTitle": "Titel",
+  "jobs.jobTitlePlaceholder": "Till exempel: Fönsterputs",
   "jobs.jobsThisMonth": "Jobb den här månaden",
   "jobs.keepEditing": "Fortsätt redigera",
   "jobs.loadingJob": "Hämtar jobbet",
@@ -385,6 +389,7 @@ export const sv = {
   "jobs.newSingleJobFor": "Nytt enstaka jobb för {name}",
   "jobs.nextDay": "Nästa dag",
   "jobs.nextUp": "Nästa: {date}",
+  "jobs.noEligibleMembers": "Lägg till en anställd för att kunna planera jobb.",
   "jobs.noJobs": "Inga jobb den här dagen",
   "jobs.noJobsEmployee": "Inget den här dagen.",
   "jobs.noJobsHint": "Lägg till vad {name} jobbade, eller planera ett jobb i förväg. Varje jobb har egen tid, plats och anteckning.",
@@ -392,6 +397,7 @@ export const sv = {
   "jobs.noStartNoReminder": "Ingen starttid: {name} får ingen påminnelse för det här jobbet.",
   "jobs.notSet": "Inte satt",
   "jobs.onePerCellHint": "En dag med ett jobb eller inget: skriv timmarna direkt i rutan.",
+  "jobs.pickMember": "Vem är jobbet för?",
   "jobs.placeCount_one": "{count} plats",
   "jobs.placeCount_other": "{count} platser",
   "jobs.planned": "Planerat",
@@ -583,6 +589,8 @@ export const sv = {
   "notifications.jobReminder.in30": "30 minuter",
   "notifications.jobReminder.in60": "1 timme",
   "notifications.jobReminder.title": "Jobb om {lead}",
+  "notifications.jobReminder.titleNamed": "{title} om {lead}",
+  "notifications.jobReminder.titleNamedTomorrow": "{title} i morgon kl. {time}",
   "notifications.jobReminder.titlePlace": "Jobb på {place} om {lead}",
   "notifications.jobReminder.titlePlaceTomorrow": "Jobb på {place} i morgon kl. {time}",
   "notifications.jobReminder.titleTomorrow": "Jobb i morgon kl. {time}",
@@ -601,6 +609,8 @@ export const sv = {
   "notifications.jobs.whenPlace": "{workspace}: {date} på {place}",
   "notifications.jobs.whenTime": "{workspace}: {date} kl. {time}",
   "notifications.jobs.whenTimePlace": "{workspace}: {date} kl. {time} på {place}",
+  "notifications.jobs.whenTimeTitle": "{workspace}: {date} kl. {time}, {title}",
+  "notifications.jobs.whenTitle": "{workspace}: {date}, {title}",
   "notifications.markAllRead": "Markera alla som lästa",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -1271,6 +1281,7 @@ export const en = {
   "api.csv.note": "Note",
   "api.csv.rate": "Hourly rate",
   "api.csv.weekday": "Weekday",
+  "api.email.digest.jobWithPlace": "{title}, {place}",
   "api.email.digest.nothing": "No hours were logged last week.",
   "api.email.digest.workspace": "{emoji} {workspace}",
   "api.email.footer": "Klokka is free and open source. Everyone with a Klokka account gets this email on Mondays.",
@@ -1289,6 +1300,7 @@ export const en = {
   "api.xlsx.sheetJobs": "Jobs",
   "api.xlsx.start": "Start",
   "api.xlsx.team": "Whole team",
+  "api.xlsx.title": "Title",
   "api.xlsx.total": "Total",
   "api.xlsx.weekTotal": "Week total",
   "api.xlsx.weekday": "Weekday",
@@ -1624,6 +1636,8 @@ export const en = {
   "jobs.jobCount_other": "{count} jobs",
   "jobs.jobGone": "This job no longer exists.",
   "jobs.jobNumber": "Job {number}",
+  "jobs.jobTitle": "Title",
+  "jobs.jobTitlePlaceholder": "For example: Window cleaning",
   "jobs.jobsThisMonth": "Jobs this month",
   "jobs.keepEditing": "Keep editing",
   "jobs.loadingJob": "Loading the job",
@@ -1636,6 +1650,7 @@ export const en = {
   "jobs.newSingleJobFor": "New single job for {name}",
   "jobs.nextDay": "Next day",
   "jobs.nextUp": "Next: {date}",
+  "jobs.noEligibleMembers": "Add an employee to plan jobs.",
   "jobs.noJobs": "No jobs on this day",
   "jobs.noJobsEmployee": "Nothing on this day.",
   "jobs.noJobsHint": "Add what {name} worked, or plan a job ahead. Each job has its own time, place and note.",
@@ -1643,6 +1658,7 @@ export const en = {
   "jobs.noStartNoReminder": "No start time: {name} gets no reminder for this job.",
   "jobs.notSet": "Not set",
   "jobs.onePerCellHint": "A day with one job or none: type the hours right in the cell.",
+  "jobs.pickMember": "Who is the job for?",
   "jobs.placeCount_one": "{count} place",
   "jobs.placeCount_other": "{count} places",
   "jobs.planned": "Planned",
@@ -1834,6 +1850,8 @@ export const en = {
   "notifications.jobReminder.in30": "30 minutes",
   "notifications.jobReminder.in60": "1 hour",
   "notifications.jobReminder.title": "Job in {lead}",
+  "notifications.jobReminder.titleNamed": "{title} in {lead}",
+  "notifications.jobReminder.titleNamedTomorrow": "{title} tomorrow at {time}",
   "notifications.jobReminder.titlePlace": "Job at {place} in {lead}",
   "notifications.jobReminder.titlePlaceTomorrow": "Job at {place} tomorrow at {time}",
   "notifications.jobReminder.titleTomorrow": "Job tomorrow at {time}",
@@ -1852,6 +1870,8 @@ export const en = {
   "notifications.jobs.whenPlace": "{workspace}: {date} at {place}",
   "notifications.jobs.whenTime": "{workspace}: {date}, {time}",
   "notifications.jobs.whenTimePlace": "{workspace}: {date}, {time} at {place}",
+  "notifications.jobs.whenTimeTitle": "{workspace}: {date}, {time}, {title}",
+  "notifications.jobs.whenTitle": "{workspace}: {date}, {title}",
   "notifications.markAllRead": "Mark all as read",
   "notifications.monthClosed.body": "{workspace}: {hours}, {money}",
   "notifications.monthClosed.bodyHoursOnly": "{workspace}: {hours}",
@@ -2523,6 +2543,7 @@ export type MessageParams = {
   "api.csv.note": Record<never, never>;
   "api.csv.rate": Record<never, never>;
   "api.csv.weekday": Record<never, never>;
+  "api.email.digest.jobWithPlace": { place: string | number; title: string | number };
   "api.email.digest.nothing": Record<never, never>;
   "api.email.digest.workspace": { emoji: string | number; workspace: string | number };
   "api.email.footer": Record<never, never>;
@@ -2541,6 +2562,7 @@ export type MessageParams = {
   "api.xlsx.sheetJobs": Record<never, never>;
   "api.xlsx.start": Record<never, never>;
   "api.xlsx.team": Record<never, never>;
+  "api.xlsx.title": Record<never, never>;
   "api.xlsx.total": Record<never, never>;
   "api.xlsx.weekTotal": Record<never, never>;
   "api.xlsx.weekday": Record<never, never>;
@@ -2866,6 +2888,8 @@ export type MessageParams = {
   "jobs.jobCount": { count: string | number };
   "jobs.jobGone": Record<never, never>;
   "jobs.jobNumber": { number: string | number };
+  "jobs.jobTitle": Record<never, never>;
+  "jobs.jobTitlePlaceholder": Record<never, never>;
   "jobs.jobsThisMonth": Record<never, never>;
   "jobs.keepEditing": Record<never, never>;
   "jobs.loadingJob": Record<never, never>;
@@ -2878,6 +2902,7 @@ export type MessageParams = {
   "jobs.newSingleJobFor": { name: string | number };
   "jobs.nextDay": Record<never, never>;
   "jobs.nextUp": { date: string | number };
+  "jobs.noEligibleMembers": Record<never, never>;
   "jobs.noJobs": Record<never, never>;
   "jobs.noJobsEmployee": Record<never, never>;
   "jobs.noJobsHint": { name: string | number };
@@ -2885,6 +2910,7 @@ export type MessageParams = {
   "jobs.noStartNoReminder": { name: string | number };
   "jobs.notSet": Record<never, never>;
   "jobs.onePerCellHint": Record<never, never>;
+  "jobs.pickMember": Record<never, never>;
   "jobs.placeCount": { count: string | number };
   "jobs.planned": Record<never, never>;
   "jobs.previousDay": Record<never, never>;
@@ -3068,6 +3094,8 @@ export type MessageParams = {
   "notifications.jobReminder.in30": Record<never, never>;
   "notifications.jobReminder.in60": Record<never, never>;
   "notifications.jobReminder.title": { lead: string | number };
+  "notifications.jobReminder.titleNamed": { lead: string | number; title: string | number };
+  "notifications.jobReminder.titleNamedTomorrow": { time: string | number; title: string | number };
   "notifications.jobReminder.titlePlace": { lead: string | number; place: string | number };
   "notifications.jobReminder.titlePlaceTomorrow": { place: string | number; time: string | number };
   "notifications.jobReminder.titleTomorrow": { time: string | number };
@@ -3083,6 +3111,8 @@ export type MessageParams = {
   "notifications.jobs.whenPlace": { date: string | number; place: string | number; workspace: string | number };
   "notifications.jobs.whenTime": { date: string | number; time: string | number; workspace: string | number };
   "notifications.jobs.whenTimePlace": { date: string | number; place: string | number; time: string | number; workspace: string | number };
+  "notifications.jobs.whenTimeTitle": { date: string | number; time: string | number; title: string | number; workspace: string | number };
+  "notifications.jobs.whenTitle": { date: string | number; title: string | number; workspace: string | number };
   "notifications.markAllRead": Record<never, never>;
   "notifications.monthClosed.body": { hours: string | number; money: string | number; workspace: string | number };
   "notifications.monthClosed.bodyHoursOnly": { hours: string | number; workspace: string | number };

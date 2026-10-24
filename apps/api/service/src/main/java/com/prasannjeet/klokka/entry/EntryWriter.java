@@ -52,7 +52,7 @@ public class EntryWriter {
     public record Outcome(HourEntryEntity entry, boolean changed) {}
 
     // A job as written: hours already rounded by the workspace rule.
-    public record JobInput(BigDecimal hours, LocalTime startTime, String note, JobLocation location) {}
+    public record JobInput(BigDecimal hours, LocalTime startTime, String title, String note, JobLocation location) {}
 
     // How a series write treats closed months and full days, and whether the employee is notified (CHQ-186).
     public record SeriesOptions(boolean skipClosedMonths, boolean skipFullDays, boolean notifyEmployee) {
@@ -142,8 +142,9 @@ public class EntryWriter {
                         + " jobs; change them one by one.");
             }
             if (dayJobs.isEmpty()) {
-                newJob(access, entry, new JobInput(hours, null, cleanNote, null), now);
+                newJob(access, entry, new JobInput(hours, null, null, cleanNote, null), now);
             } else {
+                // Hours and note only: the day-level write (and the week grid) never clears a title (CHQ-191).
                 JobEntity job = dayJobs.get(0);
                 job.hours = hours;
                 job.note = cleanNote;
@@ -162,7 +163,7 @@ public class EntryWriter {
         }
 
         HourEntryEntity entry = newEntry(access, target, date, hours, cleanNote, now);
-        newJob(access, entry, new JobInput(hours, null, cleanNote, null), now);
+        newJob(access, entry, new JobInput(hours, null, null, cleanNote, null), now);
         history(access, entry, EntryChangeKind.CREATED, null, hours, null, cleanNote, actor, now);
         if (notify) notifyChange(access, target, date, null, hours, cleanNote);
         return new Outcome(entry, true);
@@ -240,7 +241,7 @@ public class EntryWriter {
         }
         // A day written without jobs (only possible with rows from before V3) keeps its hours as a first job.
         if (dayJobs.isEmpty() && entry.hours.signum() > 0) {
-            newJob(access, entry, new JobInput(entry.hours, null, entry.note, null), now);
+            newJob(access, entry, new JobInput(entry.hours, null, null, entry.note, null), now);
         }
         JobEntity job = newJob(access, entry, input, now);
         job.recurrenceId = seriesId;
@@ -358,6 +359,7 @@ public class EntryWriter {
     private static void apply(JobEntity job, JobInput input) {
         job.hours = input.hours();
         job.startTime = input.startTime();
+        job.title = clean(input.title());
         job.note = clean(input.note());
         JobLocation location = input.location();
         job.placeId = location == null ? null : blankToNull(location.getPlaceId());
@@ -374,12 +376,13 @@ public class EntryWriter {
 
     private void notifyJob(Access access, MembershipEntity target, LocalDate date, JobChangeKind kind, JobEntity job) {
         notifications.jobChanged(access.workspace(), target.userId, target.id, access.userId(), access.membership().displayName,
-                new JobChange(job.id, date, kind, job.startTime == null ? null : job.startTime.format(EntryViews.HH_MM), job.placeName, job.hours));
+                new JobChange(job.id, date, kind, job.startTime == null ? null : job.startTime.format(EntryViews.HH_MM), job.title,
+                        job.placeName, job.hours));
     }
 
     // What a job edit can change, for telling a real change from the same values sent again.
     private static List<Object> jobValues(JobEntity job) {
-        return Arrays.asList(job.hours == null ? null : job.hours.stripTrailingZeros(), job.startTime, job.note, job.placeId,
+        return Arrays.asList(job.hours == null ? null : job.hours.stripTrailingZeros(), job.startTime, job.title, job.note, job.placeId,
                 job.placeName, job.placeAddress, job.latitude == null ? null : job.latitude.stripTrailingZeros(),
                 job.longitude == null ? null : job.longitude.stripTrailingZeros());
     }

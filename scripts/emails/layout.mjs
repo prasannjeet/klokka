@@ -172,5 +172,6 @@ export const digest = {
   lines: `role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"`,
   time: `class="k-muted" width="52" style="width:52px;padding:3px 0;font-family:${MONO};font-weight:700;font-size:12px;color:${C.muted};vertical-align:top;white-space:nowrap;"`,
   place: `class="k-text" style="padding:3px 8px 3px 0;font-family:${BODY};font-size:14px;line-height:1.4;color:${C.text};vertical-align:top;"`,
+  placeUnder: `class="k-muted" style="font-size:12px;color:${C.muted};"`,
   hours: `class="k-text" align="right" style="padding:3px 0;font-family:${BODY};font-weight:700;font-size:14px;color:${C.text};vertical-align:top;white-space:nowrap;"`,
 };

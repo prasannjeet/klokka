@@ -358,6 +358,46 @@ class NotificationAndPushTest {
         assertThat(replaced.body()).isEqualTo("Kafé Nord: Monday 28 Sept, 10:00");
     }
 
+    // CHQ-191: one job with a title names the title instead of its place; a payload without one reads as before.
+    @Test
+    void jobTextsNameTheTitleWhenTheJobHasOne() {
+        Map<String, Object> titled = jobSitting("2026-09-28", "ADDED", "09:00", "Café Nord");
+        titledJob(titled).put("title", "Window cleaning");
+        assertThat(jobs(titled, Language.EN).body()).isEqualTo("Kafé Nord: Monday 28 Sept, 09:00, Window cleaning");
+        assertThat(jobs(titled, Language.SV).body()).isEqualTo("Kafé Nord: måndag 28 sep kl. 09:00, Window cleaning");
+        Map<String, Object> noTime = jobSitting("2026-09-28", "CHANGED", null, null);
+        titledJob(noTime).put("title", "Window cleaning");
+        assertThat(jobs(noTime, Language.EN).body()).isEqualTo("Kafé Nord: Monday 28 Sept, Window cleaning");
+        // Positive control: a blank title is no title, the place line stays.
+        Map<String, Object> blank = jobSitting("2026-09-28", "ADDED", "09:00", "Café Nord");
+        titledJob(blank).put("title", " ");
+        assertThat(jobs(blank, Language.EN).body()).isEqualTo("Kafé Nord: Monday 28 Sept, 09:00 at Café Nord");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> titledJob(Map<String, Object> sitting) {
+        return (Map<String, Object>) ((Map<String, Object>) sitting.get("jobs")).values().iterator().next();
+    }
+
+    // A title-only edit is news, and the row's payload carries the title the push names.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aTitleOnlyEditIsNewsAndThePushNamesTheTitle() {
+        UUID entry = data.entry(ws, maria, java.time.LocalDate.parse("2026-09-14"), new BigDecimal("4"), null, NORA);
+        given().contentType("application/json").body("{\"hours\":4,\"title\":\"Window cleaning\"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + jobId(entry)).then().statusCode(200);
+        assertThat(jobRows()).containsExactly(List.of("JOB_CHANGED", "2026-09-14:CHANGED"));
+        assertThat(data.scalar("select j.value->>'title' from notification n, jsonb_each(n.payload->'jobs') j "
+                + "where n.logto_user_id = ? and n.workspace_id = ?", MARIA, ws)).isEqualTo("Window cleaning");
+        data.pushToken(MARIA, "ExponentPushToken[nt-title]");
+        clock.set(MutableClock.DEFAULT.plusSeconds(10 * 60 + 30));
+        sweeper.sweep();
+        List<Map<String, Object>> sent = messagesTo("ExponentPushToken[nt-title]");
+        assertThat(sent).hasSize(1);
+        assertThat(sent.get(0).get("body")).isEqualTo("Notify Corp: måndag 14 sep, Window cleaning");
+    }
+
     // An open-ended series is planned a year ahead, so its range spans two years and needs them to make sense.
     @Test
     void jobRangeAcrossYearsNamesTheYears() {

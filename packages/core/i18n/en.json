@@ -402,6 +402,10 @@
     "newSingleJobFor": "New single job for {name}",
     "singleSubtitle": "{date}, does not repeat",
     "date": "Date",
+    "jobTitle": "Title",
+    "jobTitlePlaceholder": "For example: Window cleaning",
+    "pickMember": "Who is the job for?",
+    "noEligibleMembers": "Add an employee to plan jobs.",
     "discardTitle": "Discard changes?",
     "discardBody": "What you entered for this job will be lost.",
     "keepEditing": "Keep editing",
@@ -678,6 +682,8 @@
       "title": "Job in {lead}",
       "titlePlaceTomorrow": "Job at {place} tomorrow at {time}",
       "titleTomorrow": "Job tomorrow at {time}",
+      "titleNamed": "{title} in {lead}",
+      "titleNamedTomorrow": "{title} tomorrow at {time}",
       "body": "{workspace}: starts {time}, {hours}.",
       "bodyAddress": "{workspace}: starts {time}, {hours}. {address}",
       "in15": "15 minutes",
@@ -699,6 +705,8 @@
       "whenTime": "{workspace}: {date}, {time}",
       "whenPlace": "{workspace}: {date} at {place}",
       "whenTimePlace": "{workspace}: {date}, {time} at {place}",
+      "whenTitle": "{workspace}: {date}, {title}",
+      "whenTimeTitle": "{workspace}: {date}, {time}, {title}",
       "range": "{workspace}: {from} to {to}",
       "more": "and {count} more"
     }
@@ -1064,7 +1072,8 @@
       "greeting": "Hi {name},",
       "digest": {
         "workspace": "{emoji} {workspace}",
-        "nothing": "No hours were logged last week."
+        "nothing": "No hours were logged last week.",
+        "jobWithPlace": "{title}, {place}"
       },
       "footer": "Klokka is free and open source. Everyone with a Klokka account gets this email on Mondays."
     },
@@ -1086,6 +1095,7 @@
       "start": "Start",
       "end": "End",
       "hours": "Hours",
+      "title": "Title",
       "place": "Place",
       "address": "Address",
       "note": "Note",

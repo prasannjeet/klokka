@@ -88,6 +88,8 @@ public class JobRecurrenceEntity {
     public BigDecimal hours;
     @Column(name = "start_time")
     public LocalTime startTime;
+    @Column(length = 120)
+    public String title;
     @Column(length = 500)
     public String note;
     @Column(name = "place_id", length = 300)

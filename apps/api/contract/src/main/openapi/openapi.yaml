@@ -3196,6 +3196,11 @@ components:
           description: Local time in the workspace time zone, `HH:mm`.
           pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
           example: '09:00'
+        title:
+          type: [string, 'null']
+          description: Optional short name of the job, shown as its main label; trimmed, blank is saved as null.
+          maxLength: 120
+          example: Window cleaning
         note:
           type: [string, 'null']
           maxLength: 500
@@ -3214,6 +3219,7 @@ components:
         id: 7b6a5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d
         hours: 4.5
         startTime: '09:00'
+        title: Window cleaning
         note: Opened, counter and dishes
         location:
           placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk
@@ -3244,6 +3250,11 @@ components:
           type: [string, 'null']
           pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]$'
           example: '09:00'
+        title:
+          type: [string, 'null']
+          description: Trimmed on save; blank or absent clears the title.
+          maxLength: 120
+          example: Window cleaning
         note:
           type: [string, 'null']
           maxLength: 500
@@ -3253,6 +3264,7 @@ components:
       example:
         hours: 4.5
         startTime: '09:00'
+        title: Window cleaning
         note: Opened, counter and dishes
         location:
           placeId: ChIJAy4wk7yGX0YRFBzaAG4pLGk

@@ -402,6 +402,10 @@
     "newSingleJobFor": "Nytt enstaka jobb för {name}",
     "singleSubtitle": "{date}, upprepas inte",
     "date": "Datum",
+    "jobTitle": "Titel",
+    "jobTitlePlaceholder": "Till exempel: Fönsterputs",
+    "pickMember": "Vem är jobbet för?",
+    "noEligibleMembers": "Lägg till en anställd för att kunna planera jobb.",
     "discardTitle": "Släng ändringarna?",
     "discardBody": "Det du har fyllt i för jobbet försvinner.",
     "keepEditing": "Fortsätt redigera",
@@ -678,6 +682,8 @@
       "title": "Jobb om {lead}",
       "titlePlaceTomorrow": "Jobb på {place} i morgon kl. {time}",
       "titleTomorrow": "Jobb i morgon kl. {time}",
+      "titleNamed": "{title} om {lead}",
+      "titleNamedTomorrow": "{title} i morgon kl. {time}",
       "body": "{workspace}: börjar {time}, {hours}.",
       "bodyAddress": "{workspace}: börjar {time}, {hours}. {address}",
       "in15": "15 minuter",
@@ -699,6 +705,8 @@
       "whenTime": "{workspace}: {date} kl. {time}",
       "whenPlace": "{workspace}: {date} på {place}",
       "whenTimePlace": "{workspace}: {date} kl. {time} på {place}",
+      "whenTitle": "{workspace}: {date}, {title}",
+      "whenTimeTitle": "{workspace}: {date} kl. {time}, {title}",
       "range": "{workspace}: {from} till {to}",
       "more": "och {count} till"
     }
@@ -1064,7 +1072,8 @@
       "greeting": "Hej {name},",
       "digest": {
         "workspace": "{emoji} {workspace}",
-        "nothing": "Inga timmar loggades förra veckan."
+        "nothing": "Inga timmar loggades förra veckan.",
+        "jobWithPlace": "{title}, {place}"
       },
       "footer": "Klokka är gratis och öppen källkod. Alla med ett Klokka-konto får det här mejlet på måndagar."
     },
@@ -1086,6 +1095,7 @@
       "start": "Start",
       "end": "Slut",
       "hours": "Timmar",
+      "title": "Titel",
       "place": "Plats",
       "address": "Adress",
       "note": "Anteckning",

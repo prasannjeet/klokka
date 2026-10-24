@@ -70,7 +70,7 @@ class RecurrenceExtenderTest {
 
     // An open weekly series from today on one weekday; returns its id.
     UUID openSeries(UUID membershipId, String weekday) {
-        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"note\":\"Weekly clean\",\"requestId\":\"" + UUID.randomUUID()
+        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Office clean\",\"note\":\"Weekly clean\",\"requestId\":\"" + UUID.randomUUID()
                 + "\",\"location\":{\"name\":\"Office\",\"latitude\":59.33,\"longitude\":18.06},"
                 + "\"recurrence\":{\"frequency\":\"WEEKLY\",\"interval\":1,\"weekdays\":[\"" + weekday + "\"]}}";
         given().contentType("application/json").body(body)
@@ -113,7 +113,7 @@ class RecurrenceExtenderTest {
                 + "and date '2027-10-31'", ws)).isZero();
         assertThat(data.count("select count(*) from job j join hour_entry e on e.workspace_id = j.workspace_id and e.id = j.entry_id "
                 + "where j.workspace_id = ? and e.work_date = date '2027-11-17' and j.hours = 3 and j.start_time = time '09:00' "
-                + "and j.note = 'Weekly clean' and j.place_name = 'Office' and j.latitude = 59.33 and j.created_by = ? "
+                + "and j.title = 'Office clean' and j.note = 'Weekly clean' and j.place_name = 'Office' and j.latitude = 59.33 and j.created_by = ? "
                 + "and e.hours = 3", ws, OWNER)).isEqualTo(1);
         assertThat(data.count("select count(*) from notification where workspace_id = ?", ws)).isZero();
 

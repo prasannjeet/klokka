@@ -18,7 +18,7 @@ import java.util.UUID;
 public class JobReminderRepository {
 
     public record Due(UUID workspaceId, UUID jobId, UUID entryId, UUID membershipId, String userId, LocalDate date,
-            LocalTime startTime, Instant startsAt, BigDecimal hours, String placeName, String placeAddress, String note,
+            LocalTime startTime, Instant startsAt, BigDecimal hours, String title, String placeName, String placeAddress, String note,
             String lead) {}
 
     @Inject
@@ -32,7 +32,7 @@ public class JobReminderRepository {
                 select * from (
                     select j.workspace_id, j.id as job_id, e.id as entry_id, e.membership_id, m.logto_user_id, e.work_date,
                            j.start_time, (e.work_date + j.start_time) at time zone w.timezone as starts_at, j.hours,
-                           j.place_name, j.place_address, j.note, p.job_reminder_lead,
+                           j.title, j.place_name, j.place_address, j.note, p.job_reminder_lead,
                            case p.job_reminder_lead
                                when 'MINUTES_15' then interval '15 minutes'
                                when 'MINUTES_30' then interval '30 minutes'
@@ -64,7 +64,7 @@ public class JobReminderRepository {
         return rows.stream().map(r -> new Due(
                 (UUID) r[0], (UUID) r[1], (UUID) r[2], (UUID) r[3], (String) r[4],
                 toDate(r[5]), toTime(r[6]), toInstant(r[7]), (BigDecimal) r[8],
-                (String) r[9], (String) r[10], (String) r[11], (String) r[12])).toList();
+                (String) r[9], (String) r[10], (String) r[11], (String) r[12], (String) r[13])).toList();
     }
 
     // True when this call recorded the reminder (false: an earlier sweep already did).

@@ -93,6 +93,7 @@ public final class EntryViews {
                 .id(j.id)
                 .hours(j.hours)
                 .startTime(j.startTime == null ? null : j.startTime.format(HH_MM))
+                .title(j.title)
                 .note(j.note)
                 .createdAt(j.createdAt.atOffset(ZoneOffset.UTC))
                 .updatedAt(j.updatedAt.atOffset(ZoneOffset.UTC));

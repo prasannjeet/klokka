@@ -43,8 +43,8 @@ public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
     }
 
     // One line of the weekly digest (CHQ-189): a job, or a day without jobs as one line with the day's hours and note.
-    public record WeekJob(UUID membershipId, String memberName, LocalDate date, LocalTime start, BigDecimal hours, String placeName,
-            String placeAddress, String note, boolean recurring) {}
+    public record WeekJob(UUID membershipId, String memberName, LocalDate date, LocalTime start, BigDecimal hours, String title,
+            String placeName, String placeAddress, String note, boolean recurring) {}
 
     // The live days in [from, to] of one member (or every member when membershipId is null), one row per job and one
     // row for a day without jobs, by member name, date, start time (none last) and the order the jobs were added.
@@ -62,10 +62,10 @@ public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
         return query.getResultStream().map(row -> {
             JobEntity job = (JobEntity) row[5];
             if (job == null) {
-                return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], null, (BigDecimal) row[3], null, null, (String) row[4], false);
+                return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], null, (BigDecimal) row[3], null, null, null, (String) row[4], false);
             }
-            return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], job.startTime, job.hours, job.placeName, job.placeAddress,
-                    job.note, job.recurrenceId != null);
+            return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], job.startTime, job.hours, job.title, job.placeName,
+                    job.placeAddress, job.note, job.recurrenceId != null);
         }).toList();
     }
 

@@ -18,3 +18,25 @@ export function jobStatus(
   if (minutesNow < start) return 'later';
   return minutesNow < start + Math.round(job.hours * 60) ? 'now' : 'done';
 }
+
+// The fields a job's label reads (the contract's Job fits it).
+export type JobLike = { title?: string | null; location?: { name: string } | null };
+
+// A job's main label on every surface (CHQ-191): its title, else its place's name, else null (the caller shows
+// "1 job" or "No place"). The API's push, digest and workbook use the same rule (JobLabels.java).
+export function jobLabel(job: JobLike): string | null {
+  const title = job.title?.trim();
+  if (title) return title;
+  const place = job.location?.name.trim();
+  return place ? place : null;
+}
+
+// The distinct labels of a day's jobs, in order (titles and places alike); jobs with neither are left out.
+export function jobLabels(jobs: readonly JobLike[]): string[] {
+  const out: string[] = [];
+  for (const job of jobs) {
+    const label = jobLabel(job);
+    if (label !== null && !out.includes(label)) out.push(label);
+  }
+  return out;
+}

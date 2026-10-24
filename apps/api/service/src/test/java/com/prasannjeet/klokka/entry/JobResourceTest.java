@@ -152,6 +152,47 @@ class JobResourceTest {
                 .body("avgPerWorkingDay", is(0.47f));
     }
 
+    // CHQ-191: an optional title, trimmed, blank saved as null, at most 120 characters; a regular job field (left out
+    // is cleared), and the day-level writes (single PUT and the week grid) never clear it.
+    @Test
+    @TestSecurity(user = NORA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
+    void aJobKeepsItsTitleUntilAJobWriteChangesIt() {
+        String job = given().contentType("application/json")
+                .body("{\"hours\":3,\"title\":\"  Window cleaning \",\"location\":" + CAFE + "}")
+                .when().post(jobs("2026-09-25")).then().statusCode(201)
+                .body("jobs[0].title", is("Window cleaning")).body("jobs[0].location.name", is("Café Nord"))
+                .extract().path("jobs[0].id");
+        given().when().get("/v1/workspaces/" + ws + "/entries?from=2026-09-25&to=2026-09-25").then().statusCode(200)
+                .body("[0].jobs[0].title", is("Window cleaning"));
+
+        // The day-level PUT and the week grid change hours and note only.
+        given().contentType("application/json").body("{\"hours\":4,\"note\":\"Longer\"}")
+                .when().put("/v1/workspaces/" + ws + "/members/" + maria + "/entries/2026-09-25").then().statusCode(200)
+                .body("jobs[0].hours", is(4.0f)).body("jobs[0].title", is("Window cleaning"));
+        given().contentType("application/json")
+                .body("{\"items\":[{\"membershipId\":\"" + maria + "\",\"workDate\":\"2026-09-25\",\"hours\":5}]}")
+                .when().post("/v1/workspaces/" + ws + "/entries/batch").then().statusCode(200);
+        assertThat(data.query("select hours, title from job where id = ?", UUID.fromString(job)).getFirst())
+                .containsExactly(new BigDecimal("5.00"), "Window cleaning");
+
+        // 120 characters are taken, 121 refused with the standard validation problem (the job keeps its title).
+        String max = "a".repeat(120);
+        given().contentType("application/json").body("{\"hours\":5,\"title\":\"" + max + "a\"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(400)
+                .body("code", is("VALIDATION")).body("errors[0].field", is("title"));
+        given().contentType("application/json").body("{\"hours\":5,\"title\":\"" + max + "\"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", is(max));
+        // Blank is saved as null; a job write without the field clears it.
+        given().contentType("application/json").body("{\"hours\":5,\"title\":\"   \"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", nullValue());
+        assertThat(data.scalar("select title from job where id = ?", UUID.fromString(job))).isNull();
+        given().contentType("application/json").body("{\"hours\":5,\"title\":\"Windows\"}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", is("Windows"));
+        given().contentType("application/json").body("{\"hours\":5}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", nullValue());
+    }
+
     @Test
     @TestSecurity(user = MARIA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})

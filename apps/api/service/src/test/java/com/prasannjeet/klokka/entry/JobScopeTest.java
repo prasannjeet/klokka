@@ -112,6 +112,35 @@ class JobScopeTest {
                 + "and start_time is null", ws)).isEqualTo(1);
     }
 
+    // CHQ-191: a series carries its title to every job and to the template; a this-and-following title change
+    // reaches only those jobs and becomes the template's title.
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void aSeriesTitleReachesEveryJobAndAThisAndFollowingChangeOnlyThose() {
+        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Window cleaning\",\"requestId\":\"" + UUID.randomUUID()
+                + "\",\"recurrence\":" + EIGHT_WEDNESDAYS + "}";
+        String first = given().contentType("application/json").body(body)
+                .post(base() + "/members/" + member + "/entries/2026-09-23/jobs").then().statusCode(201)
+                .body("jobs[0].title", is("Window cleaning")).extract().path("jobs[0].id");
+        UUID series = (UUID) data.scalar("select recurrence_id from job where workspace_id = ? and id = ?", ws, UUID.fromString(first));
+        assertThat(titles(series)).containsOnly("Window cleaning").hasSize(8);
+        assertThat(data.scalar("select title from job_recurrence where workspace_id = ? and id = ?", ws, series)).isEqualTo("Window cleaning");
+
+        given().contentType("application/json").body("{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Deep clean\"}")
+                .put(base() + "/jobs/" + jobOn("2026-10-14") + "?scope=THIS_AND_FUTURE").then().statusCode(200)
+                .body("jobs[0].title", is("Deep clean"));
+        assertThat(titles(series)).containsExactly("Window cleaning", "Window cleaning", "Window cleaning", "Deep clean", "Deep clean",
+                "Deep clean", "Deep clean", "Deep clean");
+        assertThat(data.scalar("select title from job_recurrence where workspace_id = ? and id = ?", ws, series)).isEqualTo("Deep clean");
+    }
+
+    List<String> titles(UUID series) {
+        return data.query("select j.title from job j join hour_entry e on e.workspace_id = j.workspace_id and e.id = j.entry_id "
+                + "where j.workspace_id = ? and j.recurrence_id = ? and e.deleted_at is null order by e.work_date",
+                ws, series).stream().map(r -> (String) r.getFirst()).toList();
+    }
+
     @Test
     @TestSecurity(user = OWNER)
     @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))

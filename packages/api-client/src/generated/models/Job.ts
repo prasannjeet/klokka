@@ -51,6 +51,10 @@ export interface Job {
      */
     startTime?: string | null;
     /**
+     * Optional short name of the job, shown as its main label; trimmed, blank is saved as null.
+     */
+    title?: string | null;
+    /**
      * 
      */
     note?: string | null;
@@ -93,6 +97,7 @@ export function JobFromJSONTyped(json: any, ignoreDiscriminator: boolean): Job {
         'hours': json['hours'],
         'recurrence': json['recurrence'] == null ? undefined : JobRecurrenceFromJSON(json['recurrence']),
         'startTime': json['startTime'] === undefined ? undefined : json['startTime'] === null ? null : json['startTime'],
+        'title': json['title'] === undefined ? undefined : json['title'] === null ? null : json['title'],
         'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
         'location': json['location'] == null ? undefined : JobLocationFromJSON(json['location']),
         'createdAt': (json['createdAt'] == null ? json['createdAt'] : parseDateTime(json['createdAt'])),
@@ -115,6 +120,7 @@ export function JobToJSONTyped(value?: Job | null, ignoreDiscriminator: boolean 
         'hours': value['hours'],
         'recurrence': JobRecurrenceToJSON(value['recurrence']),
         'startTime': value['startTime'],
+        'title': value['title'],
         'note': value['note'],
         'location': JobLocationToJSON(value['location']),
         'createdAt': value['createdAt'] == null ? value['createdAt'] : serializeDateTime(value['createdAt']),

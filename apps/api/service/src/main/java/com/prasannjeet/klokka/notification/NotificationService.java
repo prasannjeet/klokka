@@ -42,7 +42,8 @@ public class NotificationService {
     public enum JobChangeKind { ADDED, CHANGED, REMOVED }
 
     // One job write as the employee hears about it: the job's values after the write (before it, for a removal).
-    public record JobChange(UUID jobId, LocalDate date, JobChangeKind kind, String startTime, String placeName, BigDecimal hours) {}
+    public record JobChange(UUID jobId, LocalDate date, JobChangeKind kind, String startTime, String title, String placeName,
+            BigDecimal hours) {}
 
     @Inject
     NotificationRepository repository;
@@ -132,6 +133,7 @@ public class NotificationService {
             merged.put("date", change.date().toString());
             merged.put("kind", kind.name());
             merged.put("startTime", change.startTime());
+            merged.put("title", change.title());
             merged.put("placeName", change.placeName());
             merged.put("hours", change.hours());
             jobs.put(jobId, merged);
@@ -222,13 +224,14 @@ public class NotificationService {
 
     // Pushed now (the reminder sweep decided it is due); not coalesced, one row per job and start.
     public void jobReminder(WorkspaceEntity workspace, String recipientUserId, UUID membershipId, UUID entryId, LocalDate date,
-            String startTime, BigDecimal hours, String placeName, String placeAddress, String note, String lead) {
+            String startTime, BigDecimal hours, String title, String placeName, String placeAddress, String note, String lead) {
         Map<String, Object> payload = base(workspace, "");
         payload.put("membershipId", membershipId.toString());
         payload.put("entryId", entryId.toString());
         payload.put("date", date.toString());
         payload.put("startTime", startTime);
         payload.put("hours", hours);
+        payload.put("title", title);
         payload.put("placeName", placeName);
         payload.put("placeAddress", placeAddress);
         payload.put("note", note);

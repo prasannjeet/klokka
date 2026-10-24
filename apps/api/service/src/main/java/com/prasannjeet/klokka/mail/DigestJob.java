@@ -7,6 +7,7 @@ import com.prasannjeet.klokka.contract.model.Language;
 import com.prasannjeet.klokka.contract.model.MemberStatus;
 import com.prasannjeet.klokka.contract.model.Role;
 import com.prasannjeet.klokka.domain.WorkspaceId;
+import com.prasannjeet.klokka.entry.JobLabels;
 import com.prasannjeet.klokka.i18n.Catalogue;
 import com.prasannjeet.klokka.i18n.Formats;
 import com.prasannjeet.klokka.i18n.Text;
@@ -217,7 +218,7 @@ public class DigestJob {
                         days.add(new DigestMail.DayJobs(label, day.getValue()));
                         lines.append(label).append('\n');
                         for (DigestMail.JobLine job : day.getValue()) {
-                            lines.append("  ").append(job.time().isEmpty() ? "" : job.time() + "  ").append(job.place()).append("  ").append(job.hours()).append('\n');
+                            lines.append("  ").append(job.time().isEmpty() ? "" : job.time() + "  ").append(plainLabel(job, lang)).append("  ").append(job.hours()).append('\n');
                         }
                     }
                     people.add(new DigestMail.PersonJobs(name, total, days));
@@ -345,8 +346,16 @@ public class DigestJob {
     }
 
     private DigestMail.JobLine jobLine(WeekJob job, Language lang) {
+        String label = JobLabels.label(job.title(), job.placeName());
         return new DigestMail.JobLine(job.start() == null ? "" : job.start().format(TIME),
-                job.placeName() != null ? job.placeName() : catalogue.t(lang, Text.DIGEST_NO_PLACE.key()), hours(job.hours(), lang, catalogue));
+                label != null ? label : catalogue.t(lang, Text.DIGEST_NO_PLACE.key()), JobLabels.secondLine(job.title(), job.placeName()),
+                hours(job.hours(), lang, catalogue));
+    }
+
+    // The plain-text line's label: "Window cleaning, Café Nord" when a title and a place are both there.
+    private String plainLabel(DigestMail.JobLine job, Language lang) {
+        return job.place() == null ? job.label()
+                : catalogue.t(lang, Text.EMAIL_DIGEST_JOB_WITH_PLACE.key(), Map.of("title", job.label(), "place", job.place()));
     }
 
     // Monday to Sunday: short weekday, the day's hours or "off", and the busiest day marked.

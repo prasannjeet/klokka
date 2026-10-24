@@ -30,7 +30,7 @@ class SchemaMigrationTest {
 
     @Test
     void theBaselineIsAppliedAndNothingIsPending() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("7");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("8");
         assertThat(flyway.info().pending()).isEmpty();
     }
 

@@ -35,20 +35,21 @@ class DigestWorkbookTest {
     @Test
     void theEmployerWorkbookListsEveryJobWithTotalsAndPay() throws IOException {
         DigestWeek week = new DigestWeek(workspace(true), true, MONDAY, List.of(
-                new WeekJob(ANNA, "Anna Berg", MONDAY, LocalTime.of(9, 0), new BigDecimal("4.00"), "Café Nord", "Storgatan 1", null, true),
-                new WeekJob(ANNA, "Anna Berg", MONDAY.plusDays(2), null, new BigDecimal("2.50"), null, null, "Inventory", false),
-                new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(8, 0), new BigDecimal("3.00"), "Kafé Syd", null, null, false),
-                new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(13, 30), new BigDecimal("1.50"), "Café Nord", null, "=HYPERLINK(\"x\")", false)),
+                new WeekJob(ANNA, "Anna Berg", MONDAY, LocalTime.of(9, 0), new BigDecimal("4.00"), "Window cleaning", "Café Nord", "Storgatan 1", null, true),
+                new WeekJob(ANNA, "Anna Berg", MONDAY.plusDays(2), null, new BigDecimal("2.50"), null, null, null, "Inventory", false),
+                new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(8, 0), new BigDecimal("3.00"), null, "Kafé Syd", null, null, false),
+                new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(13, 30), new BigDecimal("1.50"), null, "Café Nord", null, "=HYPERLINK(\"x\")", false)),
                 List.of(new DigestWeek.Member(ANNA, "Anna Berg", new BigDecimal("150.00")), new DigestWeek.Member(MARIA, "Maria Lind", null)),
                 true);
 
         try (ReadableWorkbook workbook = read(week, Language.EN)) {
             assertThat(workbook.getSheets().map(Sheet::getName).toList()).containsExactly("Jobs", "Hours");
             List<Row> jobs = rows(workbook, "Jobs");
-            assertThat(texts(jobs.get(0), 10)).containsExactly("Employee", "Date", "Weekday", "Start", "End", "Hours", "Place", "Address", "Note",
-                    "Recurring");
+            // The title right after the hours, before the place (CHQ-191).
+            assertThat(texts(jobs.get(0), 11)).containsExactly("Employee", "Date", "Weekday", "Start", "End", "Hours", "Title", "Place", "Address",
+                    "Note", "Recurring");
             assertThat(jobs).hasSize(7);
-            // Anna's job at Café Nord: a real date, time cells, two-decimal hours, recurring.
+            // Anna's window cleaning at Café Nord: a real date, time cells, two-decimal hours, recurring.
             Row first = jobs.get(1);
             assertThat(first.getCellText(0)).isEqualTo("Anna Berg");
             assertThat(first.getCellAsDate(1)).contains(LocalDateTime.of(2026, 10, 19, 0, 0));
@@ -58,23 +59,24 @@ class DigestWorkbookTest {
             assertThat(first.getCellAsDate(4).orElseThrow().toLocalTime()).isEqualTo(LocalTime.of(13, 0));
             assertThat(number(first, 5)).isEqualTo("4");
             assertThat(first.getCell(5).getDataFormatString()).isEqualTo("0.00");
-            assertThat(texts(first, 10).subList(6, 10)).containsExactly("Café Nord", "Storgatan 1", "", "Yes");
+            assertThat(texts(first, 11).subList(6, 11)).containsExactly("Window cleaning", "Café Nord", "Storgatan 1", "", "Yes");
             // A day without jobs is one row with the day's hours and note, no start or place.
             Row noJobs = jobs.get(2);
             assertThat(noJobs.getCellText(2)).isEqualTo("Wednesday");
             assertThat(noJobs.getCellText(3)).isEmpty();
             assertThat(number(noJobs, 5)).isEqualTo("2.5");
-            assertThat(noJobs.getCellText(8)).isEqualTo("Inventory");
-            assertThat(noJobs.getCellText(9)).isEqualTo("No");
+            assertThat(noJobs.getCellText(6)).isEmpty();
+            assertThat(noJobs.getCellText(9)).isEqualTo("Inventory");
+            assertThat(noJobs.getCellText(10)).isEqualTo("No");
             // Anna's total row, then Maria's two jobs (by start time) and her total.
             assertThat(jobs.get(3).getCellText(0)).isEqualTo("Anna Berg");
             assertThat(jobs.get(3).getCellText(1)).isEqualTo("Total");
             assertThat(number(jobs.get(3), 5)).isEqualTo("6.5");
-            assertThat(jobs.get(4).getCellText(6)).isEqualTo("Kafé Syd");
-            assertThat(jobs.get(5).getCellText(6)).isEqualTo("Café Nord");
+            assertThat(jobs.get(4).getCellText(7)).isEqualTo("Kafé Syd");
+            assertThat(jobs.get(5).getCellText(7)).isEqualTo("Café Nord");
             // Typed text stays a string cell, never a formula.
-            assertThat(jobs.get(5).getCellText(8)).isEqualTo("=HYPERLINK(\"x\")");
-            assertThat(jobs.get(5).getCell(8).getFormula()).isNull();
+            assertThat(jobs.get(5).getCellText(9)).isEqualTo("=HYPERLINK(\"x\")");
+            assertThat(jobs.get(5).getCell(9).getFormula()).isNull();
             assertThat(jobs.get(6).getCellText(1)).isEqualTo("Total");
             assertThat(number(jobs.get(6), 5)).isEqualTo("4.5");
 
@@ -96,8 +98,8 @@ class DigestWorkbookTest {
     @Test
     void theTeamPayIsTheSumWhenEveryoneWithHoursHasARate() throws IOException {
         DigestWeek week = new DigestWeek(workspace(true), true, MONDAY, List.of(
-                new WeekJob(ANNA, "Anna Berg", MONDAY, null, new BigDecimal("4.00"), null, null, null, false),
-                new WeekJob(MARIA, "Maria Lind", MONDAY.plusDays(1), null, new BigDecimal("2.00"), null, null, null, false)),
+                new WeekJob(ANNA, "Anna Berg", MONDAY, null, new BigDecimal("4.00"), null, null, null, null, false),
+                new WeekJob(MARIA, "Maria Lind", MONDAY.plusDays(1), null, new BigDecimal("2.00"), null, null, null, null, false)),
                 List.of(new DigestWeek.Member(ANNA, "Anna Berg", new BigDecimal("150.00")), new DigestWeek.Member(MARIA, "Maria Lind", new BigDecimal("200.00"))),
                 true);
         try (ReadableWorkbook workbook = read(week, Language.EN)) {
@@ -112,10 +114,11 @@ class DigestWorkbookTest {
     @Test
     void withoutPayTheHoursSheetHasNoPayColumn() throws IOException {
         DigestWeek week = new DigestWeek(workspace(false), true, MONDAY,
-                List.of(new WeekJob(ANNA, "Anna Berg", MONDAY, null, new BigDecimal("8.00"), null, null, null, false)),
+                List.of(new WeekJob(ANNA, "Anna Berg", MONDAY, null, new BigDecimal("8.00"), null, null, null, null, false)),
                 List.of(new DigestWeek.Member(ANNA, "Anna Berg", new BigDecimal("150.00"))), false);
         try (ReadableWorkbook workbook = read(week, Language.SV)) {
             assertThat(workbook.getSheets().map(Sheet::getName).toList()).containsExactly("Jobb", "Timmar");
+            assertThat(rows(workbook, "Jobb").get(0).getCellText(6)).isEqualTo("Titel");
             List<Row> hours = rows(workbook, "Timmar");
             assertThat(hours.get(0).getCellCount()).isEqualTo(9);
             assertThat(hours.get(0).getCellText(1)).isEqualTo("Mån 19/10");
@@ -126,7 +129,7 @@ class DigestWorkbookTest {
 
     @Test
     void theEmployeeWorkbookHasOnlyTheirRowsAndNoTeamRow() throws IOException {
-        List<WeekJob> own = List.of(new WeekJob(MARIA, "Maria Lind", MONDAY.plusDays(4), LocalTime.of(10, 0), new BigDecimal("6.00"), "Kafé Syd",
+        List<WeekJob> own = List.of(new WeekJob(MARIA, "Maria Lind", MONDAY.plusDays(4), LocalTime.of(10, 0), new BigDecimal("6.00"), null, "Kafé Syd",
                 null, null, false));
         List<DigestWeek.Member> self = List.of(new DigestWeek.Member(MARIA, "Maria Lind", new BigDecimal("170.00")));
         // Pay on and an own rate: the employee sees their pay.
@@ -148,7 +151,7 @@ class DigestWorkbookTest {
     @Test
     void aNightJobEndsAfterMidnight() throws IOException {
         DigestWeek week = new DigestWeek(workspace(false), false, MONDAY,
-                List.of(new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(22, 0), new BigDecimal("3.75"), null, null, null, false)),
+                List.of(new WeekJob(MARIA, "Maria Lind", MONDAY, LocalTime.of(22, 0), new BigDecimal("3.75"), null, null, null, null, false)),
                 List.of(new DigestWeek.Member(MARIA, "Maria Lind", null)), false);
         try (ReadableWorkbook workbook = read(week, Language.EN)) {
             assertThat(rows(workbook, "Jobs").get(1).getCellAsDate(4).orElseThrow().toLocalTime()).isEqualTo(LocalTime.of(1, 45));

@@ -87,15 +87,18 @@ public class NotificationTexts {
         };
     }
 
-    // "Job at Café Nord in 1 hour" / "Job tomorrow at 09:00", then where, when and how long (CHQ-156).
+    // "Job at Café Nord in 1 hour" / "Job tomorrow at 09:00", then where, when and how long (CHQ-156). A job with a
+    // title is named by it, "Window cleaning in 1 hour" (CHQ-191); the place stays in the body's address.
     private Rendered jobReminder(Map<String, Object> payload, Language lang, String where) {
+        String named = strOrNull(payload, "title");
         String place = strOrNull(payload, "placeName");
         String time = str(payload, "startTime");
         String lead = str(payload, "lead");
         String title;
         if ("DAY_BEFORE".equals(lead)) {
-            title = place == null ? t(lang, Text.JOB_REMINDER_TITLE_TOMORROW, Map.of("time", time))
-                    : t(lang, Text.JOB_REMINDER_TITLE_PLACE_TOMORROW, Map.of("place", place, "time", time));
+            if (named != null) title = t(lang, Text.JOB_REMINDER_TITLE_NAMED_TOMORROW, Map.of("title", named, "time", time));
+            else if (place == null) title = t(lang, Text.JOB_REMINDER_TITLE_TOMORROW, Map.of("time", time));
+            else title = t(lang, Text.JOB_REMINDER_TITLE_PLACE_TOMORROW, Map.of("place", place, "time", time));
         } else {
             String in = t(lang, switch (lead) {
                 case "MINUTES_15" -> Text.JOB_REMINDER_IN_15;
@@ -103,8 +106,9 @@ public class NotificationTexts {
                 case "HOURS_2" -> Text.JOB_REMINDER_IN_120;
                 default -> Text.JOB_REMINDER_IN_60;
             }, Map.of());
-            title = place == null ? t(lang, Text.JOB_REMINDER_TITLE, Map.of("lead", in))
-                    : t(lang, Text.JOB_REMINDER_TITLE_PLACE, Map.of("place", place, "lead", in));
+            if (named != null) title = t(lang, Text.JOB_REMINDER_TITLE_NAMED, Map.of("title", named, "lead", in));
+            else if (place == null) title = t(lang, Text.JOB_REMINDER_TITLE, Map.of("lead", in));
+            else title = t(lang, Text.JOB_REMINDER_TITLE_PLACE, Map.of("place", place, "lead", in));
         }
         String hoursText = hours(decimal(payload.get("hours")), lang, catalogue);
         String address = strOrNull(payload, "placeAddress");
@@ -175,9 +179,10 @@ public class NotificationTexts {
     private static final int LISTED_JOBS = 5;
 
     // What one job's write in a sitting reads as (CHQ-188): its date, kind and the values shown.
-    public record JobNews(LocalDate date, String kind, String startTime, String placeName) {}
+    public record JobNews(LocalDate date, String kind, String startTime, String title, String placeName) {}
 
-    // One sitting's job writes: {jobId -> {date, kind, startTime, placeName, hours}} (CHQ-188), counted per job. On a
+    // One sitting's job writes: {jobId -> {date, kind, startTime, title, placeName, hours}} (CHQ-188), counted per job.
+    // One job with a title names the title instead of its place (CHQ-191); rows written before have no title. On a
     // date where jobs were both removed and added (a schedule change replaces a date's job with a new one), each
     // removed and added pair reads as one changed job with the added one's values. One job says what happened and
     // when; several count them (a mix of kinds reads as changed), name the date or give the range, and list the
@@ -197,9 +202,13 @@ public class NotificationTexts {
             };
             String date = dayDate(only.date(), lang);
             String time = only.startTime();
+            String named = only.title();
             String place = only.placeName();
             String body;
-            if (time == null && place == null) body = t(lang, Text.JOBS_WHEN, Map.of("workspace", where, "date", date));
+            if (named != null) {
+                body = time == null ? t(lang, Text.JOBS_WHEN_TITLE, Map.of("workspace", where, "date", date, "title", named))
+                        : t(lang, Text.JOBS_WHEN_TIME_TITLE, Map.of("workspace", where, "date", date, "time", time, "title", named));
+            } else if (time == null && place == null) body = t(lang, Text.JOBS_WHEN, Map.of("workspace", where, "date", date));
             else if (place == null) body = t(lang, Text.JOBS_WHEN_TIME, Map.of("workspace", where, "date", date, "time", time));
             else if (time == null) body = t(lang, Text.JOBS_WHEN_PLACE, Map.of("workspace", where, "date", date, "place", place));
             else body = t(lang, Text.JOBS_WHEN_TIME_PLACE, Map.of("workspace", where, "date", date, "time", time, "place", place));
@@ -236,7 +245,7 @@ public class NotificationTexts {
             int pairs = Math.min(added.size(), removed.size());
             for (int i = 0; i < pairs; i++) {
                 JobNews now = added.get(i);
-                out.add(new JobNews(now.date(), "CHANGED", now.startTime(), now.placeName()));
+                out.add(new JobNews(now.date(), "CHANGED", now.startTime(), now.title(), now.placeName()));
             }
             out.addAll(added.subList(pairs, added.size()));
             out.addAll(removed.subList(pairs, removed.size()));
@@ -253,7 +262,8 @@ public class NotificationTexts {
         if (!(raw instanceof Map<?, ?> map)) return out;
         for (Object value : map.values()) {
             Map<String, Object> job = (Map<String, Object>) value;
-            out.add(new JobNews(LocalDate.parse(str(job, "date")), str(job, "kind"), strOrNull(job, "startTime"), strOrNull(job, "placeName")));
+            out.add(new JobNews(LocalDate.parse(str(job, "date")), str(job, "kind"), strOrNull(job, "startTime"), strOrNull(job, "title"),
+                    strOrNull(job, "placeName")));
         }
         out.sort(Comparator.comparing(JobNews::date).thenComparing(JobNews::startTime, Comparator.nullsLast(Comparator.naturalOrder())));
         return out;

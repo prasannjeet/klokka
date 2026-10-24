@@ -62,7 +62,7 @@ public class JobReminderJob {
         if (!reminders.markSent(d.workspaceId(), d.jobId(), d.startsAt(), now)) return false;
         WorkspaceEntity workspace = em.find(WorkspaceEntity.class, d.workspaceId());
         notifications.jobReminder(workspace, d.userId(), d.membershipId(), d.entryId(), d.date(),
-                d.startTime().format(EntryViews.HH_MM), d.hours(), d.placeName(), d.placeAddress(), d.note(), d.lead());
+                d.startTime().format(EntryViews.HH_MM), d.hours(), d.title(), d.placeName(), d.placeAddress(), d.note(), d.lead());
         return true;
     }
 }

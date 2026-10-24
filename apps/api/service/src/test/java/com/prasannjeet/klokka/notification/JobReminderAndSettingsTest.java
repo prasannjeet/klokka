@@ -128,6 +128,23 @@ class JobReminderAndSettingsTest {
                 .body("jobReminders", is(false)).body("jobReminderLead", is("DAY_BEFORE"));
     }
 
+    // CHQ-191: a job with a title is named by it; the place stays in the body's address.
+    @Test
+    @TestSecurity(user = MARIA)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = MARIA)})
+    void aReminderNamesTheJobsTitle() {
+        UUID entry = seedJob();
+        data.run("update job set title = 'Window cleaning' where entry_id = ?", entry);
+        clock.set(Instant.parse("2026-09-24T06:01:00Z"));
+        // The sweep covers every workspace on the shared database; this test reads only its own.
+        job.sweep();
+        assertThat(reminders()).isEqualTo(1);
+        given().when().get("/v1/notifications?workspaceId=" + ws).then().statusCode(200)
+                .body("items[0].title", is("Window cleaning in 1 hour"))
+                .body("items[0].body", is("Reminders AB: starts 09:00, 4.5 h. Kungsgatan 12"))
+                .body("items[0].payload.title", is("Window cleaning"));
+    }
+
     @Test
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})

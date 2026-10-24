@@ -37,7 +37,9 @@ public record DigestMail(String lang, String subject, String title1, String titl
     @TemplateData
     public record DayJobs(String label, List<JobLine> jobs) {}
 
-    // "09:00", "Café Nord", "4 h"; time is empty for a job without a start.
+    // "09:00", "Café Nord", "4 h"; time is empty for a job without a start. With a title (CHQ-191) the label is the
+    // title and `place` its place, shown muted under it; otherwise the label is the place (or "No place") and `place`
+    // is null.
     @TemplateData
-    public record JobLine(String time, String place, String hours) {}
+    public record JobLine(String time, String label, String place, String hours) {}
 }

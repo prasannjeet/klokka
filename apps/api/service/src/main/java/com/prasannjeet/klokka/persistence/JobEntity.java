@@ -37,6 +37,10 @@ public class JobEntity {
     @Column(name = "start_time")
     public LocalTime startTime;
 
+    // Optional; trimmed, blank stored as NULL (CHQ-191).
+    @Column(length = 120)
+    public String title;
+
     @Column(length = 500)
     public String note;
 

@@ -101,6 +101,10 @@ class DigestJobTest {
         assertThat(job.run().sent()).isZero();
         assertThat(mailbox.getTotalMessagesSent()).isZero();
 
+        // CHQ-191: Friday's job has a title and a place; Monday's has neither (positive control: "No place").
+        data.run("update job set title = 'Window cleaning', place_name = 'Café Nord', latitude = 59.33, longitude = 18.06 "
+                + "where entry_id in (select id from hour_entry where workspace_id = ? and work_date = '2026-09-18')", ws);
+
         // 07:15 in Stockholm: both opted-in users get last week's digest, each in their language.
         clock.set(Instant.parse("2026-09-21T05:15:00Z"));
         DigestJob.Result result = job.run();
@@ -134,7 +138,10 @@ class DigestJobTest {
         assertThat(sv).doesNotContain("Teamet den här veckan").contains(">Jobb<").contains("Ingen plats").contains(">6,5 h<")
                 .contains("Förra veckan i Excel: klokka-" + slug + "-2026-W38.xlsx");
         assertThat(toNora.get(0).getText()).contains("Team this week").contains("Maria Lind: Mon 4, Fri 6.5 (10.5 h)").contains("Jobs")
-                .contains("Mon 14 Sept").contains("  No place  4 h");
+                .contains("Mon 14 Sept").contains("  No place  4 h").contains("  Window cleaning, Café Nord  6.5 h");
+        // The title leads the line, its place muted underneath.
+        assertThat(en).containsPattern(">Window cleaning<br><span class=\"k-muted\"[^>]*>Café Nord</span>");
+        assertThat(sv).contains("Window cleaning<br>");
         // One workbook per workspace, parsed back: the employer's lists Maria's two days and a total.
         Attachment file = toNora.get(0).getAttachments().getFirst();
         assertThat(toNora.get(0).getAttachments()).hasSize(1);
@@ -144,6 +151,8 @@ class DigestJobTest {
             assertThat(workbook.getSheets().map(Sheet::getName).toList()).containsExactly("Jobs", "Hours");
             List<Row> jobs = workbook.findSheet("Jobs").orElseThrow().read();
             assertThat(jobs).hasSize(4);
+            assertThat(jobs.get(2).getCellText(6)).isEqualTo("Window cleaning");
+            assertThat(jobs.get(2).getCellText(7)).isEqualTo("Café Nord");
             assertThat(jobs.get(3).getCellText(1)).isEqualTo("Total");
             assertThat(jobs.get(3).getCellAsNumber(5).orElseThrow()).isEqualByComparingTo("10.5");
             assertThat(workbook.findSheet("Hours").orElseThrow().read()).hasSize(3);

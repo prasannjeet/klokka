@@ -51,6 +51,10 @@ export interface JobWrite {
      */
     startTime?: string | null;
     /**
+     * Trimmed on save; blank or absent clears the title.
+     */
+    title?: string | null;
+    /**
      * 
      */
     note?: string | null;
@@ -82,6 +86,7 @@ export function JobWriteFromJSONTyped(json: any, ignoreDiscriminator: boolean): 
         'recurrence': json['recurrence'] == null ? undefined : JobRecurrenceRuleFromJSON(json['recurrence']),
         'requestId': json['requestId'] == null ? undefined : json['requestId'],
         'startTime': json['startTime'] === undefined ? undefined : json['startTime'] === null ? null : json['startTime'],
+        'title': json['title'] === undefined ? undefined : json['title'] === null ? null : json['title'],
         'note': json['note'] === undefined ? undefined : json['note'] === null ? null : json['note'],
         'location': json['location'] == null ? undefined : JobLocationFromJSON(json['location']),
     };
@@ -102,6 +107,7 @@ export function JobWriteToJSONTyped(value?: JobWrite | null, ignoreDiscriminator
         'recurrence': JobRecurrenceRuleToJSON(value['recurrence']),
         'requestId': value['requestId'],
         'startTime': value['startTime'],
+        'title': value['title'],
         'note': value['note'],
         'location': JobLocationToJSON(value['location']),
     };

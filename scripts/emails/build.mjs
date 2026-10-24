@@ -139,11 +139,12 @@ function digestTemplate() {
 {#if w.morePeopleLine}${small(q('w.morePeopleLine'))}{/if}
 {/if}`;
   // Jobs per person per day: "Mon 20 Oct", then "09:00  Café Nord  4 h" lines (an employee's own list has no name).
+  // A job with a title shows the title, its place muted underneath (CHQ-191).
   const jobs = `{#if w.people}
 <p ${digest.heading}>{m.jobsTitle}</p>
 {#for p in w.people}{#if p.name}<p ${digest.person}>{p.name} <span ${digest.personTotal}>{p.total}</span></p>{/if}
 {#for d in p.days}<p ${digest.day}>{d.label}</p>
-<table ${digest.lines}>{#for j in d.jobs}<tr><td ${digest.time}>{j.time}</td><td ${digest.place}>{j.place}</td><td ${digest.hours}>{j.hours}</td></tr>{/for}</table>
+<table ${digest.lines}>{#for j in d.jobs}<tr><td ${digest.time}>{j.time}</td><td ${digest.place}>{j.label}{#if j.place}<br><span ${digest.placeUnder}>{j.place}</span>{/if}</td><td ${digest.hours}>{j.hours}</td></tr>{/for}</table>
 {/for}{/for}
 {/if}`;
   const files = `{#if w.fileLine}${small(q('w.fileLine'))}{/if}

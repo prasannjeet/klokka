@@ -299,6 +299,7 @@ public class JobService {
     private static void setTemplate(JobRecurrenceEntity row, EntryWriter.JobInput values) {
         row.hours = values.hours();
         row.startTime = values.startTime();
+        row.title = EntryWriter.clean(values.title());
         row.note = EntryWriter.clean(values.note());
         JobLocation location = values.location();
         row.placeId = location == null ? null : EntryWriter.blankToNull(location.getPlaceId());
@@ -312,7 +313,7 @@ public class JobService {
         if (row.hours == null) throw new IllegalStateException("series " + row.id + " has no template");
         JobLocation location = row.placeName == null ? null : new JobLocation().placeId(row.placeId).name(row.placeName)
                 .address(row.placeAddress).latitude(row.latitude).longitude(row.longitude);
-        return new EntryWriter.JobInput(row.hours, row.startTime, row.note, location);
+        return new EntryWriter.JobInput(row.hours, row.startTime, row.title, row.note, location);
     }
 
     // The selection to write, after locking the parts it covers; nothing writable (every job in a closed month) is
@@ -415,7 +416,7 @@ public class JobService {
         BigDecimal hours = HoursRounding.apply(body.getHours(), a.workspace().rounding, "hours");
         if (hours.signum() == 0) throw validation("hours", "rounds to 0 under the workspace rule");
         LocalTime start = body.getStartTime() == null ? null : LocalTime.parse(body.getStartTime());
-        return new EntryWriter.JobInput(hours, start, body.getNote(), body.getLocation());
+        return new EntryWriter.JobInput(hours, start, body.getTitle(), body.getNote(), body.getLocation());
     }
 
 }

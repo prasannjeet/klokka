@@ -63,7 +63,7 @@ public final class DigestWorkbook {
     private static void jobsSheet(Worksheet sheet, DigestWeek week, Language lang, Catalogue catalogue) {
         Locale locale = Formats.locale(lang);
         Text[] headers = {Text.XLSX_EMPLOYEE, Text.XLSX_DATE, Text.XLSX_WEEKDAY, Text.XLSX_START, Text.XLSX_END, Text.XLSX_HOURS,
-                Text.XLSX_PLACE, Text.XLSX_ADDRESS, Text.XLSX_NOTE, Text.XLSX_RECURRING};
+                Text.XLSX_TITLE, Text.XLSX_PLACE, Text.XLSX_ADDRESS, Text.XLSX_NOTE, Text.XLSX_RECURRING};
         Widths widths = new Widths(headers.length);
         for (int c = 0; c < headers.length; c++) headerCell(sheet, widths, c, catalogue.t(lang, headers[c].key()));
         String yes = catalogue.t(lang, Text.XLSX_YES.key());
@@ -84,10 +84,11 @@ public final class DigestWorkbook {
                     time(sheet, widths, r, 4, end(job.start(), job.hours()));
                 }
                 hours(sheet, widths, r, 5, job.hours(), false);
-                text(sheet, widths, r, 6, job.placeName());
-                text(sheet, widths, r, 7, job.placeAddress());
-                text(sheet, widths, r, 8, job.note());
-                text(sheet, widths, r, 9, job.recurring() ? yes : no);
+                text(sheet, widths, r, 6, job.title());
+                text(sheet, widths, r, 7, job.placeName());
+                text(sheet, widths, r, 8, job.placeAddress());
+                text(sheet, widths, r, 9, job.note());
+                text(sheet, widths, r, 10, job.recurring() ? yes : no);
                 r++;
             }
             text(sheet, widths, r, 0, member.name());
