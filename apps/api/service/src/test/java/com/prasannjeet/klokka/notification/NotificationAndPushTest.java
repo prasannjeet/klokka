@@ -371,11 +371,12 @@ class NotificationAndPushTest {
         return data.scalar("select id from job where entry_id = ?", entry).toString();
     }
 
+    // The test clock is fixed, so rows of two sittings share created_at: the pushed (earlier) sitting sorts first.
     private List<List<Object>> jobRows() {
         return data.query("select kind, (select string_agg((j.value->>'date') || ':' || (j.value->>'kind'), ',' "
                 + "order by j.value->>'date', j.value->>'kind') "
                 + "from jsonb_each(n.payload->'jobs') j) from notification n where logto_user_id = ? and workspace_id = ? "
-                + "order by created_at, kind", MARIA, ws);
+                + "order by created_at, pushed_at nulls last, kind", MARIA, ws);
     }
 
     // A start-time-only or place-only edit is news even though the day's hours stay the same, past dates included;
