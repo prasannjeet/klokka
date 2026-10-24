@@ -113,7 +113,8 @@ deleted from Coolify.
   `KLOKKA_AUTH_ISSUER`, `KLOKKA_AUTH_AUDIENCE`, `KLOKKA_AUTH_JWKS`, `KLOKKA_LOGTO_ENDPOINT`,
   `KLOKKA_LOGTO_M2M_CLIENT_ID`, `KLOKKA_LOGTO_M2M_CLIENT_SECRET*`, `KLOKKA_LOGTO_WEBHOOK_SIGNING_KEY*`,
   `KLOKKA_MAIL_HOST`, `KLOKKA_MAIL_PORT`, `KLOKKA_MAIL_USERNAME`, `KLOKKA_MAIL_PASSWORD*`, `KLOKKA_MAIL_FROM`,
-  `KLOKKA_MAIL_START_TLS` (`REQUIRED`), `KLOKKA_MAIL_MONTHLY_QUOTA` (100), `KLOKKA_WEB_BASE_URL`,
+  `KLOKKA_MAIL_START_TLS` (`REQUIRED`), `KLOKKA_MAIL_MONTHLY_QUOTA` (100; ignored since CHQ-189, which reads
+  `KLOKKA_MAIL_DAILY_QUOTA` with the same default, so it can be deleted), `KLOKKA_WEB_BASE_URL`,
   `KLOKKA_EXPO_ACCESS_TOKEN*`, `KLOKKA_PUSH_QUIET_WINDOW` (`PT2M`) and `KLOKKA_PUSH_MAX_DELAY` (`PT10M`), set
   2026-09-28 for CHQ-145 (the defaults were 10 and 30 minutes then; they are 2 and 10 now, so the variables only pin
   them), `KLOKKA_OPERATOR_API_URL` and `KLOKKA_OPERATOR_LANDING_URL` (the Health page's
@@ -194,7 +195,11 @@ staging, `.env` locally. Secrets are marked; their values are in the named local
 | `KLOKKA_MAIL_USERNAME` | prod | Coolify | `smtp.json` | |
 | `KLOKKA_MAIL_PASSWORD` | prod, secret | Coolify | `smtp.json` | |
 | `KLOKKA_MAIL_FROM` | yes | Coolify | `Klokka <no-reply@cleanhq.se>` | |
-| `KLOKKA_MAIL_MONTHLY_QUOTA` | no | Coolify | `100` (default) | the `email_send` ledger is checked against it before an invite |
+| `KLOKKA_MAIL_DAILY_QUOTA` | no | Coolify | `100` (default) | the SMTP account's allowance over a rolling 24 hours: non-failed `email_send` rows are checked against it before an invite (replaced `KLOKKA_MAIL_MONTHLY_QUOTA` in CHQ-189) |
+| `KLOKKA_DIGEST_RESERVE` | no | Coolify | `20` (default) | the digest sends only while this many of the daily quota stay free for invitations and sign-up codes; must be below the daily quota or the API refuses to start |
+| `KLOKKA_DIGEST_CATCH_UP_DAYS` | no | Coolify | `2` (default, 0 to 6) | the digest stays due from Monday 07:00 until the end of Monday plus this many days (workspace time), then last week's is dropped; staging may set 6 to test on any day |
+| `KLOKKA_DIGEST_MAX_USERS_PER_RUN` | no | Coolify | `5000` (default) | users walked per 15-minute sweep |
+| `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` | no | Coolify | `60` (default) | job lines in one digest email; the rest are only in the attached workbook |
 | `KLOKKA_EXPO_ACCESS_TOKEN` | no, secret | Coolify | `expo.json` | Expo enhanced push security; absent means no bearer on Expo calls |
 | `KLOKKA_EXPO_PUSH_URL` | no | none | default `https://exp.host/--/api/v2` | tests point it at a fake |
 | `KLOKKA_PUSH_QUIET_WINDOW` | no | Coolify | `PT2M` (default `PT2M`) | "one push per sitting": the push waits this long after the last change (sliding); the in-app row exists from the first change |
@@ -241,7 +246,9 @@ profiles use Dev Services for Postgres and mock the mailer; the fast-jar integra
   `webhook_event` idempotency table, `hour_entry_change.seq` identity). New tables get their grants from the
   default privileges set for `klokka_migrate`; nothing to grant by hand.
 - Jobs (`quarkus-scheduler`, single node): push sweeper every minute, receipts every 15 minutes, weekly digest sweep
-  every 15 minutes (sends Monday from 07:00 workspace time, once per user and ISO week through `digest_run`).
+  every 15 minutes (due Monday from 07:00 workspace time until the end of Monday plus `KLOKKA_DIGEST_CATCH_UP_DAYS`,
+  once per user and ISO week through `digest_run`, one transaction per user, stops for the run when only the
+  reserve is left).
   Rows are claimed with `FOR UPDATE SKIP LOCKED`, batches are bounded (`klokka.push.batch-size`, `klokka.digest.batch-size`).
 
 ### Image and health

@@ -70,7 +70,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `operatorListUsers` | `GET /operator/users?q&role&page&pageSize` | operator | console: Users |
 | `operatorListInvitations` | `GET /operator/invitations?status&month&page&pageSize` | operator | console: Invitations |
 | `operatorResendInvitation` | `POST /operator/invitations/{invitationId}/resend` | operator | console: Invitations "Resend" |
-| `operatorVolume` | `GET /operator/volume?month=` | operator | console: Volume |
+| `operatorVolume` | `GET /operator/volume?month=` | operator | console: Volume (emails in the last 24 hours against the daily quota, `sentLast24h` / `quota`; the month's counts under it) |
 | `operatorHealth` | `GET /operator/health` | operator | console: Health |
 | `logtoWebhook` | `POST /webhooks/logto` | public, HMAC signed | Logto (membership and user events) |
 

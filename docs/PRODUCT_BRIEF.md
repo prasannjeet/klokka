@@ -70,7 +70,7 @@ API fields and the contract keep `workspace`.
 - **Rounding rule** setting (none / nearest 0.25 h / nearest 0.5 h) and a default day length for the
   "full day" chip.
 - **Shareable monthly card**: a pretty image of "your September: 142 h" the employee can save or share.
-- **Weekly email digest** (opt-in, off by default) so email volume stays tiny.
+- **Weekly email digest**, on by default since CHQ-189 (D22), with an Excel file of last week; the setting turns it off.
 - **CSV export** of any month, per employee or whole workspace.
 - **Audit history** on every entry (who changed what, when), visible to both roles.
 - **Languages**: English and Swedish from day one (owner's market); the string catalogue is shared by
@@ -98,10 +98,10 @@ every feature states this explicitly.
 | Entry flagged | | yes | Push + in-app |
 | Flag resolved | yes | | Push + in-app |
 | Month closed | yes | | Push + in-app |
-| Weekly digest (opt-in) | yes | yes | Email |
+| Weekly digest (on by default, D22) | yes | yes | Email |
 
-The staging SMTP account may send only ~100 emails a month, so email is reserved for invitations and
-opt-in digests; everything else is push + in-app. Push is Expo's push service (Android via FCM).
+The SMTP account may send only ~100 emails a day, so email is reserved for sign-up codes, invitations and
+the weekly digest (paced inside that daily quota, D22); everything else is push + in-app. Push is Expo's push service (Android via FCM).
 
 ## Data model (first cut, for the researchers to challenge)
 

@@ -662,7 +662,7 @@ export const sv = {
   "operator.volume.coalescingHint": "{changes} poständringar blev {notifications} notiser, en per person och tillfälle",
   "operator.volume.digestOptIns": "Sammanfattning påslagen: {people}, {mondays} måndagar",
   "operator.volume.digests": "Veckosammanfattningar {count}",
-  "operator.volume.emailsAgainstQuota": "Skickade mejl den här månaden, mot kvoten",
+  "operator.volume.emailsAgainstQuota": "Mejl de senaste 24 timmarna, mot dagskvoten",
   "operator.volume.inApp": "I appen",
   "operator.volume.invitations": "Inbjudningar {count}",
   "operator.volume.ofQuota": "av {quota}",
@@ -671,10 +671,10 @@ export const sv = {
   "operator.volume.pushDelivery": "{delivered} levererade, {failed} misslyckade ({percent})",
   "operator.volume.pushSent": "Push skickade",
   "operator.volume.readWithinDay": "Lästa inom ett dygn: {percent}",
-  "operator.volume.resets": "Återställs {date}, {when}",
   "operator.volume.samePointLastMonth": "Samma läge i {month}: {count}",
   "operator.volume.sittings": "tillfällen",
-  "operator.volume.subtitle": "{month}. SMTP-kontot skickar ungefär {quota} mejl i månaden, så e-post är reserverad för inbjudningar och den valfria sammanfattningen. Allt annat är push och i appen.",
+  "operator.volume.subtitle": "{month}. SMTP-kontot skickar ungefär {quota} mejl om dagen, så e-post är reserverad för inbjudningar och sammanfattningen. Allt annat är push och i appen.",
+  "operator.volume.thisMonth": "Den här månaden: {count}",
   "operator.volume.title": "Notis- och e-postvolym",
   "operator.volume.verifications": "E-postverifieringar {count}",
   "operator.workspaces.acrossAll": "Alla företag sammanlagt, bara aggregat",
@@ -766,7 +766,7 @@ export const sv = {
   "profile.uploadPhoto": "Ladda upp foto",
   "profile.uploadPhotoHint": "JPG eller PNG, beskuret kvadratiskt.",
   "profile.workspaces": "Företag",
-  "recurrence.afterCount": "Efter ett antal veckor/månader",
+  "recurrence.afterCount": "Under en period",
   "recurrence.allCount_one": "Hela serien ({count} jobb)",
   "recurrence.allCount_other": "Alla {count} jobb i serien",
   "recurrence.byDay": "På en dag i månaden",
@@ -873,7 +873,7 @@ export const sv = {
   "settings.defaultDayLength": "Standardlängd på en dag",
   "settings.defaultDayLengthHint": "Det som knappen Hel dag fyller i.",
   "settings.defaultDayLengthLabel": "Standardlängd på en dag i timmar",
-  "settings.digestTo": "Till {email}",
+  "settings.digestTo": "Varje måndag, med en Excel-fil för förra veckan. Till {email}",
   "settings.employees": "Anställda",
   "settings.employeesSeeInsights": "Visa analys för anställda",
   "settings.employeesSeeInsightsOff": "Anställda ser sina timmar och jobb, utan snitt, trender eller prognos.",
@@ -1118,8 +1118,6 @@ export const sv = {
   "web.operator.users.pushYes": "Registrerad",
   "web.operator.volume.count": "Antal",
   "web.operator.volume.day": "Dag",
-  "web.operator.volume.inDays_one": "om {count} dag",
-  "web.operator.volume.inDays_other": "om {count} dagar",
   "web.operator.volume.kind": "Typ",
   "web.operator.volume.noDays": "Inga notiser den här månaden än.",
   "web.operator.volume.perDayLabel": "Notiser per dag, push och i appen",
@@ -1906,9 +1904,9 @@ export const en = {
   "operator.volume.byKind": "By kind",
   "operator.volume.coalescing": "Coalescing",
   "operator.volume.coalescingHint": "{changes} entry changes became {notifications} notifications, one per person and sitting",
-  "operator.volume.digestOptIns": "Digest opt-ins: {people}, {mondays} Mondays",
+  "operator.volume.digestOptIns": "Digest on: {people}, {mondays} Mondays",
   "operator.volume.digests": "Weekly digests {count}",
-  "operator.volume.emailsAgainstQuota": "Emails sent this month, against the quota",
+  "operator.volume.emailsAgainstQuota": "Emails in the last 24 hours, against the daily quota",
   "operator.volume.inApp": "In-app",
   "operator.volume.invitations": "Invitations {count}",
   "operator.volume.ofQuota": "of {quota}",
@@ -1917,10 +1915,10 @@ export const en = {
   "operator.volume.pushDelivery": "{delivered} delivered, {failed} failed ({percent})",
   "operator.volume.pushSent": "Push sent",
   "operator.volume.readWithinDay": "Read within a day: {percent}",
-  "operator.volume.resets": "Resets {date}, {when}",
   "operator.volume.samePointLastMonth": "Same point in {month}: {count}",
   "operator.volume.sittings": "sittings",
-  "operator.volume.subtitle": "{month}. The SMTP account sends about {quota} emails a month, so email is reserved for invitations and the opt-in digest. Everything else is push and in-app.",
+  "operator.volume.subtitle": "{month}. The SMTP account sends about {quota} emails a day, so email is reserved for invitations and the digest. Everything else is push and in-app.",
+  "operator.volume.thisMonth": "This month: {count}",
   "operator.volume.title": "Notification and email volume",
   "operator.volume.verifications": "Email verifications {count}",
   "operator.workspaces.acrossAll": "Across all businesses, aggregate only",
@@ -2012,7 +2010,7 @@ export const en = {
   "profile.uploadPhoto": "Upload photo",
   "profile.uploadPhotoHint": "JPG or PNG, cropped square.",
   "profile.workspaces": "Businesses",
-  "recurrence.afterCount": "After a number of weeks/months",
+  "recurrence.afterCount": "For a period",
   "recurrence.allCount_one": "The whole series ({count} job)",
   "recurrence.allCount_other": "All {count} jobs in the series",
   "recurrence.byDay": "On a day of the month",
@@ -2119,7 +2117,7 @@ export const en = {
   "settings.defaultDayLength": "Default day length",
   "settings.defaultDayLengthHint": "What the Full day chip fills in.",
   "settings.defaultDayLengthLabel": "Default day length in hours",
-  "settings.digestTo": "To {email}",
+  "settings.digestTo": "Every Monday, with an Excel file of last week. To {email}",
   "settings.employees": "Employees",
   "settings.employeesSeeInsights": "Show analysis to employees",
   "settings.employeesSeeInsightsOff": "Employees see their hours and jobs, without averages, trends or the forecast.",
@@ -2364,8 +2362,6 @@ export const en = {
   "web.operator.users.pushYes": "Registered",
   "web.operator.volume.count": "Count",
   "web.operator.volume.day": "Day",
-  "web.operator.volume.inDays_one": "in {count} day",
-  "web.operator.volume.inDays_other": "in {count} days",
   "web.operator.volume.kind": "Kind",
   "web.operator.volume.noDays": "No notifications this month yet.",
   "web.operator.volume.perDayLabel": "Notifications per day, push and in-app",
@@ -3142,10 +3138,10 @@ export type MessageParams = {
   "operator.volume.pushDelivery": { delivered: string | number; failed: string | number; percent: string | number };
   "operator.volume.pushSent": Record<never, never>;
   "operator.volume.readWithinDay": { percent: string | number };
-  "operator.volume.resets": { date: string | number; when: string | number };
   "operator.volume.samePointLastMonth": { count: string | number; month: string | number };
   "operator.volume.sittings": Record<never, never>;
   "operator.volume.subtitle": { month: string | number; quota: string | number };
+  "operator.volume.thisMonth": { count: string | number };
   "operator.volume.title": Record<never, never>;
   "operator.volume.verifications": { count: string | number };
   "operator.workspaces.acrossAll": Record<never, never>;
@@ -3571,7 +3567,6 @@ export type MessageParams = {
   "web.operator.users.pushYes": Record<never, never>;
   "web.operator.volume.count": Record<never, never>;
   "web.operator.volume.day": Record<never, never>;
-  "web.operator.volume.inDays": { count: string | number };
   "web.operator.volume.kind": Record<never, never>;
   "web.operator.volume.noDays": Record<never, never>;
   "web.operator.volume.perDayLabel": Record<never, never>;
@@ -3739,7 +3734,6 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "role.employerPeople",
   "web.month.daysWithHours",
   "web.month.editedTimes",
-  "web.operator.volume.inDays",
   "web.profile.employerAt",
   "web.share.daysValue",
   "web.week.notify",

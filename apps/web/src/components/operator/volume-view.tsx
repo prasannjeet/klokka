@@ -1,7 +1,8 @@
 'use client';
 
-// Operator: notification and email volume. The SMTP account allows about 100 emails a month, so the meter
-// against the quota leads; push and in-app volume, coalescing and the per-day chart follow. Counts only.
+// Operator: notification and email volume. The SMTP account allows about 100 emails a day, so the meter of
+// the last 24 hours against the daily quota leads, with the month's counts under it; push and in-app volume,
+// coalescing and the per-day chart follow. Counts only.
 import { useState, type CSSProperties } from 'react';
 import { Bar, BarChart, Tooltip, XAxis } from 'recharts';
 import {
@@ -13,21 +14,12 @@ import {
   formatPercent,
 } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
-import { isoOf, monthIn, todayIn } from '@/lib/time';
+import { isoOf, monthIn } from '@/lib/time';
 import { Icon } from '../icons';
 import { MonthNav } from '../month-nav';
 import { ViewHeader } from '../view-header';
 import { useOperatorVolume } from './queries';
 import { useBrowserTimeZone } from './use-time-zone';
-
-const DAY_MS = 86_400_000;
-
-function daysUntil(fromIso: string, toIso: string): number {
-  return Math.max(
-    0,
-    Math.round((Date.parse(`${toIso}T00:00:00Z`) - Date.parse(`${fromIso}T00:00:00Z`)) / DAY_MS),
-  );
-}
 
 interface DayPoint {
   day: string;
@@ -71,9 +63,7 @@ export function OperatorVolumeView() {
   }
 
   const quota = Math.max(1, v.email.quota);
-  const share = (n: number) => `${Math.min(100, (n / quota) * 100).toFixed(1)}%`;
-  const today = todayIn(timeZone);
-  const resets = isoOf(v.email.resetsOn);
+  const share = `${Math.min(100, (v.email.sentLast24h / quota) * 100).toFixed(1)}%`;
   const days: DayPoint[] = v.perDay.map((d) => {
     const iso = isoOf(d.date);
     return {
@@ -101,7 +91,7 @@ export function OperatorVolumeView() {
         <div className="card meter" role="region" aria-label={t('operator.volume.emailsAgainstQuota')}>
           <span className="lbl">{t('operator.volume.emailsAgainstQuota')}</span>
           <div className="val">
-            <span>{formatNumber(v.email.sent, locale)}</span>
+            <span>{formatNumber(v.email.sentLast24h, locale)}</span>
             <small>{t('operator.volume.ofQuota', { quota: formatNumber(v.email.quota, locale) })}</small>
           </div>
           <div
@@ -109,34 +99,24 @@ export function OperatorVolumeView() {
             role="meter"
             aria-valuemin={0}
             aria-valuemax={v.email.quota}
-            aria-valuenow={v.email.sent}
+            aria-valuenow={v.email.sentLast24h}
             aria-label={t('operator.volume.emailsAgainstQuota')}
           >
-            <i style={{ '--w': share(v.email.invitations), '--c': 'var(--chart-1)' } as CSSProperties} />
-            <i style={{ '--w': share(v.email.verifications), '--c': 'var(--chart-2)' } as CSSProperties} />
-            <i style={{ '--w': share(v.email.digests), '--c': 'var(--chart-3)' } as CSSProperties} />
+            <i style={{ '--w': share, '--c': 'var(--chart-1)' } as CSSProperties} />
           </div>
           <div className="legend">
             <span>
-              <i style={{ '--c': 'var(--chart-1)' } as CSSProperties} />
+              <b>{t('operator.volume.thisMonth', { count: formatNumber(v.email.sent, locale) })}</b>
+            </span>
+            <span>
               {t('operator.volume.invitations', { count: formatNumber(v.email.invitations, locale) })}
             </span>
             <span>
-              <i style={{ '--c': 'var(--chart-2)' } as CSSProperties} />
               {t('operator.volume.verifications', { count: formatNumber(v.email.verifications, locale) })}
             </span>
-            <span>
-              <i style={{ '--c': 'var(--chart-3)' } as CSSProperties} />
-              {t('operator.volume.digests', { count: formatNumber(v.email.digests, locale) })}
-            </span>
+            <span>{t('operator.volume.digests', { count: formatNumber(v.email.digests, locale) })}</span>
           </div>
           <div className="foot">
-            <span>
-              {t('operator.volume.resets', {
-                date: formatDate(resets, locale, 'dayMonth'),
-                when: t('web.operator.volume.inDays', { count: daysUntil(today, resets) }),
-              })}
-            </span>
             <span>
               {t('operator.volume.samePointLastMonth', {
                 month: formatMonthName(addMonths(v.month, -1), locale, false),

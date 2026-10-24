@@ -180,7 +180,7 @@ index|noindex` checks `/` and `/en`: CI runs it with `noindex` against staging a
 - **Anyone** signs up on the web app or the phone (email + password, email confirmed by a code from the
   environment's sender mailbox). Signing in: email, then password or "Sign in with verification code"; "Forgot your
   password?" resets by email code (both switched on 2026-09-30, staging and production). Every code costs one email
-  against the monthly quota. The first screen after sign-up creates their business; they become its EMPLOYER.
+  against the daily quota. The first screen after sign-up creates their business; they become its EMPLOYER.
   Employees join through the invitation email an employer sends from the app. Nothing here needs an operator.
 - **Operator (`platform-admin`)**: the operator console needs the Logto global role `platform-admin`. Grant it after
   the person has signed up once, with `$TOKEN`, `$E` and `$L` from section 3:
@@ -215,7 +215,22 @@ The production host also ships container logs to the staging Elastic stack (serv
 
 Both senders are Migadu mailboxes (`smtp.migadu.com:587` STARTTLS; Migadu allows about 100 emails a day per
 mailbox). Each is used twice: by the environment's Logto (sign-up, sign-in and password reset codes, invitations) and
-by the API (weekly digest), which caps itself at `KLOKKA_MAIL_MONTHLY_QUOTA`.
+by the API (weekly digest), which caps itself at `KLOKKA_MAIL_DAILY_QUOTA` (default 100, counted over a rolling 24
+hours from the `email_send` ledger, failed sends excluded).
+
+**Weekly digest (CHQ-189, D22).** On for every user by default (the setting turns it off). It carries one Excel
+workbook per workspace with last week's jobs and hours per day (employer and employee versions; pay only when the
+workspace shows pay and, for an employee, their rate is set). How it is paced:
+
+- Due window: from Monday 07:00 in any of the user's workspaces until the end of Monday plus
+  `KLOKKA_DIGEST_CATCH_UP_DAYS` (default 2, so Wednesday 23:59, workspace time). Past the window last week's digest
+  is dropped, never sent late. To test on another weekday, set it to `6` on staging, then remove the override.
+- Reserve: the digest sends only while `KLOKKA_DIGEST_RESERVE` (default 20) of the daily quota stays free, so sign-up
+  codes and invitations always have room. A sweep that hits the reserve stops (one log line) and the next sweep,
+  every 15 minutes, carries on inside the window. The API refuses to start when the reserve is not below the quota.
+- Every user is walked in pages, at most `KLOKKA_DIGEST_MAX_USERS_PER_RUN` (5000) per sweep, one transaction per
+  user. One email lists at most `KLOKKA_DIGEST_MAX_JOBS_IN_EMAIL` (60) jobs; the rest are only in the workbook.
+- The operator console's Volume page shows the last 24 hours against the daily quota, with the month's counts under it.
 
 **Templates (CHQ-148).** Every email has the klokka.se design, in Swedish and English, generated from one layout:
 
@@ -245,7 +260,7 @@ Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled 
 | A release's APK job hangs for ~50 min on "Timeout waiting to lock daemon addresses registry", then is cancelled | the runners and local builds share `~/.gradle` on this host, which was at its memory cap (40 GB; raised to 45 GB on 2026-10-06), so a daemon stalled holding the lock | check `/proc/pressure/memory` and stray `GradleDaemon` processes, then `gh run rerun <id> --failed` |
 | Inviting an employee fails with "Logto is unreachable" after ~10 s | Logto sends the invitation email before answering | the API waits up to 30 s (`quarkus.rest-client.logto.read-timeout`) |
 | Creating a business or inviting an employee fails with a generic error; the API log shows Logto 422 `entity.relation_foreign_key_not_found` on `assignUserRoles` | `KLOKKA_LOGTO_EMPLOYER_ROLE_ID` / `KLOKKA_LOGTO_EMPLOYEE_ROLE_ID` are not set, so the API uses the defaults, which are the staging Logto's role ids (production, 2026-10-02) | set both on the API app to that Logto's organization role ids (console, Organization template) and restart |
-| Sign-up email never arrives | sender mailbox not allowed to send, or the monthly quota used up | section 8 |
+| Sign-up email never arrives | sender mailbox not allowed to send, or the daily quota used up | section 8 |
 | `v*` tag built but production unchanged | production deploys are by hand | section 5, step 2 |
 | Coolify's "Redirect to non-www" setting has no effect on the landing | the apps were created through the API with stored custom labels, which Coolify uses as they are | redirects live in the landing app's labels (below); after a domain change, edit the labels, never "reset to defaults" |
 
@@ -264,4 +279,4 @@ homelab's front proxy before Traefik; Traefik itself answers 301.
   `ssh netcup docker exec gual64hodx8mn2x4xr04lbhm pg_dump -U postgres -Fc klokka > klokka-$(date +%F).dump`.
 - One `app_user` row (`5zgfj0ng8gnz`, `smoke-test@klokka.se`) from the go-live sign-in test; its Logto user is deleted.
 - `prod/klokka-v1.0.1.apk` in Nexus carries staging URLs; delete it.
-- Mail quota 100 per month; raise it to the Migadu plan's limit.
+- Mail quota 100 a day (`KLOKKA_MAIL_DAILY_QUOTA`), matching Migadu's per-mailbox limit; raise both together if the plan changes. Production still carries the unused `KLOKKA_MAIL_MONTHLY_QUOTA`; delete it after the CHQ-189 release.

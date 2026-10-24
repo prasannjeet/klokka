@@ -2,6 +2,34 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## Unreleased
+
+### Added
+- The job editor is a full page on the phone and the web instead of a sheet. Leaving it with unsaved changes asks
+  "Discard changes?"; an untouched form closes without asking (CHQ-185).
+- A day's plus adds a single job for that day; New job has its own date and repeat (CHQ-185).
+- Monthly repeat on a day of the month (the last day in shorter months) or on a weekday such as the second Tuesday,
+  and repeats with no end date, planned 12 months ahead and topped up every night (CHQ-186).
+- Editing a repeating job asks which jobs change: only this one, this and the following ones, or the whole series,
+  past jobs included. Jobs in closed months stay as they are and the editor says how many. A series' schedule can be
+  changed too; earlier jobs keep their dates (CHQ-187).
+- Employees get a notification when their employer adds, changes or removes one of their jobs, also on past dates.
+  A new Job updates setting turns the push off, and Android has its own Job updates notification category
+  (CHQ-188).
+- The weekly digest email is on for everyone by default (the setting still turns it off), has a new design and
+  carries an Excel file of last week per workspace: jobs and hours per day, with pay where the workspace shows it
+  (CHQ-189).
+
+### Changed
+- The weekly digest goes out from Monday morning until Wednesday, paced inside the mail account's daily limit so
+  sign-up codes and invitations always get through; a digest that misses the window is skipped, never sent late.
+  The operator console's email meter shows the last 24 hours against the daily quota (CHQ-189).
+- The repeat end choice reads "For a period", which fits on small phones (CHQ-189).
+
+### Fixed
+- Phone: signing out and signing in as someone with another role, without closing the app, no longer opens the
+  other role's screen under your tab bar; you land on your own first tab (CHQ-190).
+
 ## 1.6.6, 2026-10-14
 
 ### Fixed

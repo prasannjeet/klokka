@@ -219,3 +219,24 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   per job; the week grid's day-level writes keep `HOURS_CHANGED`. Its push goes to the Android channel `jobs`
   ("Job updates") and is gated by the `jobUpdates` preference (default on); the notification centre row is
   always written.
+
+## D22. The weekly digest: on by default, an Excel file, paced by a daily quota (owner, 2026-10-24, CHQ-189)
+
+- **On by default.** Migration V7 turns `digest_enabled` on for every user and new users start with it on; the
+  setting still turns it off. This replaces the brief's "opt-in, off by default": the digest is the one email that
+  shows both sides what last week added up to, and it is the only regular email Klokka sends.
+- **An Excel workbook per workspace** with last week's jobs and hours per day, an employer and an employee version
+  (`klokka-<workspace slug>-<YYYY>-W<ww>.xlsx`, built with fastexcel, no Apache POI). Pay appears under the same
+  rule as the app (workspace shows pay; for an employee, their rate is set). A workspace with nothing last week
+  gets no file. The email lists at most `klokka.digest.max-jobs-in-email` jobs and points to the file for the rest.
+- **The quota is daily, over a rolling 24 hours.** Migadu limits a mailbox to about 100 emails a day, not a month,
+  so `KLOKKA_MAIL_DAILY_QUOTA` (100) replaced `KLOKKA_MAIL_MONTHLY_QUOTA`. The count is non-failed `email_send` rows
+  sent in the last 24 hours. The operator console's meter shows that count against the daily quota.
+- **A reserve keeps room for people waiting on an email.** The digest sends only while `KLOKKA_DIGEST_RESERVE` (20)
+  of the daily quota stays free; invitations still use the whole quota. When a sweep reaches the reserve it stops
+  and a later sweep carries on, one transaction per user, every user walked in pages.
+- **A due window, never a stale digest.** Last week's digest is due from Monday 07:00 in any of the user's
+  workspaces until the end of Monday plus `KLOKKA_DIGEST_CATCH_UP_DAYS` (2, so Wednesday). A digest held back for
+  budget goes out later inside the window; past it, it is dropped. With 100 a day and a reserve of 20 that is
+  about 240 digests a week before any are dropped; when the user count nears that, the quota (and the Migadu
+  plan) has to grow.

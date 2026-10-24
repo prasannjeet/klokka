@@ -201,8 +201,9 @@ guarded by a regenerate-and-diff check.
   (`klokka_migrate` owns DDL, `klokka_runtime` for the app).
 - SMTP: Migadu `smtp.migadu.com:587` STARTTLS, senders `no-reply@cleanhq.se` (staging) and `no-reply@klokka.se`
   (production). Migadu allows about 100 emails a day per mailbox, so tests send a handful, never loops; the API also caps
-  itself with `KLOKKA_MAIL_MONTHLY_QUOTA` (100 in both today). Klokka emails only codes, invitations and the opt-in
-  digest; notifications are push. Credentials live only in Coolify env vars and gitignored files.
+  itself with `KLOKKA_MAIL_DAILY_QUOTA` (100, rolling 24 hours) and keeps `KLOKKA_DIGEST_RESERVE` (20) of it free from
+  the digest (D22). Klokka emails only codes, invitations and the weekly digest (on by default, Excel file attached,
+  due Monday 07:00 to Wednesday); notifications are push. Credentials live only in Coolify env vars and gitignored files.
 - Staging deploys from CI on every push to `main`; `./deploy-staging.sh` is the manual fallback. Production is
   `./release.sh patch|minor|major|x.y.z`: a `v*` tag builds `klokka-*:v<version>` and the production APK
   (`docs/RELEASING.md`), and the owner pins the tag in production Coolify by hand. Environment URLs are the
