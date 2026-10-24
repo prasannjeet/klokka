@@ -19,6 +19,8 @@ function Page({ initiallyDirty = false }: { initiallyDirty?: boolean }) {
   const guard = useUnsavedGuard(dirty);
   return (
     <>
+      {/* A plain anchor on purpose: the guard intercepts plain link clicks, which is what Link renders too. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a href="/w/kafe-nord/week">Week</a>
       <a href="https://example.com/">Elsewhere</a>
       <button type="button" onClick={() => setDirty(!dirty)}>
