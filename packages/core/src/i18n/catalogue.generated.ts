@@ -22,8 +22,26 @@ export const sv = {
   "api.csv.weekday": "Veckodag",
   "api.email.digest.nothing": "Inga timmar loggades förra veckan.",
   "api.email.digest.workspace": "{emoji} {workspace}",
-  "api.email.footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar.",
+  "api.email.footer": "Klokka är gratis och öppen källkod. Alla med ett Klokka-konto får det här mejlet på måndagar.",
   "api.email.greeting": "Hej {name},",
+  "api.xlsx.address": "Adress",
+  "api.xlsx.date": "Datum",
+  "api.xlsx.employee": "Anställd",
+  "api.xlsx.end": "Slut",
+  "api.xlsx.hours": "Timmar",
+  "api.xlsx.no": "Nej",
+  "api.xlsx.note": "Anteckning",
+  "api.xlsx.pay": "Lön ({currency})",
+  "api.xlsx.place": "Plats",
+  "api.xlsx.recurring": "Återkommande",
+  "api.xlsx.sheetHours": "Timmar",
+  "api.xlsx.sheetJobs": "Jobb",
+  "api.xlsx.start": "Start",
+  "api.xlsx.team": "Hela teamet",
+  "api.xlsx.total": "Totalt",
+  "api.xlsx.weekTotal": "Veckan totalt",
+  "api.xlsx.weekday": "Veckodag",
+  "api.xlsx.yes": "Ja",
   "auth.alreadyHaveAccount": "Har du redan ett konto?",
   "auth.byContinuing": "Genom att fortsätta godkänner du {terms} och {privacy}.",
   "auth.continue": "Fortsätt",
@@ -103,14 +121,20 @@ export const sv = {
   "email.common.codeLabel": "Din kod",
   "email.common.footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
   "email.digest.action": "Öppna Klokka",
+  "email.digest.attached": "Förra veckan i Excel: {file}",
   "email.digest.dayOff": "ledig",
-  "email.digest.intro": "Förra veckan i ett mejl, som du bad om.",
+  "email.digest.intro": "Förra veckan i ett mejl, med en Excel-fil bifogad.",
+  "email.digest.jobsTitle": "Jobb",
   "email.digest.monthSoFar": "{month} hittills: {hours}",
   "email.digest.monthSoFarLabel": "{month} hittills",
+  "email.digest.moreInFile_one": "{count} jobb till finns i den bifogade filen.",
+  "email.digest.moreInFile_other": "{count} jobb till finns i den bifogade filen.",
+  "email.digest.noPlace": "Ingen plats",
   "email.digest.subject": "Din vecka {week} på {workspace}",
   "email.digest.subjectEmployer": "Vecka {week} på {workspace}: {hours}",
   "email.digest.teamHours": "Teamets timmar vecka {week}: {hours}",
   "email.digest.teamHoursLabel": "Teamets timmar vecka {week}",
+  "email.digest.teamTitle": "Teamet den här veckan",
   "email.digest.title1": "Vecka {week}.",
   "email.digest.title2_one": "{hours} timme.",
   "email.digest.title2_other": "{hours} timmar.",
@@ -1244,8 +1268,26 @@ export const en = {
   "api.csv.weekday": "Weekday",
   "api.email.digest.nothing": "No hours were logged last week.",
   "api.email.digest.workspace": "{emoji} {workspace}",
-  "api.email.footer": "Klokka is free and open source. You get this email because you turned it on in Settings.",
+  "api.email.footer": "Klokka is free and open source. Everyone with a Klokka account gets this email on Mondays.",
   "api.email.greeting": "Hi {name},",
+  "api.xlsx.address": "Address",
+  "api.xlsx.date": "Date",
+  "api.xlsx.employee": "Employee",
+  "api.xlsx.end": "End",
+  "api.xlsx.hours": "Hours",
+  "api.xlsx.no": "No",
+  "api.xlsx.note": "Note",
+  "api.xlsx.pay": "Pay ({currency})",
+  "api.xlsx.place": "Place",
+  "api.xlsx.recurring": "Recurring",
+  "api.xlsx.sheetHours": "Hours",
+  "api.xlsx.sheetJobs": "Jobs",
+  "api.xlsx.start": "Start",
+  "api.xlsx.team": "Whole team",
+  "api.xlsx.total": "Total",
+  "api.xlsx.weekTotal": "Week total",
+  "api.xlsx.weekday": "Weekday",
+  "api.xlsx.yes": "Yes",
   "auth.alreadyHaveAccount": "Already have an account?",
   "auth.byContinuing": "By continuing you accept the {terms} and the {privacy}.",
   "auth.continue": "Continue",
@@ -1325,14 +1367,20 @@ export const en = {
   "email.common.codeLabel": "Your code",
   "email.common.footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
   "email.digest.action": "Open Klokka",
+  "email.digest.attached": "Last week in Excel: {file}",
   "email.digest.dayOff": "off",
-  "email.digest.intro": "Last week in one email, as you asked for.",
+  "email.digest.intro": "Last week in one email, with an Excel file attached.",
+  "email.digest.jobsTitle": "Jobs",
   "email.digest.monthSoFar": "{month} so far: {hours}",
   "email.digest.monthSoFarLabel": "{month} so far",
+  "email.digest.moreInFile_one": "{count} more job is in the attached file.",
+  "email.digest.moreInFile_other": "{count} more jobs are in the attached file.",
+  "email.digest.noPlace": "No place",
   "email.digest.subject": "Your week {week} at {workspace}",
   "email.digest.subjectEmployer": "Week {week} at {workspace}: {hours}",
   "email.digest.teamHours": "Team hours in week {week}: {hours}",
   "email.digest.teamHoursLabel": "Team hours in week {week}",
+  "email.digest.teamTitle": "Team this week",
   "email.digest.title1": "Week {week}.",
   "email.digest.title2_one": "{hours} hour.",
   "email.digest.title2_other": "{hours} hours.",
@@ -2469,6 +2517,24 @@ export type MessageParams = {
   "api.email.digest.workspace": { emoji: string | number; workspace: string | number };
   "api.email.footer": Record<never, never>;
   "api.email.greeting": { name: string | number };
+  "api.xlsx.address": Record<never, never>;
+  "api.xlsx.date": Record<never, never>;
+  "api.xlsx.employee": Record<never, never>;
+  "api.xlsx.end": Record<never, never>;
+  "api.xlsx.hours": Record<never, never>;
+  "api.xlsx.no": Record<never, never>;
+  "api.xlsx.note": Record<never, never>;
+  "api.xlsx.pay": { currency: string | number };
+  "api.xlsx.place": Record<never, never>;
+  "api.xlsx.recurring": Record<never, never>;
+  "api.xlsx.sheetHours": Record<never, never>;
+  "api.xlsx.sheetJobs": Record<never, never>;
+  "api.xlsx.start": Record<never, never>;
+  "api.xlsx.team": Record<never, never>;
+  "api.xlsx.total": Record<never, never>;
+  "api.xlsx.weekTotal": Record<never, never>;
+  "api.xlsx.weekday": Record<never, never>;
+  "api.xlsx.yes": Record<never, never>;
   "auth.alreadyHaveAccount": Record<never, never>;
   "auth.byContinuing": { privacy: string | number; terms: string | number };
   "auth.continue": Record<never, never>;
@@ -2546,14 +2612,19 @@ export type MessageParams = {
   "email.common.codeLabel": Record<never, never>;
   "email.common.footer": Record<never, never>;
   "email.digest.action": Record<never, never>;
+  "email.digest.attached": { file: string | number };
   "email.digest.dayOff": Record<never, never>;
   "email.digest.intro": Record<never, never>;
+  "email.digest.jobsTitle": Record<never, never>;
   "email.digest.monthSoFar": { hours: string | number; month: string | number };
   "email.digest.monthSoFarLabel": { month: string | number };
+  "email.digest.moreInFile": { count: string | number };
+  "email.digest.noPlace": Record<never, never>;
   "email.digest.subject": { week: string | number; workspace: string | number };
   "email.digest.subjectEmployer": { hours: string | number; week: string | number; workspace: string | number };
   "email.digest.teamHours": { hours: string | number; week: string | number };
   "email.digest.teamHoursLabel": { week: string | number };
+  "email.digest.teamTitle": Record<never, never>;
   "email.digest.title1": { week: string | number };
   "email.digest.title2": { count: string | number; hours: string | number };
   "email.digest.unsubscribe": Record<never, never>;
@@ -3630,6 +3701,7 @@ export const pluralKeys: ReadonlySet<string> = new Set<string>([
   "account.delete.ownerWarning",
   "common.days",
   "common.people",
+  "email.digest.moreInFile",
   "email.digest.title2",
   "entry.changesThisMonth",
   "entry.editedTimes",

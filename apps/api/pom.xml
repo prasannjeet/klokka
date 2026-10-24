@@ -49,6 +49,8 @@
         <jandex-plugin.version>3.6.0</jandex-plugin.version>
         <archunit.version>1.5.1</archunit.version>
         <assertj.version>3.27.6</assertj.version>
+        <!-- The digest's Excel workbook (CHQ-189); the reader is test scope. No Apache POI. -->
+        <fastexcel.version>0.20.2</fastexcel.version>
 
         <compiler-plugin.version>3.15.0</compiler-plugin.version>
         <surefire-plugin.version>3.5.6</surefire-plugin.version>
@@ -81,6 +83,16 @@
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dhatim</groupId>
+                <artifactId>fastexcel</artifactId>
+                <version>${fastexcel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dhatim</groupId>
+                <artifactId>fastexcel-reader</artifactId>
+                <version>${fastexcel.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

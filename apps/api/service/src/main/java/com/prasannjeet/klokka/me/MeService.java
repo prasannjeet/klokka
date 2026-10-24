@@ -174,7 +174,7 @@ public class MeService {
             preferences.userId = userId;
             preferences.language = initialLanguage(acceptLanguage);
             preferences.pushEnabled = true;
-            preferences.digestEnabled = false;
+            preferences.digestEnabled = true;
             preferences.theme = ThemePreference.SYSTEM;
             preferences.updatedAt = clock.instant();
             repository.persistPreferences(preferences);

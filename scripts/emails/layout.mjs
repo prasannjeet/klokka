@@ -152,3 +152,23 @@ export const row = (label, value) => `<tr>
 
 export const rows = (inner) =>
   `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="k-rule" style="margin:18px 0 0;border-top:1px solid ${C.border};">${inner}</table>`;
+
+// The digest's team table and job lists (CHQ-189): compact text styles in the same palette, picked by build.mjs.
+export const digest = {
+  heading: `class="k-text" style="margin:22px 0 10px;font-family:${BODY};font-weight:700;font-size:15px;line-height:1.3;color:${C.text};"`,
+  scroll: `style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 4px;"`,
+  table: `role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;min-width:100%;"`,
+  th: `class="k-muted k-rule" style="padding:0 6px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;letter-spacing:0.4px;color:${C.muted};text-align:center;white-space:nowrap;"`,
+  thName: `class="k-muted k-rule" style="padding:0 8px 6px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:600;font-size:11px;color:${C.muted};text-align:left;"`,
+  name: `class="k-text k-rule" style="padding:8px 8px 8px 0;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.text};white-space:nowrap;"`,
+  value: `class="k-text k-rule" style="padding:8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.text};text-align:center;white-space:nowrap;"`,
+  zero: `class="k-muted k-rule" style="padding:8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-size:13px;color:${C.muted};text-align:center;"`,
+  total: `class="k-text k-rule" style="padding:8px 0 8px 6px;border-bottom:1px solid ${C.border};font-family:${BODY};font-weight:700;font-size:13px;color:${C.text};text-align:right;white-space:nowrap;"`,
+  person: `class="k-text" style="margin:14px 0 4px;font-family:${BODY};font-weight:600;font-size:14px;line-height:1.4;color:${C.text};"`,
+  personTotal: `class="k-muted" style="font-weight:400;color:${C.muted};"`,
+  day: `class="k-muted" style="margin:8px 0 2px;font-family:${BODY};font-weight:600;font-size:12px;letter-spacing:0.3px;line-height:1.4;color:${C.muted};"`,
+  lines: `role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"`,
+  time: `class="k-muted" width="52" style="width:52px;padding:3px 0;font-family:${MONO};font-weight:700;font-size:12px;color:${C.muted};vertical-align:top;white-space:nowrap;"`,
+  place: `class="k-text" style="padding:3px 8px 3px 0;font-family:${BODY};font-size:14px;line-height:1.4;color:${C.text};vertical-align:top;"`,
+  hours: `class="k-text" align="right" style="padding:3px 0;font-family:${BODY};font-weight:700;font-size:14px;color:${C.text};vertical-align:top;white-space:nowrap;"`,
+};

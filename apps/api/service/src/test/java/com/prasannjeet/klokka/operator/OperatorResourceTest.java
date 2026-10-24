@@ -89,7 +89,7 @@ class OperatorResourceTest {
         given().when().post("/v1/operator/invitations/" + UUID.randomUUID() + "/resend").then().statusCode(404);
         given().when().get("/v1/operator/volume?month=2026-09").then().statusCode(200)
                 .body("month", is("2026-09")).body("email.quota", is(100)).body("email.sent", greaterThanOrEqualTo(1))
-                .body("email.invitations", greaterThanOrEqualTo(1)).body("email.resetsOn", is("2026-10-01")).body("email.digestMondays", is(4))
+                .body("email.sentLast24h", greaterThanOrEqualTo(1)).body("email.invitations", greaterThanOrEqualTo(1)).body("email.resetsOn", is("2026-10-01")).body("email.digestMondays", is(4))
                 .body("push.sent", greaterThanOrEqualTo(0)).body("perDay", hasSize(30)).body("perDay[0].date", is("2026-09-01"))
                 .body("coalescing.entryChanges", greaterThanOrEqualTo(1));
     }

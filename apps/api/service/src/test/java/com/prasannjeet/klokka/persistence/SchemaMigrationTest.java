@@ -30,7 +30,7 @@ class SchemaMigrationTest {
 
     @Test
     void theBaselineIsAppliedAndNothingIsPending() {
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("6");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("7");
         assertThat(flyway.info().pending()).isEmpty();
     }
 
@@ -151,6 +151,31 @@ class SchemaMigrationTest {
                     .containsExactly("15 6.00 - Live");
             assertThat(query("select job_updates::text from " + schema + ".user_preference where logto_user_id = 'usr_v5'"))
                     .containsExactly("true");
+        } finally {
+            try (Connection c = dataSource.getConnection()) {
+                run(c, "drop schema if exists " + schema + " cascade");
+            }
+        }
+    }
+
+    // V7 on a database at V6 (CHQ-189): the digest is on for everyone, existing rows included, and new rows default to on.
+    @Test
+    void v7TurnsTheDigestOnForEveryoneOnAV6Database() throws SQLException {
+        String schema = "v6_" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        try {
+            Flyway.configure().dataSource(dataSource).schemas(schema).createSchemas(true).locations("classpath:db/migration")
+                    .target("6").load().migrate();
+            try (Connection c = dataSource.getConnection()) {
+                run(c, "set search_path to " + schema);
+                run(c, "insert into app_user (logto_user_id, display_name) values ('usr_v6_off', 'Off'), ('usr_v6_on', 'On')");
+                run(c, "insert into user_preference (logto_user_id, digest_enabled) values ('usr_v6_off', false), ('usr_v6_on', true)");
+                run(c, "reset search_path");
+            }
+            Flyway.configure().dataSource(dataSource).schemas(schema).locations("classpath:db/migration").load().migrate();
+            assertThat(query("select logto_user_id || ' ' || digest_enabled from " + schema + ".user_preference order by logto_user_id"))
+                    .containsExactly("usr_v6_off true", "usr_v6_on true");
+            assertThat(query("select column_default from information_schema.columns where table_schema = '" + schema
+                    + "' and table_name = 'user_preference' and column_name = 'digest_enabled'")).containsExactly("true");
         } finally {
             try (Connection c = dataSource.getConnection()) {
                 run(c, "drop schema if exists " + schema + " cascade");

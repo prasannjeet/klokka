@@ -64,7 +64,7 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         config.put("klokka.logto.endpoint", base);
         config.put("klokka.logto.webhook-signing-key", SIGNING_KEY);
         config.put("test.fake.base-url", base);
-        config.put("klokka.mail.monthly-quota", "100");
+        config.put("klokka.mail.daily-quota", "100");
         config.put("klokka.web-base-url", "https://app.klokka.test");
         config.put("klokka.operator.probe-timeout", "PT1S");
         return config;

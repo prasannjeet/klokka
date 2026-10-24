@@ -121,16 +121,23 @@ class MemberResourceTest {
     @TestSecurity(user = NORA)
     @OidcSecurity(claims = {@Claim(key = "sub", value = NORA)})
     void theEmailQuotaRefusesAnInviteThatWouldExceedIt() {
-        // 100 is the quota in tests; fill it to 99 this month so the 2-email budget of an invite does not fit.
+        // 100 a day is the quota in tests, counted over the last 24 hours: 99 sends 23 hours ago leave no room for
+        // the 2-email budget of an invite.
         for (int i = 0; i < 99; i++) {
             data.run("insert into email_send (id, kind, recipient, status, sent_at) values (?, 'DIGEST', 'q@example.com', 'SENT', ?)",
-                    UUID.randomUUID(), clock.instant());
+                    UUID.randomUUID(), clock.instant().minus(java.time.Duration.ofHours(23)));
         }
         try {
             given().contentType("application/json").body("{\"name\":\"Over\",\"email\":\"over-quota@example.com\"}")
                     .when().post("/v1/workspaces/" + ws + "/members")
                     .then().statusCode(409).body("code", is("CONFLICT"));
             assertThat(Fake.<Object>list("invitations")).isEmpty();
+            // A day and an hour after them they are outside the window, and the same invite goes out.
+            data.run("update email_send set sent_at = ? where recipient = 'q@example.com'", clock.instant().minus(java.time.Duration.ofHours(25)));
+            given().contentType("application/json").body("{\"name\":\"Over\",\"email\":\"over-quota@example.com\"}")
+                    .when().post("/v1/workspaces/" + ws + "/members")
+                    .then().statusCode(201);
+            assertThat(Fake.<Object>list("invitations")).hasSize(1);
         } finally {
             data.run("delete from email_send where recipient = 'q@example.com'");
         }

@@ -3,7 +3,9 @@ package com.prasannjeet.klokka.persistence;
 import com.prasannjeet.klokka.domain.WorkspaceId;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -38,6 +40,33 @@ public class JobRepository implements PanacheRepositoryBase<JobEntity, UUID> {
                 .setParameter("s", seriesIds);
         if (from != null) query.setParameter("from", from);
         return query.getResultStream().map(row -> new SeriesJob((JobEntity) row[0], (LocalDate) row[1])).toList();
+    }
+
+    // One line of the weekly digest (CHQ-189): a job, or a day without jobs as one line with the day's hours and note.
+    public record WeekJob(UUID membershipId, String memberName, LocalDate date, LocalTime start, BigDecimal hours, String placeName,
+            String placeAddress, String note, boolean recurring) {}
+
+    // The live days in [from, to] of one member (or every member when membershipId is null), one row per job and one
+    // row for a day without jobs, by member name, date, start time (none last) and the order the jobs were added.
+    public List<WeekJob> weekJobs(WorkspaceId workspaceId, UUID membershipId, LocalDate from, LocalDate to) {
+        var query = getEntityManager().createQuery("select e.membershipId, m.displayName, e.workDate, e.hours, e.note, j "
+                        + "from HourEntryEntity e join MembershipEntity m on m.id = e.membershipId and m.workspaceId = e.workspaceId "
+                        + "left join JobEntity j on j.entryId = e.id and j.workspaceId = e.workspaceId "
+                        + "where e.workspaceId = :w " + (membershipId == null ? "" : "and e.membershipId = :m ")
+                        + "and e.workDate between :f and :t and e.deletedAt is null "
+                        + "order by m.displayName, e.membershipId, e.workDate, j.startTime nulls last, j.position, j.createdAt", Object[].class)
+                .setParameter("w", workspaceId.value())
+                .setParameter("f", from)
+                .setParameter("t", to);
+        if (membershipId != null) query.setParameter("m", membershipId);
+        return query.getResultStream().map(row -> {
+            JobEntity job = (JobEntity) row[5];
+            if (job == null) {
+                return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], null, (BigDecimal) row[3], null, null, (String) row[4], false);
+            }
+            return new WeekJob((UUID) row[0], (String) row[1], (LocalDate) row[2], job.startTime, job.hours, job.placeName, job.placeAddress,
+                    job.note, job.recurrenceId != null);
+        }).toList();
     }
 
     // The job as the database has it now, for a caller that has just taken a lock: the copy this transaction read

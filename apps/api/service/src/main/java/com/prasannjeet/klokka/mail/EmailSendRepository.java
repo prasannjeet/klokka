@@ -8,8 +8,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-// The email ledger (email_send) and the digest bookkeeping. Counted per calendar month for the quota, keyed by
-// recipient and user rather than workspace, so this package is exempt from the WorkspaceId rule.
+// The email ledger (email_send) and the digest bookkeeping. Counted over a rolling 24 hours for the daily quota,
+// keyed by recipient and user rather than workspace, so this package is exempt from the WorkspaceId rule.
 @ApplicationScoped
 public class EmailSendRepository implements PanacheRepositoryBase<AppUserEntity, String> {
 
@@ -19,9 +19,10 @@ public class EmailSendRepository implements PanacheRepositoryBase<AppUserEntity,
     public static final String STATUS_SENT = "SENT";
     public static final String STATUS_FAILED = "FAILED";
 
-    public long countSentBetween(Instant from, Instant to) {
-        Object n = em().createNativeQuery("select count(*) from email_send where sent_at >= :f and sent_at < :t and status <> 'FAILED'")
-                .setParameter("f", from).setParameter("t", to).getSingleResult();
+    // Non-failed sends with sent_at in (from, to]: the rolling window the daily quota is counted over.
+    public long countSentIn(Instant fromExclusive, Instant toInclusive) {
+        Object n = em().createNativeQuery("select count(*) from email_send where sent_at > :f and sent_at <= :t and status <> 'FAILED'")
+                .setParameter("f", fromExclusive).setParameter("t", toInclusive).getSingleResult();
         return ((Number) n).longValue();
     }
 
@@ -40,13 +41,21 @@ public class EmailSendRepository implements PanacheRepositoryBase<AppUserEntity,
                 .executeUpdate();
     }
 
-    // Users who opted in to the digest, oldest account first, bounded.
+    // One keyset page of the users with the digest on (CHQ-189: on by default), after `afterUserId` (null: from the
+    // start), ordered by user id so a sweep can walk all of them page by page.
     @SuppressWarnings("unchecked")
-    public List<String> digestOptIns(int limit) {
-        return em().createNativeQuery("select p.logto_user_id from user_preference p where p.digest_enabled order by p.logto_user_id limit :n",
-                        String.class)
+    public List<String> digestOptIns(String afterUserId, int limit) {
+        return em().createNativeQuery("select p.logto_user_id from user_preference p where p.digest_enabled "
+                        + "and p.logto_user_id > :after order by p.logto_user_id limit :n", String.class)
+                .setParameter("after", afterUserId == null ? "" : afterUserId)
                 .setParameter("n", limit)
                 .getResultList();
+    }
+
+    public boolean digestRunExists(String userId, String isoWeek) {
+        Object n = em().createNativeQuery("select count(*) from digest_run where logto_user_id = :u and iso_week = :w")
+                .setParameter("u", userId).setParameter("w", isoWeek).getSingleResult();
+        return ((Number) n).longValue() > 0;
     }
 
     // True when this (user, week) was not yet recorded; the primary key makes the digest idempotent.

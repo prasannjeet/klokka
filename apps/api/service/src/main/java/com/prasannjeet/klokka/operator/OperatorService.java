@@ -221,7 +221,8 @@ public class OperatorService {
 
         OperatorEmailVolume email = new OperatorEmailVolume()
                 .sent((int) repository.scalar("select count(*) from email_send where sent_at >= :f and sent_at < :t and status <> 'FAILED'", "f", from, "t", to))
-                .quota(config.mail().monthlyQuota())
+                .sentLast24h((int) mail.sentLast24h())
+                .quota(config.mail().dailyQuota())
                 .invitations((int) repository.scalar("select count(*) from email_send where kind = 'INVITATION' and sent_at >= :f and sent_at < :t and status <> 'FAILED'", "f", from, "t", to))
                 .verifications((int) repository.scalar("select count(*) from email_send where kind = 'VERIFICATION' and sent_at >= :f and sent_at < :t and status <> 'FAILED'", "f", from, "t", to))
                 .digests((int) repository.scalar("select count(*) from email_send where kind = 'DIGEST' and sent_at >= :f and sent_at < :t and status <> 'FAILED'", "f", from, "t", to))

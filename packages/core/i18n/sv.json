@@ -718,7 +718,7 @@
     "digest": {
       "subject": "Din vecka {week} på {workspace}",
       "subjectEmployer": "Vecka {week} på {workspace}: {hours}",
-      "intro": "Förra veckan i ett mejl, som du bad om.",
+      "intro": "Förra veckan i ett mejl, med en Excel-fil bifogad.",
       "yourHours": "Dina timmar vecka {week}: {hours}",
       "teamHours": "Teamets timmar vecka {week}: {hours}",
       "monthSoFar": "{month} hittills: {hours}",
@@ -730,7 +730,13 @@
       "yourHoursLabel": "Dina timmar vecka {week}",
       "monthSoFarLabel": "{month} hittills",
       "dayOff": "ledig",
-      "action": "Öppna Klokka"
+      "action": "Öppna Klokka",
+      "teamTitle": "Teamet den här veckan",
+      "jobsTitle": "Jobb",
+      "attached": "Förra veckan i Excel: {file}",
+      "moreInFile_one": "{count} jobb till finns i den bifogade filen.",
+      "moreInFile_other": "{count} jobb till finns i den bifogade filen.",
+      "noPlace": "Ingen plats"
     },
     "common": {
       "footer": "Klokka är gratis och öppen källkod. Om du inte väntade dig det här mejlet kan du bortse från det.",
@@ -1053,7 +1059,7 @@
         "workspace": "{emoji} {workspace}",
         "nothing": "Inga timmar loggades förra veckan."
       },
-      "footer": "Klokka är gratis och öppen källkod. Du får det här mejlet för att du slagit på det under Inställningar."
+      "footer": "Klokka är gratis och öppen källkod. Alla med ett Klokka-konto får det här mejlet på måndagar."
     },
     "csv": {
       "date": "Datum",
@@ -1063,6 +1069,26 @@
       "note": "Anteckning",
       "rate": "Timlön",
       "amount": "Belopp"
+    },
+    "xlsx": {
+      "sheetJobs": "Jobb",
+      "sheetHours": "Timmar",
+      "employee": "Anställd",
+      "date": "Datum",
+      "weekday": "Veckodag",
+      "start": "Start",
+      "end": "Slut",
+      "hours": "Timmar",
+      "place": "Plats",
+      "address": "Adress",
+      "note": "Anteckning",
+      "recurring": "Återkommande",
+      "yes": "Ja",
+      "no": "Nej",
+      "weekTotal": "Veckan totalt",
+      "pay": "Lön ({currency})",
+      "total": "Totalt",
+      "team": "Hela teamet"
     }
   },
   "web": {

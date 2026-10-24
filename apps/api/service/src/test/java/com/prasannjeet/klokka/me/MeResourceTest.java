@@ -89,7 +89,8 @@ class MeResourceTest {
                 .body("user.name", is(""))
                 .body("preferences.language", is("en"))
                 .body("preferences.pushEnabled", is(true))
-                .body("preferences.digestEnabled", is(false))
+                // CHQ-189: the weekly digest is on by default.
+                .body("preferences.digestEnabled", is(true))
                 .body("preferences.theme", is("SYSTEM"))
                 .body("preferences.jobUpdates", is(true))
                 .body("workspaces", empty())

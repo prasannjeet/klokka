@@ -718,7 +718,7 @@
     "digest": {
       "subject": "Your week {week} at {workspace}",
       "subjectEmployer": "Week {week} at {workspace}: {hours}",
-      "intro": "Last week in one email, as you asked for.",
+      "intro": "Last week in one email, with an Excel file attached.",
       "yourHours": "Your hours in week {week}: {hours}",
       "teamHours": "Team hours in week {week}: {hours}",
       "monthSoFar": "{month} so far: {hours}",
@@ -730,7 +730,13 @@
       "yourHoursLabel": "Your hours in week {week}",
       "monthSoFarLabel": "{month} so far",
       "dayOff": "off",
-      "action": "Open Klokka"
+      "action": "Open Klokka",
+      "teamTitle": "Team this week",
+      "jobsTitle": "Jobs",
+      "attached": "Last week in Excel: {file}",
+      "moreInFile_one": "{count} more job is in the attached file.",
+      "moreInFile_other": "{count} more jobs are in the attached file.",
+      "noPlace": "No place"
     },
     "common": {
       "footer": "Klokka is free and open source. If you did not expect this email, ignore it.",
@@ -1053,7 +1059,7 @@
         "workspace": "{emoji} {workspace}",
         "nothing": "No hours were logged last week."
       },
-      "footer": "Klokka is free and open source. You get this email because you turned it on in Settings."
+      "footer": "Klokka is free and open source. Everyone with a Klokka account gets this email on Mondays."
     },
     "csv": {
       "date": "Date",
@@ -1063,6 +1069,26 @@
       "note": "Note",
       "rate": "Hourly rate",
       "amount": "Amount"
+    },
+    "xlsx": {
+      "sheetJobs": "Jobs",
+      "sheetHours": "Hours",
+      "employee": "Employee",
+      "date": "Date",
+      "weekday": "Weekday",
+      "start": "Start",
+      "end": "End",
+      "hours": "Hours",
+      "place": "Place",
+      "address": "Address",
+      "note": "Note",
+      "recurring": "Recurring",
+      "yes": "Yes",
+      "no": "No",
+      "weekTotal": "Week total",
+      "pay": "Pay ({currency})",
+      "total": "Total",
+      "team": "Whole team"
     }
   },
   "web": {

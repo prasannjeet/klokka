@@ -137,10 +137,11 @@ public interface KlokkaConfig {
     }
 
     interface Mail {
-        // The SMTP account's monthly allowance, shown on the operator's volume page and enforced before an invite.
+        // The SMTP account's daily allowance (Migadu: about 100 a day per mailbox), counted over a rolling 24 hours;
+        // shown on the operator's volume page and enforced before an invite and before every digest.
         @WithDefault("100")
         @Min(1)
-        int monthlyQuota();
+        int dailyQuota();
     }
 
     interface Digest {
@@ -150,11 +151,33 @@ public interface KlokkaConfig {
         @Max(23)
         int localHour();
 
-        // Users considered per sweep.
+        // Users read per page while a sweep walks every user (keyset paging).
         @WithDefault("200")
         @Min(1)
         @Max(5000)
         int batchSize();
+
+        // Emails of the daily quota the digest leaves untouched, so invitations and sign-up codes always have room.
+        @WithDefault("20")
+        @Min(0)
+        int reserve();
+
+        // Last week's digest stays due until the end of Monday plus this many days (local time); a digest held back
+        // for budget past that is dropped rather than sent stale.
+        @WithDefault("2")
+        @Min(0)
+        @Max(6)
+        int catchUpDays();
+
+        // Users one sweep looks at, at most (a bound on the walk, not a page size).
+        @WithDefault("5000")
+        @Min(1)
+        int maxUsersPerRun();
+
+        // Job lines listed in one email across all workspaces; the rest are in the attached workbook.
+        @WithDefault("60")
+        @Min(1)
+        int maxJobsInEmail();
     }
 
     interface Logto {

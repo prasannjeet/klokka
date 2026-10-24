@@ -20,7 +20,7 @@ public class AccountDeletionRepository implements PanacheRepositoryBase<AppUserE
 
     // Children of a workspace, deleted before it in this order. A table added later with a foreign key to one of
     // these (or to workspace) belongs here too; AccountDeletionTest reads the foreign keys from the catalogue and
-    // fails on a table this list does not name. The mail log keeps its rows (the monthly quota counts them) but
+    // fails on a table this list does not name. The mail log keeps its rows (the daily quota counts them) but
     // loses the addresses.
     static final List<String> WORKSPACE_CHILDREN = List.of(
             "delete from job_reminder where workspace_id = :w",

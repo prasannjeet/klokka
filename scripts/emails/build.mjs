@@ -4,7 +4,7 @@
 // Both are committed. `--check` regenerates in memory and fails when a committed file differs.
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { business, button, cell, code, esc, p, page, row, rows, small, strong } from './layout.mjs';
+import { business, button, cell, code, digest, esc, p, page, row, rows, small, strong } from './layout.mjs';
 
 const root = (path) => fileURLToPath(new URL(`../../${path}`, import.meta.url));
 const LOGTO_OUT = root('infra/logto/email-templates.json');
@@ -126,9 +126,31 @@ function digestTemplate() {
 <tr>{#for d in w.days}<td ${cell.label}>{d.label}</td>{/for}</tr>
 <tr>{#for d in w.days}{#if d.hot}<td ${cell.hot}>{d.value}</td>{#else if d.off}<td ${cell.off}>{d.value}</td>{#else}<td ${cell.hours}>{d.value}</td>{/if}{/for}</tr>
 </table>`;
+  // Employer only: one row per person, Monday to Sunday and the week; a day without hours is a muted dash. The table
+  // scrolls inside its own wrapper on a narrow screen instead of squeezing the names.
+  const team = `{#if w.team}
+<p ${digest.heading}>{m.teamTitle}</p>
+<div ${digest.scroll}><table ${digest.table}>
+<tr><th ${digest.thName}>&nbsp;</th>{#for d in w.days}<th ${digest.th}>{d.label}</th>{/for}<th ${digest.th}>{m.totalLabel}</th></tr>
+{#for r in w.team}<tr><td ${digest.name}>{r.name}</td>{#for c in r.days}{#if c.zero}<td ${digest.zero}>{c.value}</td>{#else}<td ${digest.value}>{c.value}</td>{/if}{/for}<td ${digest.total}>{r.total}</td></tr>
+{/for}</table></div>
+{/if}`;
+  // Jobs per person per day: "Mon 20 Oct", then "09:00  Café Nord  4 h" lines (an employee's own list has no name).
+  const jobs = `{#if w.people}
+<p ${digest.heading}>{m.jobsTitle}</p>
+{#for p in w.people}{#if p.name}<p ${digest.person}>{p.name} <span ${digest.personTotal}>{p.total}</span></p>{/if}
+{#for d in p.days}<p ${digest.day}>{d.label}</p>
+<table ${digest.lines}>{#for j in d.jobs}<tr><td ${digest.time}>{j.time}</td><td ${digest.place}>{j.place}</td><td ${digest.hours}>{j.hours}</td></tr>{/for}</table>
+{/for}{/for}
+{/if}`;
+  const files = `{#if w.fileLine}${small(q('w.fileLine'))}{/if}
+{#if w.moreLine}${small(q('w.moreLine'))}{/if}`;
   const workspace = `{#for w in m.workspaces}
 ${business(q('w.emoji'), q('w.name'), q('w.range'))}
 ${grid}
+${team}
+${jobs}
+${files}
 ${rows(row(q('w.hoursLabel'), q('w.hours')) + row(q('w.monthLabel'), q('w.monthHours')))}
 <div style="height:14px;line-height:14px;">&nbsp;</div>
 {/for}`;

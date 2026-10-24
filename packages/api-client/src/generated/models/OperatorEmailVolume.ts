@@ -24,7 +24,11 @@ export interface OperatorEmailVolume {
      */
     sent: number;
     /**
-     * The configured monthly allowance (KLOKKA_MAIL_MONTHLY_QUOTA).
+     * Emails sent in the last 24 hours, the count the daily quota is enforced against.
+     */
+    sentLast24h: number;
+    /**
+     * The daily allowance (KLOKKA_MAIL_DAILY_QUOTA), counted over the last 24 hours.
      */
     quota: number;
     /**
@@ -44,7 +48,7 @@ export interface OperatorEmailVolume {
      */
     bounced: number;
     /**
-     * 
+     * The first day of the next month (the month's counts start over); the quota itself is daily.
      */
     resetsOn: Date;
     /**
@@ -66,6 +70,7 @@ export interface OperatorEmailVolume {
  */
 export function instanceOfOperatorEmailVolume(value: object): value is OperatorEmailVolume {
     if (!('sent' in value) || value['sent'] === undefined) return false;
+    if (!('sentLast24h' in value) || value['sentLast24h'] === undefined) return false;
     if (!('quota' in value) || value['quota'] === undefined) return false;
     if (!('invitations' in value) || value['invitations'] === undefined) return false;
     if (!('verifications' in value) || value['verifications'] === undefined) return false;
@@ -89,6 +94,7 @@ export function OperatorEmailVolumeFromJSONTyped(json: any, ignoreDiscriminator:
     return {
         
         'sent': json['sent'],
+        'sentLast24h': json['sentLast24h'],
         'quota': json['quota'],
         'invitations': json['invitations'],
         'verifications': json['verifications'],
@@ -113,6 +119,7 @@ export function OperatorEmailVolumeToJSONTyped(value?: OperatorEmailVolume | nul
     return {
         
         'sent': value['sent'],
+        'sentLast24h': value['sentLast24h'],
         'quota': value['quota'],
         'invitations': value['invitations'],
         'verifications': value['verifications'],
