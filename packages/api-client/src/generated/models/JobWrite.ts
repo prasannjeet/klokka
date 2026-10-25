@@ -29,7 +29,7 @@ import {
 } from './JobRecurrenceRule';
 
 /**
- * A whole job; a field left out is cleared.
+ * A whole job; a field left out is cleared, except title, which is kept.
  * @export
  * @interface JobWrite
  */
@@ -51,7 +51,7 @@ export interface JobWrite {
      */
     startTime?: string | null;
     /**
-     * Trimmed on save; blank or absent clears the title.
+     * Trimmed on save; null or blank clears the title. Left out, the title is kept, so a client that predates the field cannot clear it; each job keeps its own and a series keeps the one its later jobs are planned with. On creation, left out means no title.
      */
     title?: string | null;
     /**

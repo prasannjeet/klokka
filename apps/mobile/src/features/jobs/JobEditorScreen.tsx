@@ -588,7 +588,7 @@ function JobForm({
           onChangeText={setTitle}
           maxLength={JOB_TITLE_MAX}
           autoCapitalize="sentences"
-          returnKeyType="next"
+          returnKeyType="done"
           containerStyle={s.titleField}
           testID="job-title"
         />

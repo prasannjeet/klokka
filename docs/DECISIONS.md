@@ -247,7 +247,9 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
 ## D23. A job's label: title first, then place (owner, 2026-10-24, CHQ-191)
 
 - A job has an optional title (at most 120 characters, blank stored as null), a regular job field like the note:
-  in `JobWrite`, a series' template, the request hash and the "which jobs" scope.
+  in `JobWrite`, a series' template, the request hash and the "which jobs" scope. Unlike the note, a `JobWrite`
+  that leaves `title` out keeps the title (an explicit null or blank clears it), so a 1.7.0 phone or a stale web
+  tab, which knows nothing of titles, cannot wipe them by saving a job.
 - One display rule on every surface: the title is the job's main label and the place goes on the second line (or
   after a comma on one line); with no title a job looks as before (its place, or a job count). Both clients use
   `jobLabel`/`jobLabels` from `@klokka/core`; push, the digest and its workbook use `JobLabels` in the API.

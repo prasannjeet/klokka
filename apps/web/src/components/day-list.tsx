@@ -71,7 +71,7 @@ export function DayList({
               <span className="what">
                 {jobLabels(day.jobs).length > 0 ? (
                   <span className="places">
-                    <Icon name="pin" />
+                    <Icon name="briefcase" />
                     <span className="truncate">{jobLabels(day.jobs).join(', ')}</span>
                   </span>
                 ) : null}

@@ -200,6 +200,38 @@ describe('PersonScreen: Back from a day', () => {
     expect(routerState.backs).toBe(1);
   });
 
+  // Review fix: a whole-stack reset (switching workspace dismisses every screen) is not a Back, so it goes through.
+  it('a removal that is not a Back passes through the guard', async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="month" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('cell-2026-09-17'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    await act(() => routerState.preventRemove?.({ data: { action: { type: 'POP_TO_TOP' } } }));
+    await act(() =>
+      routerState.preventRemove?.({ data: { action: { type: 'POP', payload: { count: 2 } } } }),
+    );
+    expect(routerState.dispatches).toEqual([{ type: 'POP_TO_TOP' }, { type: 'POP', payload: { count: 2 } }]);
+    expect(screen.getByTestId('day-screen')).toBeTruthy();
+    // Positive control: a one-screen POP is a Back and returns to the month.
+    await act(() =>
+      routerState.preventRemove?.({ data: { action: { type: 'POP', payload: { count: 1 } } } }),
+    );
+    expect(await screen.findByTestId('member-month-screen')).toBeTruthy();
+    expect(routerState.dispatches).toHaveLength(2);
+  });
+
+  it('removing the person from a day opened in the month leaves the person', async () => {
+    const api = personApi();
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="month" />, { api });
+    await fireEvent.press(await screen.findByTestId('cell-2026-09-17'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    expect(routerState.preventRemove).not.toBeNull();
+    await fireEvent.press(screen.getByTestId('member-actions'));
+    await fireEvent.press(await screen.findByTestId('action-remove'));
+    await fireEvent.press(await screen.findByTestId('remove-confirm'));
+    await waitFor(() => expect(routerState.dispatches).toEqual([{ type: 'GO_BACK' }]));
+    expect(api.calls.some((c) => c.op === 'removeMember')).toBe(true);
+  });
+
   // The positive control: a day the screen was opened on (a team day chip) leaves as before.
   it('opened on a day, Back leaves the person', async () => {
     await renderApp(<PersonScreen membershipId="mem-maria" initialView="day" initialDate="2026-09-22" />, {

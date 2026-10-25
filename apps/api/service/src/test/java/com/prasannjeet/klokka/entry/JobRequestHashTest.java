@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 // The retry fingerprint covers every field of the body: a retry that changes only the title (CHQ-191) is a
-// different request.
+// different request, and so is a schedule change that leaves the title out (kept) against one that sends null.
 class JobRequestHashTest {
 
     private static JobWrite body(String title) {
@@ -21,8 +21,11 @@ class JobRequestHashTest {
         assertThat(JobRequestHash.of(body("Window cleaning"))).isNotEqualTo(JobRequestHash.of(body("Deep clean")));
         assertThat(JobRequestHash.of(body("Window cleaning"))).isNotEqualTo(JobRequestHash.of(body(null)));
         UUID job = UUID.randomUUID();
-        assertThat(JobRequestHash.ofScheduleChange(job, body("Window cleaning"))).isNotEqualTo(JobRequestHash.ofScheduleChange(job, body(null)));
+        assertThat(JobRequestHash.ofScheduleChange(job, body("Window cleaning"), true))
+                .isNotEqualTo(JobRequestHash.ofScheduleChange(job, body(null), true));
+        assertThat(JobRequestHash.ofScheduleChange(job, body(null), false)).isNotEqualTo(JobRequestHash.ofScheduleChange(job, body(null), true));
         // Positive control: the same body hashes the same.
         assertThat(JobRequestHash.of(body("Window cleaning"))).isEqualTo(JobRequestHash.of(body("Window cleaning")));
+        assertThat(JobRequestHash.ofScheduleChange(job, body(null), false)).isEqualTo(JobRequestHash.ofScheduleChange(job, body(null), false));
     }
 }

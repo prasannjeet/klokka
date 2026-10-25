@@ -4,7 +4,8 @@ import jakarta.enterprise.context.RequestScoped;
 import java.util.Set;
 
 // Which top-level properties the request body actually carried. PATCH bodies distinguish "absent, leave it" from
-// "null, clear it" (MemberUpdate.hourlyRate); Jackson gives both as null, so PatchBodyReader records the names.
+// "null, clear it" (MemberUpdate.hourlyRate, JobWrite.title); Jackson gives both as null, so PatchBodyReader records
+// the names.
 @RequestScoped
 public class JsonFieldPresence {
 

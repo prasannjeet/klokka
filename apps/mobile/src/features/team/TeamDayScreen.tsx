@@ -62,7 +62,8 @@ export function plannable(members: readonly Member[] | undefined): Member[] {
 // (a tap opens that person's day), open flags, and every job with its map and person. The arrows step a day,
 // sliding from the side they point to (CHQ-169). The total is the sum of the listed entries (presentation).
 // The employer plans a single job on the date from here (CHQ-191): straight to the editor when one person can
-// take it, through a pick of the person otherwise; a closed month keeps the action in view, disabled, and says why.
+// take it, through a pick of the person otherwise; a closed month keeps the action in view, disabled, and says why,
+// and with nobody to plan for the day says so.
 function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
@@ -81,8 +82,11 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
   const summary = useMonthSummary(workspace.workspaceId, monthOf(date), employer);
   const pick = useRef<PickPersonHandle>(null);
   const eligible = plannable(members.data);
-  // Hidden until the team is known, and when nobody can take a job; a closed month disables it.
-  const canPlan = employer && members.isSuccess && eligible.length > 0;
+  // Hidden until the team and the month's lock state are known (so it is never live in a closed month for a moment),
+  // and when nobody can take a job; a closed month disables it.
+  const canPlan = employer && members.isSuccess && summary.isSuccess && eligible.length > 0;
+  // Said on every day, as on the web, not only on an empty one.
+  const noOneToPlan = employer && members.isSuccess && eligible.length === 0;
   const locked = summary.data?.locked ?? false;
   const monthName = formatMonthName(monthOf(date), locale);
   const openEditor = (membershipId: string) =>
@@ -161,6 +165,11 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
             </AppText>
           </Card>
         ) : null}
+        {noOneToPlan ? (
+          <AppText variant="small" tone="muted" align="center" testID="team-day-no-eligible">
+            {t('jobs.noEligibleMembers')}
+          </AppText>
+        ) : null}
         {list.length > 0 ? (
           <View style={s.chips}>
             {list.map((e) => (
@@ -217,12 +226,7 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
         ) : null}
         {entries.isLoading ? null : list.length === 0 ? (
           <>
-            <EmptyState
-              icon="briefcase"
-              title={t('team.noJobsDay')}
-              body={employer && members.isSuccess && !canPlan ? t('jobs.noEligibleMembers') : undefined}
-              testID="team-day-empty"
-            />
+            <EmptyState icon="briefcase" title={t('team.noJobsDay')} testID="team-day-empty" />
             {canPlan && !locked ? (
               <Button label={t('jobs.addJob')} icon="plus" onPress={newJob} testID="team-day-add-job" />
             ) : null}

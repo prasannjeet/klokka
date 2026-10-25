@@ -3,6 +3,7 @@ package com.prasannjeet.klokka.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.prasannjeet.klokka.contract.model.JobWrite;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,8 +18,9 @@ import org.jboss.resteasy.reactive.server.spi.ResteasyReactiveResourceInfo;
 import org.jboss.resteasy.reactive.server.spi.ServerMessageBodyReader;
 import org.jboss.resteasy.reactive.server.spi.ServerRequestContext;
 
-// Reads every contract `*Update` body through a JSON tree first, so the service can ask JsonFieldPresence which
-// properties were sent, then maps it with the same ObjectMapper Quarkus uses (validation runs afterwards as usual).
+// Reads every contract `*Update` body, and JobWrite (whose title is kept when left out, CHQ-191), through a JSON tree
+// first, so the service can ask JsonFieldPresence which properties were sent, then maps it with the same ObjectMapper
+// Quarkus uses (validation runs afterwards as usual).
 @Provider
 @Consumes(MediaType.APPLICATION_JSON)
 public class PatchBodyReader implements ServerMessageBodyReader<Object> {
@@ -33,7 +35,8 @@ public class PatchBodyReader implements ServerMessageBodyReader<Object> {
 
     @Override
     public boolean isReadable(Class<?> type, Type genericType, ResteasyReactiveResourceInfo target, MediaType mediaType) {
-        return type.getPackageName().equals(MODEL_PACKAGE) && type.getSimpleName().endsWith("Update");
+        return type.getPackageName().equals(MODEL_PACKAGE)
+                && (type.getSimpleName().endsWith("Update") || type == JobWrite.class);
     }
 
     @Override

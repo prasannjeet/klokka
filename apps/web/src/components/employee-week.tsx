@@ -140,7 +140,7 @@ export function EmployeeWeek() {
                   <span className="what">
                     {entry && entry.jobs.some((j) => jobLabel(j) || j.startTime) ? (
                       <span className="places">
-                        <Icon name="pin" />
+                        <Icon name="briefcase" />
                         <span className="truncate">
                           {entry.jobs
                             .map((j) => [j.startTime, jobLabel(j)].filter(Boolean).join(' '))

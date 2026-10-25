@@ -172,7 +172,8 @@ describe('JobEditorScreen: saving', () => {
     const field = await screen.findByTestId('job-title');
     expect(field.props.maxLength).toBe(120);
     expect(field.props.autoCapitalize).toBe('sentences');
-    expect(field.props.returnKeyType).toBe('next');
+    // The rows below are not text fields, so the key closes the keyboard rather than promising a next field.
+    expect(field.props.returnKeyType).toBe('done');
     expect(field.props.accessibilityLabel).toBe('Title');
     expect(field.props.placeholder).toBe('For example: Window cleaning');
     await fireEvent.changeText(field, '  Stairwell  ');

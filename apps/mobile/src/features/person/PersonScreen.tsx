@@ -44,6 +44,15 @@ export function personViewOf(value: unknown): PersonView | null {
   return value === 'day' || value === 'week' || value === 'month' ? value : null;
 }
 
+// A plain one-screen Back (the header's button or the phone's gesture). Anything else that removes the screen, such
+// as a whole-stack reset after switching workspace (dismissAll, POP_TO_TOP, RESET, REPLACE), is not Back.
+export function isBackAction(action: { type: string; payload?: unknown }): boolean {
+  if (action.type === 'GO_BACK') return true;
+  if (action.type !== 'POP') return false;
+  const count = (action.payload as { count?: number } | undefined)?.count;
+  return count === undefined || count === 1;
+}
+
 const styles = (t: Theme) =>
   StyleSheet.create({
     round: {
@@ -113,9 +122,9 @@ function PersonScreenInner({
     setView(next);
   };
   // The Header's back button (router.back) and the Android back gesture both ask the stack to remove the screen,
-  // so one guard covers both.
+  // so one guard covers both. Only a Back returns to the view; any other removal goes through.
   usePreventRemove(view === 'day' && cameFrom !== null, ({ data }) => {
-    if (leaving.current || cameFrom === null) {
+    if (leaving.current || cameFrom === null || !isBackAction(data.action)) {
       navigation.dispatch(data.action);
       return;
     }

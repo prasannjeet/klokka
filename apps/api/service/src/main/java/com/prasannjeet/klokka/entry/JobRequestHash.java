@@ -34,9 +34,10 @@ final class JobRequestHash {
     }
 
     // A schedule change also names the job it was sent for, so one key cannot replay against another job (and a
-    // creation's key never matches a schedule change).
-    static String ofScheduleChange(UUID jobId, JobWrite body) {
-        return hash(Map.of("jobId", jobId, "body", body));
+    // creation's key never matches a schedule change). A title left out keeps the series' title while null clears
+    // it, so the two are different requests. A creation needs no such mark: there both mean no title.
+    static String ofScheduleChange(UUID jobId, JobWrite body, boolean titleSent) {
+        return hash(titleSent ? Map.of("jobId", jobId, "body", body) : Map.of("jobId", jobId, "body", body, "titleLeftOut", true));
     }
 
     private static String hash(Object value) {

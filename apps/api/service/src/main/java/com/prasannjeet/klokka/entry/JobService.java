@@ -32,6 +32,7 @@ import com.prasannjeet.klokka.persistence.JobRepository.SeriesJob;
 import com.prasannjeet.klokka.persistence.MembershipEntity;
 import com.prasannjeet.klokka.persistence.MembershipRepository;
 import com.prasannjeet.klokka.persistence.MonthLockRepository;
+import com.prasannjeet.klokka.rest.JsonFieldPresence;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -54,7 +55,9 @@ import java.util.stream.Collectors;
 // The jobs of a day (CHQ-156). Every write goes through EntryWriter, which keeps the day's entry the sum of its jobs.
 // A series job is changed or removed by scope (CHQ-187): ONLY_THIS, THIS_AND_FUTURE (from the selected job on, past
 // or not) or ALL (the whole series); range scopes skip and count jobs in closed months. A schedule change splits a
-// series into parts (previous_id points back); the range scopes reach across them.
+// series into parts (previous_id points back); the range scopes reach across them. A JobWrite without the title
+// property keeps each job's title and the template's (clients before 1.8.0 do not know the field); null or blank
+// clears it.
 @ApplicationScoped
 public class JobService {
 
@@ -97,6 +100,9 @@ public class JobService {
     KlokkaConfig config;
 
     @Inject
+    JsonFieldPresence presence;
+
+    @Inject
     Clock clock;
 
     @Transactional
@@ -126,11 +132,14 @@ public class JobService {
         HourEntryEntity entry = liveEntry(a, job);
         MembershipEntity target = access.target(a, entry.membershipId);
         EntryWriter.JobInput values = input(a, body);
+        boolean titleSent = presence.sent("title");
         Scoped scoped = scoped(a, job, entry, scope);
-        for (SeriesJob each : scoped.writable()) writer.updateJob(a, target, liveEntry(a, each.job()), each.job(), values);
+        for (SeriesJob each : scoped.writable()) {
+            writer.updateJob(a, target, liveEntry(a, each.job()), each.job(), titleSent ? values : values.withTitle(each.job().title));
+        }
         // A range reaches the series' last planned job, so its values are the ones later jobs are planned with; the
         // earlier parts of a split series plan nothing any more.
-        if (scope != ONLY_THIS) setTemplate(scoped.current(), values);
+        if (scope != ONLY_THIS) setTemplate(scoped.current(), titleSent ? values : values.withTitle(scoped.current().title));
         return entryService.view(a, entry, target);
     }
 
@@ -213,7 +222,8 @@ public class JobService {
         if (scope != THIS_AND_FUTURE) throw validation("scope", "a schedule change applies to this and following jobs");
         if (body.getRequestId() == null) throw validation("requestId", "required for a schedule change");
         canonicalWeekdays(body);
-        String requestHash = JobRequestHash.ofScheduleChange(jobId, body);
+        boolean titleSent = presence.sent("title");
+        String requestHash = JobRequestHash.ofScheduleChange(jobId, body, titleSent);
         JobEntity unlocked = jobs.findJob(a.workspaceId(), jobId).orElse(null);
         if (unlocked == null) {
             // A retry can arrive after the change removed the job it was sent for.
@@ -234,7 +244,8 @@ public class JobService {
         HourEntryEntity entry = liveEntry(a, job);
         MembershipEntity target = access.target(a, entry.membershipId);
 
-        EntryWriter.JobInput values = input(a, body);
+        // Left out, the title stays the series' (its template's), as on every job it plans from here on.
+        EntryWriter.JobInput values = titleSent ? input(a, body) : input(a, body).withTitle(old.title);
         LocalDate today = today(a);
         LocalDate from = entry.workDate.isAfter(today) ? entry.workDate : today;
         JobRecurrenceDates.Schedule schedule = recurrenceDates.calculate(entry.workDate, from, body.getRecurrence(), today);

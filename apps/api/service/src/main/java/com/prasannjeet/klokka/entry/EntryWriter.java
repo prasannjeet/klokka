@@ -52,7 +52,11 @@ public class EntryWriter {
     public record Outcome(HourEntryEntity entry, boolean changed) {}
 
     // A job as written: hours already rounded by the workspace rule.
-    public record JobInput(BigDecimal hours, LocalTime startTime, String title, String note, JobLocation location) {}
+    public record JobInput(BigDecimal hours, LocalTime startTime, String title, String note, JobLocation location) {
+        JobInput withTitle(String kept) {
+            return new JobInput(hours, startTime, kept, note, location);
+        }
+    }
 
     // How a series write treats closed months and full days, and whether the employee is notified (CHQ-186).
     public record SeriesOptions(boolean skipClosedMonths, boolean skipFullDays, boolean notifyEmployee) {

@@ -245,7 +245,7 @@ export function linearGradientModule() {
 // expo-router outside a navigator: a recording router and empty params, overridable per test.
 // A screen guarded by usePreventRemove (the job editor) gets the leave attempt instead of the stack; the
 // navigation's `dispatch` of that action is what finally leaves.
-type PreventRemoveCallback = (options: { data: { action: { type: string } } }) => void;
+type PreventRemoveCallback = (options: { data: { action: { type: string; payload?: unknown } } }) => void;
 export const routerState = {
   pushes: [] as unknown[],
   replaces: [] as unknown[],

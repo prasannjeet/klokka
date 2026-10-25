@@ -13,6 +13,7 @@ import io.quarkus.test.security.TestSecurity;
 import io.quarkus.test.security.oidc.Claim;
 import io.quarkus.test.security.oidc.OidcSecurity;
 import jakarta.inject.Inject;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -139,6 +140,76 @@ class JobScopeTest {
         return data.query("select j.title from job j join hour_entry e on e.workspace_id = j.workspace_id and e.id = j.entry_id "
                 + "where j.workspace_id = ? and j.recurrence_id = ? and e.deleted_at is null order by e.work_date",
                 ws, series).stream().map(r -> (String) r.getFirst()).toList();
+    }
+
+    Object templateTitle(UUID series) {
+        return data.scalar("select title from job_recurrence where workspace_id = ? and id = ?", ws, series);
+    }
+
+    // CHQ-191: a client from before 1.8.0 sends JobWrite without the title. Left out, every job keeps its own title
+    // and the template keeps its; a title change on one job leaves the template alone; one over ALL reaches every
+    // job and the template, and an explicit null clears them all.
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void aJobWriteWithoutTheTitleKeepsTheSeriesTitles() {
+        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Window cleaning\",\"requestId\":\"" + UUID.randomUUID()
+                + "\",\"recurrence\":" + EIGHT_WEDNESDAYS + "}";
+        String first = given().contentType("application/json").body(body)
+                .post(base() + "/members/" + member + "/entries/2026-09-23/jobs").then().statusCode(201).extract().path("jobs[0].id");
+        UUID series = (UUID) data.scalar("select recurrence_id from job where workspace_id = ? and id = ?", ws, UUID.fromString(first));
+
+        given().contentType("application/json").body("{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Inside only\"}")
+                .put(base() + "/jobs/" + jobOn("2026-09-30") + "?scope=ONLY_THIS").then().statusCode(200)
+                .body("jobs[0].title", is("Inside only"));
+        assertThat(titles(series)).containsExactly("Window cleaning", "Inside only", "Window cleaning", "Window cleaning",
+                "Window cleaning", "Window cleaning", "Window cleaning", "Window cleaning");
+        assertThat(templateTitle(series)).isEqualTo("Window cleaning");
+
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"09:00\"}")
+                .put(base() + "/jobs/" + jobOn("2026-10-07") + "?scope=ALL").then().statusCode(200)
+                .body("hours", is(4.0f)).body("jobs[0].title", is("Window cleaning"));
+        assertThat(dates(series, 4)).hasSize(8);
+        assertThat(titles(series)).containsExactly("Window cleaning", "Inside only", "Window cleaning", "Window cleaning",
+                "Window cleaning", "Window cleaning", "Window cleaning", "Window cleaning");
+        assertThat(data.query("select hours, title from job_recurrence where workspace_id = ? and id = ?", ws, series).getFirst())
+                .containsExactly(new BigDecimal("4.00"), "Window cleaning");
+
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"09:00\",\"title\":\"Deep clean\"}")
+                .put(base() + "/jobs/" + jobOn("2026-10-07") + "?scope=ALL").then().statusCode(200);
+        assertThat(titles(series)).containsOnly("Deep clean").hasSize(8);
+        assertThat(templateTitle(series)).isEqualTo("Deep clean");
+
+        given().contentType("application/json").body("{\"hours\":4,\"startTime\":\"09:00\",\"title\":null}")
+                .put(base() + "/jobs/" + jobOn("2026-10-07") + "?scope=ALL").then().statusCode(200);
+        assertThat(titles(series)).containsOnlyNulls().hasSize(8);
+        assertThat(templateTitle(series)).isNull();
+    }
+
+    // A schedule change without the title plans its jobs with the series' title; the same key with title null is a
+    // different request (it would clear the title), so it is refused.
+    @Test
+    @TestSecurity(user = OWNER)
+    @OidcSecurity(claims = @Claim(key = "sub", value = OWNER))
+    void aScheduleChangeWithoutTheTitleKeepsTheSeriesTitle() {
+        String body = "{\"hours\":3,\"startTime\":\"09:00\",\"title\":\"Window cleaning\",\"requestId\":\"" + UUID.randomUUID()
+                + "\",\"recurrence\":" + EIGHT_WEDNESDAYS + "}";
+        String first = given().contentType("application/json").body(body)
+                .post(base() + "/members/" + member + "/entries/2026-09-23/jobs").then().statusCode(201).extract().path("jobs[0].id");
+        UUID old = (UUID) data.scalar("select recurrence_id from job where workspace_id = ? and id = ?", ws, UUID.fromString(first));
+        String thursdays = "{\"frequency\":\"WEEKLY\",\"interval\":1,\"weekdays\":[\"THURSDAY\"],\"periodCount\":3}";
+        String selected = jobOn("2026-10-14");
+        UUID key = UUID.randomUUID();
+        given().contentType("application/json").body(schedule(key, thursdays))
+                .put(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(200);
+        UUID next = (UUID) data.scalar("select id from job_recurrence where workspace_id = ? and previous_id = ?", ws, old);
+        assertThat(titles(next)).containsOnly("Window cleaning").isNotEmpty();
+        assertThat(templateTitle(next)).isEqualTo("Window cleaning");
+
+        given().contentType("application/json").body(schedule(key, thursdays).replace("\"hours\":3", "\"hours\":3,\"title\":null"))
+                .put(base() + "/jobs/" + selected + "?scope=THIS_AND_FUTURE").then().statusCode(400)
+                .body("errors[0].field", is("requestId"));
+        assertThat(titles(next)).containsOnly("Window cleaning");
     }
 
     @Test

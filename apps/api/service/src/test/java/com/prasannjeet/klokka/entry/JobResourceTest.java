@@ -183,14 +183,18 @@ class JobResourceTest {
                 .body("code", is("VALIDATION")).body("errors[0].field", is("title"));
         given().contentType("application/json").body("{\"hours\":5,\"title\":\"" + max + "\"}")
                 .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", is(max));
-        // Blank is saved as null; a job write without the field clears it.
+        // Blank is saved as null; a job write without the field keeps it (clients before 1.8.0); null clears it.
         given().contentType("application/json").body("{\"hours\":5,\"title\":\"   \"}")
                 .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", nullValue());
         assertThat(data.scalar("select title from job where id = ?", UUID.fromString(job))).isNull();
         given().contentType("application/json").body("{\"hours\":5,\"title\":\"Windows\"}")
                 .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", is("Windows"));
-        given().contentType("application/json").body("{\"hours\":5}")
+        given().contentType("application/json").body("{\"hours\":6}")
+                .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200)
+                .body("jobs[0].hours", is(6.0f)).body("jobs[0].title", is("Windows"));
+        given().contentType("application/json").body("{\"hours\":5,\"title\":null}")
                 .when().put("/v1/workspaces/" + ws + "/jobs/" + job).then().statusCode(200).body("jobs[0].title", nullValue());
+        assertThat(data.scalar("select title from job where id = ?", UUID.fromString(job))).isNull();
     }
 
     @Test

@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
 import type { Member, MonthSummary } from '@klokka/api-client';
 import { TeamCalendarScreen } from './TeamCalendarScreen';
 import { TeamDayScreen } from './TeamDayScreen';
@@ -286,6 +286,30 @@ describe('TeamDayScreen: new job (CHQ-191)', () => {
     expect(await screen.findByText('Add an employee to plan jobs.')).toBeTruthy();
     expect(screen.queryByTestId('team-day-new-job')).toBeNull();
     expect(screen.queryByTestId('team-day-add-job')).toBeNull();
+  });
+
+  it('with nobody to plan for, says so on a day with jobs too', async () => {
+    await renderApp(<TeamDayScreen date="2026-09-24" />, { api: planApi([employer, deactivated]) });
+    expect(await screen.findByText('Maria, 4 h')).toBeTruthy();
+    expect(screen.getByTestId('team-day-no-eligible')).toBeTruthy();
+    expect(screen.getByText('Add an employee to plan jobs.')).toBeTruthy();
+    expect(screen.queryByTestId('team-day-new-job')).toBeNull();
+  });
+
+  it('keeps New job away until the month is known, so it is never live in a closed month', async () => {
+    let answer: (value: unknown) => void = () => undefined;
+    const pending = new Promise((resolve) => {
+      answer = resolve;
+    });
+    await renderApp(<TeamDayScreen date="2026-09-24" />, {
+      api: planApi(membersFixture, { getMonthSummary: () => pending }),
+    });
+    expect(await screen.findByText('Maria, 4 h')).toBeTruthy();
+    expect(screen.queryByTestId('team-day-new-job')).toBeNull();
+    expect(screen.queryByTestId('team-day-no-eligible')).toBeNull();
+    await act(async () => answer({ ...summary, locked: true }));
+    const action = await screen.findByTestId('team-day-new-job');
+    expect(action.props.accessibilityState).toEqual({ disabled: true });
   });
 
   it('an employee sees no action', async () => {
