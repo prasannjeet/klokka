@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
+import { usePreventRemove } from 'expo-router/react-navigation';
 import {
   addDays,
   formatDate,
@@ -14,7 +15,7 @@ import {
 import { useEntries, useMember, useMemberMonth } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { currentMonthIn, todayIn } from '@/lib/dates';
-import { useTheme, useThemedStyles, type Theme } from '@/theme';
+import { useThemedStyles, type Theme } from '@/theme';
 import {
   AppPressable,
   AppText,
@@ -31,6 +32,7 @@ import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspa
 import { DayPage } from '@/features/day/DayScreen';
 import { dayActionFor } from '@/features/jobs/dayAction';
 import { jobEditorHref } from '@/features/jobs/jobEditorHref';
+import { NewJobPill } from '@/features/jobs/NewJobPill';
 import { MemberMonthView } from '@/features/month/MemberMonthView';
 import { MemberActionsSheets, type MemberActionsHandle } from '@/features/member/MemberActionsSheets';
 import { MonthLockExport } from '@/features/member/MonthLockExport';
@@ -55,22 +57,15 @@ const styles = (t: Theme) =>
     nav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: t.space[2] },
     navText: { flex: 1, alignItems: 'center', gap: 2 },
     actions: { flexDirection: 'row', alignItems: 'center', gap: t.space[2] },
-    newJob: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: t.space[1],
-      minHeight: t.tapMin,
-      paddingHorizontal: t.space[3],
-      borderRadius: t.radius.pill,
-      backgroundColor: t.color.primary,
-    },
   });
 
 type Workspace = WorkspaceProps['workspace'];
 
 // One person (CHQ-171, the People tab): their week, day or month behind one switch, each with its own arrows.
 // The date carries over between the views, so a week's Wednesday opens as that day and that month. Replaces
-// the per-employee month (CHQ-122); the lock, export and member actions stay here.
+// the per-employee month (CHQ-122); the lock, export and member actions stay here. A day opened from the week or
+// the month remembers where it came from, so Back (the header's button and the phone's gesture alike) returns
+// there instead of leaving the person (CHQ-191); choosing a view in the switch forgets it.
 function PersonScreenInner({
   membershipId,
   initialView,
@@ -86,12 +81,16 @@ function PersonScreenInner({
   initialDate?: IsoDate | undefined;
 } & WorkspaceProps) {
   const t = useT();
-  const theme = useTheme();
   const s = useThemedStyles(styles);
   const router = useRouter();
+  const navigation = useNavigation();
   const employer = workspace.role === 'EMPLOYER';
   const today = todayIn(workspace.timezone);
   const [view, setView] = useState<PersonView>(initialView);
+  // The view a date was tapped in; null when the day was opened directly (a team day chip) or chosen in the switch.
+  const [cameFrom, setCameFrom] = useState<PersonView | null>(null);
+  // Set when the person is removed: that Back leaves the screen whatever view it is on.
+  const leaving = useRef(false);
   const [date, setDate] = useState<IsoDate>(
     initialDate ?? (initialMonth && initialMonth !== monthOf(today) ? `${initialMonth}-01` : today),
   );
@@ -105,9 +104,24 @@ function PersonScreenInner({
     { value: 'month', label: t('team.month'), testID: 'view-month' },
   ];
   const openDay = (next: IsoDate) => {
+    setCameFrom(view);
     setDate(next);
     setView('day');
   };
+  const chooseView = (next: PersonView) => {
+    setCameFrom(null);
+    setView(next);
+  };
+  // The Header's back button (router.back) and the Android back gesture both ask the stack to remove the screen,
+  // so one guard covers both.
+  usePreventRemove(view === 'day' && cameFrom !== null, ({ data }) => {
+    if (leaving.current || cameFrom === null) {
+      navigation.dispatch(data.action);
+      return;
+    }
+    setView(cameFrom);
+    setCameFrom(null);
+  });
   const header = (
     <>
       <Header
@@ -119,19 +133,10 @@ function PersonScreenInner({
           <View style={s.actions}>
             {/* New job (CHQ-185): a date and a repeat, today by default. */}
             {employer ? (
-              <AppPressable
-                accessibilityRole="button"
-                accessibilityLabel={t('jobs.newJob')}
+              <NewJobPill
                 onPress={() => router.push(jobEditorHref({ membershipId, date: today, mode: 'full' }))}
-                hapticKind="select"
-                style={s.newJob}
                 testID="person-new-job"
-              >
-                <Icon name="plus" size={18} color={theme.color.onPrimary} />
-                <AppText variant="small" weight={600} color={theme.color.onPrimary}>
-                  {t('jobs.newJob')}
-                </AppText>
-              </AppPressable>
+              />
             ) : null}
             <AppPressable
               accessibilityRole="button"
@@ -150,7 +155,7 @@ function PersonScreenInner({
       ) : status === 'DEACTIVATED' ? (
         <Pill label={t('status.deactivated')} />
       ) : null}
-      <Segmented options={views} value={view} onChange={setView} accessibilityLabel={t('team.view')} />
+      <Segmented options={views} value={view} onChange={chooseView} accessibilityLabel={t('team.view')} />
     </>
   );
 
@@ -190,7 +195,10 @@ function PersonScreenInner({
         workspace={workspace}
         member={member.data}
         membershipId={membershipId}
-        onRemoved={() => router.back()}
+        onRemoved={() => {
+          leaving.current = true;
+          router.back();
+        }}
       />
     </>
   );

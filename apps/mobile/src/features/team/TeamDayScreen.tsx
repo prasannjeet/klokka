@@ -1,15 +1,27 @@
+import { useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { addDays, formatDate, formatHours, isoWeek, sumHours, type IsoDate } from '@klokka/core';
-import { useEntries } from '@/data/workspace';
+import type { Member } from '@klokka/api-client';
+import {
+  addDays,
+  formatDate,
+  formatHours,
+  formatMonthName,
+  isoWeek,
+  monthOf,
+  sumHours,
+  type IsoDate,
+} from '@klokka/core';
+import { useEntries, useMembers, useMonthSummary } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
-import { formatDuration } from '@/lib/duration';
 import { todayIn } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
-import { AppPressable, AppText, Avatar, Card, EmptyState, Header, Icon, Screen } from '@/ui';
+import { AppPressable, AppText, Avatar, Button, Card, EmptyState, Header, Icon, Screen } from '@/ui';
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { jobEditorHref } from '@/features/jobs/jobEditorHref';
+import { NewJobPill } from '@/features/jobs/NewJobPill';
 import type { DayStep } from '@/features/day/dayStep';
+import { PickPersonSheet, type PickPersonHandle } from './PickPersonSheet';
 import { TeamJobs } from './TeamJobs';
 
 const styles = (t: Theme) =>
@@ -40,9 +52,17 @@ const styles = (t: Theme) =>
     flagRow: { flexDirection: 'row', alignItems: 'center', gap: t.space[3] },
   });
 
+// Who a job can be planned for: the employees the employer's other New job flows offer (the People list, the web
+// Employees list), so never a deactivated one (CHQ-191).
+export function plannable(members: readonly Member[] | undefined): Member[] {
+  return (members ?? []).filter((m) => m.role === 'EMPLOYEE' && m.status !== 'DEACTIVATED');
+}
+
 // The whole team on one date (CHQ-171, opened from the Calendar): the day's total, who worked and how long
 // (a tap opens that person's day), open flags, and every job with its map and person. The arrows step a day,
 // sliding from the side they point to (CHQ-169). The total is the sum of the listed entries (presentation).
+// The employer plans a single job on the date from here (CHQ-191): straight to the editor when one person can
+// take it, through a pick of the person otherwise; a closed month keeps the action in view, disabled, and says why.
 function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspaceProps) {
   const t = useT();
   const locale = useLocale();
@@ -57,6 +77,21 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
   const flagged = (entries.data ?? []).filter((e) => e.flag?.status === 'OPEN');
   const go = (next: IsoDate, step: DayStep) =>
     router.replace({ pathname: '/team-day/[date]', params: { date: next, step } });
+  const members = useMembers(workspace.workspaceId);
+  const summary = useMonthSummary(workspace.workspaceId, monthOf(date), employer);
+  const pick = useRef<PickPersonHandle>(null);
+  const eligible = plannable(members.data);
+  // Hidden until the team is known, and when nobody can take a job; a closed month disables it.
+  const canPlan = employer && members.isSuccess && eligible.length > 0;
+  const locked = summary.data?.locked ?? false;
+  const monthName = formatMonthName(monthOf(date), locale);
+  const openEditor = (membershipId: string) =>
+    router.push(jobEditorHref({ membershipId, date, mode: 'single' }));
+  const newJob = () => {
+    const only = eligible.length === 1 ? eligible[0] : undefined;
+    if (only) openEditor(only.id);
+    else pick.current?.present();
+  };
 
   return (
     <>
@@ -66,6 +101,16 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
           subtitle={t('entry.daySubtitle', { week: isoWeek(date).week, workspace: workspace.name })}
           back
           large={false}
+          trailing={
+            canPlan ? (
+              <NewJobPill
+                onPress={newJob}
+                disabled={locked}
+                accessibilityHint={locked ? t('jobs.monthClosed', { month: monthName }) : undefined}
+                testID="team-day-new-job"
+              />
+            ) : null
+          }
         />
         <View style={s.nav}>
           <AppPressable
@@ -96,7 +141,7 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
               accessibilityLabel={formatHours(total, locale)}
               testID="team-day-hours"
             >
-              {formatDuration(total, t)}
+              {formatHours(total, locale)}
             </AppText>
           </View>
           <AppPressable
@@ -109,6 +154,13 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
             <Icon name="chevron-right" size={22} />
           </AppPressable>
         </View>
+        {canPlan && locked ? (
+          <Card style={{ backgroundColor: theme.color.warningSoft }} testID="team-day-locked">
+            <AppText variant="small" color={theme.color.warning}>
+              {t('jobs.monthClosed', { month: monthName })}
+            </AppText>
+          </Card>
+        ) : null}
         {list.length > 0 ? (
           <View style={s.chips}>
             {list.map((e) => (
@@ -164,7 +216,17 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
           </Card>
         ) : null}
         {entries.isLoading ? null : list.length === 0 ? (
-          <EmptyState icon="briefcase" title={t('team.noJobsDay')} testID="team-day-empty" />
+          <>
+            <EmptyState
+              icon="briefcase"
+              title={t('team.noJobsDay')}
+              body={employer && members.isSuccess && !canPlan ? t('jobs.noEligibleMembers') : undefined}
+              testID="team-day-empty"
+            />
+            {canPlan && !locked ? (
+              <Button label={t('jobs.addJob')} icon="plus" onPress={newJob} testID="team-day-add-job" />
+            ) : null}
+          </>
         ) : (
           <TeamJobs
             entries={list}
@@ -182,6 +244,7 @@ function TeamDayScreenInner({ date, workspace }: { date: IsoDate } & WorkspacePr
           />
         )}
       </Screen>
+      {canPlan ? <PickPersonSheet ref={pick} members={eligible} onPick={openEditor} /> : null}
     </>
   );
 }

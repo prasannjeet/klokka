@@ -62,6 +62,23 @@ describe('HomeScreen (employer, today, CHQ-171)', () => {
     expect(screen.getByText('Nora Lind, employer')).toBeTruthy();
   });
 
+  // CHQ-191 item 1: today's bar is the team's sum, so it is not capped at one day's 24 h.
+  it("shows today's team hours over 24 h in full", async () => {
+    const days = insightsFixture.currentWeek.days.map((d) =>
+      toIsoDate(d.date) === '2026-09-25' ? { ...d, hours: 26.5 } : d,
+    );
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getWorkspace: workspaceFixture,
+      listMembers: membersFixture,
+      listEntries: [],
+      getWorkspaceInsights: { ...insightsFixture, currentWeek: { ...insightsFixture.currentWeek, days } },
+      listFlags: [],
+    });
+    await renderApp(<HomeScreen />, { api });
+    expect((await screen.findByTestId('home-today-hours')).props.children).toBe('26.5 h');
+  });
+
   it("lists today's jobs in time order with who does them and where they stand", async () => {
     const api = homeApi();
     await renderApp(<HomeScreen />, { api });

@@ -1,8 +1,10 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react-native';
-import type { Entry } from '@klokka/api-client';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react-native';
+import type { Entry, Job } from '@klokka/api-client';
 import { PersonScreen } from './PersonScreen';
+import MemberRoute from '../../../app/member/[membershipId]';
 import { fakeApi, renderApp, type FakeApi } from '@/testing/render';
 import {
+  cafeLocation,
   employerMeFixture,
   entryFixture,
   jobFixture,
@@ -46,6 +48,10 @@ describe('PersonScreen', () => {
     jest.useFakeTimers({ now: new Date('2026-09-25T10:00:00Z') });
     useAppStore.getState().setActiveWorkspace('ws-cafe');
     routerState.pushes.length = 0;
+    routerState.backs = 0;
+    routerState.dispatches.length = 0;
+    routerState.preventRemove = null;
+    routerState.params = {};
   });
   afterEach(() => jest.useRealTimers());
 
@@ -115,5 +121,137 @@ describe('PersonScreen', () => {
     });
     expect(await screen.findByTestId('day-screen')).toBeTruthy();
     await waitFor(() => expect(ranges(api)).toContain('2026-09-22..2026-09-22 mem-maria'));
+  });
+
+  // CHQ-191 item 5: the People list and the Employees list open a person on the month.
+  it('opens on the month when no view is given', async () => {
+    routerState.params = { membershipId: 'mem-maria' };
+    await renderApp(<MemberRoute />, { api: personApi() });
+    expect(await screen.findByTestId('member-month-screen')).toBeTruthy();
+    expect(screen.getByTestId('view-month').props.accessibilityState).toEqual({ checked: true });
+  });
+
+  it('keeps a view given to the route', async () => {
+    routerState.params = { membershipId: 'mem-maria', view: 'week' };
+    await renderApp(<MemberRoute />, { api: personApi() });
+    expect(await screen.findByTestId('person-week')).toBeTruthy();
+  });
+});
+
+// CHQ-191 item 4: Back from a day returns to the view the date was tapped in, not out of the person.
+describe('PersonScreen: Back from a day', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-09-25T10:00:00Z') });
+    useAppStore.getState().setActiveWorkspace('ws-cafe');
+    routerState.pushes.length = 0;
+    routerState.backs = 0;
+    routerState.dispatches.length = 0;
+    routerState.preventRemove = null;
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it("a month date's day goes Back to the month, on the header button and the phone's gesture alike", async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="month" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('cell-2026-09-17'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    // The header's back button: router.back() asks the stack, the guard answers.
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(await screen.findByTestId('member-month-screen')).toBeTruthy();
+    expect(routerState.backs).toBe(0);
+    expect(routerState.dispatches).toEqual([]);
+    // Again, through the phone's back gesture (the stack's remove event).
+    await fireEvent.press(await screen.findByTestId('cell-2026-09-17'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    await act(() => routerState.preventRemove?.({ data: { action: { type: 'GO_BACK' } } }));
+    expect(await screen.findByTestId('member-month-screen')).toBeTruthy();
+    // On the month, Back leaves the person.
+    expect(routerState.preventRemove).toBeNull();
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(routerState.backs).toBe(1);
+  });
+
+  it("a week line's day goes Back to that week", async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('day-mem-maria-2026-09-23'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(await screen.findByTestId('person-week')).toBeTruthy();
+    expect(screen.getByText('Week 39')).toBeTruthy();
+    expect(routerState.backs).toBe(0);
+  });
+
+  it('the day after stepping goes Back to the week of the day shown', async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('day-mem-maria-2026-09-22'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('day-prev'));
+    await fireEvent.press(screen.getByTestId('day-prev'));
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(await screen.findByText('Week 38')).toBeTruthy();
+  });
+
+  it('choosing Day in the switch forgets where it came from, so Back leaves', async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api: personApi() });
+    await fireEvent.press(await screen.findByTestId('day-mem-maria-2026-09-23'));
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('view-week'));
+    await fireEvent.press(screen.getByTestId('view-day'));
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(routerState.backs).toBe(1);
+  });
+
+  // The positive control: a day the screen was opened on (a team day chip) leaves as before.
+  it('opened on a day, Back leaves the person', async () => {
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="day" initialDate="2026-09-22" />, {
+      api: personApi(),
+    });
+    expect(await screen.findByTestId('day-screen')).toBeTruthy();
+    expect(routerState.preventRemove).toBeNull();
+    await fireEvent.press(screen.getByTestId('header-back'));
+    expect(routerState.backs).toBe(1);
+    expect(screen.getByTestId('day-screen')).toBeTruthy();
+  });
+});
+
+// CHQ-191 item 3: a day's line names its jobs by title, else by place.
+describe('PersonScreen: job titles in the lines', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-09-25T10:00:00Z') });
+    useAppStore.getState().setActiveWorkspace('ws-cafe');
+  });
+  afterEach(() => jest.useRealTimers());
+
+  const titled = [
+    jobFixture('job-w', 3, { title: 'Window cleaning', location: cafeLocation }),
+    jobFixture('job-c', 2, { location: cafeLocation }),
+  ];
+
+  it('the week line', async () => {
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getWorkspace: workspaceFixture,
+      getMember: membersFixture[0],
+      listEntries: [
+        entryFixture('mem-maria', '2026-09-22', 3, { jobs: [titled[0] as Job] }),
+        entryFixture('mem-maria', '2026-09-23', 5, { jobs: titled }),
+      ],
+    });
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="week" />, { api });
+    expect(await screen.findByText('Window cleaning')).toBeTruthy();
+    expect(screen.getByText('2 jobs, Window cleaning, Café Nord')).toBeTruthy();
+  });
+
+  it('the month line', async () => {
+    const days = memberMonthFixture.days.map((d) =>
+      toIsoDate(d.date) === '2026-09-24' ? { ...d, jobs: [titled[0] as Job] } : d,
+    );
+    const api = fakeApi({
+      getMe: employerMeFixture,
+      getWorkspace: workspaceFixture,
+      getMember: membersFixture[0],
+      getMemberMonth: { ...memberMonthFixture, days },
+    });
+    await renderApp(<PersonScreen membershipId="mem-maria" initialView="month" />, { api });
+    expect(await screen.findByText('Window cleaning')).toBeTruthy();
   });
 });

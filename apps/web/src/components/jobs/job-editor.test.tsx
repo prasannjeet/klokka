@@ -62,6 +62,7 @@ const SERIES_JOB: Job = {
   id: 'j1',
   hours: 4,
   startTime: '09:00',
+  title: 'Window cleaning',
   note: 'Counter',
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -138,7 +139,7 @@ describe('JobEditor', () => {
       workspaceId: 'ws',
       membershipId: 'm-test',
       date: parseDate('2026-10-24'),
-      jobWrite: { hours: 4, startTime: null, note: null },
+      jobWrite: { hours: 4, startTime: null, title: null, note: null },
     });
     // The guard's extra history entry is replaced, so Back from the day does not land on the editor twice.
     await waitFor(() => expect(calls.replace).toHaveBeenCalledWith(BACK));
@@ -205,6 +206,55 @@ describe('JobEditor', () => {
     expect(calls.push).not.toHaveBeenCalled();
   });
 
+  it('starts with an optional one-line title that is saved trimmed, and Enter in it does not save', async () => {
+    renderEditor('full', '2026-10-20');
+    const title = (await screen.findByLabelText('Title')) as HTMLInputElement;
+    // The first field of the job panel, before the date.
+    const fields = [...document.querySelectorAll('.job-form input, .job-form textarea')];
+    expect(fields[0]).toBe(title);
+    expect(title.maxLength).toBe(120);
+    expect(title.placeholder).toBe('For example: Window cleaning');
+    fireEvent.click(screen.getByRole('button', { name: '2 h' }));
+    fireEvent.change(title, { target: { value: '  Window cleaning  ' } });
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    title.dispatchEvent(enter);
+    expect(enter.defaultPrevented).toBe(true);
+    expect(calls.createJob).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('save-job'));
+    await waitFor(() => expect(calls.createJob).toHaveBeenCalledTimes(1));
+    expect(calls.createJob.mock.calls[0]?.[0].jobWrite).toEqual({
+      hours: 2,
+      startTime: null,
+      title: 'Window cleaning',
+      note: null,
+    });
+  });
+
+  it('asks before Cancel throws away a typed title', async () => {
+    renderEditor('single');
+    fireEvent.change(await screen.findByLabelText('Title'), { target: { value: 'Stairwell' } });
+    fireEvent.click(screen.getByTestId('job-cancel'));
+    expect(screen.getByText('Discard changes?')).toBeTruthy();
+    expect(calls.push).not.toHaveBeenCalled();
+  });
+
+  it("clears a job's title when it is emptied", async () => {
+    renderEditor('edit', '2026-10-21', 'j1');
+    const title = (await screen.findByLabelText('Title')) as HTMLInputElement;
+    expect(title.value).toBe('Window cleaning');
+    fireEvent.change(title, { target: { value: '   ' } });
+    fireEvent.click(screen.getByTestId('save-job'));
+    expect(await screen.findByLabelText('Only this job')).toBeTruthy();
+    fireEvent.click(screen.getByTestId('scope-confirm'));
+    await waitFor(() => expect(calls.updateJob).toHaveBeenCalledTimes(1));
+    expect(calls.updateJob.mock.calls[0]?.[0]).toEqual({
+      workspaceId: 'ws',
+      jobId: 'j1',
+      scope: 'ONLY_THIS',
+      jobWrite: { hours: 4, startTime: '09:00', title: null, note: 'Counter' },
+    });
+  });
+
   it('saves a field change to a chosen range of the series, with the counts', async () => {
     renderEditor('edit', '2026-10-21', 'j1');
     expect(await screen.findByRole('heading', { name: 'Job for Test' })).toBeTruthy();
@@ -223,7 +273,7 @@ describe('JobEditor', () => {
       workspaceId: 'ws',
       jobId: 'j1',
       scope: 'THIS_AND_FUTURE',
-      jobWrite: { hours: 4, startTime: '09:00', note: 'Side door' },
+      jobWrite: { hours: 4, startTime: '09:00', title: 'Window cleaning', note: 'Side door' },
     });
   });
 

@@ -5,7 +5,8 @@
 // changes a job and, for a recurring one, its schedule or a range of its series (CHQ-187). Leaving with changes
 // asks first, on every way out (Cancel, a link, the browser's Back, a reload). The time sits on two wheels (the
 // minutes the workspace rounding allows), with quick picks, an optional start time (the employee's reminder needs
-// one), the place and a note. Saving writes the job; the API keeps the day the sum of its jobs.
+// one), the place and a note. An optional title (CHQ-191) comes first: it is the job's main label everywhere.
+// Saving writes the job; the API keeps the day the sum of its jobs.
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -40,6 +41,8 @@ import { TimeWheels } from './time-wheels';
 import './jobs.css';
 
 const QUICK = [0.5, 1, 2, 4] as const;
+// The contract's Job.title maxLength (CHQ-191).
+const TITLE_MAX = 120;
 
 type Panel = 'job' | 'repeat' | 'scope';
 
@@ -190,6 +193,7 @@ function JobForm({
   }));
   const [panel, setPanel] = useState<Panel>('job');
   const [time, setTime] = useState(opened.time);
+  const [jobTitle, setJobTitle] = useState(job?.title ?? '');
   const [startTime, setStartTime] = useState(job?.startTime ?? '');
   const [note, setNote] = useState(job?.note ?? '');
   const [location, setLocation] = useState<JobLocation | null>(job?.location ?? null);
@@ -208,6 +212,7 @@ function JobForm({
     !saved &&
     (time.hours !== opened.time.hours ||
       time.minutes !== opened.time.minutes ||
+      jobTitle !== (job?.title ?? '') ||
       note !== (job?.note ?? '') ||
       startTime !== (job?.startTime ?? '') ||
       !sameLocation(location, job?.location ?? null) ||
@@ -251,6 +256,7 @@ function JobForm({
       const jobWrite: JobWrite = {
         hours,
         startTime: startTime || null,
+        title: jobTitle.trim() || null,
         note: note.trim() || null,
         ...(location ? { location } : {}),
         ...(sendsRule && recurrence ? { recurrence, requestId } : {}),
@@ -417,6 +423,24 @@ function JobForm({
         }
       >
         {guard.dialog}
+        <div className="field">
+          <label htmlFor="job-title">{t('jobs.jobTitle')}</label>
+          <input
+            id="job-title"
+            className="input"
+            type="text"
+            maxLength={TITLE_MAX}
+            autoComplete="off"
+            enterKeyHint="next"
+            placeholder={t('jobs.jobTitlePlaceholder')}
+            value={jobTitle}
+            onChange={(e) => setJobTitle(e.target.value)}
+            // One line: Enter does not save a half-filled job.
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.nativeEvent.isComposing) e.preventDefault();
+            }}
+          />
+        </div>
         <div className="job-form-cols">
           <div className="job-form-col">
             {mode === 'full' ? (

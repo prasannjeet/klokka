@@ -2,6 +2,7 @@
 // apply to packages/* and, once they exist, apps/web, apps/landing and apps/mobile. App-specific
 // presets (eslint-config-next, eslint-config-expo) are layered on in each app's own config later.
 import js from '@eslint/js';
+import nextPlugin from '@next/eslint-plugin-next';
 import prettier from 'eslint-config-prettier/flat';
 import tseslint from 'typescript-eslint';
 
@@ -57,11 +58,12 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
     },
   },
-  // The landing's own config (apps/landing/eslint.config.mjs) adds Next's rules, and its disable directives
-  // name those rules; this config has no Next plugin, so it would report them as unused. The landing's own lint
-  // still reports unused directives.
+  // The landing's and the web app's own configs (apps/*/eslint.config.mjs) add Next's rules, and their disable
+  // directives name those rules. Here the plugin is only registered (no rules on) so those names resolve, and
+  // unused directives are left to each app's own lint.
   {
-    files: ['apps/landing/**'],
+    files: ['apps/landing/**', 'apps/web/**'],
+    plugins: { '@next/next': nextPlugin },
     linterOptions: { reportUnusedDisableDirectives: 'off' },
   },
   prettier,

@@ -1,7 +1,7 @@
 // Jobs as the web shows them (CHQ-156): durations, spans, the directions link and the map URL.
 import { describe, expect, it } from 'vitest';
 import { translator } from '@klokka/core';
-import { directionsUrl, endTime, formatDuration, mapImageUrl, placesOf, timeRange } from './jobs';
+import { directionsUrl, endTime, formatDuration, mapImageUrl, timeRange } from './jobs';
 
 const t = translator('en');
 
@@ -27,19 +27,5 @@ describe('jobs', () => {
     expect(mapImageUrl('ws1', place, 360, 110, true)).toBe(
       '/api/k/workspaces/ws1/map.png?latitude=59.33459&longitude=18.06324&width=360&height=110&dark=true',
     );
-  });
-
-  it("names a day's places once each, in order", () => {
-    const job = (name: string | null) => ({
-      id: name ?? 'x',
-      hours: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      ...(name ? { location: { name, latitude: 0, longitude: 0 } } : {}),
-    });
-    expect(placesOf([job('Café Nord'), job(null), job('Lager'), job('Café Nord')])).toEqual([
-      'Café Nord',
-      'Lager',
-    ]);
   });
 });

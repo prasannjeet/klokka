@@ -4,7 +4,7 @@ import { useT } from '@/i18n/LocaleProvider';
 import { formatDuration } from '@/lib/duration';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Icon, Pill, type PillTone } from '@/ui';
-import type { JobStatus, MessageKey } from '@klokka/core';
+import { jobLabel, type JobStatus, type MessageKey } from '@klokka/core';
 import { RecurrenceSummary } from './RecurrenceSummary';
 import { MapImage, directionsUrl } from './MapImage';
 
@@ -52,8 +52,9 @@ const STATUS: Record<JobStatus, { key: MessageKey; tone: PillTone }> = {
   later: { key: 'team.statusLater', tone: 'neutral' },
 };
 
-// One job on a day (CHQ-156): the map when it has a place, where, when, how long, the note, and
-// Directions; Edit for the employer. The team views (CHQ-171) add who does it and where it stands.
+// One job on a day (CHQ-156): the map when it has a place, what (its title, CHQ-191) and where, when, how long,
+// the note, and Directions; Edit for the employer. The team views (CHQ-171) add who does it and where it stands.
+// The heading is the job's label (title, else place, else "No place"); with a title the place is the next line.
 export function JobCard({
   job,
   workspaceId,
@@ -71,6 +72,7 @@ export function JobCard({
   const theme = useTheme();
   const s = useThemedStyles(styles);
   const location = job.location ?? null;
+  const title = job.title?.trim() ? job.title.trim() : null;
   const when = job.startTime
     ? t('jobs.timeRange', { from: job.startTime, to: endTime(job.startTime, job.hours) })
     : null;
@@ -106,9 +108,14 @@ export function JobCard({
             </View>
           )}
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-            <AppText weight={700} numberOfLines={2}>
-              {location ? location.name : t('jobs.noLocation')}
+            <AppText weight={700} numberOfLines={title ? undefined : 2} testID={`job-label-${job.id}`}>
+              {jobLabel(job) ?? t('jobs.noLocation')}
             </AppText>
+            {title && location ? (
+              <AppText variant="small" weight={600} numberOfLines={2} testID={`job-place-${job.id}`}>
+                {location.name}
+              </AppText>
+            ) : null}
             {when || location?.address ? (
               <AppText variant="small" tone="muted" numberOfLines={2}>
                 {[when, location?.address].filter(Boolean).join(', ')}

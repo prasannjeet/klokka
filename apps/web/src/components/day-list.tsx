@@ -4,9 +4,15 @@
 // one line per day with the date, the note, who changed it last and when, the flag if any, and the hours.
 // A line selects the day; its history and flag live in the day panel next to the calendar.
 import type { MemberMonthDay } from '@klokka/api-client';
-import { formatDate, formatHours, formatWeekday, isoWeekdayIndex, type IsoDate } from '@klokka/core';
+import {
+  formatDate,
+  formatHours,
+  formatWeekday,
+  isoWeekdayIndex,
+  jobLabels,
+  type IsoDate,
+} from '@klokka/core';
 import { formatDayTime } from '@/lib/format';
-import { placesOf } from '@/lib/jobs';
 import { useLocale, useT } from '@/lib/i18n';
 import { isoOf } from '@/lib/time';
 import { firstName } from '@/lib/visual';
@@ -63,10 +69,10 @@ export function DayList({
                 <b>{formatDate(date, locale, 'day')}</b>
               </span>
               <span className="what">
-                {placesOf(day.jobs).length > 0 ? (
+                {jobLabels(day.jobs).length > 0 ? (
                   <span className="places">
                     <Icon name="pin" />
-                    {placesOf(day.jobs).join(', ')}
+                    <span className="truncate">{jobLabels(day.jobs).join(', ')}</span>
                   </span>
                 ) : null}
                 {day.note ? <span className="note">{day.note}</span> : null}

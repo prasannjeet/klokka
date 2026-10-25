@@ -63,6 +63,8 @@ const HOUR_VALUES = Array.from({ length: 25 }, (_, i) => i);
 const START_HOURS = Array.from({ length: 24 }, (_, i) => i);
 const START_MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 const DEFAULT_START = '08:00';
+// The contract's maxLength for a job's title (CHQ-191).
+const JOB_TITLE_MAX = 120;
 
 const styles = (t: Theme) =>
   StyleSheet.create({
@@ -80,6 +82,7 @@ const styles = (t: Theme) =>
     groupRow: { minHeight: 48, paddingVertical: t.space[2] },
     series: { paddingVertical: t.space[3] },
     label: { paddingHorizontal: t.space[1] },
+    titleField: { marginBottom: t.space[2] },
     chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
     note: { minHeight: t.tapMin * 2, textAlignVertical: 'top' },
     actions: { gap: t.space[2] },
@@ -285,6 +288,7 @@ function JobForm({
   }));
   const [panel, setPanel] = useState<Panel>('job');
   const [time, setTime] = useState(opened.time);
+  const [title, setTitle] = useState(job?.title ?? '');
   const [note, setNote] = useState(job?.note ?? '');
   const [location, setLocation] = useState<JobLocation | null>(job?.location ?? null);
   const [picking, setPicking] = useState(false);
@@ -305,6 +309,7 @@ function JobForm({
   const dirty =
     time.hours !== opened.time.hours ||
     time.minutes !== opened.time.minutes ||
+    title !== (job?.title ?? '') ||
     note !== (job?.note ?? '') ||
     startTime !== (job?.startTime ?? null) ||
     !sameLocation(location, job?.location ?? null) ||
@@ -338,7 +343,7 @@ function JobForm({
   const yesterdayHours = range.data?.find((e) => sameDate(e.workDate, addDays(workDate, -1)))?.hours ?? null;
   const dayHours = dayEntry?.hours ?? 0;
   const dateLabel = formatDate(workDate, locale, 'long');
-  const title =
+  const heading =
     mode === 'single'
       ? t('jobs.newSingleJobFor', { name: memberName })
       : mode === 'edit'
@@ -365,6 +370,7 @@ function JobForm({
     const body: JobWrite = {
       hours: rounded,
       startTime,
+      title: title.trim() === '' ? null : title.trim(),
       note: note.trim() === '' ? null : note.trim(),
       ...(location ? { location } : {}),
       ...(sendsRule && recurrence ? { recurrence, requestId } : {}),
@@ -421,7 +427,7 @@ function JobForm({
 
   const header = (
     <Header
-      title={title}
+      title={heading}
       subtitle={subtitle}
       large={false}
       leading={
@@ -575,6 +581,17 @@ function JobForm({
       }
     >
       <View style={{ gap: theme.space[2] }}>
+        <TextField
+          label={t('jobs.jobTitle')}
+          placeholder={t('jobs.jobTitlePlaceholder')}
+          value={title}
+          onChangeText={setTitle}
+          maxLength={JOB_TITLE_MAX}
+          autoCapitalize="sentences"
+          returnKeyType="next"
+          containerStyle={s.titleField}
+          testID="job-title"
+        />
         <Card style={s.group}>
           {mode === 'full' ? (
             <>

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import type { Entry, Member } from '@klokka/api-client';
-import { formatDate, formatHours, formatHoursDelta, sumHours, type IsoDate } from '@klokka/core';
+import { formatDate, formatHours, formatHoursDelta, jobLabels, sumHours, type IsoDate } from '@klokka/core';
 import { sameDate } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
@@ -100,12 +100,13 @@ export function WeekCard({
         const entry = weekEntries[i];
         const isToday = date === today;
         const jobs = entry?.jobs ?? [];
-        const places = jobs.map((j) => j.location?.name).filter(Boolean);
+        // What each job is: its title, else its place (CHQ-191).
+        const labels = jobLabels(jobs);
         const subtitle =
           jobs.length > 1
-            ? [t('jobs.jobCount', { count: jobs.length }), ...places].join(', ')
-            : places.length > 0
-              ? places.join(', ')
+            ? [t('jobs.jobCount', { count: jobs.length }), ...labels].join(', ')
+            : labels.length > 0
+              ? labels.join(', ')
               : entry?.note
                 ? entry.note
                 : isToday

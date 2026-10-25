@@ -117,6 +117,17 @@ describe('JobEditorScreen: leaving (CHQ-185)', () => {
     expect(routerState.backs).toBe(1);
   });
 
+  // CHQ-191: a typed title is a change like any other.
+  it('a typed title asks first too', async () => {
+    await renderApp(<JobEditorScreen membershipId="mem-maria" date="2026-09-28" mode="single" />, {
+      api: editorApi(),
+    });
+    await fireEvent.changeText(await screen.findByTestId('job-title'), 'Window cleaning');
+    await fireEvent.press(screen.getByTestId('job-cancel'));
+    expect(alerts.at(-1)).toMatchObject({ title: 'Discard changes?' });
+    expect(routerState.backs).toBe(0);
+  });
+
   it('back on a step returns to the job instead of leaving', async () => {
     await renderApp(<JobEditorScreen membershipId="mem-maria" date="2026-09-28" mode="single" />, {
       api: editorApi(),
@@ -149,9 +160,52 @@ describe('JobEditorScreen: saving', () => {
       workspaceId: 'ws-cafe',
       membershipId: 'mem-maria',
       date: fromIsoDate('2026-09-28'),
-      jobWrite: { hours: 4.5, startTime: null, note: null },
+      jobWrite: { hours: 4.5, startTime: null, title: null, note: null },
     });
     expect(alerts).toEqual([]);
+  });
+
+  // CHQ-191: the title is the first field, trimmed on save and capped at the contract's 120 characters.
+  it('saves a trimmed title', async () => {
+    const api = editorApi();
+    await renderApp(<JobEditorScreen membershipId="mem-maria" date="2026-09-28" mode="single" />, { api });
+    const field = await screen.findByTestId('job-title');
+    expect(field.props.maxLength).toBe(120);
+    expect(field.props.autoCapitalize).toBe('sentences');
+    expect(field.props.returnKeyType).toBe('next');
+    expect(field.props.accessibilityLabel).toBe('Title');
+    expect(field.props.placeholder).toBe('For example: Window cleaning');
+    await fireEvent.changeText(field, '  Stairwell  ');
+    await fireEvent.press(screen.getByTestId('chip-2'));
+    await fireEvent.press(screen.getByTestId('save-job'));
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'createJob')).toBe(true));
+    expect(api.calls.find((c) => c.op === 'createJob')?.args[0]).toMatchObject({
+      jobWrite: { hours: 2, title: 'Stairwell' },
+    });
+  });
+
+  it('an edited job opens with its title, and a blanked title is sent as null', async () => {
+    const api = editorApi({
+      listEntries: [
+        entryFixture('mem-maria', '2026-09-28', 3, {
+          jobs: [jobFixture('job-titled', 3, { title: 'Window cleaning' })],
+        }),
+      ],
+    });
+    await renderApp(
+      <JobEditorScreen membershipId="mem-maria" date="2026-09-28" mode="edit" jobId="job-titled" />,
+      { api },
+    );
+    const field = await screen.findByTestId('job-title');
+    expect(field.props.value).toBe('Window cleaning');
+    await fireEvent.changeText(field, '   ');
+    await fireEvent.press(screen.getByTestId('save-job'));
+    await waitFor(() => expect(api.calls.some((c) => c.op === 'updateJob')).toBe(true));
+    expect(api.calls.find((c) => c.op === 'updateJob')?.args[0]).toEqual({
+      workspaceId: 'ws-cafe',
+      jobId: 'job-titled',
+      jobWrite: { hours: 3, startTime: null, title: null, note: null },
+    });
   });
 
   it('offers only the minutes the rounding allows, and 24 h has no minutes', async () => {
@@ -306,7 +360,7 @@ describe('JobEditorScreen: a recurring job (CHQ-187)', () => {
       workspaceId: 'ws-cafe',
       jobId: 'job-repeat',
       scope: 'ALL',
-      jobWrite: { hours: 8, startTime: null, note: null },
+      jobWrite: { hours: 8, startTime: null, title: null, note: null },
     });
   });
 
@@ -342,6 +396,7 @@ describe('JobEditorScreen: a recurring job (CHQ-187)', () => {
       jobWrite: {
         hours: 4,
         startTime: null,
+        title: null,
         note: null,
         requestId: expect.any(String),
         recurrence: {

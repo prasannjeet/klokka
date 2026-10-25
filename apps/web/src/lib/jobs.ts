@@ -11,6 +11,7 @@ import { bffUrl } from './api';
 // How far ahead the month views go, for planning jobs (CHQ-156).
 export const PLAN_AHEAD_MONTHS = 12;
 
+// One job or one day only (it caps at 24 h); a sum of jobs or days uses formatHours from @klokka/core.
 export function formatDuration(hours: number, t: Translator): string {
   const { hours: h, minutes: m } = splitHours(hours, 'NONE');
   if (m === 0) return t('common.hoursValue', { hours: h });
@@ -81,9 +82,4 @@ export function useDarkMode(): boolean {
     };
   }, []);
   return dark;
-}
-
-// Place names of a day's jobs, in order, without repeats ("Café Nord, Lager").
-export function placesOf(jobs: readonly Job[]): string[] {
-  return [...new Set(jobs.map((j) => j.location?.name).filter((n): n is string => Boolean(n)))];
 }

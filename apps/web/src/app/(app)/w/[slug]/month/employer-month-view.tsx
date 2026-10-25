@@ -18,7 +18,7 @@ import { MonthLockButton } from '@/components/month-lock';
 import { MonthNav } from '@/components/month-nav';
 import { ViewHeader } from '@/components/view-header';
 import { formatDay } from '@/lib/format';
-import { formatDuration, PLAN_AHEAD_MONTHS } from '@/lib/jobs';
+import { PLAN_AHEAD_MONTHS } from '@/lib/jobs';
 import { useLocale, useT } from '@/lib/i18n';
 import { jobEditorHref } from '@/lib/job-links';
 import { useMemberMonth, useMembers, useMonthStatus, useWorkspaceDetails } from '@/lib/queries';
@@ -153,8 +153,8 @@ export function EmployerMonthView() {
               {mm.plannedHours > 0 ? (
                 <span className="delta muted">
                   {t('jobs.soFarPlanned', {
-                    hours: formatDuration(mm.totalHours - mm.plannedHours, t),
-                    planned: formatDuration(mm.plannedHours, t),
+                    hours: formatHours(mm.totalHours - mm.plannedHours, locale),
+                    planned: formatHours(mm.plannedHours, locale),
                   })}
                 </span>
               ) : null}

@@ -81,6 +81,12 @@
 .job-where span {
   font-size: 13px;
   color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.job-where .job-place {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
 }
 .job-hours {
   font-family: var(--font-display);
@@ -480,13 +486,13 @@
   color: var(--text-muted);
 }
 
-/* ---- day lists: the places of a day's jobs, planned hours ---- */
+/* ---- day lists: the labels of a day's jobs (titles or places, one line, CHQ-191), planned hours ---- */
 .daylist .what .places {
   display: flex;
   gap: 6px;
   align-items: center;
+  min-width: 0;
   font-size: 13.5px;
-  overflow-wrap: anywhere;
 }
 .daylist .what .places .icon {
   width: 14px;
@@ -553,7 +559,11 @@
   font-size: 13px;
   font-weight: 600;
 }
-.job-who > span:first-of-type {
+.job-who .av {
+  flex: none;
+}
+/* The name takes the free space (the avatar is a span too, so it is named by class, not position). */
+.job-who-name {
   flex: 1;
   min-width: 0;
 }
@@ -704,4 +714,40 @@
 }
 .mr-selects {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+
+/* ---- the team calendar's day (CHQ-191): New job beside the date, who it is for in a menu ---- */
+.team-day-head {
+  flex-wrap: nowrap;
+}
+.team-day-title {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.team-day-title h2 {
+  overflow-wrap: anywhere;
+}
+.team-day-head > .btn {
+  flex: none;
+}
+.team-day-note {
+  margin-bottom: 12px;
+}
+.team-day-empty {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.pick-pop {
+  max-height: min(var(--available-height, 60dvh), 60dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.pick-pop .pop-label {
+  padding: 6px 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
 }

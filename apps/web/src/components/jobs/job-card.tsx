@@ -1,10 +1,10 @@
 'use client';
 
-// One job on a day (CHQ-156): the map when it has a place, where, when ("09:00 to 13:30"), how long
-// ("4 h 30 min"), the note, and Directions. The employer also gets Edit (the job editor page, CHQ-185) and Remove.
+// One job on a day (CHQ-156): the map when it has a place, its title (CHQ-191) or else where, the place under a
+// title, when ("09:00 to 13:30"), how long ("4 h 30 min"), the note, and Directions. The employer also gets Edit (the job editor page, CHQ-185) and Remove.
 import Link from 'next/link';
 import type { Job } from '@klokka/api-client';
-import type { JobStatus, MessageKey } from '@klokka/core';
+import { jobLabel, type JobStatus, type MessageKey } from '@klokka/core';
 import { useT } from '@/lib/i18n';
 import { directionsUrl, formatDuration, timeRange } from '@/lib/jobs';
 import { Avatar } from '../avatar';
@@ -39,6 +39,9 @@ export function JobCard({
   const t = useT();
   const range = timeRange(job, t);
   const place = job.location;
+  const label = jobLabel(job);
+  // With a title the place moves to the line under it; without one the place is the heading, as before.
+  const placeLine = job.title?.trim() && place ? place.name : null;
   return (
     <article className="job-card" data-testid={`job-${job.id}`}>
       {place ? <MapImage workspaceId={workspaceId} location={place} width={360} height={110} /> : null}
@@ -46,7 +49,7 @@ export function JobCard({
         {member || status ? (
           <div className="job-who">
             {member ? <Avatar name={member.name} index={member.index} size="sm" /> : null}
-            <span>{member?.name}</span>
+            <span className="job-who-name">{member?.name}</span>
             {status ? (
               <span className={STATUS[status].cls}>
                 {status === 'now' ? <span className="dot" aria-hidden="true" /> : null}
@@ -57,7 +60,8 @@ export function JobCard({
         ) : null}
         <div className="job-top">
           <div className="job-where">
-            <b>{place ? place.name : t('jobs.noLocation')}</b>
+            <b>{label ?? t('jobs.noLocation')}</b>
+            {placeLine ? <span className="job-place">{placeLine}</span> : null}
             {range || place?.address ? (
               <span>{[range, place?.address].filter(Boolean).join(', ')}</span>
             ) : null}

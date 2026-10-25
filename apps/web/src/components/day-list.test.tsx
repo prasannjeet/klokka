@@ -35,7 +35,7 @@ const DAYS = [
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      { id: 'j2', hours: 3, createdAt: new Date(), updatedAt: new Date() },
+      { id: 'j2', hours: 3, title: 'Stairwell', createdAt: new Date(), updatedAt: new Date() },
     ],
   }),
   day('2026-09-22', null),
@@ -73,8 +73,9 @@ describe('DayList', () => {
     expect(within(rows[1]!).getByText(/^Changed by Anna, /)).toBeTruthy();
     expect(within(rows[1]!).getByText('edited 2 times')).toBeTruthy();
     expect(within(rows[2]!).getByText(/^Logged by Anna, /)).toBeTruthy();
-    // A day with jobs (CHQ-156) names their places and counts them.
-    expect(within(rows[2]!).getByText('Café Nord')).toBeTruthy();
+    // A day with jobs (CHQ-156) names them (a title, else the place, CHQ-191) on one clipped line and counts them.
+    const labels = within(rows[2]!).getByText('Café Nord, Stairwell');
+    expect(labels.className).toBe('truncate');
     expect(within(rows[2]!).getByText('2 jobs')).toBeTruthy();
     expect(rows[1]!.getAttribute('aria-current')).toBe('true');
     expect(screen.queryByText(/SEK|kr/)).toBeNull();

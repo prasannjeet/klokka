@@ -16,6 +16,7 @@ import {
   formatWeekday,
   isoWeek,
   isoWeekdayIndex,
+  jobLabel,
   sumHours,
   weekOf,
   type IsoDate,
@@ -137,13 +138,15 @@ export function EmployeeWeek() {
                     <b>{formatDate(date, locale, 'day')}</b>
                   </span>
                   <span className="what">
-                    {entry && entry.jobs.some((j) => j.location || j.startTime) ? (
+                    {entry && entry.jobs.some((j) => jobLabel(j) || j.startTime) ? (
                       <span className="places">
                         <Icon name="pin" />
-                        {entry.jobs
-                          .map((j) => [j.startTime, j.location?.name].filter(Boolean).join(' '))
-                          .filter(Boolean)
-                          .join(', ')}
+                        <span className="truncate">
+                          {entry.jobs
+                            .map((j) => [j.startTime, jobLabel(j)].filter(Boolean).join(' '))
+                            .filter(Boolean)
+                            .join(', ')}
+                        </span>
                       </span>
                     ) : null}
                     {entry?.note ? <span className="note">{entry.note}</span> : null}

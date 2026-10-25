@@ -1,8 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 import { PersonScreen, personViewOf } from '@/features/person/PersonScreen';
 
-// One person (CHQ-171): `view` picks day, week or month (week by default, month when a `month` is given),
-// `date` the day it opens on.
+// One person (CHQ-171): `view` picks day, week or month (month by default, CHQ-191), `month` the month it opens
+// on, `date` the day.
 export default function MemberRoute() {
   const { membershipId, month, view, date } = useLocalSearchParams<{
     membershipId: string;
@@ -15,7 +15,7 @@ export default function MemberRoute() {
   return (
     <PersonScreen
       membershipId={membershipId}
-      initialView={personViewOf(view) ?? (initialMonth ? 'month' : 'week')}
+      initialView={personViewOf(view) ?? 'month'}
       initialMonth={initialMonth}
       initialDate={initialDate}
     />

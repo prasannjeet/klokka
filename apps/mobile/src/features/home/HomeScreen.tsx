@@ -4,7 +4,6 @@ import { formatDate, formatHours, formatMonthName, formatWeekday, weekOf, type I
 import { useEntries, useFlags, useWorkspaceInsights } from '@/data/workspace';
 import { useMe } from '@/data/me';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
-import { formatDuration } from '@/lib/duration';
 import { currentMonthIn, todayIn, toIsoDate } from '@/lib/dates';
 import { useTheme, useThemedStyles, type Theme } from '@/theme';
 import { AppPressable, AppText, Avatar, Card, EmptyState, Icon, Screen } from '@/ui';
@@ -131,7 +130,7 @@ function HomeScreenInner({ workspace }: WorkspaceProps) {
             accessibilityLabel={formatHours(dayHours(today), locale)}
             testID="home-today-hours"
           >
-            {formatDuration(dayHours(today), t)}
+            {formatHours(dayHours(today), locale)}
           </AppText>
           <AppText variant="small" tone="muted">
             {[t('jobs.jobCount', { count: jobs.length }), t('jobs.placeCount', { count: places })].join(', ')}

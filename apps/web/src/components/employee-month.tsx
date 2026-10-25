@@ -13,10 +13,11 @@ import {
   formatMoney,
   formatMonthName,
   isoWeek,
+  jobLabels,
   type IsoDate,
 } from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
-import { formatDuration, PLAN_AHEAD_MONTHS, placesOf } from '@/lib/jobs';
+import { formatDuration, PLAN_AHEAD_MONTHS } from '@/lib/jobs';
 import { useMemberInsights, useMemberMonth, useWorkspaceDetails } from '@/lib/queries';
 import { isoOf, monthIn, todayIn } from '@/lib/time';
 import { useMonthParam } from '@/lib/use-month-param';
@@ -191,14 +192,14 @@ export function EmployeeMonth() {
                 : t('month.hoursIn', { month: monthName })}
             </span>
             <div className="val">
-              <span className="num">{formatDuration(mm.totalHours - mm.plannedHours, t)}</span>
+              <span className="num">{formatHours(mm.totalHours - mm.plannedHours, locale)}</span>
             </div>
             {mm.plannedHours > 0 ? (
               <div className="deltas">
                 <span className="muted">
                   {t('jobs.soFarPlanned', {
-                    hours: formatDuration(mm.totalHours - mm.plannedHours, t),
-                    planned: formatDuration(mm.plannedHours, t),
+                    hours: formatHours(mm.totalHours - mm.plannedHours, locale),
+                    planned: formatHours(mm.plannedHours, locale),
                   })}
                 </span>
               </div>
@@ -362,8 +363,8 @@ function JobsThisMonth({
                     {formatDate(date, locale, 'weekdayDay')}
                   </span>
                   <span className="what">
-                    <span className="note">
-                      {placesOf(day.jobs).join(', ') || t('jobs.jobCount', { count: day.jobs.length })}
+                    <span className="note truncate">
+                      {jobLabels(day.jobs).join(', ') || t('jobs.jobCount', { count: day.jobs.length })}
                     </span>
                     {planned ? (
                       <span className="meta">

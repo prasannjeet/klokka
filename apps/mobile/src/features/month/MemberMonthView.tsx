@@ -11,6 +11,7 @@ import {
   formatMonth,
   formatMonthName,
   formatTime,
+  jobLabels,
   previousMonth,
   type IsoDate,
   type IsoMonth,
@@ -106,9 +107,10 @@ export function MemberMonthView({
       router.push({ pathname: '/day/[membershipId]/[date]', params: { membershipId, date } }));
   const planned = data.plannedHours ?? 0;
   const subtitleFor = (day: MemberMonthDay): string => {
-    const places = day.jobs.map((j) => j.location?.name).filter(Boolean);
-    if (day.jobs.length > 1) return [t('jobs.jobCount', { count: day.jobs.length }), ...places].join(', ');
-    if (places.length > 0 && !day.flag) return places.join(', ');
+    // What each job is: its title, else its place (CHQ-191).
+    const labels = jobLabels(day.jobs);
+    if (day.jobs.length > 1) return [t('jobs.jobCount', { count: day.jobs.length }), ...labels].join(', ');
+    if (labels.length > 0 && !day.flag) return labels.join(', ');
     if (day.flag?.status === 'OPEN')
       return (
         t('flags.says', { name: data.name }) +
