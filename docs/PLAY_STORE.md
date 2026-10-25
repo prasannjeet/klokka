@@ -6,10 +6,10 @@ forms, review, promote). It lists what the owner does and what the agent does.
 Klokka is on Google Play as `se.klokka.app` (`docs/DECISIONS.md` D19) under the CleanHQ developer account, a personal
 account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play-launch.md` (CHQ-153).
 
-**Current release (2026-10-24):** v1.7.0, versionCode 20, is `completed` on internal testing and a `draft` on
-closed testing (`alpha`). Public promotion is rejected while the app is in its initial draft state. The owner
+**Current release (2026-10-25):** v1.8.0, versionCode 21, is `completed` on internal testing (rolled out through
+the API: the release run leaves it a `draft`); closed testing (`alpha`) still holds versionCode 20 as a `draft`. Public promotion is rejected while the app is in its initial draft state. The owner
 must complete Play Console setup/review and the closed-test/production-access steps before public rollout.
-[Release verification](releases/1.7.0.md).
+[Release verification](releases/1.8.0.md).
 
 ## Access
 
