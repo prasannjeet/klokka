@@ -1,0 +1,1 @@
+Lägg till ett jobb direkt från ett datum i kalendern och ge jobb en titel som syns överallt, i notiser och i veckomejlet. En anställds sida öppnas nu på Månad, och Tillbaka från en dag går till månaden. Månadssummor över 24 timmar visas nu rätt.

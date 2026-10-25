@@ -243,3 +243,13 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   budget goes out later inside the window; past it, it is dropped. With 100 a day and a reserve of 20 that is
   about 240 digests a week before any are dropped; when the user count nears that, the quota (and the Migadu
   plan) has to grow.
+
+## D23. A job's label: title first, then place (owner, 2026-10-24, CHQ-191)
+
+- A job has an optional title (at most 120 characters, blank stored as null), a regular job field like the note:
+  in `JobWrite`, a series' template, the request hash and the "which jobs" scope.
+- One display rule on every surface: the title is the job's main label and the place goes on the second line (or
+  after a comma on one line); with no title a job looks as before (its place, or a job count). Both clients use
+  `jobLabel`/`jobLabels` from `@klokka/core`; push, the digest and its workbook use `JobLabels` in the API.
+- Totals of several jobs or days are formatted as decimal hours (`formatHours`), never with the one-job duration
+  formatter, whose 24 hour cap is right only for one job or one day.

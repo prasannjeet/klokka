@@ -1,0 +1,1 @@
+Add a job straight from a date in the calendar, and give jobs a title that shows everywhere, in notifications and in the weekly email. An employee's page now opens on Month, and Back from a day returns to the month. Month totals over 24 hours now show correctly.

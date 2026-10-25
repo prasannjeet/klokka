@@ -2,6 +2,26 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.8.0, 2026-10-25
+
+### Added
+- The employer adds a job straight from a date in the calendar: New job on the picked day (phone: the team day)
+  asks who it is for when there is more than one employee and opens the editor on that date; an empty day offers
+  Add a job. In a closed month the button stays visible but disabled, with the reason (CHQ-191).
+- A job can have a title, such as "Window cleaning". It is the job's main label everywhere jobs appear, with the
+  place under it; job notifications and reminders name it, and the weekly email and its Excel file show it (a new
+  Title column) (CHQ-191).
+
+### Changed
+- Phone: an employee's page opens on Month instead of Week (CHQ-191).
+
+### Fixed
+- Month and day totals of several jobs no longer stop at "24 h": the employee's month card, the employer's "so far,
+  planned" line and the team calendar's day total on the web, and the team day and Home totals on the phone, show
+  the real sum (CHQ-191).
+- Phone: Back from a day opened from an employee's month or week returns to that month or week instead of the People
+  list (CHQ-191).
+
 ## 1.7.0, 2026-10-24
 
 ### Added

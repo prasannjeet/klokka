@@ -40,7 +40,7 @@ workspace's employer, **self** = the member the path names, **operator** = the g
 | `upsertEntry` | `PUT /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | week grid single cell (a day with 2+ jobs answers `409 ENTRY_HAS_JOBS`) |
 | `deleteEntry` | `DELETE /workspaces/{workspaceId}/members/{membershipId}/entries/{date}` | employer | clear a day |
 | `previewJobRecurrence` | `POST /workspaces/{workspaceId}/jobs/recurrence-preview` | employer | job editor's Repeat step: first four dates, count, last date and end (planned-through date for no end date); a schedule change sends `fromDate` |
-| `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job editor page: a day's plus (single job) and New job (date and repeat), any day (CHQ-156, CHQ-185) |
+| `createJob` | `POST /workspaces/{workspaceId}/members/{membershipId}/entries/{date}/jobs` | employer | job editor page: a day's plus (single job), New job on a calendar date (single job, CHQ-191) and New job (date and repeat), any day (CHQ-156, CHQ-185) |
 | `updateJob` | `PUT /workspaces/{workspaceId}/jobs/{jobId}?scope=` | employer | job editor page Save; a series edit goes through the scope step (ONLY_THIS, THIS_AND_FUTURE, ALL), a schedule change is THIS_AND_FUTURE only (CHQ-187) |
 | `deleteJob` | `DELETE /workspaces/{workspaceId}/jobs/{jobId}?scope=` | employer | job editor page "Remove", with the same scope step; ALL asks a second time (CHQ-187) |
 | `getJobScopeCounts` | `GET /workspaces/{workspaceId}/jobs/{jobId}/scope-counts` | employer | scope step: how many jobs each scope reaches and how many sit in closed months (CHQ-187) |
