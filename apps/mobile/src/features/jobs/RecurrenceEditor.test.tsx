@@ -51,8 +51,10 @@ it('repeats with no end date by default, and sends neither an end date nor a cou
   expect(rule).toMatchObject({ frequency: 'WEEKLY', interval: 1, weekdays: new Set(['MONDAY']) });
   expect(rule?.endDate).toBeUndefined();
   expect(rule?.periodCount).toBeUndefined();
-  expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
-    'Every week on Mon, from 5 October 2026, no end date',
+  await waitFor(() =>
+    expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
+      'Every week on Mon, from 5 October 2026, no end date',
+    ),
   );
   // No total for a series that has no end.
   expect(screen.queryByText(/8 jobs/)).toBeNull();
@@ -106,8 +108,11 @@ describe('monthly (CHQ-186)', () => {
       weekOfMonth: 'THIRD',
       weekday: 'WEDNESDAY',
     });
-    expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
-      'Every month on the third Wednesday, from 18 November 2026, no end date',
+    // The sentence follows the debounced preview; under CI load it can land a tick later.
+    await waitFor(() =>
+      expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
+        'Every month on the third Wednesday, from 18 November 2026, no end date',
+      ),
     );
     await fireEvent.press(screen.getByTestId('repeat-nth-4'));
     await waitFor(() => expect(lastRule(api)).toMatchObject({ weekOfMonth: 'LAST', weekday: 'WEDNESDAY' }));
@@ -131,8 +136,11 @@ describe('monthly (CHQ-186)', () => {
     await fireEvent.press(screen.getByTestId('repeat-dom-31'));
     await waitFor(() => expect(lastRule(api)).toMatchObject({ dayOfMonth: 31 }));
     expect(screen.getByText('Shorter months use their last day.')).toBeTruthy();
-    expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
-      'Every month on the last day, from 5 October 2026, no end date',
+    // The sentence follows the debounced preview; under CI load it can land a tick later.
+    await waitFor(() =>
+      expect(screen.getByTestId('repeat-sentence')).toHaveTextContent(
+        'Every month on the last day, from 5 October 2026, no end date',
+      ),
     );
   });
 });
