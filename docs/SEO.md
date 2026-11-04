@@ -90,14 +90,22 @@ Changing a guide later: settle every legal claim against an official source, upd
 `97610e0ce4b2f414fb199ad350852ed0`, one bounded POST of the sitemap URLs), re-scrape `/` and `/en` in the Facebook
 Sharing Debugger and LinkedIn Post Inspector.
 
-## 7. Search Console and Bing (not connected yet)
+## 7. Search Console and Bing
 
-1. Search Console: add a **Domain property** for klokka.se, verified with a TXT record at Dynu (DNS host).
-2. Add the existing Search Console service account (`/home/dev/.config/gsc/credentials.json`, used by the `gsc` MCP)
-   as a user with **Full** permission (read-only gave 403 errors on cleanhq.se).
-3. Submit `https://klokka.se/sitemap.xml`; request indexing for `/` and `/en`.
-4. Bing Webmaster: import the property from Search Console (Bing feeds ChatGPT search and Copilot).
-5. From week 4: a weekly look with the `gsc` MCP. Pages at positions 5 to 20 are the ones to improve first;
+Search Console is connected (2026-11-04):
+- **Domain property `klokka.se`**, verified by a TXT record
+  `google-site-verification=jvo6yYWzDct9ZZ1VpJQg-94k2YYn1XB847dWocWB2LA` on the apex at Dynu, next to the Migadu SPF
+  and `hosted-email-verify` records. Keep the record: removing it drops ownership. The Domain property covers every
+  subdomain and both schemes, so `app.klokka.se` needs no property of its own; it sends `noindex, nofollow` on every
+  response and shows only as "Excluded by noindex".
+- The `gsc` MCP service account `gsc-mcp@gsc-mcp-server-502620.iam.gserviceaccount.com`
+  (`/home/dev/.config/gsc/credentials.json`) is a user with **Full** permission (read-only gave 403 errors on cleanhq.se).
+- `https://klokka.se/sitemap.xml` submitted. `/` was already indexed; indexing requested for `/en`
+  ("Crawled, currently not indexed" at the time).
+
+Still to do:
+1. Bing Webmaster: import the property from Search Console (Bing feeds ChatGPT search and Copilot).
+2. From week 4: a weekly look with the `gsc` MCP. Pages at positions 5 to 20 are the ones to improve first;
    check `site:klokka.coolify.ooguy.com` and `site:www.klokka.se` stay empty.
 
 ## 8. Backlog (P3 and launch)
