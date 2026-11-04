@@ -2766,4 +2766,121 @@
       align-items: center;
     }
   }
+
+  /* ---- the cookie question (components/consent): a floating card, never a wall in front of the page ---- */
+  .consent {
+    position: fixed;
+    /* Above the page and the sticky nav, below the open burger menu (a dialog that covers everything). */
+    z-index: calc(var(--z-overlay) - 1);
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: var(--surface);
+    color: var(--text);
+    border: var(--card-border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-float);
+    /* lift, not rise: it slides in already opaque, so the page never shows through the card. */
+    animation: lift var(--dur-slow) var(--ease-enter) both;
+  }
+  @media (min-width: 640px) {
+    .consent {
+      right: auto;
+      width: min(26rem, calc(100% - 2 * var(--gutter)));
+    }
+  }
+  .consent-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .consent-mark {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    color: var(--primary);
+  }
+  /* A notice, not a headline: bold body type like the site's notification toasts. */
+  .consent-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-stretch: normal;
+    font-variation-settings: normal;
+    letter-spacing: normal;
+    font-size: var(--text-body);
+    line-height: var(--leading-small);
+  }
+  .consent-title:focus {
+    outline: none;
+  }
+  .consent-title:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: var(--radius-xs);
+  }
+  /* "No thanks": a quiet text button in the corner, smaller than Accept but underlined so it is never missed.
+     The padding keeps a full tap target around the short label. */
+  .consent-decline {
+    flex: none;
+    min-height: var(--tap-min);
+    margin: calc(var(--space-3) * -1) calc(var(--space-2) * -1) calc(var(--space-3) * -1) 0;
+    padding: 0 var(--space-2);
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--text-small);
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    white-space: nowrap;
+  }
+  .consent-decline:hover {
+    color: var(--text);
+  }
+  .consent-body {
+    margin: 0;
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+  .consent-link {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+  .consent-link:hover {
+    color: var(--accent);
+  }
+  .consent-accept {
+    width: 100%;
+    margin-top: var(--space-1);
+  }
+
+  /* "Cookie settings" in the footer: a button that reads as one of the footer links around it. */
+  .foot-button {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 14.5px;
+    color: var(--text);
+    opacity: 0.85;
+    text-align: left;
+  }
+  .foot-button:hover {
+    color: var(--accent);
+    opacity: 1;
+  }
 }

@@ -13,6 +13,8 @@ import { fieldError, problemMessage, toProblem, type ProblemInfo } from '@/lib/p
 import { invalidateFigures } from '@/lib/queries';
 import type { WorkspaceView } from '@/lib/workspace';
 import { parseRate } from './rate';
+import { ANALYTICS_EVENTS } from '@klokka/core';
+import { trackEvent } from '@/lib/analytics';
 
 export function InviteDialog({
   ws,
@@ -50,6 +52,7 @@ export function InviteDialog({
         },
       }),
     onSuccess: async (member) => {
+      trackEvent(ANALYTICS_EVENTS.invitationSent);
       await invalidateFigures(queryClient, ws.id);
       toast({
         title: t('web.employees.invited', { email: member.email }),

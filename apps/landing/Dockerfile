@@ -30,10 +30,13 @@ ARG NEXT_PUBLIC_APP_URL=https://klokka-app.coolify.ooguy.com
 ARG NEXT_PUBLIC_APK_URL=https://nexus.coolify.ooguy.com/repository/klokka-downloads/klokka-latest.apk
 # Only 'true' lets search engines index the site (release.yml, production); the default keeps a build noindex.
 ARG NEXT_PUBLIC_INDEXABLE=false
+# Klokka's GTM container (CI passes the GTM_ID repository variable); empty builds a site with no analytics at all.
+ARG NEXT_PUBLIC_GTM_ID=
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
     NEXT_PUBLIC_APK_URL=$NEXT_PUBLIC_APK_URL \
-    NEXT_PUBLIC_INDEXABLE=$NEXT_PUBLIC_INDEXABLE
+    NEXT_PUBLIC_INDEXABLE=$NEXT_PUBLIC_INDEXABLE \
+    NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 RUN npm run build --workspace @klokka/landing
 
 # ---- run: the standalone server mirrors the repo layout (apps/landing/server.js) ----

@@ -7,4 +7,5 @@ export * from './recurrence.ts';
 export * from './format.ts';
 export * from './timezones.ts';
 export * from './workspace.ts';
+export * from './analytics.ts';
 export * from './i18n/index.ts';

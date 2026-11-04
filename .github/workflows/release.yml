@@ -27,6 +27,8 @@ env:
   NEXT_PUBLIC_APP_URL: ${{ vars.PROD_APP_URL }}
   NEXT_PUBLIC_SITE_URL: ${{ vars.PROD_SITE_URL }}
   NEXT_PUBLIC_APK_URL: ${{ vars.PROD_APK_URL }}
+  # One GTM container for every build: GTM routes klokka.se to production GA4 and other hosts to staging (CHQ-201).
+  NEXT_PUBLIC_GTM_ID: ${{ vars.GTM_ID }}
   # Production is the one build search engines may index; every other build is noindex (the default is false).
   NEXT_PUBLIC_INDEXABLE: 'true'
 
@@ -153,6 +155,9 @@ jobs:
       EXPO_PUBLIC_LOGTO_ENDPOINT: ${{ vars.PROD_LOGTO_ENDPOINT }}
       EXPO_PUBLIC_LOGTO_APP_ID: ${{ vars.PROD_LOGTO_APP_ID }}
       EXPO_PUBLIC_LOGTO_API_RESOURCE: ${{ vars.PROD_API_RESOURCE }}
+      # Umami usage analytics (CHQ-201): the production phone app website, on the same Umami as staging.
+      EXPO_PUBLIC_UMAMI_URL: ${{ vars.UMAMI_URL }}
+      EXPO_PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.PROD_UMAMI_MOBILE_WEBSITE_ID }}
       EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
       # The job location map's key (CHQ-163), restricted to se.klokka.app + the release certificate.
       GOOGLE_MAPS_ANDROID_API_KEY: ${{ secrets.GOOGLE_MAPS_ANDROID_API_KEY }}

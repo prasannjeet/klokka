@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono, Unbounded } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { translator } from '@klokka/core';
+import { UsageAnalytics } from '@/components/usage-analytics';
+import { umami } from '@/lib/env';
 import { requestLocale, requestMode, requestPreviewLocale } from '@/lib/server-prefs';
 import { Providers } from './providers';
 import './globals.css';
@@ -57,6 +59,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const [locale, mode] = await Promise.all([requestLocale(), requestMode()]);
+  const analytics = umami();
   return (
     <html
       lang={locale}
@@ -67,6 +70,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <body>
         <Providers locale={locale}>{children}</Providers>
+        {analytics ? <UsageAnalytics url={analytics.url} websiteId={analytics.websiteId} /> : null}
       </body>
     </html>
   );

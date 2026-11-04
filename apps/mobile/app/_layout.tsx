@@ -1,15 +1,18 @@
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth';
+import { appConfig } from '@/config';
 import { dayStepAnimation } from '@/features/day/dayStep';
 import { AuthGate } from '@/features/shell/AuthGate';
 import { installCrashGuard, RootErrorBoundary } from '@/features/shell/RootErrorBoundary';
 import { useSystemUi } from '@/features/shell/useSystemUi';
-import { LocaleProvider } from '@/i18n/LocaleProvider';
+import { LocaleProvider, useLocale } from '@/i18n/LocaleProvider';
+import { configureAnalytics, setAnalyticsLanguage, trackScreen } from '@/lib/analytics';
 import { useAppStore } from '@/store/appStore';
 import { ThemeProvider, useTheme } from '@/theme';
 import { ToastProvider } from '@/ui';
@@ -19,10 +22,21 @@ import { ToastProvider } from '@/ui';
 void SplashScreen.preventAutoHideAsync();
 installCrashGuard();
 
+// Umami screen views (CHQ-201): every route change, as a cleaned path, in the language the user reads. The
+// configure effect runs before the first screen effect (effects run in order), so the first screen is counted.
+function useUsageAnalytics() {
+  const pathname = usePathname();
+  const locale = useLocale();
+  useEffect(() => configureAnalytics(appConfig().analytics), []);
+  useEffect(() => setAnalyticsLanguage(locale), [locale]);
+  useEffect(() => trackScreen(pathname), [pathname]);
+}
+
 function Navigator() {
   const theme = useTheme();
   const userId = useAppStore((s) => s.userId);
   useSystemUi();
+  useUsageAnalytics();
   return (
     <>
       <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />

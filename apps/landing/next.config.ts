@@ -1,5 +1,6 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
+import { analyticsCsp, gtmId } from './src/lib/analytics.ts';
 import { apkSourceUrl } from './src/lib/links.ts';
 import { swedishRewrites } from './src/lib/pages/registry.ts';
 
@@ -8,14 +9,16 @@ import { swedishRewrites } from './src/lib/pages/registry.ts';
 const repoRoot = path.resolve(import.meta.dirname, '../..');
 
 // Production only: dev needs eval and a websocket for HMR. Inline scripts are the theme no-flash snippet,
-// the clock sync, JSON-LD and Next's own RSC payload, which is why script-src keeps 'unsafe-inline'.
+// the clock sync, JSON-LD and Next's own RSC payload, which is why script-src keeps 'unsafe-inline'. A build with
+// a GTM container id (CHQ-201) also allows Google's tag and analytics hosts; GTM itself loads only after a yes.
+const google = (sources: readonly string[]) => (gtmId ? ` ${sources.join(' ')}` : '');
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${google(analyticsCsp.script)}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  `img-src 'self' data:${google(analyticsCsp.img)}`,
   "font-src 'self'",
-  "connect-src 'self'",
+  `connect-src 'self'${google(analyticsCsp.connect)}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

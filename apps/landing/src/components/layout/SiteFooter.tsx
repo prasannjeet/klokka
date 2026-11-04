@@ -1,11 +1,13 @@
+import { CookieSettingsButton } from '@/components/consent/ConsentManager';
 import { Mark } from '@/components/ui/Icon';
+import { gtmId } from '@/lib/analytics';
 import type { Dictionary, Locale } from '@/lib/i18n';
 import { pageCopy } from '@/lib/i18n/pages';
 import { apkUrl, appUrl, issuesUrl, licenseUrl, repoUrl } from '@/lib/links';
 import { footerColumns, hrefFor, type FooterGroup, type PageId } from '@/lib/pages';
 import { LocaleSwitch } from './LocaleSwitch';
 
-type Link = { href: string; label: string };
+type Link = { href: string; label: string; track?: 'login_click' };
 
 /** `page` is the page being shown, so the language switch leads to the same page in the other language. */
 export function SiteFooter({ t, locale, page }: { t: Dictionary; locale: Locale; page: PageId }) {
@@ -48,7 +50,7 @@ export function SiteFooter({ t, locale, page }: { t: Dictionary; locale: Locale;
       links: [
         ...pagesIn('klokka'),
         { href: home('#faq'), label: f.links.faq },
-        { href: appUrl, label: f.links.login },
+        { href: appUrl, label: f.links.login, track: 'login_click' },
         { href: appUrl, label: f.links.create },
       ],
     },
@@ -72,9 +74,16 @@ export function SiteFooter({ t, locale, page }: { t: Dictionary; locale: Locale;
                 <ul>
                   {col.links.map((link) => (
                     <li key={link.label}>
-                      <a href={link.href}>{link.label}</a>
+                      <a href={link.href} data-track={link.track}>
+                        {link.label}
+                      </a>
                     </li>
                   ))}
+                  {gtmId && col.title === f.groups.klokka ? (
+                    <li>
+                      <CookieSettingsButton label={t.consent.settings} />
+                    </li>
+                  ) : null}
                 </ul>
               </nav>
             ))}

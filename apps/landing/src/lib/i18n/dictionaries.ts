@@ -363,6 +363,15 @@ export const sv = {
     },
     copyright: '© 2026 Klokka. MIT-licens.',
   },
+  /** The cookie question (components/consent): shown only on a build with a GTM container id. */
+  consent: {
+    title: 'Vi använder kakor',
+    body: 'De hjälper oss att förstå hur webbplatsen används och att göra den bättre.',
+    privacy: 'Läs mer i integritetspolicyn.',
+    accept: 'Godkänn',
+    decline: 'Nej tack',
+    settings: 'Kakinställningar',
+  },
   /** The frame of a guide page (components/pages/GuidePage): `{author}` and `{date}` come from the guide's copy. */
   guide: {
     reviewed: 'Av {author}. Granskad {date}, källor längst ner.',
@@ -730,6 +739,14 @@ export const en: Dictionary = {
       create: 'Create a business',
     },
     copyright: '© 2026 Klokka. MIT licensed.',
+  },
+  consent: {
+    title: 'We use cookies',
+    body: 'They help us understand how the site is used and make it better.',
+    privacy: 'Read more in our privacy policy.',
+    accept: 'Accept',
+    decline: 'No thanks',
+    settings: 'Cookie settings',
   },
   guide: {
     reviewed: 'By {author}. Reviewed {date}, sources at the end.',

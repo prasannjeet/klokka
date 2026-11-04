@@ -35,7 +35,7 @@ export const sv = {
   breadcrumb: 'Integritet',
   h1: 'Integritetspolicy',
   lede: [
-    'Klokka lagrar de timmar en arbetsgivare för in för sina anställda och de uppgifter som behövs för att visa dem för rätt personer. Inga lösenord lagras i Klokkas databas, och webbplatsen har ingen spårning eller analys.',
+    'Klokka lagrar de timmar en arbetsgivare för in för sina anställda och de uppgifter som behövs för att visa dem för rätt personer. Inga lösenord lagras i Klokkas databas. Webbplatsen använder Google Analytics bara om du tackar ja, och apparna räknar användningen utan kakor.',
     'Här står vilka uppgifter det är, varför de behandlas, var de lagras, hur länge de sparas och hur du tar del av, exporterar eller raderar dem.',
   ],
   sections: [
@@ -59,6 +59,8 @@ export const sv = {
         'Notiser: en token för pushnotiser till varje telefon där du är inloggad i Android-appen.',
         'Telefonens position, bara när arbetsgivaren trycker på "Använd där jag är nu" på ett jobb, i Android-appen eller i webbappen. Den läses en gång medan appen är öppen, aldrig i bakgrunden, och sparas inte som din position: bara den plats som blir jobbets sparas. Anställdas position samlas aldrig in.',
         'E-post: adresser för inbjudningar och för veckosammanfattningen, som går att stänga av under Inställningar.',
+        'Användning av apparna: vilka sidor och skärmar i webbappen och Android-appen som öppnas och tre händelser (ett företag skapas, en inbjudan skickas, timmar sparas), med webbläsare eller telefon, operativsystem, språk och ungefär vilket land och vilken stad besöket kommer från. Det räknas med Umami, utan kakor och utan något id på din enhet, och kopplas inte till ditt konto. IP-adressen sparas inte, och id:n, datum och länkparametrar tas bort ur adresserna innan de skickas.',
+        'Besök på webbplatsen klokka.se, bara om du har tackat ja: Google Analytics sätter kakor och samlar in vilka sidor du besöker, var du kom ifrån, ungefärlig plats, enhet och webbläsare och klick på knappar som "Skapa ditt företag".',
       ],
     },
     {
@@ -66,6 +68,7 @@ export const sv = {
       body: [
         'Kontouppgifterna behandlas för att ge dig tjänsten du har registrerat dig för (avtal). Säkerhet och drift, som loggar och säkerhetskopior, vilar på berättigat intresse.',
         'Timmarna om anställda behandlas på arbetsgivarens uppdrag. Den rättsliga grunden för dem är arbetsgivarens, till exempel anställningsavtalet eller skyldigheten att föra anteckningar om jourtid, övertid och mertid enligt arbetstidslagen.',
+        'Webbplatsens statistik i Google Analytics bygger på ditt samtycke, som du kan ta tillbaka när som helst under Kakinställningar längst ner på sidan. Apparnas statistik i Umami vilar på berättigat intresse: att se vilka delar som används och göra dem bättre, utan att identifiera någon.',
       ],
     },
     {
@@ -74,6 +77,7 @@ export const sv = {
         'Allt lagras på servrar hos NetCup i Tyskland, inom EU, och säkerhetskopiorna på vår egen server i Sverige. Inloggningen körs på samma servrar i vår egen installation av Logto, inte hos en extern inloggningstjänst.',
         'Några av tjänsterna finns utanför EU och EES. E-posten skickas via Migadu, ett företag i Schweiz, och Schweiz har enligt EU-kommissionen en adekvat skyddsnivå för personuppgifter. Pushnotiserna levereras via Expo och Google Firebase Cloud Messaging i USA, med stöd av EU-US Data Privacy Framework, som båda företagen är certifierade enligt, och EU-kommissionens standardavtalsklausuler. En pushnotis innehåller bara notisens text och telefonens token.',
         'Platssökningen, "Använd där jag är nu" och de små kartorna på jobben går via Klokkas server till Google Maps Platform (Google LLC, USA), på samma grund. Google får söktexten, den valda platsens id eller koordinaterna, aldrig ditt namn, din e-postadress eller ditt konto. Vägbeskrivningar öppnar Google Maps på din egen telefon eller dator, utanför Klokka.',
+        'Apparnas statistik lagras i vår egen installation av Umami, på vår server i Sverige. Webbplatsens statistik lagras hos Google Analytics (Google Ireland Limited och Google LLC, USA) med stöd av EU-US Data Privacy Framework, och bara om du har tackat ja.',
       ],
     },
     {
@@ -86,13 +90,14 @@ export const sv = {
         'Migadu (Schweiz): utskick av e-post, som inbjudningar och veckosammanfattningar.',
         'Expo (USA) och Google Firebase Cloud Messaging (USA): leverans av pushnotiser till Android-appen. De får bara notisens text och telefonens token.',
         'Google Maps Platform (USA): platssökning, adresser till koordinater och kartbilder för jobb. Google får bara söktexten, platsens id eller koordinaterna.',
+        'Google Analytics (Irland och USA): besöksstatistik för webbplatsen klokka.se, bara om du har tackat ja.',
       ],
     },
     {
       h2: 'Kakor och lagring i webbläsaren',
       body: [
-        'Webbplatsen klokka.se har ingen analys, ingen spårning och inga spårningskakor. Den sparar bara ditt val av ljust eller mörkt läge i webbläsaren.',
-        'Webbappen använder en kaka för inloggningen och några kakor för dina val: språk, ljust eller mörkt läge och senast valda företag. De behövs för att appen ska fungera.',
+        'Webbplatsen klokka.se sparar ditt val av ljust eller mörkt läge och ditt svar på frågan om kakor i webbläsaren. Bara om du tackar ja sätter Google Analytics sina kakor (_ga och _ga_ följt av ett id), som sparas i upp till två år. Du ändrar ditt svar när som helst under Kakinställningar längst ner på sidan, och säger du nej efteråt tar vi bort kakorna.',
+        'Webbappen använder en kaka för inloggningen och några kakor för dina val: språk, ljust eller mörkt läge och senast valda företag. De behövs för att appen ska fungera. Statistiken i webbappen och Android-appen använder inga kakor och sparar inget på din enhet.',
       ],
     },
     {
@@ -115,7 +120,7 @@ export const sv = {
       h2: 'Ändringar',
       body: [
         'Ändras policyn uppdaterar vi den här sidan och datumet nedan. Större ändringar meddelar vi på webbplatsen innan de gäller.',
-        'Senast ändrad 4 oktober 2026.',
+        'Senast ändrad 4 november 2026.',
       ],
     },
   ],
@@ -138,7 +143,7 @@ export const en: PageCopyOf<typeof sv> = {
   breadcrumb: 'Privacy',
   h1: 'Privacy policy',
   lede: [
-    "Klokka stores the hours an employer logs for their employees, and the details needed to show them to the right people. No passwords are stored in Klokka's database, and this website has no tracking or analytics.",
+    "Klokka stores the hours an employer logs for their employees, and the details needed to show them to the right people. No passwords are stored in Klokka's database. The website uses Google Analytics only if you say yes, and the apps count usage without cookies.",
     'This page lists that data, why it is processed, where it is stored, how long it is kept, and how to access, export or delete it.',
   ],
   sections: [
@@ -162,6 +167,8 @@ export const en: PageCopyOf<typeof sv> = {
         'Notifications: a push notification token for each phone where you are signed in to the Android app.',
         "The phone's position, only when the employer taps \"Use where I am now\" on a job, in the Android app or the web app. It is read once while the app is open, never in the background, and is not stored as your position: only the place that becomes the job's is saved. Employees' positions are never collected.",
         'Email: addresses for invitations and for the weekly digest, which you can turn off in Settings.',
+        'Use of the apps: which pages and screens of the web app and the Android app are opened and three events (a business is created, an invitation is sent, hours are saved), with the browser or phone, operating system, language and roughly which country and city the visit comes from. It is counted with Umami, without cookies or any id on your device, and is not linked to your account. The IP address is not stored, and ids, dates and link parameters are removed from the addresses before they are sent.',
+        'Visits to the klokka.se website, only if you have said yes: Google Analytics sets cookies and collects which pages you visit, where you came from, approximate location, device and browser, and clicks on buttons such as "Create your business".',
       ],
     },
     {
@@ -169,6 +176,7 @@ export const en: PageCopyOf<typeof sv> = {
       body: [
         'Account data is processed to provide the service you signed up for (contract). Security and operations, such as logs and backups, rest on legitimate interest.',
         "Employees' hours are processed on the employer's behalf. The legal basis for them is the employer's, for example the employment contract or the duty under the Working Hours Act to record on-call time, overtime and additional hours.",
+        'The website statistics in Google Analytics rest on your consent, which you can withdraw at any time under Cookie settings at the bottom of the page. The app statistics in Umami rest on legitimate interest: seeing which parts are used and making them better, without identifying anyone.',
       ],
     },
     {
@@ -177,6 +185,7 @@ export const en: PageCopyOf<typeof sv> = {
         'Everything is stored on servers at NetCup in Germany, inside the EU, and backups on our own server in Sweden. Sign-in runs on the same servers, in our own installation of Logto, not with an outside sign-in provider.',
         "Some of the services sit outside the EU and EEA. Email is sent through Migadu, a company in Switzerland, which the European Commission recognises as giving adequate protection to personal data. Push notifications are delivered through Expo and Google Firebase Cloud Messaging in the US, relying on the EU-US Data Privacy Framework, under which both companies are certified, and on the European Commission's standard contractual clauses. A push notification contains only the notification text and the phone's token.",
         'Place search, "Use where I am now" and the small job maps go through Klokka\'s server to Google Maps Platform (Google LLC, US), on the same basis. Google receives the search text, the chosen place\'s id or the coordinates, never your name, email address or account. Directions open Google Maps on your own phone or computer, outside Klokka.',
+        'The app statistics are stored in our own installation of Umami, on our server in Sweden. The website statistics are stored by Google Analytics (Google Ireland Limited and Google LLC, US) under the EU-US Data Privacy Framework, and only if you have said yes.',
       ],
     },
     {
@@ -189,13 +198,14 @@ export const en: PageCopyOf<typeof sv> = {
         'Migadu (Switzerland): sending email, such as invitations and weekly digests.',
         "Expo (US) and Google Firebase Cloud Messaging (US): delivering push notifications to the Android app. They receive only the notification text and the phone's token.",
         'Google Maps Platform (US): place search, addresses to coordinates and map images for jobs. Google receives only the search text, the place id or the coordinates.',
+        'Google Analytics (Ireland and US): visit statistics for the klokka.se website, only if you have said yes.',
       ],
     },
     {
       h2: 'Cookies and browser storage',
       body: [
-        'The klokka.se website has no analytics, no tracking and no tracking cookies. It only stores your choice of light or dark mode in your browser.',
-        'The web app uses one cookie for sign-in and a few for your choices: language, light or dark mode and the business you last opened. They are needed for the app to work.',
+        'The klokka.se website stores your choice of light or dark mode and your answer to the cookie question in your browser. Only if you say yes does Google Analytics set its cookies (_ga and _ga_ followed by an id), kept for up to two years. You can change your answer at any time under Cookie settings at the bottom of the page, and if you say no later, we remove the cookies.',
+        'The web app uses one cookie for sign-in and a few for your choices: language, light or dark mode and the business you last opened. They are needed for the app to work. The statistics in the web app and the Android app use no cookies and store nothing on your device.',
       ],
     },
     {
@@ -218,7 +228,7 @@ export const en: PageCopyOf<typeof sv> = {
       h2: 'Changes',
       body: [
         'If this policy changes, we update this page and the date below. Larger changes are announced on the website before they apply.',
-        'Last changed 4 October 2026.',
+        'Last changed 4 November 2026.',
       ],
     },
   ],

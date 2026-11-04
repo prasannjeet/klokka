@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Entry, EntryBatchResult } from '@klokka/api-client';
 import {
+  ANALYTICS_EVENTS,
   QUICK_CHIPS,
   addDays,
   formatDate,
@@ -21,6 +22,7 @@ import {
   weekOf,
   type IsoDate,
 } from '@klokka/core';
+import { trackEvent } from '@/lib/analytics';
 import { CsvButton } from '@/components/csv-button';
 import { Icon } from '@/components/icons';
 import { MonthLockButton, UnlockButton } from '@/components/month-lock';
@@ -190,6 +192,7 @@ export function WeekView() {
       toast({ title: message, body: t('web.week.failed'), tone: 'error' });
     },
     onSuccess: (result: EntryBatchResult, items) => {
+      trackEvent(ANALYTICS_EVENTS.hoursSaved);
       dispatch({
         type: 'saved',
         saved: result.saved.map(entryLike),

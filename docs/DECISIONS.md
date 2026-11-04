@@ -176,7 +176,8 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   new one signs in: both register the `klokka://` sign-in redirect, so with both installed Android offers two
   identical apps and the sign-in fails. The switch costs one reinstall for the handful of sideloaded users.
 - Firebase `klokka-64f3a` holds both Android apps and `google-services.json` lists both clients, so builds of
-  either package work. Expo (EAS) has FCM V1 credentials for both, with the same service-account key.
+  either package work. Expo (EAS) has FCM V1 credentials for both, with the same service-account key. The old
+  app was removed from Firebase in CHQ-201 (D24); only `se.klokka.app` remains.
 - **Signing:** Play App Signing with our existing release key (uploaded once with Google's PEPK tool), which is
   also the upload key. The Play build and the APK on klokka.se therefore share a signature and update each other.
 - **Pipeline:** a `v*` tag builds the APK and an AAB from the same prebuild; the AAB goes to Nexus and, with
@@ -255,3 +256,24 @@ landing 3001. Kulram keeps 8082 / 8899 / 8081.
   `jobLabel`/`jobLabels` from `@klokka/core`; push, the digest and its workbook use `JobLabels` in the API.
 - Totals of several jobs or days are formatted as decimal hours (`formatHours`), never with the one-job duration
   formatter, whose 24 hour cap is right only for one job or one day.
+
+## D24. Analytics: Google Analytics with consent on the public site, cookieless Umami in the apps (owner, 2026-11-04, CHQ-201)
+
+- **The public site (klokka.se and every page added to it)** uses Google Analytics 4 through Google Tag Manager,
+  like the owner's other sites, and only after the visitor accepts a cookie notice ("basic" consent mode: nothing
+  reaches Google before a yes). One container, `GTM-P6RRM6CL`, serves every build: a lookup on the page's hostname
+  sends klokka.se to the production property and any other host to the staging one. The container id is a build
+  argument (`NEXT_PUBLIC_GTM_ID`, repository variable `GTM_ID`); a build without it, a fork or a self-hosted one,
+  shows no notice and sends nothing. Events: `sign_up_click`, `login_click`, `apk_download`, `template_download`,
+  each with a `placement`.
+- **The notice** is a small card at the bottom left in the site's own design: Accept as the full-width button,
+  "No thanks" as an underlined text button in the corner, generic wording, "Cookie settings" in the footer to change
+  the answer. A no after a yes removes Google's cookies and reloads.
+- **The web app and the phone app** (Android now, iOS when it ships) use Umami, self-hosted on staging Coolify for
+  both environments so production carries no analytics load. Cookieless and nothing stored on the device, so no
+  notice; the privacy policy says what is collected (legitimate interest). Both report the same cleaned paths
+  (`analyticsPath` in `@klokka/core`: no business slug, ids, dates or query) and the same three events
+  (`workspace_created`, `invitation_sent`, `hours_saved`). Configured at runtime on the web (`KLOKKA_UMAMI_URL`,
+  `KLOKKA_UMAMI_WEBSITE_ID`) and at bundle time on the phone (`EXPO_PUBLIC_UMAMI_*`); unset means no tracking.
+- The GA4 property Firebase created with the project (`klokka-64f3a`) and the retired Android app
+  `com.prasannjeet.klokka` are removed; Firebase stays for push only.

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MissingEnvError, apiBaseUrl, fakeSessionEnabled, serverEnv } from './env';
+import { MissingEnvError, apiBaseUrl, fakeSessionEnabled, serverEnv, umami } from './env';
 
 afterEach(() => vi.unstubAllEnvs());
 
@@ -47,5 +47,32 @@ describe('fakeSessionEnabled', () => {
     expect(fakeSessionEnabled()).toBe(false);
     vi.stubEnv('NODE_ENV', 'development');
     expect(fakeSessionEnabled()).toBe(true);
+  });
+});
+
+describe('umami', () => {
+  const ID = 'f0b48f6b-5703-4c05-97d9-956552a2b262';
+
+  it('is null when neither variable is set: no tracking', () => {
+    vi.stubEnv('KLOKKA_UMAMI_URL', '');
+    vi.stubEnv('KLOKKA_UMAMI_WEBSITE_ID', '');
+    expect(umami()).toBeNull();
+  });
+
+  it('reads the pair and trims the URL', () => {
+    vi.stubEnv('KLOKKA_UMAMI_URL', 'https://umami.example.se/');
+    vi.stubEnv('KLOKKA_UMAMI_WEBSITE_ID', ID);
+    expect(umami()).toEqual({ url: 'https://umami.example.se', websiteId: ID });
+  });
+
+  it('names the missing half and rejects a malformed value', () => {
+    vi.stubEnv('KLOKKA_UMAMI_URL', 'https://umami.example.se');
+    vi.stubEnv('KLOKKA_UMAMI_WEBSITE_ID', '');
+    expect(() => umami()).toThrowError(new MissingEnvError('KLOKKA_UMAMI_WEBSITE_ID'));
+    vi.stubEnv('KLOKKA_UMAMI_WEBSITE_ID', 'abc');
+    expect(() => umami()).toThrowError(/UUID/);
+    vi.stubEnv('KLOKKA_UMAMI_URL', 'umami.example.se');
+    vi.stubEnv('KLOKKA_UMAMI_WEBSITE_ID', ID);
+    expect(() => umami()).toThrowError(/http\(s\) URL/);
   });
 });

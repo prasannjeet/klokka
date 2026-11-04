@@ -1,9 +1,13 @@
 import type { Viewport } from 'next';
 import { color } from '@klokka/tokens';
 import '../globals.css';
+import { ConsentManager } from '@/components/consent/ConsentManager';
 import { IconSprite } from '@/components/ui/IconSprite';
+import { gtmId } from '@/lib/analytics';
 import { fontVariables } from '@/lib/fonts';
 import { getDictionary, htmlLang, locales, resolveLocale } from '@/lib/i18n';
+import { appUrl } from '@/lib/links';
+import { hrefFor } from '@/lib/pages';
 
 type Props = {
   children: React.ReactNode;
@@ -45,6 +49,14 @@ export default async function RootLayout({ children, params }: Props) {
         </a>
         <IconSprite />
         {children}
+        {gtmId ? (
+          <ConsentManager
+            gtmId={gtmId}
+            copy={t.consent}
+            privacyHref={hrefFor('privacy', locale)}
+            appUrl={appUrl}
+          />
+        ) : null}
       </body>
     </html>
   );

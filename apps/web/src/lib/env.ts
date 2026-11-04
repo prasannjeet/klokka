@@ -59,6 +59,28 @@ export function serverEnv(): ServerEnv {
   };
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export interface UmamiConfig {
+  url: string;
+  websiteId: string;
+}
+
+// Umami usage analytics (CHQ-201), optional as a pair: neither set means no tracking; half a pair or a malformed
+// value is a misconfiguration and fails the request that renders the layout, naming the variable.
+export function umami(): UmamiConfig | null {
+  const url = optional('KLOKKA_UMAMI_URL');
+  const websiteId = optional('KLOKKA_UMAMI_WEBSITE_ID');
+  if (!url && !websiteId) return null;
+  if (!url) throw new MissingEnvError('KLOKKA_UMAMI_URL');
+  if (!websiteId) throw new MissingEnvError('KLOKKA_UMAMI_WEBSITE_ID');
+  if (!/^https?:\/\//.test(url)) throw new Error(`KLOKKA_UMAMI_URL must be an http(s) URL, got "${url}"`);
+  if (!UUID.test(websiteId)) {
+    throw new Error(`KLOKKA_UMAMI_WEBSITE_ID must be an Umami website id (a UUID), got "${websiteId}"`);
+  }
+  return { url: trimSlash(url), websiteId };
+}
+
 export function androidApkUrl(): string | null {
   return optional('KLOKKA_ANDROID_APK_URL');
 }

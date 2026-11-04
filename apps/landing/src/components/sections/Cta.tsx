@@ -15,7 +15,7 @@ export function Cta({ t }: { t: Dictionary }) {
             <a className="btn btn-primary" href={appUrl}>
               {c.create}
             </a>
-            <a className="btn btn-ghost" href={appUrl}>
+            <a className="btn btn-ghost" href={appUrl} data-track="login_click">
               {c.login}
             </a>
           </div>

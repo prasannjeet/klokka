@@ -60,7 +60,33 @@ describe('resolveAppConfig', () => {
       issuer: 'https://klokka-logto.coolify.ooguy.com/oidc',
       clientId: '1uhtt4uj8f0aevtgf6g3b',
       apiResource: 'https://api.klokka.app',
+      analytics: null,
     });
+  });
+
+  it('reads the Umami pair (CHQ-201) and trims the URL', () => {
+    const analytics = resolveAppConfig({
+      ...raw,
+      EXPO_PUBLIC_UMAMI_URL: 'https://umami.example.se/',
+      EXPO_PUBLIC_UMAMI_WEBSITE_ID: '33d7ba05-164a-41e3-8723-59ebbea29c31',
+    }).analytics;
+    expect(analytics).toEqual({
+      url: 'https://umami.example.se',
+      websiteId: '33d7ba05-164a-41e3-8723-59ebbea29c31',
+    });
+  });
+
+  it('fails fast on half an Umami pair or a malformed website id', () => {
+    expect(() => resolveAppConfig({ ...raw, EXPO_PUBLIC_UMAMI_URL: 'https://umami.example.se' })).toThrow(
+      /set both or neither/,
+    );
+    expect(() =>
+      resolveAppConfig({
+        ...raw,
+        EXPO_PUBLIC_UMAMI_URL: 'https://umami.example.se',
+        EXPO_PUBLIC_UMAMI_WEBSITE_ID: 'abc',
+      }),
+    ).toThrow(/UUID/);
   });
 
   it('names the missing variable instead of defaulting', () => {

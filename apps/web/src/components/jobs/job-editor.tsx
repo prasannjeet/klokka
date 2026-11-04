@@ -12,6 +12,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Job, JobChangeScope, JobLocation, JobRecurrenceRule, JobWrite } from '@klokka/api-client';
 import {
+  ANALYTICS_EVENTS,
   addDays,
   describeRecurrence,
   formatDate,
@@ -20,6 +21,7 @@ import {
   splitHours,
   type IsoDate,
 } from '@klokka/core';
+import { trackEvent } from '@/lib/analytics';
 import { api } from '@/lib/api';
 import { useLocale, useT } from '@/lib/i18n';
 import type { JobEditorMode } from '@/lib/job-links';
@@ -271,6 +273,7 @@ function JobForm({
         : api.jobs.createJob({ workspaceId: ws.id, membershipId, date: dateOf(workDate), jobWrite });
     },
     onSuccess: () => {
+      trackEvent(ANALYTICS_EVENTS.hoursSaved);
       toast({
         title: sendsRule ? t('recurrence.saved') : t('jobs.saved', { duration, name }),
         icon: 'check',

@@ -236,7 +236,7 @@ export const pages: readonly PageEntry[] = [
     path: { sv: '/integritet', en: '/privacy' },
     parent: 'home',
     footer: 'klokka',
-    lastmod: '2026-10-04',
+    lastmod: '2026-11-04',
     background: 'clock',
   },
   {

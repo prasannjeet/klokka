@@ -36,8 +36,8 @@ All apps are Coolify `dockerimage` apps: 512 MB, `--init`, health checks on `127
 calls the API over the Docker network at `http://klokka-api:8080/v1` (the API app's network alias `klokka-api`),
 never through the public domain. Push notifications: Expo project `f617e8bb-38d1-4247-9dde-d92bda37fe18`, Firebase
 `klokka-64f3a`, package `se.klokka.app` for both environments (one phone holds one of the two APKs; D19). The old
-package `com.prasannjeet.klokka` stays registered in Firebase and Expo so older installs keep their push, but it must be
-uninstalled before the new app signs in (both own the `klokka://` redirect).
+package `com.prasannjeet.klokka` was removed from Firebase in CHQ-201 (2026-11-04): an old sideloaded install no
+longer gets push and must be replaced by the current app (both own the `klokka://` redirect).
 
 ## 2. Where the credentials are
 
@@ -111,6 +111,18 @@ is DbGate (`https://dbgate.apps.prod.roxa.org`, Common Resources project).
 ```bash
 ssh netcup docker exec -it postgres-hxthesh8i3rgrca3yldartx9 psql -U "$(ssh netcup docker exec postgres-hxthesh8i3rgrca3yldartx9 printenv POSTGRES_USER)" logto
 ```
+
+## 3a. Analytics (CHQ-201, docs/DECISIONS.md D24)
+
+| What | Where |
+|---|---|
+| Public site | GA4 account CleanHQ: property **Klokka** (stream klokka.se, `G-NJCCFQD2L6`) and **Klokka (staging)** (stream klokka.coolify.ooguy.com, `G-RES1DTS3EG`). Loaded through GTM account **Klokka**, container **klokka.se** `GTM-P6RRM6CL`; its `GA4 measurement ID` lookup sends klokka.se to production and every other host to staging. Repository variable `GTM_ID` feeds both builds. |
+| Web app and phone app | Umami on staging Coolify (project critical, service `a4zjdk8zgumdaqfxh3el0gtq`): `https://umami-a4zjdk8zgumdaqfxh3el0gtq.coolify.ooguy.com`, admin login in 1Password. Websites: Klokka web app `d9b3b17f-d70c-4f32-afc5-fb3f696a3436`, Klokka web app (staging) `f0b48f6b-5703-4c05-97d9-956552a2b262`, Klokka phone app `63c4a306-4fd8-4b13-ae9e-2d8f78871e74`, Klokka phone app (staging) `33d7ba05-164a-41e3-8723-59ebbea29c31`. |
+| Web config | Coolify env on each klokka-web: `KLOKKA_UMAMI_URL` and `KLOKKA_UMAMI_WEBSITE_ID` (runtime; unset turns it off). |
+| Phone config | Repository variables `UMAMI_URL`, `STAGING_UMAMI_MOBILE_WEBSITE_ID`, `PROD_UMAMI_MOBILE_WEBSITE_ID` (baked in at bundle time by ci.yml and release.yml). |
+
+The LAN's DNS filter answers `0.0.0.0` for Google's tag and analytics hosts, so check GA4 from mobile data (or
+GTM's preview), not from the office network.
 
 ## 4. Daily checkup
 

@@ -46,7 +46,7 @@ export function SiteNav({ t, locale, page }: { t: Dictionary; locale: Locale; pa
             {other.toUpperCase()}
           </a>
           <ThemeToggle label={t.a11y.theme} />
-          <a className="nav-login" href={appUrl}>
+          <a className="nav-login" href={appUrl} data-track="login_click">
             {t.nav.login}
           </a>
           <a className="btn btn-secondary btn-sm nav-cta" href={appUrl}>
@@ -60,7 +60,7 @@ export function SiteNav({ t, locale, page }: { t: Dictionary; locale: Locale; pa
                 <a className="btn btn-primary" href={appUrl}>
                   {t.nav.createWorkspace}
                 </a>
-                <a className="btn btn-ghost" href={appUrl}>
+                <a className="btn btn-ghost" href={appUrl} data-track="login_click">
                   {t.nav.login}
                 </a>
               </>

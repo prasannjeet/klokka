@@ -12,8 +12,9 @@ import type {
   WorkspaceCreate,
   WorkspaceUpdate,
 } from '@klokka/api-client';
-import type { IsoDate, IsoMonth } from '@klokka/core';
+import { ANALYTICS_EVENTS, type IsoDate, type IsoMonth } from '@klokka/core';
 import { useApi } from '@/api/ApiProvider';
+import { trackEvent } from '@/lib/analytics';
 import { fromIsoDate } from '@/lib/dates';
 import { keys } from './keys';
 
@@ -177,7 +178,10 @@ export function useCreateWorkspace() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (workspaceCreate: WorkspaceCreate) => api.workspaces.createWorkspace({ workspaceCreate }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.me }),
+    onSuccess: () => {
+      trackEvent(ANALYTICS_EVENTS.workspaceCreated);
+      return qc.invalidateQueries({ queryKey: keys.me });
+    },
   });
 }
 
@@ -200,7 +204,10 @@ export function useInviteMember(workspaceId: string) {
   const invalidate = useInvalidateWorkspace(workspaceId);
   return useMutation({
     mutationFn: (memberInvite: MemberInvite) => api.members.inviteMember({ workspaceId, memberInvite }),
-    onSuccess: () => void invalidate(),
+    onSuccess: () => {
+      trackEvent(ANALYTICS_EVENTS.invitationSent);
+      void invalidate();
+    },
   });
 }
 
@@ -261,6 +268,7 @@ export function useUpsertEntry(workspaceId: string) {
       }
       return { snapshots };
     },
+    onSuccess: () => trackEvent(ANALYTICS_EVENTS.hoursSaved),
     onError: (_e, _v, context) => {
       for (const [key, list] of context?.snapshots ?? []) qc.setQueryData(key, list);
     },
@@ -285,6 +293,7 @@ export function useCreateJob(workspaceId: string) {
   return useMutation({
     mutationFn: ({ membershipId, date, job }: { membershipId: string; date: IsoDate; job: JobWrite }) =>
       api.jobs.createJob({ workspaceId, membershipId, date: fromIsoDate(date), jobWrite: job }),
+    onSuccess: () => trackEvent(ANALYTICS_EVENTS.hoursSaved),
     onSettled: () => void invalidate(),
   });
 }
@@ -295,6 +304,7 @@ export function useUpdateJob(workspaceId: string) {
   return useMutation({
     mutationFn: ({ jobId, job, scope }: { jobId: string; job: JobWrite; scope?: JobChangeScope }) =>
       api.jobs.updateJob({ workspaceId, jobId, jobWrite: job, scope }),
+    onSuccess: () => trackEvent(ANALYTICS_EVENTS.hoursSaved),
     onSettled: () => void invalidate(),
   });
 }

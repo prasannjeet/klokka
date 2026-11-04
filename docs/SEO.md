@@ -103,6 +103,12 @@ Search Console is connected (2026-11-04):
 - `https://klokka.se/sitemap.xml` submitted. `/` was already indexed; indexing requested for `/en`
   ("Crawled, currently not indexed" at the time).
 
+Google Analytics on the site (CHQ-201, D24): GA4 through GTM `GTM-P6RRM6CL`, loaded only after the cookie notice's
+Accept; properties and ids in `docs/OPERATIONS.md` section 3a. The site's events (`sign_up_click`, `login_click`,
+`apk_download`, `template_download`) carry a `placement`; a new page needs nothing, the click listener classifies
+links by their address (`apps/landing/src/lib/analytics.ts`). Link the GA4 property to Search Console (GA4 Admin,
+Product links) once both have data.
+
 Still to do:
 1. Bing Webmaster: import the property from Search Console (Bing feeds ChatGPT search and Copilot).
 2. From week 4: a weekly look with the `gsc` MCP. Pages at positions 5 to 20 are the ones to improve first;
