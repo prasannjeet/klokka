@@ -8,7 +8,7 @@ vars one by one), `docs/RELEASING.md` (the production release flow).
 **Rule:** test, probe and experiment on staging. Anything that changes production (Coolify, Logto, Postgres,
 Migadu) needs the owner's explicit go-ahead for that change.
 
-**Current production release:** v1.8.0 (2026-10-25, CHQ-191), API, web and landing. Android versionCode 21 is
+**Current production release:** v1.8.1 (2026-11-04, CHQ-199, CHQ-200), API, web and landing. Android versionCode 22 is
 on Play internal testing. Public Play publishing still requires the initial Console setup/review.
 
 ## 1. The map
@@ -263,6 +263,7 @@ Migadu mailbox may accept IMAP but reject SMTP (`535`) until sending is enabled 
 | A release's APK job hangs for ~50 min on "Timeout waiting to lock daemon addresses registry", then is cancelled | the runners and local builds share `~/.gradle` on this host, which was at its memory cap (40 GB; raised to 45 GB on 2026-10-06), so a daemon stalled holding the lock | check `/proc/pressure/memory` and stray `GradleDaemon` processes, then `gh run rerun <id> --failed` |
 | Inviting an employee fails with "Logto is unreachable" after ~10 s | Logto sends the invitation email before answering | the API waits up to 30 s (`quarkus.rest-client.logto.read-timeout`) |
 | Creating a business or inviting an employee fails with a generic error; the API log shows Logto 422 `entity.relation_foreign_key_not_found` on `assignUserRoles` | `KLOKKA_LOGTO_EMPLOYER_ROLE_ID` / `KLOKKA_LOGTO_EMPLOYEE_ROLE_ID` are not set, so the API uses the defaults, which are the staging Logto's role ids (production, 2026-10-02) | set both on the API app to that Logto's organization role ids (console, Organization template) and restart |
+| An invited employee signs up, then Join fails every time; the API log shows Logto 404 `entity.not_found` on `updateInvitationStatus` | a Resend deleted the Logto invitation, then failed (Migadu limit, 2026-11-02) and Klokka's row rolled back to the deleted id | fixed in v1.8.1 (CHQ-199): the accept adds the user to the organization directly; older versions: the employer presses Resend once mail works |
 | Sign-up email never arrives | sender mailbox not allowed to send, or the daily quota used up | section 8 |
 | `v*` tag built but production unchanged | production deploys are by hand | section 5, step 2 |
 | Coolify's "Redirect to non-www" setting has no effect on the landing | the apps were created through the API with stored custom labels, which Coolify uses as they are | redirects live in the landing app's labels (below); after a domain change, edit the labels, never "reset to defaults" |

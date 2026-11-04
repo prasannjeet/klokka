@@ -2,6 +2,17 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.8.1, 2026-11-04
+
+### Changed
+- 29 icons to choose from when creating or editing a business, the same on the web and the phone (the web offered 8
+  and the phone 12 different ones), each with a Swedish and English name for screen readers (CHQ-200).
+
+### Fixed
+- An invited employee could not join after the employer's Resend had failed (for example on the daily email limit):
+  every Join answered an error. Joining now works for these invitations, the ones already affected included
+  (CHQ-199).
+
 ## 1.8.0, 2026-10-25
 
 ### Added
