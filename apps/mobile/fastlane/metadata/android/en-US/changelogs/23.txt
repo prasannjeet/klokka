@@ -1,0 +1,1 @@
+Improvements under the hood. Klokka now counts, anonymously, which screens are used, so we can make the app better. No ads, no tracking across apps.

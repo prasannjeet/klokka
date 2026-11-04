@@ -1,0 +1,1 @@
+Förbättringar under huven. Klokka räknar nu anonymt vilka skärmar som används, så att vi kan göra appen bättre. Ingen reklam, ingen spårning mellan appar.

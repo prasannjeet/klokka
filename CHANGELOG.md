@@ -2,6 +2,16 @@
 
 All notable changes to Klokka. The format follows Keep a Changelog; versions follow SemVer.
 
+## 1.9.0, 2026-11-05
+
+### Added
+- klokka.se asks before it uses Google Analytics: a small cookie card (Accept, or No thanks), Cookie settings in the
+  footer to change the answer, and the privacy policy says what is collected and why. Nothing from Google loads
+  before Accept (CHQ-201).
+- The web app and the phone app count which pages and screens are used, plus three events (business created,
+  invitation sent, hours saved), with Umami on Klokka's own server in Sweden: no cookies, nothing stored on the
+  device, no account or device id, and business names, ids and dates are removed from the paths (CHQ-201).
+
 ## 1.8.1, 2026-11-04
 
 ### Changed
