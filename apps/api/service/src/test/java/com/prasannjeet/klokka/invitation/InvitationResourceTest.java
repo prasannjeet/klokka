@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.hamcrest.Matchers.is;
 
 import com.prasannjeet.klokka.support.Fake;
+import com.prasannjeet.klokka.support.FakeServers;
 import com.prasannjeet.klokka.support.MutableClock;
 import com.prasannjeet.klokka.support.TestData;
 import io.agroal.api.AgroalDataSource;
@@ -28,6 +29,7 @@ class InvitationResourceTest {
     private static final String NORA = "usr_inv_nora";
     private static final String LINA = "usr_inv_lina";
     private static final String OTHER = "usr_inv_other";
+    private static final String FAIZ = "usr_inv_faiz";
 
     @Inject
     AgroalDataSource dataSource;
@@ -152,6 +154,23 @@ class InvitationResourceTest {
             clock.reset();
         }
         assertThat(Fake.<Object>list("invitationStatusUpdates")).isEmpty();
+    }
+
+    @Test
+    @TestSecurity(user = FAIZ)
+    @OidcSecurity(claims = {@Claim(key = "sub", value = FAIZ)})
+    void acceptingStillJoinsWhenLogtoNoLongerHasTheInvitation() {
+        // Production 2026-11-02: a resend deleted the Logto invitation, then failed on the mail limit; Klokka's row
+        // rolled back to the deleted id and every accept answered 500 (Logto 404 entity.not_found).
+        String gone = "inv_" + UUID.randomUUID().toString().replace("-", "");
+        UUID stale = data.invited(ws, "Faiz Khan", "faiz@example.com", gone, clock.instant(), clock.instant().plusSeconds(7 * 86400),
+                "logto_inv_" + FakeServers.GONE_USER_MARKER + gone.substring(4, 12));
+        Fake.user(FAIZ, "faiz@example.com", "Faiz Khan");
+        given().when().post("/v1/invitations/" + gone + "/accept").then().statusCode(200).body("membershipId", is(stale.toString()));
+        assertThat(data.query("select status, logto_user_id from membership where id = ?", stale)).containsExactly(List.of("ACTIVE", FAIZ));
+        List<Map<String, Object>> added = Fake.list("addedUsers");
+        assertThat(added).extracting(a -> a.get("userIds")).containsExactly(List.of(FAIZ));
+        assertThat(Fake.<Object>list("assignedRoles")).hasSize(1);
     }
 
     @Test

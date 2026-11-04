@@ -112,8 +112,9 @@ public class InvitationService {
         if (repository.findByUserInWorkspace(m.workspaceId, user.id).isPresent()) {
             throw new KlokkaException(CONFLICT, "You are already a member of this workspace.");
         }
-        if (m.logtoInvitationId != null) logto.acceptInvitation(m.logtoInvitationId, user.id);
-        else logto.addMember(w.logtoOrgId, user.id, m.role);
+        if (m.logtoInvitationId == null || !logto.acceptInvitation(m.logtoInvitationId, user.id)) {
+            logto.addMember(w.logtoOrgId, user.id, m.role);
+        }
         m.userId = user.id;
         m.status = ACTIVE;
         m.joinedAt = now;

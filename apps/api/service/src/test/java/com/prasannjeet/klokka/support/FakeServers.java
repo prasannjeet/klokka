@@ -23,7 +23,8 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
     public static final String DEAD_TOKEN = "ExponentPushToken[dead]";
     public static final String DUPLICATE_ORG_MARKER = "DUPLICATE-ORG";
     public static final String FAIL_ORG_MARKER = "FAIL-ORG";
-    // An organization id containing this answers 500 on DELETE; a user id containing GONE_USER_MARKER answers 404.
+    // An organization id containing this answers 500 on DELETE; a user id containing GONE_USER_MARKER answers 404 on
+    // DELETE, and so does an invitation id containing it on PUT status.
     public static final String FAIL_ORG_DELETE_MARKER = "fail-delete";
     public static final String GONE_USER_MARKER = "gone";
     public static final String FAIL_INVITE_MARKER = "fail-invite@";
@@ -200,6 +201,10 @@ public class FakeServers implements QuarkusTestResourceLifecycleManager {
         } else if (path.matches("/organization-invitations/[^/]+/status") && method.equals("PUT")) {
             Map<String, Object> request = JSON.readValue(body, Map.class);
             String id = path.split("/")[2];
+            if (id.contains(GONE_USER_MARKER)) {
+                respond(exchange, 404, "{\"code\":\"entity.not_found\",\"message\":\"The resource does not exist.\"}");
+                return;
+            }
             request.put("id", id);
             this.<Map<String, Object>>list("invitationStatusUpdates").add(request);
             respond(exchange, 200, JSON.writeValueAsString(Map.of("id", id, "status", request.get("status"),

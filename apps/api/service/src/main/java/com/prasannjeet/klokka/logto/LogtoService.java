@@ -71,9 +71,18 @@ public class LogtoService {
                 message))).id();
     }
 
-    public void acceptInvitation(String invitationId, String userId) {
-        call("accept organization invitation", () -> api.updateInvitationStatus(invitationId,
-                new LogtoModels.InvitationStatusUpdate(ACCEPTED, userId)));
+    // False when Logto no longer has the invitation (production 2026-11-02: a resend deleted it, then failed on the
+    // mail limit and Klokka's row rolled back to the deleted id); the caller then adds the member directly.
+    public boolean acceptInvitation(String invitationId, String userId) {
+        try {
+            call("accept organization invitation", () -> api.updateInvitationStatus(invitationId,
+                    new LogtoModels.InvitationStatusUpdate(ACCEPTED, userId)));
+            return true;
+        } catch (KlokkaException e) {
+            if (!(e.getCause() instanceof WebApplicationException w && w.getResponse().getStatus() == 404)) throw e;
+            LOG.warnf("Logto invitation %s is gone; adding user %s to the organization directly", invitationId, userId);
+            return false;
+        }
     }
 
     // Best effort: a Logto invitation that is already gone must not block Klokka's own bookkeeping.
