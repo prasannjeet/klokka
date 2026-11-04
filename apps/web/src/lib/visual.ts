@@ -24,18 +24,8 @@ export function colourVar(colour: WorkspaceColour): string {
   return COLOUR_VAR[colour] ?? COLOUR_VAR.PRIMARY;
 }
 
-// Emoji choices with the catalogue key of their accessible name.
-export const WORKSPACE_EMOJIS = [
-  ['\u2615', 'coffee'],
-  ['\u2702\uFE0F', 'scissors'],
-  ['\u2728', 'sparkles'],
-  ['\uD83C\uDF5E', 'bread'],
-  ['\uD83C\uDF3C', 'flower'],
-  ['\uD83D\uDEB2', 'bicycle'],
-  ['\uD83D\uDECD\uFE0F', 'bag'],
-  ['\uD83C\uDFA8', 'palette'],
-] as const;
-
+// Avatar emoji choices with the catalogue key of their accessible name (business icons: WORKSPACE_EMOJIS in
+// @klokka/core).
 export const AVATAR_EMOJIS = [
   ['\u2600\uFE0F', 'sun'],
   ['\u2B50', 'star'],
@@ -46,8 +36,6 @@ export const AVATAR_EMOJIS = [
   ['\uD83C\uDFB5', 'music'],
   ['\uD83D\uDC1D', 'bee'],
 ] as const;
-
-export type EmojiName = (typeof WORKSPACE_EMOJIS)[number][1] | (typeof AVATAR_EMOJIS)[number][1];
 
 // Avatar fill per person, cycling through the chart order so neighbours differ.
 const AVATAR_CLASSES = ['', 'p', 'c3', 'c4', 'c2'] as const;

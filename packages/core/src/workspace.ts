@@ -1,0 +1,35 @@
+// The business icons both clients offer, each with the catalogue key of its accessible name
+// (`workspace.emojis.<name>`). The first is the default; the API stores whichever emoji is picked.
+export const WORKSPACE_EMOJIS = [
+  ['☕', 'coffee'],
+  ['🥐', 'croissant'],
+  ['✂️', 'scissors'],
+  ['🧹', 'broom'],
+  ['🍞', 'bread'],
+  ['🍕', 'pizza'],
+  ['🍔', 'burger'],
+  ['🍷', 'wine'],
+  ['🧽', 'sponge'],
+  ['🧺', 'basket'],
+  ['✨', 'sparkles'],
+  ['💈', 'barber'],
+  ['🌸', 'blossom'],
+  ['🌼', 'flower'],
+  ['🌱', 'seedling'],
+  ['🔧', 'wrench'],
+  ['🔨', 'hammer'],
+  ['⚡', 'bolt'],
+  ['🎨', 'palette'],
+  ['🏠', 'house'],
+  ['🚚', 'truck'],
+  ['🚲', 'bicycle'],
+  ['📦', 'package'],
+  ['🛒', 'cart'],
+  ['🛍️', 'bag'],
+  ['🏋️', 'weights'],
+  ['🐝', 'bee'],
+  ['🐾', 'paw'],
+  ['💻', 'laptop'],
+] as const;
+
+export type WorkspaceEmojiName = (typeof WORKSPACE_EMOJIS)[number][1];

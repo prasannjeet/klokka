@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
-import { isIanaTimeZone } from '@klokka/core';
+import { WORKSPACE_EMOJIS, isIanaTimeZone } from '@klokka/core';
 import { useMe, useUpdateMe } from '@/data/me';
 import { useCreateWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
@@ -25,7 +25,6 @@ import {
   useToast,
 } from '@/ui';
 
-export const WORKSPACE_EMOJIS = ['☕', '🥐', '✂️', '🧹', '🌸', '🍕', '🛒', '🔧', '🐝', '🎨', '🚚', '🏋️'];
 export const WORKSPACE_COLOURS: WorkspaceColour[] = ['PRIMARY', 'BLUE', 'GREEN', 'PURPLE', 'YELLOW', 'INK'];
 export const CURRENCIES = ['SEK', 'NOK', 'DKK', 'EUR', 'GBP', 'USD'];
 
@@ -83,7 +82,7 @@ export function CreateWorkspaceScreen() {
   const [name, setName] = useState('');
   const [yourName, setYourName] = useState(me?.user.name ?? '');
   const [yourNameTouched, setYourNameTouched] = useState(false);
-  const [emoji, setEmoji] = useState(WORKSPACE_EMOJIS[0] as string);
+  const [emoji, setEmoji] = useState<string>(WORKSPACE_EMOJIS[0][0]);
   const [colour, setColour] = useState<WorkspaceColour>('PRIMARY');
   const [timezone, setTimezone] = useState(deviceTimezone());
   const [currency, setCurrency] = useState(locale === 'sv' ? 'SEK' : 'EUR');
@@ -161,11 +160,11 @@ export function CreateWorkspaceScreen() {
       />
       <Field label={t('workspace.emoji')} hint={t('workspace.colourAndEmojiHint')}>
         <View style={s.wrap} accessibilityLabel={t('mobile.workspace.emojiPick')}>
-          {WORKSPACE_EMOJIS.map((e) => (
+          {WORKSPACE_EMOJIS.map(([e, name]) => (
             <AppPressable
               key={e}
               accessibilityRole="button"
-              accessibilityLabel={e}
+              accessibilityLabel={t(`workspace.emojis.${name}`)}
               accessibilityState={{ selected: e === emoji }}
               onPress={() => setEmoji(e)}
               hapticKind="tick"

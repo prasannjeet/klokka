@@ -27,7 +27,8 @@ import { useLocale, useT } from '@/lib/i18n';
 import { meKey, useMe } from '@/lib/me';
 import { fieldError, problemMessage, toProblem, type ProblemInfo } from '@/lib/problem';
 import { browserTimeZone, COUNTRIES, countryName } from '@/lib/regions';
-import { WORKSPACE_EMOJIS, colourVar } from '@/lib/visual';
+import { WORKSPACE_EMOJIS } from '@klokka/core';
+import { colourVar } from '@/lib/visual';
 
 // Sweden first: the owner's market (docs/PRODUCT_BRIEF.md). The same on the server and in the browser, so
 // the first render hydrates cleanly.

@@ -3,10 +3,16 @@
 // The workspace identity pickers shared by "Create workspace" (CHQ-112) and Settings (CHQ-127).
 import type { CSSProperties } from 'react';
 import type { WeekStart, WorkspaceColour } from '@klokka/api-client';
-import { formatWeekday, isEuropeanTimeZone, timeZoneLabel, timeZoneOptions } from '@klokka/core';
+import {
+  WORKSPACE_EMOJIS,
+  formatWeekday,
+  isEuropeanTimeZone,
+  timeZoneLabel,
+  timeZoneOptions,
+} from '@klokka/core';
 import { useLocale, useT } from '@/lib/i18n';
 import { CURRENCIES, currencyName, sortedCountries } from '@/lib/regions';
-import { WORKSPACE_COLOURS, WORKSPACE_EMOJIS, colourVar } from '@/lib/visual';
+import { WORKSPACE_COLOURS, colourVar } from '@/lib/visual';
 import { ChoiceGroup } from './choice-group';
 
 export function ColourPicker({
@@ -53,7 +59,7 @@ export function EmojiPicker({
       onChange={onChange}
       choices={WORKSPACE_EMOJIS.map(([emoji, name]) => ({
         value: emoji,
-        label: t(`web.emoji.${name}`),
+        label: t(`workspace.emojis.${name}`),
         content: emoji,
       }))}
     />

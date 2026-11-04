@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { Rounding, WeekStart, WorkspaceColour } from '@klokka/api-client';
-import { formatHours, stepHours } from '@klokka/core';
+import { WORKSPACE_EMOJIS, formatHours, stepHours } from '@klokka/core';
 import { useUpdateWorkspace, useWorkspace } from '@/data/workspace';
 import { useLocale, useT } from '@/i18n/LocaleProvider';
 import { problemMessage } from '@/lib/problems';
@@ -29,7 +29,7 @@ import {
 import { withWorkspace, type WorkspaceProps } from '@/features/shell/withWorkspace';
 import { OptionSheet } from '@/ui/OptionSheet';
 import { AppPreferenceRows, NotificationPreferenceRows } from '@/features/profile/PreferenceRows';
-import { WORKSPACE_COLOURS, WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
+import { WORKSPACE_COLOURS } from '@/features/workspaces/CreateWorkspaceScreen';
 import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 
@@ -311,11 +311,11 @@ function SettingsScreenInner({ workspace: active }: WorkspaceProps) {
               {t('workspace.emoji')}
             </AppText>
             <View style={s.wrap}>
-              {WORKSPACE_EMOJIS.map((e) => (
+              {WORKSPACE_EMOJIS.map(([e, name]) => (
                 <AppPressable
                   key={e}
                   accessibilityRole="button"
-                  accessibilityLabel={e}
+                  accessibilityLabel={t(`workspace.emojis.${name}`)}
                   accessibilityState={{ selected: e === emoji }}
                   onPress={() => setEmoji(e)}
                   hapticKind="tick"

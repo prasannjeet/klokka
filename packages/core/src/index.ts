@@ -6,4 +6,5 @@ export * from './jobs.ts';
 export * from './recurrence.ts';
 export * from './format.ts';
 export * from './timezones.ts';
+export * from './workspace.ts';
 export * from './i18n/index.ts';

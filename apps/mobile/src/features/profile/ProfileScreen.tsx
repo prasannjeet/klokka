@@ -23,7 +23,7 @@ import { WorkspaceRow } from '@/features/workspaces/WorkspaceRow';
 import { DeleteAccountSheet } from '@/features/account/DeleteAccountSheet';
 import { useSignOut } from '@/features/shell/useSignOut';
 import { enterApp } from '@/features/shell/enterApp';
-import { WORKSPACE_EMOJIS } from '@/features/workspaces/CreateWorkspaceScreen';
+import { WORKSPACE_EMOJIS } from '@klokka/core';
 import { AppPreferenceRows, JobNotificationRows, NotificationPreferenceRows } from './PreferenceRows';
 
 const styles = (t: Theme) =>
@@ -203,7 +203,7 @@ export function ProfileScreen() {
               >
                 <AppText weight={700}>{(name.trim()[0] ?? '?').toLocaleUpperCase()}</AppText>
               </AppPressable>
-              {[...AVATAR_EMOJIS, ...WORKSPACE_EMOJIS.slice(0, 4)].map((e) => (
+              {[...AVATAR_EMOJIS, ...WORKSPACE_EMOJIS.slice(0, 4).map(([e]) => e)].map((e) => (
                 <AppPressable
                   key={e}
                   accessibilityRole="button"

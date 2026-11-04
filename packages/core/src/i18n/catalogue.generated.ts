@@ -1008,19 +1008,11 @@ export const sv = {
   "web.dayList.logInGrid": "Logga i veckorutnätet",
   "web.dayList.loggedBy": "Loggad av {name}, {time}",
   "web.dayList.select": "{date}, {hours}. Visa dagen.",
-  "web.emoji.bag": "Shoppingkasse",
   "web.emoji.bee": "Bi",
-  "web.emoji.bicycle": "Cykel",
-  "web.emoji.bread": "Bröd",
   "web.emoji.cat": "Katt",
-  "web.emoji.coffee": "Kaffe",
-  "web.emoji.flower": "Blomma",
   "web.emoji.leaf": "Löv",
   "web.emoji.music": "Musik",
-  "web.emoji.palette": "Färgpalett",
   "web.emoji.rocket": "Raket",
-  "web.emoji.scissors": "Sax",
-  "web.emoji.sparkles": "Gnistor",
   "web.emoji.star": "Stjärna",
   "web.emoji.sun": "Sol",
   "web.emoji.wave": "Våg",
@@ -1243,6 +1235,35 @@ export const sv = {
   "workspace.currency": "Valuta",
   "workspace.currencyHint": "Används för varje pengasiffra. Timlön sätts per person under Anställda.",
   "workspace.emoji": "Emoji",
+  "workspace.emojis.bag": "Shoppingkasse",
+  "workspace.emojis.barber": "Barberarstolpe",
+  "workspace.emojis.basket": "Tvättkorg",
+  "workspace.emojis.bee": "Bi",
+  "workspace.emojis.bicycle": "Cykel",
+  "workspace.emojis.blossom": "Körsbärsblomma",
+  "workspace.emojis.bolt": "Blixt",
+  "workspace.emojis.bread": "Bröd",
+  "workspace.emojis.broom": "Kvast",
+  "workspace.emojis.burger": "Hamburgare",
+  "workspace.emojis.cart": "Kundvagn",
+  "workspace.emojis.coffee": "Kaffe",
+  "workspace.emojis.croissant": "Croissant",
+  "workspace.emojis.flower": "Blomma",
+  "workspace.emojis.hammer": "Hammare",
+  "workspace.emojis.house": "Hus",
+  "workspace.emojis.laptop": "Bärbar dator",
+  "workspace.emojis.package": "Paket",
+  "workspace.emojis.palette": "Färgpalett",
+  "workspace.emojis.paw": "Tassavtryck",
+  "workspace.emojis.pizza": "Pizza",
+  "workspace.emojis.scissors": "Sax",
+  "workspace.emojis.seedling": "Planta",
+  "workspace.emojis.sparkles": "Gnistor",
+  "workspace.emojis.sponge": "Disksvamp",
+  "workspace.emojis.truck": "Lastbil",
+  "workspace.emojis.weights": "Tyngdlyftning",
+  "workspace.emojis.wine": "Vinglas",
+  "workspace.emojis.wrench": "Skiftnyckel",
   "workspace.makeItYourPlace": "Gör det till ditt ställe.",
   "workspace.monday": "Måndag",
   "workspace.name": "Företagets namn",
@@ -2269,19 +2290,11 @@ export const en = {
   "web.dayList.logInGrid": "Log it in the week grid",
   "web.dayList.loggedBy": "Logged by {name}, {time}",
   "web.dayList.select": "{date}, {hours}. Show the day.",
-  "web.emoji.bag": "Shopping bag",
   "web.emoji.bee": "Bee",
-  "web.emoji.bicycle": "Bicycle",
-  "web.emoji.bread": "Bread",
   "web.emoji.cat": "Cat",
-  "web.emoji.coffee": "Coffee",
-  "web.emoji.flower": "Flower",
   "web.emoji.leaf": "Leaf",
   "web.emoji.music": "Music",
-  "web.emoji.palette": "Paint palette",
   "web.emoji.rocket": "Rocket",
-  "web.emoji.scissors": "Scissors",
-  "web.emoji.sparkles": "Sparkles",
   "web.emoji.star": "Star",
   "web.emoji.sun": "Sun",
   "web.emoji.wave": "Wave",
@@ -2504,6 +2517,35 @@ export const en = {
   "workspace.currency": "Currency",
   "workspace.currencyHint": "Used for every money figure. Rates are set per person in Employees.",
   "workspace.emoji": "Emoji",
+  "workspace.emojis.bag": "Shopping bag",
+  "workspace.emojis.barber": "Barber pole",
+  "workspace.emojis.basket": "Laundry basket",
+  "workspace.emojis.bee": "Bee",
+  "workspace.emojis.bicycle": "Bicycle",
+  "workspace.emojis.blossom": "Cherry blossom",
+  "workspace.emojis.bolt": "Lightning",
+  "workspace.emojis.bread": "Bread",
+  "workspace.emojis.broom": "Broom",
+  "workspace.emojis.burger": "Burger",
+  "workspace.emojis.cart": "Shopping cart",
+  "workspace.emojis.coffee": "Coffee",
+  "workspace.emojis.croissant": "Croissant",
+  "workspace.emojis.flower": "Flower",
+  "workspace.emojis.hammer": "Hammer",
+  "workspace.emojis.house": "House",
+  "workspace.emojis.laptop": "Laptop",
+  "workspace.emojis.package": "Package",
+  "workspace.emojis.palette": "Paint palette",
+  "workspace.emojis.paw": "Paw prints",
+  "workspace.emojis.pizza": "Pizza",
+  "workspace.emojis.scissors": "Scissors",
+  "workspace.emojis.seedling": "Seedling",
+  "workspace.emojis.sparkles": "Sparkles",
+  "workspace.emojis.sponge": "Sponge",
+  "workspace.emojis.truck": "Delivery truck",
+  "workspace.emojis.weights": "Weightlifting",
+  "workspace.emojis.wine": "Wine glass",
+  "workspace.emojis.wrench": "Wrench",
   "workspace.makeItYourPlace": "Make it your place.",
   "workspace.monday": "Monday",
   "workspace.name": "Business name",
@@ -3492,19 +3534,11 @@ export type MessageParams = {
   "web.dayList.logInGrid": Record<never, never>;
   "web.dayList.loggedBy": { name: string | number; time: string | number };
   "web.dayList.select": { date: string | number; hours: string | number };
-  "web.emoji.bag": Record<never, never>;
   "web.emoji.bee": Record<never, never>;
-  "web.emoji.bicycle": Record<never, never>;
-  "web.emoji.bread": Record<never, never>;
   "web.emoji.cat": Record<never, never>;
-  "web.emoji.coffee": Record<never, never>;
-  "web.emoji.flower": Record<never, never>;
   "web.emoji.leaf": Record<never, never>;
   "web.emoji.music": Record<never, never>;
-  "web.emoji.palette": Record<never, never>;
   "web.emoji.rocket": Record<never, never>;
-  "web.emoji.scissors": Record<never, never>;
-  "web.emoji.sparkles": Record<never, never>;
   "web.emoji.star": Record<never, never>;
   "web.emoji.sun": Record<never, never>;
   "web.emoji.wave": Record<never, never>;
@@ -3720,6 +3754,35 @@ export type MessageParams = {
   "workspace.currency": Record<never, never>;
   "workspace.currencyHint": Record<never, never>;
   "workspace.emoji": Record<never, never>;
+  "workspace.emojis.bag": Record<never, never>;
+  "workspace.emojis.barber": Record<never, never>;
+  "workspace.emojis.basket": Record<never, never>;
+  "workspace.emojis.bee": Record<never, never>;
+  "workspace.emojis.bicycle": Record<never, never>;
+  "workspace.emojis.blossom": Record<never, never>;
+  "workspace.emojis.bolt": Record<never, never>;
+  "workspace.emojis.bread": Record<never, never>;
+  "workspace.emojis.broom": Record<never, never>;
+  "workspace.emojis.burger": Record<never, never>;
+  "workspace.emojis.cart": Record<never, never>;
+  "workspace.emojis.coffee": Record<never, never>;
+  "workspace.emojis.croissant": Record<never, never>;
+  "workspace.emojis.flower": Record<never, never>;
+  "workspace.emojis.hammer": Record<never, never>;
+  "workspace.emojis.house": Record<never, never>;
+  "workspace.emojis.laptop": Record<never, never>;
+  "workspace.emojis.package": Record<never, never>;
+  "workspace.emojis.palette": Record<never, never>;
+  "workspace.emojis.paw": Record<never, never>;
+  "workspace.emojis.pizza": Record<never, never>;
+  "workspace.emojis.scissors": Record<never, never>;
+  "workspace.emojis.seedling": Record<never, never>;
+  "workspace.emojis.sparkles": Record<never, never>;
+  "workspace.emojis.sponge": Record<never, never>;
+  "workspace.emojis.truck": Record<never, never>;
+  "workspace.emojis.weights": Record<never, never>;
+  "workspace.emojis.wine": Record<never, never>;
+  "workspace.emojis.wrench": Record<never, never>;
   "workspace.makeItYourPlace": Record<never, never>;
   "workspace.monday": Record<never, never>;
   "workspace.name": Record<never, never>;
