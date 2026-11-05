@@ -9,8 +9,9 @@ account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play
 **Current release (2026-11-05):** v1.9.0, versionCode 23, is `completed` on internal testing (rolled out through
 the API: the release run leaves it a `draft`); closed testing (`alpha`) still holds versionCode 20 as a `draft`. Public promotion is rejected while the app is in its initial draft state. The owner
 must complete Play Console setup/review and the closed-test/production-access steps before public rollout.
-The Data safety form is saved as a draft (App interactions ticked for analytics, CHQ-201) and is part of the
-owner's Console steps. [Release verification](releases/1.9.0.md).
+App content is complete (2026-11-05): Sign in details (the review account), Target audience (18 and over, minors not
+blocked), Advertising ID (no) and Data safety (with App interactions for analytics, CHQ-201) are saved and waiting
+to be sent for review in Publishing overview. [Release verification](releases/1.9.0.md).
 
 ## Access
 
@@ -59,7 +60,7 @@ which names job places, device location and Google Maps Platform since CHQ-153. 
 | Form | Answer |
 |---|---|
 | Privacy policy | `https://klokka.se/integritet` |
-| App access | "All or some functionality is restricted": sign-in required. Instructions: "Sign in with the email and password below. The account owns the business 'Kafé Granskning' with sample hours: open Today, Week, Month and Insights." Credentials: the review account (`.agents/local-credentials/play-review.json`, typed into the Console, never written here). |
+| App access | "All or some functionality is restricted": sign-in required. Done 2026-11-05: the review account `review@klokka.se` (production Logto, password in `.agents/local-credentials/play-review.json`, typed into the Console, never written here) is the employer of 'Kafé Granskning' with one invited sample employee, Anna Exempel (`hej@klokka.se`), and hours for weeks 44 and 45 of 2026. The Console instructions say how to sign in and what data each screen shows. |
 | Ads | No, the app has no ads. |
 | Content rating (IARC) | Category: utility, productivity, communication or other. Violence, fear, sexuality, language, controlled substances, gambling, crude humour: none. Users interact or exchange content: **yes**: an employee's flag carries a written message to the employer, who can answer with a resolution note (inside one workplace only; no chat, no public content). This adds the "Users Interact" notice, not a higher age. Shares the user's current location with other users: no. Digital purchases: no. |
 | Target audience | 18 and over only. Not designed to appeal to children. |
