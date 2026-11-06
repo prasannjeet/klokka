@@ -10,8 +10,10 @@ account. The plan and its status: `docs/superpowers/plans/2026-10-04-google-play
 the API: the release run leaves it a `draft`); closed testing (`alpha`) still holds versionCode 20 as a `draft`. Public promotion is rejected while the app is in its initial draft state. The owner
 must complete Play Console setup/review and the closed-test/production-access steps before public rollout.
 App content is complete (2026-11-05): Sign in details (the review account), Target audience (18 and over, minors not
-blocked), Advertising ID (no) and Data safety (with App interactions for analytics, CHQ-201) are saved and waiting
-to be sent for review in Publishing overview. [Release verification](releases/1.9.0.md).
+blocked), Advertising ID (no) and Data safety (with App interactions for analytics, CHQ-201) were sent for review on
+2026-11-06 together with the first closed testing release (Alpha: 1.9.0, versionCode 23; 178 countries / regions, all
+Play offers; testers: the email lists Family and Klokka Users, 13 people; feedback `hej@klokka.se`). Next: 12 or more
+testers opted in to the closed test for 14 days in a row, then Apply for production. [Release verification](releases/1.9.0.md).
 
 ## Access
 
@@ -71,7 +73,7 @@ which names job places, device location and Google Maps Platform since CHQ-153. 
 | Data safety: collection | Data is collected and encrypted in transit. No data is shared (Expo, Firebase Cloud Messaging, Google Maps and Migadu are service providers acting for Klokka, which Play does not count as sharing). Users can request deletion: yes, `https://klokka.se/radera-konto`. |
 | Data safety: types | **Name** and **email address** (account management, app functionality; required). **User IDs** (account management; required). **Other info: work hours, notes, hourly rate** (app functionality; required). **Messages: other in-app messages** (the flag messages and resolution notes between employee and employer; app functionality; optional, only when someone flags an entry). **Approximate and precise location** (app functionality; optional: only when a user taps "use where I am now" on a job; stored as the job's place, not tracked). **Device or other IDs: push token** (app functionality; optional, only with notifications on). **App activity: app interactions** (analytics; required; the screens opened and three events, counted with Umami on Klokka's own server, not linked to the account, no device id; CHQ-201). Nothing for advertising. |
 | Store settings | Category: Business. Tags: time tracking, productivity (as offered). Email `hej@klokka.se`, website `https://klokka.se`. No phone number. |
-| Countries | Sweden, the rest of the EU/EEA, Norway, Switzerland and the UK at first; the app is in Swedish and English. |
+| Countries | All 178 countries / regions Play offers, including rest of world (owner's choice, 2026-11-06; set on the closed test first, the same for production). The app is in Swedish and English. |
 
 ## Closed test (personal account rule)
 
